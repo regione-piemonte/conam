@@ -1,0 +1,88 @@
+# This repository adheres to the publiccode.yml standard by including this 
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: '0.2'
+applicationSuite: CONAM
+categories:
+  - business-process-management
+  - document-management
+dependsOn:
+  open:
+    - name: PostgreSQL
+      optional: true
+      version: 9.2.6
+      versionMax: ''
+      versionMin: '9'
+    - name: APACHE 2
+      optional: true
+      version: 2.2.31
+      versionMax: ''
+      versionMin: '2'
+    - name: JBOSS
+      optional: true
+      version: EAP 6.4.5.GA
+      versionMax: ''
+      versionMin: EAP 6
+description:
+  it:
+    features:
+      - >-
+       Gestione delle attività di competenza regionale sull'addizionale all'accisa sul gas naturale.
+      - >-
+        L'applicativo offre un' efficace soluzione di gestione dei flussi documentali e monetari.
+        
+    genericName: CONAM
+    localisedName: CONAM
+    longDescription: >
+      CONAM : Sistema Contenzioso Amministrativo.
+      Le principali funzionalità sono: 
+      - **Gestione verbale**: 
+      - **Gestione del contenzioso amministrativo**: 
+      - **Gestione della fase giurisdizionale**: 
+      - **Rateizzazione della ordinanza di ingiunzione**:
+      - **Riscossione con sollecito di pagamento**: 
+      - **Riscossione forzata del credito**: 
+      extra applicativo. 
+      - **Gestione documenti**: permette di archiviare tutta la documentazione pervenuta relativa ad una società
+      
+    shortDescription: Sistema Contenzioso Amministrativo
+developmentStatus: stable
+it:
+  conforme:
+    gdpr: true
+    lineeGuidaDesign: true
+    misureMinimeSicurezza: true
+    modelloInteroperabilita: true
+  countryExtensionVersion: '0.2'
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: false
+  riuso:
+    codiceIPA: r_piemon
+landingURL: 'https://github.com/regione-piemonte/conam'
+legal:
+  license: EUPL-1.2
+  mainCopyrightOwner: Regione Piemonte
+  repoOwner: Regione Piemonte
+localisation:
+  availableLanguages:
+    - it
+  localisationReady: false
+maintenance:
+  contacts:
+    - email: giovanna.bertinetti@csi.it
+      name: GIOVANNA BERTINETTI
+  type: internal
+name: CONAM
+platforms:
+  - web
+  - linux
+  - windows
+  - mac
+releaseDate: '2021-07-29'
+softwareType: standalone/web
+softwareVersion: 3.3.0
+url: 'https://github.com/regione-piemonte/conam.git'
