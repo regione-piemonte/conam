@@ -1,0 +1,126 @@
+﻿NAME;VERSION;LICENSE
+actasrv-client;3.5.0;No License: CSi-Piemonte
+actasrv-client13;3.5.0;No License: CSi-Piemonte
+activation;1.0.2;CDDL-1.0
+aopalliance;1.0.0;Public Domain
+aspectjrt;1.7.2;Eclipse Public License - v 1.0
+aspectjweaver;1.7.2;Eclipse Public License - v 1.0
+axis-1.4.csi;1.0.0;Libreria personalizzata CSI basata su axis-1.4 sotto licenza Apache 2.0
+axis-ant;1.4;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+axis-jaxrpc;1.4;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+barcode4j;2.1.0;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+bcpkix-jdk15on;1.58;The Legion of the Bouncy Castle (MIT)
+bcprov-jdk15on;1.58;The Legion of the Bouncy Castle (MIT)
+bsh-1.2b7;1.2b7;LGPL-2.1
+castor-xml;1.3.3;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+cglib;2.2.2;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-beanutils;1.9.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-codec;1.3;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-collections;3.2.2;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-digester;2.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-discovery;0.2;Apache-1.1
+commons-httpclient;3.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-io;2.5;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-lang;2.5;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-lang3;3.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-logging;1.1.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+commons-net;3.6;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+coop-diag;1.2.1;No License: CSi-Piemonte
+coop-trace;1.2.0;No License: CSi-Piemonte
+csi-apachesoap;1.4.5;No License: CSi-Piemonte
+csi-core;1.4.5;No License: CSi-Piemonte
+csi-ejb;1.4.5;No License: CSi-Piemonte
+csi-ejb-weblogic;1.4.5;No License: CSi-Piemonte
+csi-rmi;1.4.5;No License: CSi-Piemonte
+csi-stadapter;1.4.5;No License: CSi-Piemonte
+dom;1.0;Da individuare
+dozer;5.3.2;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+ecmengine-common;13.4.0;No License: CSi-Piemonte
+ecmengine-engine-client;13.4.0;No License: CSi-Piemonte
+ecmengine-mtom-client;13.4.0;No License: CSi-Piemonte
+ecmengine-ws-client;13.4.0;No License: CSi-Piemonte
+ehcache;2.8.0;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+gmsreg-client;11.1.0;No License: CSi-Piemonte
+guava;18.0;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+htmpl;1.3.2;No License: CSi-Piemonte
+httpclient;4.3.4;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+iridev2-pep-intf;2.0.0;No License: CSi-Piemonte
+itext;2.1.7;MPL-1.1
+jaas;1.0;Librerie Java di Base
+jackson-core-asl;1.9.2-redhat-1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+jackson-mapper-asl;1.9.2-redhat-1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+jakarta-oro;2.0.8;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+jasperreports;6.2.1;LGPL-3.0
+jasperreports-extensions;3.5.3;LGPL-3.0
+jasperreports-font-extentions;1.0.0;LGPL-3.0
+jasperreports-fonts;6.2.1;LGPL-3.0
+jasperreports-functions;6.2.1;LGPL-3.0
+javase;3.3.3;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+jaxb-api;2.2.6;CDDL 1.1 GPL 1.1
+jaxp;1.2.2;Libreria Java di Base
+jax-qname;1.0;Da individuare
+jcommon;1.0.23;LGPL-3.0
+jettison;1.3.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+jfreechart;1.0.19;GNU Lesser General Public Licence: http://www.gnu.org/licenses/lgpl.txt
+jms;1.0.2b;Libreria Java di Base
+jndi;1.2.1;Libreria Java di Base
+joda-time;1.6;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+jsr311-api;1.1.1;CDDL-1.0
+junit;4.12;EPL-1.0
+lucene-analyzers-common;4.5.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+lucene-core;4.5.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+lucene-queryparser;4.5.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+mail;1.2;CDDL-1.1
+mail;1.5.0-b01;CDDL-1.1
+msgadp-jaxb;1.0.1;Da individuare
+msgadp-jaxb-tools;1.0.1;Da individuare
+openpdf;1.3.20;LGPL-3.0 - MPL 2.0
+oscore;2.2.5;Da individuare
+osworkflow;2.8.0;Da individuare
+policymansrv-client;2.0.0;No License: CSi-Piemonte
+propertyset;1.4;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+resolver;2.6.2;Da individuare
+resteasy-jaxrs;2.3.10.Final-redhat-1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+resteasy-multipart-provider;2.3.10.Final-redhat-1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+resteasy-spring;2.3.10.Final-redhat-1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+saaj;1.2;CDDL-1.0
+sax;2.0;Libreria Java di Base
+soap;2.3.1;Libreria Java di Base
+spring-aop;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-asm;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-aspects;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-beans;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-context;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-core;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-data-commons-core;1.3.0.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-data-jpa;1.1.0.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-expression;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-jdbc;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-orm;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-security-acl;3.1.0.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-security-config;3.1.0.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-security-core;3.1.0.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-security-taglibs;3.1.0.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-security-web;3.1.0.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-test;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-tx;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+spring-web;3.1.1.RELEASE;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+stax2-api;3.1.1;BSD-2-Clause
+svcflow;1.2.1;No License: CSi-Piemonte
+token-retry;2.2.0;No License: CSi-Piemonte
+token-retry-plugin-axis1.4;2.2.0;No License: CSi-Piemonte
+token-retry-plugin-axis2;2.2.0;No License: CSi-Piemonte
+token-retry-plugin-cxf;2.2.0;No License: CSi-Piemonte
+token-retry-plugin-jboss-eap-4.3;2.2.0;No License: CSi-Piemonte
+validation-api;1.0.0.GA-redhat-3;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+wsadp;2.1.0;No License: CSi-Piemonte
+wsdl4j;1.5.1;CPL-1.0
+xalan;2.3.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+xercesImpl;2.0.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+xercesImpl;2.6.2;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+xml-apis;2.6.2;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+xmlParserAPIs;2.6.2;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+xsltc;2.3.1;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+xstream;1.3.1;BSD
+zxing-core;2.3.0;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
+zxing-javase;2.3.0;The Apache Software License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
