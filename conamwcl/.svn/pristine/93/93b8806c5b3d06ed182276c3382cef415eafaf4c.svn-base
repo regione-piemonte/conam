@@ -1,5 +1,0 @@
-@import '../../../ricerca.scss';
-
-.paddingTop40{
-    padding-top: 40px;
-}
