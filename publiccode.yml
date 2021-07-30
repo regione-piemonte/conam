@@ -27,24 +27,41 @@ dependsOn:
 description:
   it:
     features:
-      - >-
-       Gestione delle attività di competenza regionale sull'addizionale all'accisa sul gas naturale.
-      - >-
-        L'applicativo offre un' efficace soluzione di gestione dei flussi documentali e monetari.
-        
+      - >- 
+      - CONAM gestisce il procedimento amministrativo sanzionatorio nelle materie di competenza regionale.
     genericName: CONAM
     localisedName: CONAM
     longDescription: >
-      CONAM : Sistema Contenzioso Amministrativo.
-      Le principali funzionalità sono: 
-      - **Gestione verbale**: 
-      - **Gestione del contenzioso amministrativo**: 
-      - **Gestione della fase giurisdizionale**: 
-      - **Rateizzazione della ordinanza di ingiunzione**:
-      - **Riscossione con sollecito di pagamento**: 
-      - **Riscossione forzata del credito**: 
-      extra applicativo. 
-      - **Gestione documenti**: permette di archiviare tutta la documentazione pervenuta relativa ad una società
+      Il sistema Contenzioso amministrativo (CONAM) consente la gestione del procedimento amministrativo sanzionatorio per le materie di competenza regionale. Per i verbali di accertamento non pagati in misura ridotta e inviati dagli organi accertatori alla Regione, il sistema permette la creazione dei relativi fascicoli da istruire, la gestione della fase istruttoria del contenzioso amministrativo, l’emanazione del provvedimento finale di archiviazione o di ingiunzione, la riscossione volontaria e quella coattiva. 
+      
+      L’applicativo comprende le seguenti macro-funzionalità:
+      
+      Gestione fascicolo
+      Ricomprende le funzionalità necessarie alla creazione del fascicolo digitalizzato del verbale:
+      Acquisizione del verbale di accertamento e di tutti gli allegati prodotti dall’organo accertatore che ha elevato la violazione;
+      Inserimento dei dati descrittivi della violazione commessa (data, luogo, norma violata, soggetti coinvolti)
+      Protocollazione e fascicolazione in Doqui ACTA.
+      
+      Gestione contenzioso amministrativo
+      Ricomprende le funzionalità necessarie per accrescere il fascicolo con gli atti tipici della fase istruttoria prodotti sia dai funzionari istruttori dell’ufficio Contenzioso che dalle parti coinvolte nell’illecito.
+      
+      Gestione fase giurisdizionale
+      Ricomprende le funzionalità necessarie per accrescere il fascicolo con gli atti tipici della fase giurisdizionale in particolare con l’acquisizione degli atti provenienti dalle cancellerie degli organi giurisdizionali e la predisposizione di atti difensivi. Nell’ambito della gestione della fase giurisdizionale è inoltre ricompresa la gestione del calendario udienze.
+      
+      Riscossione
+      Ricomprende le funzionalità per predisporre il sollecito di pagamento per un’ordinanza ingiunzione insoluta prima della sua iscrizione nel carico da inviare al concessionario della riscossione. In caso di morosità persistente, ricomprende le funzionalità per la predisposizione del carico con i soggetti debitori, e i relativi debiti, per il concessionario della riscossione che dovrà procedere con l’emissione dell’ingiunzione fiscale.
+      
+      Gestione pagamenti
+      Ricomprende le funzionalità per la riconciliazione dei pagamenti del verbale, dell’ordinanza ingiunzione, delle rate e per la predisposizione dei piani di rateizzazione dell’ordinanza ingiunzione.
+      
+      Utility norma
+      Ricomprende le funzionalità per l’inserimento e la modifica del prontuario delle norme sulle quali la Regione ha potere sanzionatorio se violate.
+      
+      Gestione pregresso
+      Ricomprende le funzonalità per l’acquisizione in CONAM dei documenti definiti storici per far proseguire il procedimento sanzionatorio all’interno dell’applicativo.
+
+
+
       
     shortDescription: Sistema Contenzioso Amministrativo
 developmentStatus: stable
