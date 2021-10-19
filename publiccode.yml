@@ -38,9 +38,9 @@ description:
       
       - **Gestione fascicolo**
       Ricomprende le funzionalità necessarie alla creazione del fascicolo digitalizzato del verbale:
-      Acquisizione del verbale di accertamento e di tutti gli allegati prodotti dall’organo accertatore che ha elevato la violazione;
-      Inserimento dei dati descrittivi della violazione commessa (data, luogo, norma violata, soggetti coinvolti)
-      Protocollazione e fascicolazione in Doqui ACTA.
+      - Acquisizione del verbale di accertamento e di tutti gli allegati prodotti dall’organo accertatore che ha elevato la violazione.
+      - Inserimento dei dati descrittivi della violazione commessa (data, luogo, norma violata, soggetti coinvolti).
+      - Protocollazione e fascicolazione.
       
       - **Gestione contenzioso amministrativo**
       Ricomprende le funzionalità necessarie per accrescere il fascicolo con gli atti tipici della fase istruttoria prodotti sia dai funzionari istruttori dell’ufficio Contenzioso che dalle parti coinvolte nell’illecito.
