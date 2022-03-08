@@ -35,5 +35,7 @@ public interface LuoghiService {
 	List<ProvinciaVO> getProviceByIdRegione(Long idRegione, Date dataOraAccertamento);
 
 	List<ComuneVO> getComuniByIdProvincia(Long idProvincia, Date dataOraAccertamento);
+	
+	List<ComuneVO> getComuniEnte(Date dataOraAccertamento);
 
 }

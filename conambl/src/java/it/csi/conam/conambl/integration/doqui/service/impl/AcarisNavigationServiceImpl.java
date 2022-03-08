@@ -99,7 +99,7 @@ public class AcarisNavigationServiceImpl extends
         return fascicolo.getObjectId();
 	}
 
-	public ObjectResponseType recuperaChildren(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType objectId, int index) throws IntegrationException{
+	public ObjectResponseType recuperaChildren(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType objectId, boolean isGruppoAllegati) throws IntegrationException{
 		
 		String method = "recuperaChildren";
 		log.debug(method + ". BEGIN");
@@ -143,10 +143,26 @@ public class AcarisNavigationServiceImpl extends
 			log.debug(method + ". END");			
 		}
         
-        // 20200713_LC
-        if (children.getObjectsLength()>index) {
-            response = children.getObjects(index);        	
+        
+        // 20211019_LC Jira CONAM-152	-	estrazione corretta del gruppoAllegati
+        if (isGruppoAllegati) {
+        	// cerca tra tutti gli oggetti uno di tipo GruppoAllegati			
+        	for (int i = 0; i < children.getObjectsLength(); i++) {
+        		PropertyType[] prop = children.getObjects(i).getProperties();
+        		for (int j = 0; j < prop.length; j++) {
+        			PropertyType propertyType = prop[j];
+        			if (propertyType.getQueryName().getClassName().equalsIgnoreCase("GruppoAllegatiPropertiesType")) {
+        				response = children.getObjects(i); 
+        			}
+        		}
+        	}
+
+        } else {
+        	// prende il primo in caso di documento (DocumentoSemplicePropertiesType)
+        	if (children.getObjectsLength()>0) response = children.getObjects(0);    
         }
+        
+        
          return response;
 	}
 

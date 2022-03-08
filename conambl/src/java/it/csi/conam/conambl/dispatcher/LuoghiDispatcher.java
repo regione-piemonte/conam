@@ -47,4 +47,7 @@ public interface LuoghiDispatcher {
 	@PreAuthorize(value = AuthorizationRoles.UTENTE)
 	List<ComuneVO> getComuniByIdProvincia(Long idProvincia, Date dataOraAccertamento);
 
+	@PreAuthorize(value = AuthorizationRoles.UTENTE)
+	List<ComuneVO> getComuniEnte(Date dataOraAccertamento);
+
 }

@@ -101,7 +101,7 @@ public class VerbaleSoggettoEntityMapperImpl implements VerbaleSoggettoEntityMap
 		minSoggettoVerbaleVO.setDataCaricamento(utilsDate.asLocalDateTime(verbale.getDataOraInsert()));
 		minSoggettoVerbaleVO.setUser(verbale.getCnmTUser2().getNome() + " " + verbale.getCnmTUser2().getCognome());
 		minSoggettoVerbaleVO.setModificabile(Boolean.FALSE);
-		minSoggettoVerbaleVO.setStatoManuale(statoManualeEntityMapper.mapEntityToVO(verbale.getStatoManuale()));
+		minSoggettoVerbaleVO.setStatoManuale(statoManualeEntityMapper.mapEntityToVO(verbale.getCnmDStatoManuale()));
 
 		minSoggettoVerbaleVO.setDescNormaViolata(getDescrizioneNormativaViolata(verbale));
 		return minSoggettoVerbaleVO;

@@ -4,6 +4,7 @@
  ******************************************************************************/
 package it.csi.conam.conambl.util;
 
+import it.csi.conam.conambl.integration.entity.CnmDAmbito;
 import it.csi.conam.conambl.integration.entity.CnmDLettera;
 import it.csi.conam.conambl.integration.entity.CnmDStatoManuale;
 import it.csi.conam.conambl.integration.entity.CnmDStatoPregresso;
@@ -23,6 +24,7 @@ public class VerbaleSearchParam{
 	private List<CnmDStatoVerbale> statoVerbale = null;
 	private List<CnmDStatoManuale> statoManuale = null;
 	private List<CnmDStatoPregresso> statiPregresso = null;
+	private CnmDAmbito ambito = null;	// 20211125_LC Jira 184
 	
 
 	public String getNumeroProtocollo() {
@@ -73,6 +75,16 @@ public class VerbaleSearchParam{
 		this.statiPregresso = statiPregresso;
 	}
 
+	
+	public CnmDAmbito getAmbito() {
+		return ambito;
+	}
+
+	public void setAmbito(CnmDAmbito ambito) {
+		this.ambito = ambito;
+	}
+
+	
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

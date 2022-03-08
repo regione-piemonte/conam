@@ -71,4 +71,9 @@ public class LuoghiDispatcherImpl implements LuoghiDispatcher {
 	public List<ComuneVO> getComuniByIdProvincia(Long idProvincia, Date dataOraAccertamento) {
 		return luoghiService.getComuniByIdProvincia(idProvincia, dataOraAccertamento);
 	}
+	
+	@Override
+	public List<ComuneVO> getComuniEnte(Date dataOraAccertamento) {
+		return luoghiService.getComuniEnte(dataOraAccertamento);
+	}
 }

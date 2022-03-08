@@ -21,4 +21,6 @@ public interface SoggettoService {
 	SoggettoPregressiVO getSoggettoPregressiById(Integer id, UserDetails userDetails, boolean includiControlloUtenteProprietario);
 	SoggettoVO getSoggettoByIdAndIdVerbale(Integer id, Integer idVerbale, UserDetails userDetails, boolean b);
 
+	List<SoggettoVO> ricercaSoggettiRelata(Integer idVerbale, UserDetails userDetails);
+
 }

@@ -63,7 +63,8 @@ public class DatiTemplateVOEntityMapperImpl implements DatiTemplateVOEntityMappe
 	@Autowired
 	private CnmRSollecitoSoggRataRepository cnmRSollecitoSoggRataRepository;
 
-	
+	@Autowired
+	private CnmTVerbaleRepository cnmTVerbaleRepository;
 	
 
 	private static final List<Long> PARAMETRI = Arrays.asList(Constants.ID_DIRIGENTE, Constants.ID_MAIL_SETTORE_TRIBUTI);
@@ -444,6 +445,28 @@ public class DatiTemplateVOEntityMapperImpl implements DatiTemplateVOEntityMappe
 		response.setListaSoggetti(soggettoList);
 		response.setClassificazione(utilsDoqui.getClassificazione(cnmRVerbaleSoggettoList.get(0)));
 		response.setFn(utilsDoqui.getFn(cnmRVerbaleSoggettoList.get(0)));
+		return response;
+	}
+
+
+
+
+
+
+	@Override
+	public DatiTemplateVO mapEntityToVO(Integer idVerbale, List<SoggettoVO> soggettoList) {
+		if (soggettoList == null)
+			return null;
+
+		DatiTemplateVO response = new DatiTemplateVO();
+
+		response.setListaSoggetti(soggettoList);
+		CnmTVerbale cnmTVerbale = cnmTVerbaleRepository.findByIdVerbale(idVerbale);
+		CnmRVerbaleSoggetto cnmRVerbaleSoggetto = new CnmRVerbaleSoggetto();
+		cnmRVerbaleSoggetto.setCnmTVerbale(cnmTVerbale);
+		
+		response.setClassificazione(utilsDoqui.getClassificazione(cnmRVerbaleSoggetto));
+		response.setFn(utilsDoqui.getFn(cnmRVerbaleSoggetto));
 		return response;
 	}
 

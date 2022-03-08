@@ -275,7 +275,7 @@ public class ManageArchiviaDocumentoHelperImpl extends CommonManageDocumentoHelp
 
 
 	@SuppressWarnings("unused")
-	public ResponseArchiviaDocumento archiviaDocumentoFisico(RequestArchiviaDocumentoFisico request) throws ArchiviaDocumentoException  {
+	public ResponseArchiviaDocumento archiviaDocumentoFisico(RequestArchiviaDocumentoFisico request, String fruitoreActa) throws ArchiviaDocumentoException  {
 		String method = "archiviaDocumentoFisico";
 		log.debug(method + ". BEGIN");
 		ResponseArchiviaDocumento response =  new ResponseArchiviaDocumento();
@@ -410,7 +410,11 @@ public class ManageArchiviaDocumentoHelperImpl extends CommonManageDocumentoHelp
 			DocumentoElettronicoActa documentoActa = new DocumentoElettronicoActa();
 			documentoActa.setIdDocumento(cnmTDocumento.getIdentificativoArchiviazione());
 			documentoActa.setFolder(request.getFolder());
-			documentoActa.setFruitore(cnmTFruitore.getDescrFruitore());
+			if(fruitoreActa != null) {
+				documentoActa.setFruitore(fruitoreActa);
+			}else {
+				documentoActa.setFruitore(cnmTFruitore.getDescrFruitore());
+			}
 			documentoActa.setApplicativoAlimentante(cnmTFruitore.getDescrFruitore());
 
 			//documentoActa.setTipoStrutturaRoot(cnmDTipoDocumento.getIdStrutturaActaRoot());
@@ -463,6 +467,11 @@ public class ManageArchiviaDocumentoHelperImpl extends CommonManageDocumentoHelp
 			// 20200731_LC
 			documentoActa.setCollocazioneCartacea(request.getCollocazioneCartacea());
 		
+
+			// 20211014_LC Jira CONAM-140
+	        if (request.getDataCronica() != null) documentoActa.setDataCronica(request.getDataCronica());
+	        if (request.getDataTopica() != null) documentoActa.setDataTopica(request.getDataTopica());
+		
 			if(log.isDebugEnabled())
 			{
 				log.debug(method + ". UtenteActa =\n " + XmlSerializer.objectToXml(utenteActa));
@@ -494,6 +503,7 @@ public class ManageArchiviaDocumentoHelperImpl extends CommonManageDocumentoHelp
 				//response.setIdDocumento(keyDocumentoActa.getParolaChiave());	
 				response.setIdDocumento(String.valueOf(cnmTDocumento.getIdDocumento()));	// 20200713_LC
 				response.setObjectIdDocumento(String.valueOf(cnmTDocumento.getObjectiddocumento()));	// 20201123_LC
+				response.setIdFolder(keyDocumentoActa.getIdFolderCreated());	// 20210804_PP
 			}
 			else
 				containsError = true;

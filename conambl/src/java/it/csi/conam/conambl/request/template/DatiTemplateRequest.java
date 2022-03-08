@@ -6,6 +6,8 @@ package it.csi.conam.conambl.request.template;
 
 import it.csi.conam.conambl.request.ParentRequest;
 import it.csi.conam.conambl.vo.template.DatiTemplateCompilatiVO;
+import it.csi.conam.conambl.vo.verbale.SoggettoVO;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotNull;
@@ -32,6 +34,11 @@ public class DatiTemplateRequest extends ParentRequest {
 	// template lettera accompagnamento
 	private Integer idSollecito;
 
+	// template convocazione audizione per utenti esterni
+	private Integer idVerbale;
+	
+	private List<SoggettoVO> soggettoList;
+	
 	private List<Integer> idVerbaleSoggettoList;
 
 	// solo in fase di stampa
@@ -88,6 +95,22 @@ public class DatiTemplateRequest extends ParentRequest {
 
 	public void setIdVerbaleSoggettoList(List<Integer> idVerbaleSoggettoList) {
 		this.idVerbaleSoggettoList = idVerbaleSoggettoList;
+	}
+
+	public Integer getIdVerbale() {
+		return idVerbale;
+	}
+
+	public void setIdVerbale(Integer idVerbale) {
+		this.idVerbale = idVerbale;
+	}
+
+	public List<SoggettoVO> getSoggettoList() {
+		return soggettoList;
+	}
+
+	public void setSoggettoList(List<SoggettoVO> soggettoList) {
+		this.soggettoList = soggettoList;
 	}
 
 }

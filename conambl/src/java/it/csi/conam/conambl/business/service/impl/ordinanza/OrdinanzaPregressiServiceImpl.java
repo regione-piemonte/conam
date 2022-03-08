@@ -158,7 +158,14 @@ public class OrdinanzaPregressiServiceImpl implements OrdinanzaPregressiService 
 			List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = (List<CnmRVerbaleSoggetto>) cnmRVerbaleSoggettoRepository.findAll(idVerbaleSoggettoList);
 			if (cnmRVerbaleSoggettoList == null || cnmRVerbaleSoggettoList.isEmpty())
 				throw new IllegalArgumentException("soggetti non trovati");
-	
+
+
+
+			/*---------2021-12-15 - LUCIO ROSADINI - CONTROLLO CODICE FISCALE---------*/
+			if (idTipoAllegato.equals(TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO.getId())) {
+				utilsOrdinanza.isCFValid(cnmRVerbaleSoggettoList);
+			}
+			
 			CnmTVerbale cnmTVerbale = cnmRVerbaleSoggettoList.get(0).getCnmTVerbale();
 	
 			List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggettoIn(cnmRVerbaleSoggettoList);
@@ -325,6 +332,7 @@ public class OrdinanzaPregressiServiceImpl implements OrdinanzaPregressiService 
 		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());
 		
 		CnmDStatoOrdinanza cnmDStatoOrdinanza = cnmDStatoOrdinanzaRepository.findOne(idStato);
+
 		ordinanzaService.saveSStatoOrdinanza(cnmTOrdinanza, cnmTUser);
 		cnmTOrdinanza.setCnmDStatoOrdinanza(cnmDStatoOrdinanza);
 		cnmTOrdinanza.setCnmTUser1(cnmTUser);

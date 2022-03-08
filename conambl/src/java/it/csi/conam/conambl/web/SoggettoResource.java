@@ -59,4 +59,5 @@ public class SoggettoResource extends SpringSupportedResource {
 		UserDetails utente = SecurityUtils.getUser();
 		return Response.ok(soggettoDispatcher.getSoggettoPregressiById(id, utente)).build();
 	}
+	
 }

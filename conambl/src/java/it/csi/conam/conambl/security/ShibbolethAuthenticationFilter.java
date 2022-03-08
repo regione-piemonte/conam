@@ -29,8 +29,10 @@ public class ShibbolethAuthenticationFilter extends RequestHeaderAuthenticationF
 	protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
 		IdentityDetails principal = new IdentityDetails();
 		String token = request.getHeader(this.shibbIdentity);
-		if (token == null && "enabled".equalsIgnoreCase(shibbTestMode))
+		if (token == null && "enabled".equalsIgnoreCase(shibbTestMode)) {
 			token = TokenMock.DEMO20;
+//			token = "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/ACTALIS_EU/20210910101800/16/MWClpvfpR2ccfJpkqqGQlg==";
+		}
 		logger.info("[ShibbolethAuthenticationFilter::getPreAuthenticatedPrincipal] <" + request.getRequestURI() + "> (token::" + token + ")");
 		principal.setIdentity(token);
 		return principal;

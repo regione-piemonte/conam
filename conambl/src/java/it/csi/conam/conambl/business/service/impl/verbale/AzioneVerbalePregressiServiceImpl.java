@@ -4,23 +4,65 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.verbale;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.collect.FluentIterable;
+
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
-import it.csi.conam.conambl.business.service.verbale.*;
+import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
+import it.csi.conam.conambl.business.service.verbale.AzioneVerbalePregressiService;
+import it.csi.conam.conambl.business.service.verbale.SoggettoVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.StoricizzazioneVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.UtilsVerbale;
+import it.csi.conam.conambl.common.AzioneVerbale;
 import it.csi.conam.conambl.common.AzioneVerbalePregressi;
 import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.RegoleAllegatiCambiamentoStato;
+import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.exception.RemoteWebServiceException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.integration.beans.ResponseProtocollaDocumento;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmDEnte;
+import it.csi.conam.conambl.integration.entity.CnmDMessaggio;
+import it.csi.conam.conambl.integration.entity.CnmDStatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmRFunzionarioIstruttore;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRUserEnte;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleIllecito;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.mapper.entity.IstruttoreEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.StatoVerbaleEntityMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoPregressoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoVerbaleRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbaleRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRFunzionarioIstruttoreRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRUserEnteRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleIllecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoFieldRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTVerbaleRepository;
 import it.csi.conam.conambl.request.verbale.SalvaAzioneRequest;
 import it.csi.conam.conambl.response.AzioneVerbaleResponse;
 import it.csi.conam.conambl.response.StatiVerbaleResponse;
@@ -33,16 +75,6 @@ import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
 import it.csi.conam.conambl.vo.verbale.StatoVerbaleVO;
 import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressiService {
@@ -95,6 +127,12 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 	private CnmROrdinanzaVerbSogRepository cnmROrdinanzaVerbSogRepository;
 	/*@Autowired
 	private UtilsTraceCsiLogAuditService utilsTraceCsiLogAuditService;*/
+	@Autowired
+	private CnmTAllegatoFieldRepository cnmTAllegatoFieldRepository;
+	
+
+	@Autowired
+	private AllegatoVerbaleSoggettoService allegatoVerbaleSoggettoService;
 	
 	private static Logger logger = Logger.getLogger(AzioneVerbalePregressiService.class);
 
@@ -139,15 +177,83 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			return response;
 		}
 		List<Long> statiAvanzabiliByCnmTVerbale = getStatiAvanzabiliByCnmTVerbale(cnmTVerbale, userDetails);
+		boolean aggiungiAttesaVerifica = false;
+		boolean aggiungiMancanzaCF = false;
+		if(statiAvanzabiliByCnmTVerbale != null) {
+			if(statiAvanzabiliByCnmTVerbale.contains(Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)) {
+				statiAvanzabiliByCnmTVerbale.remove(Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO);
+				aggiungiAttesaVerifica = true;
+			}
+			if(statiAvanzabiliByCnmTVerbale.contains(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO)) {
+				statiAvanzabiliByCnmTVerbale.remove(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO);
+				aggiungiMancanzaCF = true;
+			}
+		}
 		if(statiAvanzabiliByCnmTVerbale != null && !statiAvanzabiliByCnmTVerbale.isEmpty()) {
 			logger.debug("trovati "+statiAvanzabiliByCnmTVerbale.size()+" stati");
 			statiVerbale = statoVerbaleEntityMapper.mapListEntityToListVO((List<CnmDStatoVerbale>) cnmDStatoVerbaleRepository.findAll(statiAvanzabiliByCnmTVerbale));
 		}
 		
 		// visualizzo lo stato STATO_VERBALE_FINE_PREGRESSO, solo se il verbale e' in uno stato diverso da STATO_VERBALE_INCOMPLETO
-		if(Constants.STATO_VERBALE_INCOMPLETO != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()) {
+		if(Constants.STATO_VERBALE_INCOMPLETO	 != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()) {
 			statiVerbale.add(statoVerbaleFineLavorazionePregresso);
 		}
+		
+		if(aggiungiAttesaVerifica) {
+			try {				
+				StatoVerbaleVO statoVerbaleAttesaVerificaPagamentoPregresso = new StatoVerbaleVO();
+				
+				statoVerbaleAttesaVerificaPagamentoPregresso.setDenominazione(cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO).getDescStatoVerbale());
+				statoVerbaleAttesaVerificaPagamentoPregresso.setId(Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO);
+				
+				CnmDMessaggio cnmDMessaggioWar = cnmDMessaggioRepository.findByCodMessaggio(AzioneVerbale.IN_ATTESA_VERIFICA_PAGAMENTO.getWarningMessageCode());
+				String msg=cnmDMessaggioWar.getDescMessaggio();
+				statoVerbaleAttesaVerificaPagamentoPregresso.setWarningMessage(new MessageVO(msg, cnmDMessaggioWar.getCnmDTipoMessaggio().getDescTipoMessaggio()));
+				
+				CnmDMessaggio cnmDMessaggioConf = cnmDMessaggioRepository.findByCodMessaggio(AzioneVerbale.IN_ATTESA_VERIFICA_PAGAMENTO.getConfirmMessageCode());
+				msg=cnmDMessaggioConf.getDescMessaggio();
+				msg = String.format(msg, cnmTVerbale.getNumVerbale());
+				statoVerbaleAttesaVerificaPagamentoPregresso.setConfirmMessage(new MessageVO(msg, cnmDMessaggioConf.getCnmDTipoMessaggio().getDescTipoMessaggio()));
+			
+				statiVerbale.add(statoVerbaleAttesaVerificaPagamentoPregresso);
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+		}
+
+		if(aggiungiMancanzaCF) {
+//		if ((cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO || cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)) {
+			// 20210908 PP - se lo stato assegnabile al verbale e' STATO_VERBALE_ACQUISITO, controllo se ci sono soggetti senza CF, se si restituisco lo stato STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO
+			List<SoggettoVO> soggetti = soggettoVerbaleService.getSoggettiByIdVerbale(cnmTVerbale.getIdVerbale(), userDetails, false);
+			boolean soggettiSenzaCF = false;
+			for(SoggettoVO soggetto : soggetti) {
+				if(soggetto.getPersonaFisica() && (soggetto.getCodiceFiscale()==null || soggetto.getCodiceFiscale().length()==0)) {
+					soggettiSenzaCF = true;
+					break;
+				}
+			}
+			if(soggettiSenzaCF) {
+//				idStato = Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO;
+				StatoVerbaleVO statoVerbaleMancanzaCF = new StatoVerbaleVO();
+				
+				statoVerbaleMancanzaCF.setDenominazione(cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO).getDescStatoVerbale());
+				statoVerbaleMancanzaCF.setId(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO);
+				
+				CnmDMessaggio cnmDMessaggioWar = cnmDMessaggioRepository.findByCodMessaggio(AzioneVerbalePregressi.ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO.getWarningMessageCode());
+				String msg=cnmDMessaggioWar.getDescMessaggio();
+				statoVerbaleMancanzaCF.setWarningMessage(new MessageVO(msg, cnmDMessaggioWar.getCnmDTipoMessaggio().getDescTipoMessaggio()));
+				
+				CnmDMessaggio cnmDMessaggioConf = cnmDMessaggioRepository.findByCodMessaggio(AzioneVerbalePregressi.ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO.getConfirmMessageCode());
+				msg=cnmDMessaggioConf.getDescMessaggio();
+				msg = String.format(msg, cnmTVerbale.getNumVerbale());
+				statoVerbaleMancanzaCF.setConfirmMessage(new MessageVO(msg, cnmDMessaggioConf.getCnmDTipoMessaggio().getDescTipoMessaggio()));
+			
+				statiVerbale.add(statoVerbaleMancanzaCF);
+			}
+		}
+//		if(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO	== cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()){
+//			statiVerbale = new ArrayList<>();
+//		}
 		response.setStati(statiVerbale);
 		return response;
 	}
@@ -174,7 +280,8 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		for (CnmRUserEnte cnmRUserEnte : cnmRUserEnteList) {
 			CnmTUser cnmTUser = cnmRUserEnte.getCnmTUser();
 			if (cnmTUser.getCnmDRuolo().getIdRuolo() == Long.parseLong(Constants.RUOLO_UTENTE_ISTRUTTORE) ||
-					(cnmTUser.getCnmDRuolo().getIdRuolo() == Long.parseLong(Constants.RUOLO_UTENTE_AMMINISTRATIVO) && cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO)) {
+					(cnmTUser.getCnmDRuolo().getIdRuolo() == Long.parseLong(Constants.RUOLO_UTENTE_AMMINISTRATIVO) && 
+					(cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO||cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO))) {
 				istruttoreList.add(istruttoreEntityMapper.mapEntityToVO(cnmTUser));
 			}
 		}
@@ -208,20 +315,25 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			idUserAssegnato = istr.getCnmTUser().getIdUser();
 		if (!controllaPermessiAzione(idStatoVerbale, idProprietarioVerbale, idUserConnesso, idUserAssegnato))
 			return null;
-
+		boolean aggiungiAttesaPagamento = false;
+		boolean conScritti = false;
 		Long idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI, idAllegatoList,
 				RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI);
 		if (idStato != null && idStato != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()) {
 			idStati.add(idStato);
+			aggiungiAttesaPagamento = true;
+			conScritti = true;
 		}
 		idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO, idAllegatoList,
 				RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
 		if (idStato != null && idStato != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()) {
 			idStati.add(idStato);
+			aggiungiAttesaPagamento = true;
 		}
 		idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO, idAllegatoList, RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO);
 		if (idStato != null && idStato != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()) {
 			idStati.add(idStato);
+			aggiungiAttesaPagamento = true;
 		}		
 		
 		idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ARCHIVIATO_IN_AUTOTUTELA, idAllegatoList, RegoleAllegatiCambiamentoStato.STATO_VERBALE_ARCHIVIAZIONE);
@@ -231,11 +343,41 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		
 		// se il fascicolo e' stato acquisito controllo anche se tutti i soggetti hanno una ordinanza, in caso devo restituire anche questo stato verbale
 		if(Constants.STATO_VERBALE_INCOMPLETO != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() 
+				&& Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() 
 				&& Constants.STATO_VERBALE_ORDINANZA != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()
 				&& utilsOrdinanza.soggettiVerbaleCompletiDiOrdinanza(cnmTVerbale)) {
 			idStati.add(Constants.STATO_VERBALE_ORDINANZA);
 		}
-
+		if(aggiungiAttesaPagamento) {
+			if( Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()) {
+				idStati.add(Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO);
+			}else {
+				idStati = new ArrayList<>();
+				// controllo se ci sono pagamenti totali per il verbale
+				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
+				if(importoPagato == null) {
+					importoPagato = new BigDecimal(0);
+				}
+				if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) == 0) {
+					idStati.add(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
+				}else {
+					if(conScritti)
+						idStati.add(Constants.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI);
+					else
+						idStati.add(Constants.STATO_VERBALE_ACQUISITO);
+				}
+			}
+			
+		}
+		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO
+//				|| cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
+				) {
+			idStati.add(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO);
+		}
+		
+		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO) {
+			idStati = new ArrayList<>();
+		}
 		return idStati;
 
 	}
@@ -270,7 +412,7 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			throw new SecurityException("Stato non permesso");
 		}
 		
-		AzioneVO azioneVerbale = AzioneVerbalePregressi.getAzioneVerbaleByIdStato(idStato);		
+		AzioneVO azioneVerbale = AzioneVerbalePregressi.getAzioneVerbaleByIdStato(idStato, cnmTVerbale.getNumVerbale(), cnmDMessaggioRepository);		
 
 		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());
 		storicizzazioneVerbaleService.storicizzaStatoVerbale(cnmTVerbale, cnmTUser);
@@ -302,6 +444,12 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		} else if (AzioneVerbalePregressi.ORDINANZA.getId().equals(azioneVerbale.getId())) {
 			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ORDINANZA);
 			assegnaEnable = AzioneVerbalePregressi.ARCHIVIATO_IN_AUTOTUTELA.isListaIstruttori();
+		} else if (AzioneVerbalePregressi.IN_ATTESA_VERIFICA_PAGAMENTO.getId().equals(azioneVerbale.getId())) {
+			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO);
+			assegnaEnable = AzioneVerbalePregressi.IN_ATTESA_VERIFICA_PAGAMENTO.isListaIstruttori();
+		} else if (AzioneVerbalePregressi.ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO.getId().equals(azioneVerbale.getId())) {
+			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO);
+			assegnaEnable = AzioneVerbalePregressi.ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO.isListaIstruttori();
 		} else
 			throw new IllegalArgumentException("azione non gestita");
 
@@ -419,7 +567,9 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 
 //		20201130_ET aggiunto per fare in modo che spariscano tutti i bottoni dopo il salvataggio dello stato recupero pregresso terminato 
 		if(cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != Constants.STATO_PREGRESSO_IN_LAVORAZIONE){
-			azioneVerbale.setAzione(AzioneVerbalePregressi.getAzioneVerbaleByIdStato(getStatoAvanzabileByCnmTVerbale(cnmTVerbale, userDetails)));
+			List<AzioneVO> azioneList = new ArrayList<AzioneVO>();
+			azioneList.add(AzioneVerbalePregressi.getAzioneVerbaleByIdStato(getStatoAvanzabileByCnmTVerbale(cnmTVerbale, userDetails), cnmTVerbale.getNumVerbale(), cnmDMessaggioRepository));
+			azioneVerbale.setAzioneList(azioneList);
 			azioneVerbale.setModificaVerbaleEnable(Boolean.FALSE);
 			azioneVerbale.setEliminaAllegatoEnable(Boolean.FALSE);
 			azioneVerbale.setAggiungiAllegatoEnable(Boolean.FALSE);
@@ -427,7 +577,8 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			return azioneVerbale;
 		}
 		else if (appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_ISTRUTTORE)) {
-			if (idStatoVerbale != Constants.STATO_VERBALE_INCOMPLETO) {
+			if ((Constants.STATO_VERBALE_INCOMPLETO != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()
+					&& Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale())) {
 				CnmRFunzionarioIstruttore cnmRFunzionarioIstruttore = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
 				if (cnmRFunzionarioIstruttore != null && cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() == userDetails.getIdUser() && tipologiaAllegabili != null
 						&& !tipologiaAllegabili.isEmpty())
@@ -442,10 +593,10 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		} else
 			throw new SecurityException("Ruolo non riconosciuto dal sistema");
 
-		Boolean modificaVerbaleEnable = cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO && cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()
+		Boolean modificaVerbaleEnable = (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO ) && cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()
 				? Boolean.TRUE
 				: Boolean.FALSE;
-		Boolean isEliminaAllegatoEnable = cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO
+		Boolean isEliminaAllegatoEnable = (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO )
 				&& cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() ? Boolean.TRUE : Boolean.FALSE;
 
 		// restituisco isRiepilogoOrdinanzaEnable a true solo se sul verbale esiste almeno un allegato di tipo ORDINANZA
@@ -469,11 +620,29 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 //				}
 //			}
 //		}
-		azioneVerbale.setAzione(AzioneVerbalePregressi.getAzioneVerbaleByIdStato(getStatoAvanzabileByCnmTVerbale(cnmTVerbale, userDetails)));
+		List<AzioneVO> azioneList = new ArrayList<AzioneVO>();
+		azioneList.add(AzioneVerbalePregressi.getAzioneVerbaleByIdStato(getStatoAvanzabileByCnmTVerbale(cnmTVerbale, userDetails), cnmTVerbale.getNumVerbale(), cnmDMessaggioRepository));
+		azioneVerbale.setAzioneList(azioneList);
 		azioneVerbale.setModificaVerbaleEnable(modificaVerbaleEnable);
 		azioneVerbale.setEliminaAllegatoEnable(isEliminaAllegatoEnable);
 		azioneVerbale.setAggiungiAllegatoEnable(isAllegatiEnable);
 		azioneVerbale.setRiepilogoOrdinanzaEnable(isRiepilogoOrdinanzaEnable);
+		
+
+		if (idStatoVerbale == Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO ) {
+//			azioneVerbale.setAzioneList(new ArrayList<AzioneVO>());
+			azioneVerbale.setModificaVerbaleEnable(false);
+			azioneVerbale.setEliminaAllegatoEnable(false);
+//			azioneVerbale.setAggiungiAllegatoEnable(false);
+			
+//			List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettosWithoutAllegato = allegatoVerbaleSoggettoService.findCnmRVerbaleSoggettosWithoutAllegato(cnmTVerbale, TipoAllegato.RELATA_NOTIFICA);
+//			if(cnmRVerbaleSoggettosWithoutAllegato != null && cnmRVerbaleSoggettosWithoutAllegato.size()>0) {
+//				azioneVerbale.setAggiungiAllegatoEnable(true);
+//			}		
+		
+		}
+		
+		
 		return azioneVerbale;
 	}
 	private Long getStatoAvanzabileByCnmTVerbale(CnmTVerbale cnmTVerbale, UserDetails userDetails) {
@@ -503,15 +672,29 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		if (!controllaPermessiAzione(idStatoVerbale, idProprietarioVerbale, idUserConnesso, idUserAssegnato))
 			return null;
 
-		if (idStatoVerbale == Constants.STATO_VERBALE_INCOMPLETO) {
-			idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI, idAllegatoList,
-					RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI);
-			if (idStato == null) {
-				idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO, idAllegatoList,
-						RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
+		if ((idStatoVerbale == Constants.STATO_VERBALE_INCOMPLETO || idStatoVerbale == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)) {
+			
+			// 20210908 PP - se lo stato assegnabile al verbale e' STATO_VERBALE_ACQUISITO, controllo se ci sono soggetti senza CF, se si restituisco lo stato STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO
+			boolean soggettiSenzaCF = false;
+			for(SoggettoVO soggetto : soggetti) {
+				if(soggetto.getPersonaFisica() && (soggetto.getCodiceFiscale()==null || soggetto.getCodiceFiscale().length()==0)) {
+					soggettiSenzaCF = true;
+					break;
+				}
 			}
-			if (idStato == null) {
-				idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO, idAllegatoList, RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO);
+			if(soggettiSenzaCF) {
+				idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO, idAllegatoList, RegoleAllegatiCambiamentoStato.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO);
+			}else {
+				idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI, idAllegatoList,
+						RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI);
+				if (idStato == null) {
+					idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO, idAllegatoList,
+							RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
+				}
+				if (idStato == null) {
+					idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO, idAllegatoList, RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO);
+				}
+					
 			}
 
 			return idStato;
@@ -525,6 +708,19 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			if (idStato == null) {
 				idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO, idAllegatoList,
 						RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
+
+				// 20211207 PP - Anche in caso di STATO_VERBALE_ACQUISITO, imposto lo stato STATO_VERBALE_ACQUISITO_CON_PAGAMENTO, solo se i pagamenti sono totali
+				// segnalazione via mail da Cacciuttolo il 07/12/2021 14:13
+				if(idStato!= null) {
+					// controllo se ci sono pagamenti totali per il verbale
+					BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
+					if(importoPagato == null) {
+						importoPagato = new BigDecimal(0);
+					}
+					if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) != 0) {
+						idStato = null;
+					}
+				}
 			}
 
 			return idStato;
@@ -538,7 +734,7 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 	 */
 	@Override
 	public boolean controllaPermessiAzione(Long idStatoVerbale, long idProprietarioVerbale, long idUserConnesso, Long idUserAssegnato) {
-		if (idStatoVerbale == Constants.STATO_VERBALE_INCOMPLETO) {
+		if ((idStatoVerbale == Constants.STATO_VERBALE_INCOMPLETO || idStatoVerbale == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)) {
 			if (idProprietarioVerbale == idUserConnesso)
 				return true;
 		}

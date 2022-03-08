@@ -4,6 +4,7 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.verbale;
 
+import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.common.MessageVO;
@@ -58,4 +59,6 @@ public interface VerbaleService {
 		UserDetails userDetails
 	);
 	/*LUCIO 2021/04/21 - FINE Gestione casi di recidività*/
+
+	CnmTVerbale salvaNumeroProtocollo(Integer idVerbale, String numeroProtocollo, CnmTUser cnmTUser);
 }

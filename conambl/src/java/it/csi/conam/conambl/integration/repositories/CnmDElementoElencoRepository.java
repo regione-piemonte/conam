@@ -15,4 +15,6 @@ import java.util.List;
 public interface CnmDElementoElencoRepository extends CrudRepository<CnmDElementoElenco, Long> {
 
 	List<CnmDElementoElenco> findByIdElenco(BigDecimal idElenco);
+	
+	CnmDElementoElenco findByIdElencoAndIdElementoElenco(BigDecimal idElenco, long idElementoElenco);
 }

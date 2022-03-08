@@ -4,7 +4,23 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.sollecito;
 
+import java.io.FileNotFoundException;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.collect.Iterables;
+
 import it.csi.conam.conambl.business.facade.EPayServiceFacade;
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
@@ -15,34 +31,49 @@ import it.csi.conam.conambl.business.service.sollecito.UtilsSollecitoService;
 import it.csi.conam.conambl.business.service.util.UtilsCodeWriter;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.util.UtilsDoqui;
-import it.csi.conam.conambl.common.*;
+import it.csi.conam.conambl.common.Constants;
+import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.Report;
+import it.csi.conam.conambl.common.TipoAllegato;
+import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmCParametro;
+import it.csi.conam.conambl.integration.entity.CnmDStatoSollecito;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRatePK;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoSollecito;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoSollecitoPK;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRSollecitoSoggRata;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTSollecito;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.ws.epay.EPayWsInputMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoPianoRateRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRSollecitoSoggRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.jasper.BollettinoJasper;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.UtilsParametro;
 import it.csi.conam.conambl.util.UtilsRata;
+import it.csi.conam.conambl.util.UtilsTipoAllegato;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.template.DatiTemplateVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.FileNotFoundException;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author riccardo.bova
@@ -350,9 +381,13 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 		if (cnmTSollecito.getCnmDTipoSollecito().getIdTipoSollecito() == Constants.ID_TIPO_SOLLECITO_RATE) {
 			cnmCParametro = Iterables.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_OGGETTO_PAGAMENTO_SOLLECITO_RATE)).orNull();
 			List<CnmRSollecitoSoggRata> cnmRSollecitoSoggRataList = cnmRSollecitoSoggRataRepository.findByCnmTSollecito(cnmTSollecito);
-			if (cnmCParametro != null)
-//				oggettoPagamento = cnmCParametro.getValoreString() + cnmRSollecitoSoggRataList.get(0).getCnmTRata().getCnmTPianoRate().getNumeroProtocollo();	// 20210427_LC 
-				oggettoPagamento = String.format(cnmCParametro.getValoreString(), cnmRSollecitoSoggRataList.get(0).getCnmTRata().getCnmTPianoRate().getNumeroProtocollo(), cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());
+			if (cnmCParametro != null) {
+				// 20210427_LC
+				CnmRAllegatoSollecito cnmRAllegatoSollecito = Iterables.tryFind(cnmRSollecitoSoggRataList.get(0).getCnmTSollecito().getCnmRAllegatoSollecitos(), UtilsTipoAllegato.findAllegatoInCnmRAllegatoSollecitoByTipoAllegato(TipoAllegato.LETTERA_SOLLECITO_RATE))
+						.orNull();
+				
+				oggettoPagamento = String.format(cnmCParametro.getValoreString(), cnmRAllegatoSollecito!=null?cnmRAllegatoSollecito.getCnmTAllegato().getNumeroProtocollo():null, cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());
+			}
 		} else {
 			cnmCParametro = Iterables.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_OGGETTO_PAGAMENTO_SOLLECITO)).orNull();
 			if (cnmCParametro != null)

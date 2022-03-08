@@ -40,6 +40,7 @@ public class TemplateServiceTest extends TestBaseService {
 
 	@Test
 	public void getDatiTemplate() {
+		
 		logger.info("START");
 		DatiTemplateVO response = null;
 		try {
@@ -55,7 +56,7 @@ public class TemplateServiceTest extends TestBaseService {
 		logger.info(response);
 	}
 
-	@Test
+//	@Test
 	public void stampaTemplate() {
 		logger.info("START");
 		byte[] response = null;

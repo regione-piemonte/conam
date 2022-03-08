@@ -553,6 +553,11 @@ public class ManageProtocollaDocumentoHelperImpl  extends CommonManageDocumentoH
 			documentoElettronicoActa.setDestinatarioFisico(request.getDestinatarioFisico());
 			
 
+			// 20211014_LC Jira CONAM-140
+	        if (request.getDataCronica() != null) documentoElettronicoActa.setDataCronica(request.getDataCronica());
+	        if (request.getDataTopica() != null) documentoElettronicoActa.setDataTopica(request.getDataTopica());
+			
+
 
 			if(log.isDebugEnabled()){
 				log.debug(method + ". UtenteActa =\n " + XmlSerializer.objectToXml(utenteActa));

@@ -4,13 +4,15 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.repositories;
 
-import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbSog;
-import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import java.sql.Timestamp;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
 
 @Repository
 public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Integer> {
@@ -24,9 +26,29 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 
 	List<CnmTAllegato> findByCnmRAllegatoVerbSogsIn(List<CnmRAllegatoVerbSog> cnmRAllegatoVerbSogs);
 
-	@Query(value = "select a.* from cnm_t_allegato a where a.id_stato_allegato = 5 and id_tipo_allegato = 28 and a.id_acta_master is not null ", nativeQuery = true)
-	List<CnmTAllegato> findAllegatiComparsaByStato();
+	@Query(value = "select a.* from cnm_t_allegato a where a.id_stato_allegato = 5 and id_tipo_allegato = 28 and a.id_acta_master is not null and a.data_ora_insert >= ?1", nativeQuery = true)
+	List<CnmTAllegato> findAllegatiComparsaByStato(Timestamp timestamp);
+	
 
+	@Query(value = "select a.* from cnm_t_allegato a "
+			+ "join cnm_r_allegato_verb_sog b on a.id_allegato = b.id_allegato "
+			+ "join cnm_r_verbale_soggetto c on b.id_verbale_soggetto = c.id_verbale_soggetto "
+			+ "where a.id_stato_allegato = 5 and a.id_tipo_allegato = 5 and c.id_verbale = ?1", nativeQuery = true)
+	List<CnmTAllegato> findAllegatiRelataAvviaSpostamento(Integer idVerbale);
+
+	@Query(value = "select a.* from cnm_t_allegato a "
+			+ "join cnm_r_allegato_verb_sog b on a.id_allegato = b.id_allegato "
+			+ "join cnm_r_verbale_soggetto c on b.id_verbale_soggetto = c.id_verbale_soggetto "
+			+ "where a.id_stato_allegato = 3 and a.id_tipo_allegato = 5 and c.id_verbale = ?1", nativeQuery = true)
+	List<CnmTAllegato> findAllegatiRelataDaProtocollare(Integer idVerbale);
+
+	@Query(value = "select a.* from cnm_t_allegato a "
+			+ "join cnm_r_allegato_verb_sog b on a.id_allegato = b.id_allegato "
+			+ "join cnm_r_verbale_soggetto c on b.id_verbale_soggetto = c.id_verbale_soggetto "
+			+ "where a.id_stato_allegato in (2,7) and a.id_tipo_allegato = 5 and c.id_verbale = ?1", nativeQuery = true)
+	List<CnmTAllegato> findAllegatiRelataGiaProtocollati(Integer idVerbale);
+
+	
 	@Query(value = "select a.* from cnm_t_allegato a " + //
 			"join cnm_r_allegato_piano_rate apr on apr.id_allegato = a.id_allegato " + //
 			"join cnm_t_piano_rate rat on rat.id_piano_rate = apr.id_piano_rate " + //
@@ -67,6 +89,17 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 			"join cnm_r_ordinanza_verb_sog ovs on ovs.id_ordinanza_verb_sog = aovs.id_ordinanza_verb_sog " + //
 			"where  a.id_tipo_allegato in (38) and ovs.id_ordinanza = ?1 ", nativeQuery = true)
 	List<CnmTAllegato> findAllegatiIstanzaOrdinanza(Integer idOrdinanza);
+
+	@Query(value = "select a.* from cnm_t_allegato a " + //
+			"join cnm_r_allegato_verbale av on av.id_allegato = a.id_allegato " + //
+			"where  a.id_tipo_allegato in (28) and av.id_verbale = ?1 ", nativeQuery = true)
+	List<CnmTAllegato> findAllegatiIstanzaVerbale(Integer idverbale);
+
+	@Query(value = "select a.* from cnm_t_allegato a " + //
+			"join cnm_r_allegato_ord_verb_sog aovs on aovs.id_allegato = a.id_allegato " + //
+			"join cnm_r_ordinanza_verb_sog ovs on ovs.id_ordinanza_verb_sog = aovs.id_ordinanza_verb_sog " + //
+			"where  a.id_tipo_allegato in (34) and ovs.id_ordinanza = ?1 ", nativeQuery = true)
+	List<CnmTAllegato> findAllegatiIstanzaOrdinanzaAnnullamento(Integer idOrdinanza);
 	
 	
 	// 20210524_LC lotto2scenario6
@@ -85,4 +118,6 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 			"join cnm_r_ordinanza_verb_sog ovs on ovs.id_ordinanza_verb_sog = s.id_ordinanza_verb_sog " + //
 			"where a.id_tipo_allegato in (20,36) and ovs.id_ordinanza_verb_sog = ?1 ", nativeQuery = true)
 	List<CnmTAllegato> findAllegatiSollecitoByIdOrdVerbSog(Integer idOrdinanzaVerbaleSoggetto);
+
+	CnmTAllegato findByIdActa(String idActa);
 }

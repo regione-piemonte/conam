@@ -45,11 +45,12 @@ public class MinVerbaleEntityMapperImpl implements MinVerbaleEntityMapper {
 		verbale.setUser(dto.getCnmTUser2().getNome() + " " + dto.getCnmTUser2().getCognome());
 
 		verbale.setModificabile(Boolean.FALSE);
-		if (stato.getId() == Constants.STATO_VERBALE_INCOMPLETO && dto.getCnmTUser2().getIdUser() == idUser)
+		if ((stato.getId() == Constants.STATO_VERBALE_INCOMPLETO) && dto.getCnmTUser2().getIdUser() == idUser)
 			verbale.setModificabile(Boolean.TRUE);
 
-		verbale.setStatoManuale(statoManualeEntityMapper.mapEntityToVO(dto.getStatoManuale()));
+		verbale.setStatoManuale(statoManualeEntityMapper.mapEntityToVO(dto.getCnmDStatoManuale()));
 		
+		verbale.setDataOraAccertamento(utilsDate.asLocalDateTime(dto.getDataOraAccertamento()));
 		
 		return verbale;
 	}

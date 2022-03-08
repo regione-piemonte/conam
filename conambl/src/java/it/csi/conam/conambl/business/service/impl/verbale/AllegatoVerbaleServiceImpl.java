@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
@@ -109,6 +110,8 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 	private CnmTRataRepository cnmTRataRepository;*/
 	@Autowired
 	private CnmRAllegatoPianoRateRepository cnmAllegatoPianoRateRepository;
+	@Autowired
+	private CnmTAllegatoFieldRepository cnmTAllegatoFieldRepository;
 	
 	@Override
 	public RiepilogoAllegatoVO getAllegatiByIdVerbale(Integer id, UserDetails userDetails, boolean includiControlloUtenteProprietarioIstruttoreAssegnato, boolean verbaleAudizione) {
@@ -156,7 +159,8 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 					CnmTAllegato cnmTAllegato = cnmRAllegatoVerbale.getCnmTAllegato();
 					AllegatoVO al = allegatoEntityMapper.mapEntityToVO(cnmTAllegato);
 					if (al.getNumProtocollo() == null && al.getTipo().getId() != TipoAllegato.COMPARSA.getId() && al.getTipo().getId() != TipoAllegato.COMPARSA_ALLEGATO.getId()
-							&& al.getTipo().getId() != TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId())
+							&& al.getTipo().getId() != TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId()
+							&& al.getTipo().getId() != TipoAllegato.RELATA_NOTIFICA.getId())
 						al.setNumProtocollo(cnmTVerbale.getNumeroProtocollo());
 					splitAllegato(riepilogo, cnmTAllegato.getCnmDTipoAllegato().getCnmDCategoriaAllegato().getIdCategoriaAllegato(), al);
 				}
@@ -186,7 +190,8 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 				for (CnmRAllegatoVerbSog cnmRAllegatoVerbSog : cnmRAllegatoVerbSogList) {
 					CnmTAllegato cnmTAllegato = cnmRAllegatoVerbSog.getCnmTAllegato();
 					AllegatoVO al = allegatoEntityMapper.mapEntityToVO(cnmTAllegato);
-					if (al.getNumProtocollo() == null && al.getTipo().getId() != TipoAllegato.VERBALE_AUDIZIONE.getId())
+					if (al.getNumProtocollo() == null && al.getTipo().getId() != TipoAllegato.VERBALE_AUDIZIONE.getId()
+							&& al.getTipo().getId() != TipoAllegato.RELATA_NOTIFICA.getId())
 						al.setNumProtocollo(cnmTVerbale.getNumeroProtocollo());
 					splitAllegato(riepilogo, cnmTAllegato.getCnmDTipoAllegato().getCnmDCategoriaAllegato().getIdCategoriaAllegato(), al);
 				}
@@ -284,6 +289,17 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 	public List<TipoAllegatoVO> getTipologiaAllegatiAllegabiliVerbale(Integer idVerbale, String tipoDocumento, boolean aggiungiCategoriaEmail) {
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(idVerbale);
 
+		//20211214 - Se il verbale è negli stati transitori non posso aggiungere nessun allegato
+		if(cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_PROTOCOLLAZIONE_IN_ATTESA_VERIFICA_PAGAMENTO
+			||cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_PROTOCOLLAZIONE_PER_MANCANZA_CF
+			||cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ACQUISIZIONE
+			||cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ACQUISIZIONE_CON_PAGAMENTO
+			||cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ACQUISIZIONE_CON_SCRITTI_DIFENSIVI
+			) {
+			
+			return new ArrayList<TipoAllegatoVO>();	
+		}
+		
 		TipoAllegato tipo = TipoAllegato.getTipoAllegatoByTipoDocumento(tipoDocumento);
 		Long idTipoDocumento = tipo != null ? tipo.getId() : null;
 
@@ -310,8 +326,23 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		}
 		while (listAllegati.remove(comparsa)) {
 		}
-
 		listAllegabili.removeAll(listAllegati);
+		
+		// 20210921 PP - consente di inserire ancora una ricevuta di pagamento se l'importo pagato e' inferiore all'importo del verbale
+		try {
+			if(tipo==null || tipo == TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE) {
+				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
+				if(importoPagato == null) {
+					importoPagato = new BigDecimal(0);
+				}
+				if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale())<0) {
+					TipoAllegatoVO ricevutaPagamentoVerbale = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId()));
+					while (listAllegabili.remove(ricevutaPagamentoVerbale)) {
+					}
+					listAllegabili.add(ricevutaPagamentoVerbale);
+				}
+			}
+		}catch(Throwable t) {}
 		
 		//20200729_ET aggiunto blocco per gestione tipi doc EMAIL
 		if(idTipoDocumento==null && aggiungiCategoriaEmail) {
@@ -325,8 +356,31 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 			listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.EMAIL_ISTRUTTORIA.getId())));
 		}
 		
+		//20211108 PP - aggiungo la relata di notifica solo se ci sono soggetti che non hanno ancora una relata
+		TipoAllegatoVO relataNotifica = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RELATA_NOTIFICA.getId()));
+		while (listAllegabili.remove(relataNotifica)) {
+		}
+//		listAllegabili.remove(relataNotifica);
 		
+		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO ) {
+			listAllegabili = new ArrayList<TipoAllegatoVO> ();
+		}
 		
+		if(idTipoDocumento == null || idTipoDocumento == TipoAllegato.RELATA_NOTIFICA.getId()) {
+			List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettosWithoutAllegato = allegatoVerbaleSoggettoService.findCnmRVerbaleSoggettosWithoutAllegato(cnmTVerbale, TipoAllegato.RELATA_NOTIFICA);
+			if(cnmRVerbaleSoggettosWithoutAllegato != null && cnmRVerbaleSoggettosWithoutAllegato.size()>0) {
+				listAllegabili.add(relataNotifica);
+			}		
+		}
+
+		// 20210909 PP - Evolutiva E1 Comunicazione Varie
+		if(idTipoDocumento == null || idTipoDocumento == TipoAllegato.COMUNICAZIONI_VARIE.getId()) {
+			TipoAllegatoVO comunicazioniVarie = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.COMUNICAZIONI_VARIE.getId()));
+			while (listAllegabili.remove(comunicazioniVarie)) {
+			}
+			listAllegabili.add(comunicazioniVarie);
+		}				
+
 		return listAllegabili;
 	}
 
@@ -384,6 +438,19 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 
 		listAllegabili.removeAll(listAllegati);
 		
+		// 20210921 PP - consente di inserire ancora una ricevuta di pagamento se l'importo pagato e' inferiore all'importo del verbale
+		try {
+			if(tipo!=null && tipo == TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE) {
+				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
+				if(importoPagato.intValue()!=0) {
+					if(importoPagato.intValue()<cnmTVerbale.getImportoVerbale().intValue()) {
+						TipoAllegatoVO ricevutaPagamentoVerbale = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId()));
+						listAllegabili.add(ricevutaPagamentoVerbale);
+					}
+				}
+			}
+		}catch(Throwable t) {}
+		
 		//20200729_ET aggiunto blocco per gestione tipi doc EMAIL
 		if(idTipoDocumento==null && aggiungiCategoriaEmail) {
 			listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.EMAIL_VERBALE.getId())));
@@ -408,7 +475,31 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		}
 		listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.CONVOCAZIONE_AUDIZIONE.getId())));
 		listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.VERBALE_AUDIZIONE.getId())));
-//		
+
+		//20211108 PP - aggiungo la relata di notifica solo se ci sono soggetti che non hanno ancora una relata
+		TipoAllegatoVO relataNotifica = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RELATA_NOTIFICA.getId()));
+		while (listAllegabili.remove(relataNotifica)) {
+		}
+		
+		if(idTipoDocumento == null || idTipoDocumento == TipoAllegato.RELATA_NOTIFICA.getId()) {
+			List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettosWithoutAllegato = allegatoVerbaleSoggettoService.findCnmRVerbaleSoggettosWithoutAllegato(cnmTVerbale, TipoAllegato.RELATA_NOTIFICA);
+			if(cnmRVerbaleSoggettosWithoutAllegato != null && cnmRVerbaleSoggettosWithoutAllegato.size()>0) {
+				if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO ) {
+					listAllegabili = new ArrayList<TipoAllegatoVO> ();
+				}
+				listAllegabili.add(relataNotifica);
+			}		
+		}
+
+		// 20210909 PP - Evolutiva E1 Comunicazione Varie
+		if(idTipoDocumento == null || idTipoDocumento == TipoAllegato.COMUNICAZIONI_VARIE.getId()) {
+			TipoAllegatoVO comunicazioniVarie = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.COMUNICAZIONI_VARIE.getId()));
+			while (listAllegabili.remove(comunicazioniVarie)) {
+			}
+			listAllegabili.add(comunicazioniVarie);
+		}	
+		
+		
 		return listAllegabili;
 	}
 	
@@ -464,30 +555,45 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		List<AllegatoFieldVO> configAllegato = request.getAllegatoField();
 		CnmTUser cnmTUser = cnmTUserRepository.findOne(idUser);
 		boolean nofile = false;
-
-		if (fileName == null) {
+		Integer idVerbaleSoggetto = null;
+		if (fileName == null || idTipoAllegato == TipoAllegato.RELATA_NOTIFICA.getId()) {
 			String s = "";
 			for (AllegatoFieldVO all : configAllegato) {
 				if (all.getFieldType().getId() == Constants.FIELD_TYPE_BOOLEAN) {
-					s += all.getBooleanValue().toString() + " ";
+//					if(all.getBooleanValue() != null) {
+//						s += "PAGAMENTO PARZIALE: " +all.getBooleanValue().toString() + " ";
+//					}else {
+//						s += "PAGAMENTO PARZIALE: " +"false" + " ";
+//					}
 				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_NUMERIC || all.getFieldType().getId() == Constants.FIELD_TYPE_ELENCO) {
 					NumberFormat n = NumberFormat.getCurrencyInstance(Locale.ITALY);
-					double money = all.getNumberValue().doubleValue();
+					double money = 0;
+					if(all.getNumberValue()!= null)
+						money = all.getNumberValue().doubleValue();					
 					String string = n.format(money);
 					s += "IMPORTO PAGATO: " + string + " ";
 				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_STRING) {
-					s += "CONTO CORRENTE VERSAMENTO: " + all.getStringValue().toString() + " ";
+					if(all.getStringValue()!=null)
+						s += "CONTO CORRENTE VERSAMENTO: " + all.getStringValue().toString() + " ";
 				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_DATA_ORA) {
-					s += all.getDateTimeValue().toString() + " ";
+					if(all.getDateValue()!=null)
+						s += all.getDateTimeValue().toString() + " ";
 				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_DATA) {
-					s += "DATA PAGAMENTO: " + all.getDateValue().toString() + " ";
+					if(all.getDateValue()!=null)
+						s += "DATA PAGAMENTO: " + all.getDateValue().toString() + " ";
+				}	else if (all.getFieldType().getId() == Constants.FIELD_TYPE_ELENCO_SOGGETTI) {
+					if(all.getNumberValue()!= null)
+						idVerbaleSoggetto = all.getNumberValue().intValue();
 				}
 			}
 
 			byteFile = s.getBytes();
 			CnmTVerbale cnmTVerbale = cnmTVerbaleRepository.findByIdVerbale(idVerbale);
-			fileName = "Promemoria_pagamento_verbale_" + verificaNome(cnmTVerbale.getNumVerbale()) + ".txt";
-			nofile = true;
+			if (idTipoAllegato != TipoAllegato.RELATA_NOTIFICA.getId()) {
+				fileName = "Promemoria_pagamento_verbale_" + verificaNome(cnmTVerbale.getNumVerbale()) + ".txt";
+				nofile = true;
+			}
+			
 		}
 
 		// controlli sicurezza
@@ -533,7 +639,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 //			String soggettoActa = "DEFAULT_SUBJECT";// = utilsStadoc.getSoggettoActa(cnmTVerbale);
 			String rootActa = utilsDoqui.getRootActa(cnmTVerbale);
 
-			cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO, folder, idEntitaFruitore,
+				cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO, folder, idEntitaFruitore,
 					false, false, null, rootActa, 0, null, null, null);
 			// 2020-06-15 PP - FINE
 			
@@ -595,15 +701,30 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 				cnmRAllegatoVerbSogRepository.save(cnmRAllegatoVerbSog);
 			}
 		} else {
-			CnmRAllegatoVerbale cnmRAllegatoVerbale = new CnmRAllegatoVerbale();
-
-			CnmRAllegatoVerbalePK cnmRAllegatoVerbalePK = new CnmRAllegatoVerbalePK();
-			cnmRAllegatoVerbalePK.setIdAllegato(cnmTAllegato.getIdAllegato());
-			cnmRAllegatoVerbalePK.setIdVerbale(idVerbale);
-			cnmRAllegatoVerbale.setCnmTUser(cnmTUser);
-			cnmRAllegatoVerbale.setDataOraInsert(utilsDate.asTimeStamp(LocalDateTime.now()));
-			cnmRAllegatoVerbale.setId(cnmRAllegatoVerbalePK);
-			cnmRAllegatoVerbaleRepository.save(cnmRAllegatoVerbale);
+			
+			// 20211112 PP - controllo se si tratta di una relata di notifica, se si recupero dai metadati l'idVerbaleSoggetto e salvo in  CnmRAllegatoVerbSog
+			if(idTipoAllegato == TipoAllegato.RELATA_NOTIFICA.getId()) {
+				if(idVerbaleSoggetto != null) {
+					CnmRAllegatoVerbSog cnmRAllegatoVerbSog = new CnmRAllegatoVerbSog();
+					CnmRAllegatoVerbSogPK cnmRAllegatoVerbSogPK = new CnmRAllegatoVerbSogPK();
+					cnmRAllegatoVerbSogPK.setIdAllegato(cnmTAllegato.getIdAllegato());
+					cnmRAllegatoVerbSogPK.setIdVerbaleSoggetto(idVerbaleSoggetto);
+					cnmRAllegatoVerbSog.setCnmTUser(cnmTUser);
+					cnmRAllegatoVerbSog.setDataOraInsert(utilsDate.asTimeStamp(LocalDateTime.now()));
+					cnmRAllegatoVerbSog.setId(cnmRAllegatoVerbSogPK);
+					cnmRAllegatoVerbSogRepository.save(cnmRAllegatoVerbSog);
+				}
+			}else {
+				CnmRAllegatoVerbale cnmRAllegatoVerbale = new CnmRAllegatoVerbale();
+	
+				CnmRAllegatoVerbalePK cnmRAllegatoVerbalePK = new CnmRAllegatoVerbalePK();
+				cnmRAllegatoVerbalePK.setIdAllegato(cnmTAllegato.getIdAllegato());
+				cnmRAllegatoVerbalePK.setIdVerbale(idVerbale);
+				cnmRAllegatoVerbale.setCnmTUser(cnmTUser);
+				cnmRAllegatoVerbale.setDataOraInsert(utilsDate.asTimeStamp(LocalDateTime.now()));
+				cnmRAllegatoVerbale.setId(cnmRAllegatoVerbalePK);
+				cnmRAllegatoVerbaleRepository.save(cnmRAllegatoVerbale);
+			}
 		}
 
 		// 20201021 PP - Imposto il flag pregresso sull'allegato
@@ -723,12 +844,21 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		CnmTAllegato cnmTAllegato = cnmTAllegatoRepository.findOne(idAllegato);
 		if (cnmTAllegato == null)
 			throw new SecurityException("cnmTAllegato non esistente");
-
-		CnmRAllegatoVerbalePK cnmRAllegatoVerbalePK = new CnmRAllegatoVerbalePK();
-		cnmRAllegatoVerbalePK.setIdAllegato(cnmTAllegato.getIdAllegato());
-		cnmRAllegatoVerbalePK.setIdVerbale(idVerbale);
-		cnmRAllegatoVerbaleRepository.delete(cnmRAllegatoVerbalePK);
+		
+		if(cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() != TipoAllegato.RELATA_NOTIFICA.getId()) {
+			CnmRAllegatoVerbalePK cnmRAllegatoVerbalePK = new CnmRAllegatoVerbalePK();
+			cnmRAllegatoVerbalePK.setIdAllegato(cnmTAllegato.getIdAllegato());
+			cnmRAllegatoVerbalePK.setIdVerbale(idVerbale);
+			cnmRAllegatoVerbaleRepository.delete(cnmRAllegatoVerbalePK);
+		}else {
+			List<CnmRAllegatoVerbSog> cnmRAllegatoVerbSogs = cnmRAllegatoVerbSogRepository.findByCnmTAllegato(cnmTAllegato);
+			
+			for(CnmRAllegatoVerbSog cnmRAllegatoVerbSog : cnmRAllegatoVerbSogs) {
+				cnmRAllegatoVerbSogRepository.delete(cnmRAllegatoVerbSog);
+			}
+		}
 		commonAllegatoService.eliminaAllegatoBy(cnmTAllegato);
+		
 
 	}
 
@@ -817,7 +947,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 
 		MessageVO response = null;
 		// 20200903_LC da fix rilascio ieri
-		if(cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO
+		if(cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO || cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO
 				|| pregresso) { // 20201109_ET per i PREGRESSI sposto anche se sto processando un allegato, quindi non devo dare il messaggio
 			return response;
 		}

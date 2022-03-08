@@ -177,4 +177,29 @@ public class CnmRVerbaleSoggetto implements Serializable {
 	}
 	/*LUCIO 2021/04/21 - FINE Gestione casi di recidività*/
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((idVerbaleSoggetto == null) ? 0 : idVerbaleSoggetto.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CnmRVerbaleSoggetto other = (CnmRVerbaleSoggetto) obj;
+		if (idVerbaleSoggetto == null) {
+			if (other.idVerbaleSoggetto != null)
+				return false;
+		} else if (!idVerbaleSoggetto.equals(other.idVerbaleSoggetto))
+			return false;
+		return true;
+	}
+
 }

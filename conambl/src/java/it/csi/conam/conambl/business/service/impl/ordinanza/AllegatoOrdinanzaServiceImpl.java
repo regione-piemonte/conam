@@ -923,6 +923,12 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 			List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findByCnmROrdinanzaVerbSogsIn(cnmROrdinanzaVerbSogList);
 			cnmTSoggettoList = cnmTSoggettoRepository.findByCnmRVerbaleSoggettosIn(cnmRVerbaleSoggettoList);
 
+			// 20210831 PP - CR_107 non devo protoollare il master se è LETTERA_ORDINANZA, poichè sarà fatto dal batch dopo aver aggiunto gli allegati
+			
+			if (tipoAllegato.getId() == TipoAllegato.LETTERA_ORDINANZA.getId()) {
+				tipoProtocolloAllegato = TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE;
+			}
+			
 			cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), configAllegato, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
 					isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList);
 
@@ -1530,7 +1536,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 							} else {
 								// allegato da FS		
 								int numeroAllegati = 0;
-								cnmTAllegato = salvaSingoloAllegatoMulti(allegato, cnmTUser, folder, soggettoActa, rootActa, numeroAllegati, entitaFruitoreAllegato, pregresso, soggetti, TipoProtocolloAllegato.PROTOCOLLARE);	// 20210701_LC Jira 155	-	protocollare
+								cnmTAllegato = salvaSingoloAllegatoMulti(allegato, cnmTUser, folder, soggettoActa, rootActa, numeroAllegati, entitaFruitoreAllegato, pregresso, soggetti, TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE);	// 20210701_LC Jira 155	-	protocollare
 								cnmTAllegato.setCnmDStatoAllegato(avviospostamentoActa);
 								cnmTAllegato.setDataOraUpdate(now);
 								cnmTAllegato.setIdActaMaster(idActa);
@@ -1563,7 +1569,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 							msgResponseList.add(resp);			
 					} else {
 						// allegato da FS				
-						cnmTAllegato = salvaSingoloAllegatoMulti(allegato, cnmTUser, folder, soggettoActa, rootActa, 0, entitaFruitoreAllegato, pregresso, soggetti, TipoProtocolloAllegato.PROTOCOLLARE);
+						cnmTAllegato = salvaSingoloAllegatoMulti(allegato, cnmTUser, folder, soggettoActa, rootActa, 0, entitaFruitoreAllegato, pregresso, soggetti, TipoProtocolloAllegato.NON_PROTOCOLLARE);
 					}					
 				}			
 			}
@@ -1609,7 +1615,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		
 		// 20210701_LC Jira 158 - documento senza allegati (tipologiaDocSenzaAllegati + gli si passa isMaster==FALSE altrimenti lo classifica in Acta come documento con allegati: anche quando è un master, in Acta deve essere un documento singolo)
 		cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, null, cnmTUser, tipoProtocollazione, folder, fruitore,
-				false, false, soggettoActa, rootActa, numeroAllegati, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, soggetti);	
+				allegato.isMaster(), false, soggettoActa, rootActa, numeroAllegati, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, soggetti);	
 
 		// 20201021 PP - Imposto il flag pregresso sull'allegato
 		cnmTAllegato.setFlagDocumentoPregresso(pregresso);

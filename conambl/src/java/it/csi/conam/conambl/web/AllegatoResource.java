@@ -69,6 +69,13 @@ public class AllegatoResource extends SpringSupportedResource {
 	}
 	
 	@GET
+	@Path("/getDecodificaSelectSoggettiAllegato/{idverbale}")
+	public Response getDecodificaSelectSoggettiAllegato(@Valid @PathParam("idverbale") @NotNull(message = "RESCON02") Integer idverbale) {
+		List<SelectVO> select = allegatoDispatcher.getDecodificaSelectSoggettiAllegato(idverbale);
+		return Response.ok(select).build();
+	}
+	
+	@GET
 	@Path("/ricercaProtocolloSuACTA")
 	public Response ricercaProtocolloSuACTA(@Valid @QueryParam("protocollo") @NotNull(message = "RESCON20") String numProtocollo, @QueryParam("idVerbale") Integer idVerbale, @QueryParam("flagPregresso") Boolean flagPregresso) {
 		// 20200903_LC gestione pregresso

@@ -24,4 +24,7 @@ public interface CnmSComuneRepository extends CrudRepository<CnmSComune, Long> {
 
 	@Query(value = "select c.* from  cnm_s_comune c where c.id_comune = ?1 and ?2 between c.inizio_validita and c.fine_validita", nativeQuery = true)
 	CnmSComune findByidComuneAndDataNascita(long idComune, Date dataNascita);
+	
+	@Query(value = "select c.* from  cnm_s_comune c where c.id_comune = ?1 and ?2 between c.inizio_validita and c.fine_validita", nativeQuery = true)
+	CnmSComune findByidComuneValidoInData(long idComune, Date data);
 }

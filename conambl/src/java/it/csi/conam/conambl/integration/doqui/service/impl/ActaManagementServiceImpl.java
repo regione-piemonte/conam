@@ -6,6 +6,7 @@ package it.csi.conam.conambl.integration.doqui.service.impl;
 
 import it.csi.conam.conambl.integration.doqui.bean.*;
 import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
+import it.csi.conam.conambl.integration.doqui.exception.RicercaDocumentoNoDocElettronicoException;
 import it.csi.conam.conambl.integration.doqui.service.*;
 import it.csi.conam.conambl.integration.doqui.utils.DateFormat;
 import it.doqui.acta.actasrv.dto.acaris.type.common.*;
@@ -1387,9 +1388,13 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 						documentoProtocollatoActa.setClassificazioneEstesa(indiceClassificazioneEstesa);
 						log.debug(method + ". indiceClassificazioneEstesa = " + indiceClassificazioneEstesa);
 					
-						objectIdClassificazione.setValue(idClassificazione);					
-						ObjectResponseType documentoProtocollato = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazione, 0);
-						ObjectResponseType gruppoAllegati = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazione, 1);
+						objectIdClassificazione.setValue(idClassificazione);			
+						
+						ObjectResponseType documentoProtocollato = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazione, false);
+						ObjectResponseType gruppoAllegati = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazione, true);
+						
+						// 20211019_LC Jira CONAM-152 - verifica numero allegati effettivo
+						Integer numAllegatiEff = acarisObjectService.getNumeroAllegatiPresenti(repositoryId, principalId, idClassificazione);
 											
 						// recupera folder
 						folderId = acarisNavigationService.recuperaFascicoloProtocollazione(repositoryId, principalId, objectIdClassificazione);
@@ -1408,7 +1413,13 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 								log.debug(method + ". Running Servizio recuperaIdContentStream...");
 							
 								// se 1 elemento allora doc standard, se >1 è doc multiplo
-								List<ObjectIdType> contentStreamIdList = acarisRelationshipService.recuperaIdContentStream(repositoryId, principalId, docProtocollatoObj);
+								List<ObjectIdType> contentStreamIdList = null;
+								try {
+									contentStreamIdList = acarisRelationshipService.recuperaIdContentStream(repositoryId, principalId, docProtocollatoObj);
+								}catch(IntegrationException e) {
+									log.warn(method + "recupera contentStreamId problem = ", e);
+									throw new IntegrationException(e.getMessage(), new RicercaDocumentoNoDocElettronicoException(""));
+								}
 								if (contentStreamIdList != null)
 								{
 									log.debug(method + "contentStreamId Hash Code = " + contentStreamIdList.get(0).hashCode());
@@ -1481,8 +1492,8 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 						// ------------------------------------------------------------------------------------------------------------------------------------
 		
 					
-
-						if (gruppoAllegati!=null) {	// 20200708_LC
+						// 20200708_LC Jira CONAM-152 - recupera allegati solo se effettivametne presenti
+						if (gruppoAllegati!=null & numAllegatiEff>0) {
 							ObjectIdType gruppoAllegatiObj = gruppoAllegati.getObjectId();
 							PagingResponseType classificazioniAllegatiList = acarisNavigationService.recuperaAllChildrens(repositoryId, principalId, gruppoAllegatiObj);
 							ObjectResponseType[] classificazioniAllegati = classificazioniAllegatiList.getObjects();
@@ -1504,7 +1515,7 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 									String indiceClassificazioneEstesaAllegato = acarisObjectService.getIndiceClassificazioneEstesa(repositoryId, principalId, idClassificazioneAllegato);
 									documentoProtocollatoActaAllegato.setClassificazioneEstesa(indiceClassificazioneEstesaAllegato);
 									
-									ObjectResponseType documentoProtocollatoAllegato = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazioneAllegato, 0);
+									ObjectResponseType documentoProtocollatoAllegato = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazioneAllegato, false);
 									
 									if(documentoProtocollatoAllegato!=null) {
 										ObjectIdType docProtocollatoAllegatoObj = documentoProtocollatoAllegato.getObjectId();
@@ -1591,6 +1602,8 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 				
 			}
 
+			// 
+			
 			return documentoProtocollatoActaList;
 		}
 		finally

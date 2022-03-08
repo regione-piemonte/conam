@@ -60,6 +60,10 @@ public class RequestProtocollaDocumentoFisico implements java.io.Serializable {
 
 	// 20210506_LC
     private java.lang.String parolaChiaveFolderTemp;
+
+	// 20211014
+	private java.lang.String dataTopica;
+	private java.util.Date dataCronica;
     
 
 	public RequestProtocollaDocumentoFisico() {
@@ -70,7 +74,7 @@ public class RequestProtocollaDocumentoFisico implements java.io.Serializable {
 			it.csi.conam.conambl.integration.beans.Documento documento, java.lang.String folder, it.csi.conam.conambl.integration.beans.Metadati metadati, java.lang.String mimeType,
 			java.lang.String mittentiEsterni, java.lang.String numeroRegistrazionePrecedente, java.lang.String originatore, boolean protocollazioneInUscitaSenzaDocumento, java.lang.String rootActa,
 			java.lang.String scrittore, it.csi.conam.conambl.integration.beans.Soggetto soggetto, java.lang.String soggettoActa, java.lang.String tipoDocumento, java.lang.String collocazioneCartacea, 
-			java.lang.String parolaChiaveFolderTemp) {
+			java.lang.String parolaChiaveFolderTemp, java.lang.String dataTopica, java.util.Date dataCronica) {
 		this.annoRegistrazionePrecedente = annoRegistrazionePrecedente;
 		this.applicativoAlimentante = applicativoAlimentante;
 		this.autoreFisico = autoreFisico;
@@ -94,8 +98,49 @@ public class RequestProtocollaDocumentoFisico implements java.io.Serializable {
 		this.tipoDocumento = tipoDocumento;
         this.collocazioneCartacea = collocazioneCartacea;
         this.parolaChiaveFolderTemp = parolaChiaveFolderTemp;
+		this.dataTopica = dataTopica;
+		this.dataCronica = dataCronica;
 	}
 
+	
+	/**
+	 * Gets the dataTopica value for this RequestProtocollaDocumentoFisico.
+	 * 
+	 * @return dataTopica
+	 */
+	public java.lang.String getDataTopica() {
+		return dataTopica;
+	}
+
+	/**
+	 * Sets the dataTopica value for this RequestProtocollaDocumentoFisico.
+	 * 
+	 * @param dataTopica
+	 */
+	public void setDataTopica(java.lang.String dataTopica) {
+		this.dataTopica = dataTopica;
+	}
+	
+	
+	
+	/**
+	 * Gets the dataCronica value for this RequestProtocollaDocumentoFisico.
+	 * 
+	 * @return dataCronica
+	 */
+	public java.util.Date getDataCronica() {
+		return dataCronica;
+	}
+
+	/**
+	 * Sets the dataCronica value for this RequestProtocollaDocumentoFisico.
+	 * 
+	 * @param dataCronica
+	 */
+	public void setDataCronica(java.util.Date dataCronica) {
+		this.dataCronica = dataCronica;
+	}
+	
 	/**
 	 * Gets the annoRegistrazionePrecedente value for this
 	 * RequestProtocollaDocumentoFisico.
@@ -784,6 +829,18 @@ public class RequestProtocollaDocumentoFisico implements java.io.Serializable {
         elemField.setXmlType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "string"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
+		elemField = new org.apache.axis.description.ElementDesc();
+		elemField.setFieldName("dataTopica");
+		elemField.setXmlName(new javax.xml.namespace.QName("", "tipoDocumento"));
+		elemField.setXmlType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "string"));
+		elemField.setNillable(true);
+		typeDesc.addFieldDesc(elemField);
+		elemField = new org.apache.axis.description.ElementDesc();
+		elemField.setFieldName("dataCronica");
+		elemField.setXmlName(new javax.xml.namespace.QName("", "tipoDocumento"));
+		elemField.setXmlType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "date"));
+		elemField.setNillable(true);
+		typeDesc.addFieldDesc(elemField);
 	}
 
 	/**
@@ -814,7 +871,7 @@ public class RequestProtocollaDocumentoFisico implements java.io.Serializable {
 				+ ", destinatarioGiuridico=" + destinatarioGiuridico + ", documento=" + documento + ", folder=" + folder + ", metadati=" + metadati + ", mimeType=" + mimeType + ", mittentiEsterni="
 				+ mittentiEsterni + ", numeroRegistrazionePrecedente=" + numeroRegistrazionePrecedente + ", originatore=" + originatore + ", protocollazioneInUscitaSenzaDocumento="
 				+ protocollazioneInUscitaSenzaDocumento + ", rootActa=" + rootActa + ", scrittore=" + scrittore + ", soggetto=" + soggetto + ", soggettoActa=" + soggettoActa + ", tipoDocumento="
-				+ tipoDocumento + "]";
+				+ tipoDocumento + ", dataTopica="	+ dataTopica + ", dataCronica="	+ dataCronica + "]";
 	}
 
 	public java.lang.String getParolaChiaveFolderTemp() {

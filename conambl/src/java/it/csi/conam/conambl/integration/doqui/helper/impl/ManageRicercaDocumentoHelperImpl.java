@@ -17,6 +17,7 @@ import it.csi.conam.conambl.integration.doqui.exception.FruitoreException;
 import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
 import it.csi.conam.conambl.integration.doqui.exception.ProtocollaDocumentoException;
 import it.csi.conam.conambl.integration.doqui.exception.RicercaDocumentoException;
+import it.csi.conam.conambl.integration.doqui.exception.RicercaDocumentoNoDocElettronicoException;
 import it.csi.conam.conambl.integration.doqui.helper.ManageRicercaDocumentoHelper;
 import it.csi.conam.conambl.integration.doqui.service.ActaManagementService;
 import it.csi.conam.conambl.integration.doqui.utils.XmlSerializer;
@@ -344,6 +345,9 @@ public class ManageRicercaDocumentoHelperImpl  extends CommonManageDocumentoHelp
 		{
 			containsError = true;
 			log.error(method + ". IntegrationException: " + e);
+			if(e.getItsOriginalException()!= null && e.getItsOriginalException() instanceof RicercaDocumentoNoDocElettronicoException) {
+				throw new RicercaDocumentoException(e.getMessage(), "RicercaDocumentoNoDocElettronicoException", e.getItsOriginalException().getMessage());
+			}
 			throw new RicercaDocumentoException(e.getMessage());
 		}
 		catch (Exception e) 

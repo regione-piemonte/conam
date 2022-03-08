@@ -46,4 +46,5 @@ public class SoggettoDispatcherImpl implements SoggettoDispatcher {
 	public SoggettoVO getSoggettoByIdAndIdVerbale(Integer id, Integer idVerbale, UserDetails userDetails) {
 		return soggettoService.getSoggettoByIdAndIdVerbale(id, idVerbale, userDetails, true);
 	}
+
 }

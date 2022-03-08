@@ -28,6 +28,9 @@ public interface AllegatoDispatcher {
 	@PreAuthorize(value = AuthorizationRoles.UTENTE)
 	List<SelectVO> getDecodificaSelectAllegato(Long decodificaSelect);
 
+	@PreAuthorize(value = AuthorizationRoles.UTENTE)
+	List<SelectVO> getDecodificaSelectSoggettiAllegato(Integer idverbale);
+	
 	// 20200903_LC gestione pregresso (nuova resposne)
 	@PreAuthorize(value = AuthorizationRoles.UTENTE)
 	RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, Integer idVerbale, Boolean flagPregresso);

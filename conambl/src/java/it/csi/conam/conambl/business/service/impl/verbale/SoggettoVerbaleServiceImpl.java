@@ -115,7 +115,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		if (!SecurityUtils.isEnteValido(cnmTVerbale.getCnmDEnte().getIdEnte()))
 			throw new SecurityException("non si ha i permessi per vedere il verbale");
 
-		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO)
+		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
 			throw new SecurityException("Il verbale non è in stato completo");
 
 		CnmTSoggetto sogDb = commonSoggettoService.getSoggettoFromDb(soggetto, false);
@@ -304,7 +305,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		if (!SecurityUtils.isEnteValido(cnmTVerbale.getCnmDEnte().getIdEnte()))
 			throw new SecurityException("non si ha i permessi per vedere il verbale");
 
-		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO)
+		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
 			throw new SecurityException("Il verbale non è in stato completo");
 
 		CnmTSoggetto sogDb = commonSoggettoService.getSoggettoFromDb(soggetto, false);
@@ -479,8 +481,9 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			cnmTResidenza.setCnmDComune(null);
 			cnmTResidenza.setResidenzaEstera(true);
 			cnmTResidenza.setCnmTSoggetto(cnmTSoggetto);
+			cnmTResidenza.setIdVerbale(id);	// .
 			cnmTResidenzaRepository.save(cnmTResidenza);
-		} else if (idStas == null && soggetto != null && soggetto.getComuneResidenza() != null && soggetto.getComuneResidenza().getId() != null) {
+		} else if (soggetto != null && soggetto.getComuneResidenza() != null && soggetto.getComuneResidenza().getId() != null) {	// .
 			cnmTResidenza.setCnmDComune(cnmDComuneRepository.findOne(soggetto.getComuneResidenza().getId()));
 			cnmTResidenza.setIndirizzoResidenza(soggetto.getIndirizzoResidenza());
 			cnmTResidenza.setNumeroCivicoResidenza(soggetto.getCivicoResidenza());
@@ -489,6 +492,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			cnmTResidenza.setDenomComuneResidenzaEstero(null);
 			cnmTResidenza.setResidenzaEstera(false);
 			cnmTResidenza.setCnmTSoggetto(cnmTSoggetto);
+			cnmTResidenza.setIdVerbale(id); // .
 			cnmTResidenzaRepository.save(cnmTResidenza);
 		}
 		
@@ -682,7 +686,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		if (cnmRVerbaleSoggetto == null)
 			throw new SecurityException("Soggetto non associato al verbale");
 
-		if (cnmRVerbaleSoggetto.getCnmTVerbale().getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO)
+		if (cnmRVerbaleSoggetto.getCnmTVerbale().getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+				&& cnmRVerbaleSoggetto.getCnmTVerbale().getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
 			throw new SecurityException("verbale non in stato incompleto");
 
 		CnmTSoggetto cnmTSoggetto = cnmRVerbaleSoggetto.getCnmTSoggetto();

@@ -44,6 +44,7 @@ public class VerbaleVO extends ParentVO {
 	private LocalDateTime dataOraAccertamento;
 	@NotNull(message = "VOCON04")
 	private Double importo;
+	private Double importoResiduo;
 	private StatoVerbaleVO stato;
 	private ComuneVO comune;
 	@NotNull(message = "VOCON05")
@@ -61,7 +62,7 @@ public class VerbaleVO extends ParentVO {
 	//Messaggio conferma per stato manuale
 	private StatoManualeVO statoManuale;
 	
-	
+	private ComuneVO comuneEnte;
 	
 	public String getNumeroProtocollo() {
 		return numeroProtocollo;
@@ -215,6 +216,22 @@ public class VerbaleVO extends ParentVO {
 		this.statoManuale = statoManuale;
 	}
 	
+	public Double getImportoResiduo() {
+		return importoResiduo;
+	}
+
+	public void setImportoResiduo(Double importoResiduo) {
+		this.importoResiduo = importoResiduo;
+	}
+
+	public ComuneVO getComuneEnte() {
+		return comuneEnte;
+	}
+
+	public void setComuneEnte(ComuneVO comuneEnte) {
+		this.comuneEnte = comuneEnte;
+	}
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

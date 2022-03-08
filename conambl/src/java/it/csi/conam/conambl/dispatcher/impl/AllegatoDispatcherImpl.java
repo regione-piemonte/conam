@@ -39,6 +39,11 @@ public class AllegatoDispatcherImpl implements AllegatoDispatcher {
 	public List<SelectVO> getDecodificaSelectAllegato(Long decodificaSelect) {
 		return commonAllegatoService.getDecodificaSelectAllegato(decodificaSelect);
 	}
+	
+	@Override
+	public List<SelectVO> getDecodificaSelectSoggettiAllegato(Integer idverbale) {
+		return commonAllegatoService.getDecodificaSelectSoggettiAllegato(idverbale);
+	}
 
 	// 20200903_LC gestione pregresso
 	@Override

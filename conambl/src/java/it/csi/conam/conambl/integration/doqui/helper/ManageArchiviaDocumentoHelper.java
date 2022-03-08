@@ -25,7 +25,7 @@ public interface ManageArchiviaDocumentoHelper  extends CommonManageDocumentoHel
 	 * @return ResponseArchiviaDocumento
 	 * @throws ArchiviaDocumentoException
 	 */
-	public ResponseArchiviaDocumento archiviaDocumentoFisico(RequestArchiviaDocumentoFisico request) throws ArchiviaDocumentoException;
+	public ResponseArchiviaDocumento archiviaDocumentoFisico(RequestArchiviaDocumentoFisico request, String fruitoreActa) throws ArchiviaDocumentoException;
 	
 
 }

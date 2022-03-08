@@ -35,6 +35,10 @@ public class MinVerbaleVO extends ParentVO {
 	//Messaggio conferma per stato manuale
 	private StatoManualeVO statoManuale;
 
+	@JsonSerialize(using = CustomDateTimeSerializer.class)
+	@JsonDeserialize(using = CustomDateTimeDeserializer.class)
+	private LocalDateTime dataOraAccertamento;
+	
 	public Long getId() {
 		return id;
 	}
@@ -105,6 +109,14 @@ public class MinVerbaleVO extends ParentVO {
 
 	public void setStatoManuale(StatoManualeVO statoManuale) {
 		this.statoManuale = statoManuale;
+	}
+
+	public LocalDateTime getDataOraAccertamento() {
+		return dataOraAccertamento;
+	}
+
+	public void setDataOraAccertamento(LocalDateTime dataOraAccertamento) {
+		this.dataOraAccertamento = dataOraAccertamento;
 	}
 
 	@Override

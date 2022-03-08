@@ -61,6 +61,15 @@ public class UtilsTipoAllegato {
 		};
 	}
 
+	public static Predicate<CnmRAllegatoSollecito> findAllegatoInCnmRAllegatoSollecitoByTipoAllegato(TipoAllegato tipoAllegato) {
+		return new Predicate<CnmRAllegatoSollecito>() {
+			@Override
+			public boolean apply(CnmRAllegatoSollecito input) {
+				return input.getCnmTAllegato().getCnmDTipoAllegato().getIdTipoAllegato() == tipoAllegato.getId();
+			}
+		};
+	}
+
 	public static Predicate<TipoAllegatoVO> findAllegatoInTipoAllegatiByIdTipoAllegato(Long idTipoAllegato) {
 		return new Predicate<TipoAllegatoVO>() {
 			public boolean apply(TipoAllegatoVO tipoAllegatoVO) {

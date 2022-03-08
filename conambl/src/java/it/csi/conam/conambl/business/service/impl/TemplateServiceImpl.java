@@ -4,8 +4,21 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.print.PrintException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+
 import it.csi.conam.conambl.business.service.TemplateService;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.ordinanza.AllegatoOrdinanzaService;
@@ -14,9 +27,23 @@ import it.csi.conam.conambl.business.service.sollecito.AllegatoSollecitoService;
 import it.csi.conam.conambl.business.service.util.UtilsReport;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
 import it.csi.conam.conambl.common.Report;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.beans.Soggetto;
+import it.csi.conam.conambl.integration.entity.CnmCParametro;
+import it.csi.conam.conambl.integration.entity.CnmDMessaggio;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmTSollecito;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.mapper.entity.DatiTemplateVOEntityMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTPianoRateRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.request.template.DatiTemplateRequest;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.common.MessageVO;
@@ -28,16 +55,6 @@ import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.print.PrintException;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author riccardo.bova
@@ -87,7 +104,12 @@ public class TemplateServiceImpl implements TemplateService {
 		
 		switch (report) {
 		case REPORT_CONVOCAZIONE_AUDIZIONE:
-			response = getDatiTemplateConvocazioneleAudizione(request.getIdVerbaleSoggettoList());
+			if(request.getIdVerbale() == null) {
+				response = getDatiTemplateConvocazioneleAudizione(request.getIdVerbaleSoggettoList());
+			}else {
+				// 20210906 PP - Convocazione audizione utenti esterni
+				response = getDatiTemplateConvocazioneAudizioneEsterni(request.getIdVerbale(), request.getSoggettoList());
+			}
 			break;
 		case REPORT_VERBALE_AUDIZIONE:
 			response = getDatiTemplateVerbaleAudizione(request.getIdVerbaleSoggettoList());
@@ -133,8 +155,15 @@ public class TemplateServiceImpl implements TemplateService {
 		CnmTAllegato cnmTAllegato;
 		switch (report) {
 		case REPORT_CONVOCAZIONE_AUDIZIONE:
-			response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateConvocazioneleAudizione(request.getIdVerbaleSoggettoList()), user);
-			List<CnmTAllegato> cnmTAllegatos2 = allegatoVerbaleSoggettoService.salvaConvocazioneAudizione(request.getIdVerbaleSoggettoList(), response, user);
+			List<CnmTAllegato> cnmTAllegatos2;
+			if(request.getIdVerbale()==null) {
+				response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateConvocazioneleAudizione(request.getIdVerbaleSoggettoList()), user);
+				cnmTAllegatos2 = allegatoVerbaleSoggettoService.salvaConvocazioneAudizione(request.getIdVerbaleSoggettoList(), response, user);
+			}else {
+				// 20210906 PP - convocazione audizione soggetti esterni
+				response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateConvocazioneAudizioneEsterni(request.getIdVerbale(), request.getSoggettoList()), user);
+				cnmTAllegatos2 = allegatoVerbaleSoggettoService.salvaConvocazioneAudizioneEsterni(request.getIdVerbale(), request.getSoggettoList(), response, user);
+			}
 			cnmTAllegato = cnmTAllegatos2.get(0);
 			break;
 		case REPORT_VERBALE_AUDIZIONE:
@@ -306,23 +335,31 @@ public class TemplateServiceImpl implements TemplateService {
 		// 20210225_LC  (jira119 / Evolutiva E4) - CAP nei documenti creati da Conam	
 		// workaround (per non modificare template jasper): CAP concatenato prima del comuneResidenza
 		// 20210707_LC Jira 154 solo se comune e provincia presenti, altrimenti li istanzia vuoti (il report li vuole)
+		// 20211124_LC Jira 177 "" a posto di possibili null
 		for (SoggettoVO soggetto : dati.getListaSoggetti()) {
 			
 			if (soggetto.getComuneResidenza() != null) {
-				soggetto.getComuneResidenza().setDenominazione(soggetto.getCap() + " " + soggetto.getComuneResidenza().getDenominazione());
+				String cap = soggetto.getCap() != null ? soggetto.getCap() : "";
+				String comune = soggetto.getComuneResidenza().getDenominazione() != null ? soggetto.getComuneResidenza().getDenominazione() : "";
+				soggetto.getComuneResidenza().setDenominazione(cap + " " + comune);
 			} else {
 				soggetto.setComuneResidenza(new ComuneVO());
-				soggetto.getComuneResidenza().setDenominazione(null);
+				soggetto.getComuneResidenza().setDenominazione(""); 
 			}
 			
 			// 20210315_LC Jira 124 - corretta formattazione cap + comune + provincia: da denominazione proncia a "(SIGLA)"
 			if (soggetto.getProvinciaResidenza() != null) {
-				soggetto.getProvinciaResidenza().setDenominazione("(" + soggetto.getProvinciaResidenza().getSigla() + ")");
+				String provincia = soggetto.getProvinciaResidenza().getSigla() != null ? soggetto.getProvinciaResidenza().getSigla() : "";
+				soggetto.getProvinciaResidenza().setDenominazione("(" + provincia + ")");
 			} else {
 				soggetto.setProvinciaResidenza(new ProvinciaVO());
-				soggetto.getProvinciaResidenza().setDenominazione(null);
+				soggetto.getProvinciaResidenza().setDenominazione("");
 			}
+			
+			// 20211128_LC Jira 177 - gestione civico null
+			if (soggetto.getCivicoResidenza() == null) soggetto.setCivicoResidenza(""); ;
 		}
+
 		
 		jasperParam.put("listaSoggetti", new JRBeanCollectionDataSource(dati.getListaSoggetti()));
 		jasperParam.put("importoTotale", dati.getImportoTotale());
@@ -590,6 +627,16 @@ public class TemplateServiceImpl implements TemplateService {
 		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = (List<CnmRVerbaleSoggetto>) cnmRVerbaleSoggettoRepository.findAll(idVerbaleSoggettoList);
 		CnmCParametro parametro = cnmCParametroRepository.findByIdParametro(new Long(2));
 		DatiTemplateVO datiTemplate = datiTemplateResponseEntityMapper.mapEntityToVO(cnmRVerbaleSoggettoList);
+		datiTemplate.setDirigente(parametro.getValoreString());
+		return datiTemplate;
+	}
+	
+	private DatiTemplateVO getDatiTemplateConvocazioneAudizioneEsterni(Integer idVerbale, List<SoggettoVO> soggettoList) {
+		if (soggettoList == null || soggettoList.isEmpty())
+			throw new IllegalArgumentException("soggettoList non valorizzato");
+
+		CnmCParametro parametro = cnmCParametroRepository.findByIdParametro(new Long(2));
+		DatiTemplateVO datiTemplate = datiTemplateResponseEntityMapper.mapEntityToVO(idVerbale, soggettoList);
 		datiTemplate.setDirigente(parametro.getValoreString());
 		return datiTemplate;
 	}

@@ -30,6 +30,7 @@ public class CnmTVerbaleSpecification {
 			parametriVerbale.getNumeroProtocollo(),
 			parametriVerbale.getNumeroVerbale(),
 			parametriVerbale.getLettera(),
+			parametriVerbale.getAmbito(),
 			parametriVerbale.getStatoVerbale(),
 			parametriVerbale.getStatoManuale(),
 			enteAccertatore,
@@ -44,6 +45,7 @@ public class CnmTVerbaleSpecification {
 		String numeroPrototocollo, //
 		String numeroVerbale, //
 		List<CnmDLettera> lettera, // lettera selezionata dal FE
+		CnmDAmbito ambito, // ambito selezionato dal FE
 		List<CnmDStatoVerbale> statoVerbs, // stato verbale
 		List<CnmDStatoManuale> statoManuale,
 		List<CnmDEnte> enteAccertatore, // valorizzato solo per utenti accertatori
@@ -59,7 +61,19 @@ public class CnmTVerbaleSpecification {
 					final Join<CnmRVerbaleIllecito, CnmDLettera> cnmDLetteraJoin = cnmRVerbaleIllecitoJoin.join("cnmDLettera");
 					predicates.add(cnmDLetteraJoin.in(lettera));
 				}
-
+				
+				// 20211125_LC Jira 184 - ricerca per ambito
+				if (ambito != null) {
+					final Join<CnmTVerbale, CnmRVerbaleIllecito> cnmRVerbaleIllecitoJoin = root.join("cnmRVerbaleIllecitos");
+					final Join<CnmRVerbaleIllecito, CnmDLettera> cnmDLetteraJoin = cnmRVerbaleIllecitoJoin.join("cnmDLettera");
+					final Join<CnmDLettera, CnmDComma> cnmDCommaJoin = cnmDLetteraJoin.join("cnmDComma");
+					final Join<CnmDComma, CnmDArticolo> cnmDArticoloJoin = cnmDCommaJoin.join("cnmDArticolo");
+					final Join<CnmDArticolo, CnmREnteNorma> cnmREnteNormaJoin = cnmDArticoloJoin.join("cnmREnteNorma");
+					final Join<CnmREnteNorma, CnmDNorma> cnmDNormaJoin = cnmREnteNormaJoin.join("cnmDNorma");
+					final Join<CnmDNorma, CnmDAmbito> cnmDAmbitoJoin = cnmDNormaJoin.join("cnmDAmbito");
+					predicates.add(cnmDAmbitoJoin.in(ambito));
+				}
+				
 				if (trasgressore != null && !trasgressore.isEmpty()) {
 					Subquery<CnmRVerbaleSoggetto> subqueryRVerbaleSoggetto = query.subquery(CnmRVerbaleSoggetto.class);
 					Root<CnmRVerbaleSoggetto> rootSubqueryRVerbaleSoggetto = subqueryRVerbaleSoggetto.from(CnmRVerbaleSoggetto.class);

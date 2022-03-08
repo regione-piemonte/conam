@@ -6,6 +6,7 @@ package it.csi.conam.conambl.business.service.impl.pianorateizzazione;
 
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.notifica.NotificaService;
+import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
 import it.csi.conam.conambl.business.service.pianorateizzazione.PianoRateizzazionePregressiService;
 import it.csi.conam.conambl.business.service.pianorateizzazione.UtilsPianoRateizzazioneService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
@@ -77,6 +78,8 @@ public class PianoRateizzazionePregressiServiceImpl implements PianoRateizzazion
 	private UtilsPianoRateizzazioneService utilsPianoRateizzazione;
 	@Autowired
 	private CnmRAllegatoOrdVerbSogRepository cnmRAllegatoOrdVerbSogRepository;
+	@Autowired
+	private UtilsOrdinanza utilsOrdinanza;
 	
 	@Override
 	@Transactional
@@ -128,6 +131,7 @@ public class PianoRateizzazionePregressiServiceImpl implements PianoRateizzazion
 			cnmRSoggRataList = cnmRSoggRataRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList);
 			if (cnmRSoggRataList != null && !cnmRSoggRataList.isEmpty())
 				throw new SecurityException("Piano esistente per uno dei soggetti ricercati");
+
 
 			cnmTPianoRate = pianoRateizzazioneEntityMapper.mapVOtoEntity(piano);
 			// setto lo stato selezionato dall'utente

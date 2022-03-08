@@ -4,15 +4,17 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.repositories;
 
-import it.csi.conam.conambl.integration.entity.CnmTAllegato;
-import it.csi.conam.conambl.integration.entity.CnmTAllegatoField;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTAllegatoField;
 
 @Repository
 public interface CnmTAllegatoFieldRepository extends CrudRepository<CnmTAllegatoField, Integer> {
@@ -22,6 +24,15 @@ public interface CnmTAllegatoFieldRepository extends CrudRepository<CnmTAllegato
 	@Query("Select af from CnmROrdinanzaVerbSog o join o.cnmRAllegatoOrdVerbSogs rao join rao.cnmTAllegato a join a.cnmTAllegatoFields af join af.cnmCField cf where o.idOrdinanzaVerbSog = ?1 and cf.idField = 15 ")
 	List<CnmTAllegatoField> findByIdOrdinanzaVerbSog(Integer idOrdinanzaVerbSog);
 
+	@Query(value = "Select SUM(af.valore_number) from cnm_t_allegato_field af, cnm_t_allegato a, cnm_r_allegato_verbale av where "
+			+ "af.id_allegato = a.id_allegato and "
+			+ "a.id_allegato = av.id_allegato and "
+			+ "av.id_verbale = ?1 and "
+			+ "a.id_tipo_allegato = 7 and "
+			+ "af.id_field = 8 ", nativeQuery = true)
+	BigDecimal getImportoPagatoByIdVerbale(Integer idVerbale);
+
+	
 	/*
 	 * RICERCA RISCOSSIONE -> RISCOSSIONE COATTIVA
 	 */

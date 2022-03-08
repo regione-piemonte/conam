@@ -18,6 +18,9 @@ public class ResponseArchiviaDocumento  implements java.io.Serializable {
     // 20201120_LC
     private java.lang.String objectIdDocumento;
 
+    // 20210804_PP
+    private java.lang.String idFolder;
+    
     public ResponseArchiviaDocumento() {
     }
 
@@ -71,7 +74,18 @@ public class ResponseArchiviaDocumento  implements java.io.Serializable {
     
     
     
-    private java.lang.Object __equalsCalc = null;
+    public java.lang.String getIdFolder() {
+		return idFolder;
+	}
+
+	public void setIdFolder(java.lang.String idFolder) {
+		this.idFolder = idFolder;
+	}
+
+
+
+
+	private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof ResponseArchiviaDocumento)) return false;
         ResponseArchiviaDocumento other = (ResponseArchiviaDocumento) obj;

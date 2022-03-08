@@ -43,7 +43,9 @@ public enum TipoAllegato {
 	LETTERA_SOLLECITO_RATE(36, "LETSOLRAT", false), //
 	BOLLETTINI_ORDINANZA_SOLLECITO_RATE(37, "BOLSOLRAT", false), //
 	ISTANZA_ALLEGATO(38, "ISTALL", false),
-	ORDINANZA_ACCONTO(39, "ORDACC", false);
+	ORDINANZA_ACCONTO(39, "ORDACC", false),
+
+	COMUNICAZIONI_VARIE(40, "COMVARIE", true);
 
 	private final long id;
 	private final String tipoDocumento;

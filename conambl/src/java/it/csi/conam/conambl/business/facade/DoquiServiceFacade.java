@@ -46,7 +46,7 @@ public interface DoquiServiceFacade {
 			String soggettoActa, String rootActa, long tipoDocumento, String tipoDocActa, List<CnmTSoggetto> cnmTSoggettoList, String idDocumentoActa);
 
 	
-	ResponseArchiviaDocumento archiviaDocumentoFisico(byte[] file, String nomeFile, String folder, String rootActa, int numeroAllegati, String idEntitaFruitore, long tipoDocumento, boolean isMaster);
+	ResponseArchiviaDocumento archiviaDocumentoFisico(byte[] file, String nomeFile, String folder, String rootActa, int numeroAllegati, String idEntitaFruitore, long tipoDocumento, boolean isMaster, String idIndex, String soggettoActa);
 	
 	List<DocumentoProtocollatoVO> ricercaProtocolloSuACTA(String numProtocollo);
 

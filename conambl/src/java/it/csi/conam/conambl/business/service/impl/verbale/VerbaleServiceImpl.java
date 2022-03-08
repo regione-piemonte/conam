@@ -4,23 +4,80 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.verbale;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.Table;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+
 import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.util.UtilsTraceCsiLogAuditService;
-import it.csi.conam.conambl.business.service.verbale.*;
+import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.SoggettoVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.StoricizzazioneVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.UtilsVerbale;
+import it.csi.conam.conambl.business.service.verbale.VerbaleService;
 import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmDArticolo;
+import it.csi.conam.conambl.integration.entity.CnmDComma;
+import it.csi.conam.conambl.integration.entity.CnmDComune;
+import it.csi.conam.conambl.integration.entity.CnmDEnte;
+import it.csi.conam.conambl.integration.entity.CnmDLettera;
+import it.csi.conam.conambl.integration.entity.CnmDMessaggio;
+import it.csi.conam.conambl.integration.entity.CnmDStatoManuale;
+import it.csi.conam.conambl.integration.entity.CnmDStatoPregresso;
+import it.csi.conam.conambl.integration.entity.CnmDStatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdVerbSogPK;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdinanzaPK;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmREnteNorma;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleIllecito;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.entity.CsiLogAudit.TraceOperation;
 import it.csi.conam.conambl.integration.mapper.entity.EnteEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.VerbaleEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.VerbaleSoggettoEntityMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmDComuneRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDLetteraRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoManualeRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoPregressoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoVerbaleRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbaleRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleIllecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTVerbaleRepository;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.leggi.EnteVO;
@@ -31,17 +88,6 @@ import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVORaggruppatoPerSoggetto;
 import it.csi.conam.conambl.vo.verbale.VerbaleVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.RiepilogoAllegatoVO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.Table;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author riccardo.bova
@@ -107,6 +153,9 @@ public class VerbaleServiceImpl implements VerbaleService {
 
 	@Autowired
 	private VerbaleSoggettoEntityMapper verbaleSoggettoEntityMapper;
+
+	@Autowired
+	private CnmDComuneRepository cnmDComuneRepository;
 	
 	@Override
 	@Transactional
@@ -117,6 +166,14 @@ public class VerbaleServiceImpl implements VerbaleService {
 		if (verbale.getEnteAccertatore() != null && !SecurityUtils.isEnteValido(verbale.getEnteAccertatore().getId()))
 			throw new SecurityException("L'utente non puo accedere a questo servizio: l'id ente non e valido");
 
+		//20210911 PP - verifica validità comuneEnte
+		if(verbale.getComuneEnte() != null && verbale.getComuneEnte().getId() != null) {
+	
+			CnmDComune comuneS = cnmDComuneRepository.findByidComuneAndData(verbale.getComuneEnte().getId(), utilsDate.asDate(verbale.getDataOraAccertamento()));
+			if(comuneS == null) {
+				throw new BusinessException(ErrorCode.ERRORE_COMUNE_ENTE);
+			}
+		}
 		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
 		CnmTVerbale cnmTVerbale;
@@ -156,7 +213,8 @@ public class VerbaleServiceImpl implements VerbaleService {
 			if (cnmTVerbale == null || !cnmTVerbale.getNumVerbale().equals(verbale.getNumero().toUpperCase())) {
 				throw new BusinessException(ErrorCode.MODIFICA_VERBALE_NUMERO);
 			}
-			if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO)
+			if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+					&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
 				throw new SecurityException("Verbale non modificabile");
 
 			cnmTVerbale = verbaleEntityMapper.mapVOtoEntityUpdate(verbale, cnmTVerbale);
@@ -223,7 +281,8 @@ public class VerbaleServiceImpl implements VerbaleService {
 	public void eliminaVerbale(Integer id, UserDetails userDetails) {
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
 
-		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO)
+		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
 			throw new SecurityException("Il verbale non e in stato incompleto ");
 
 		if (!SecurityUtils.isEnteValido(cnmTVerbale.getCnmDEnte().getIdEnte()))
@@ -248,7 +307,8 @@ public class VerbaleServiceImpl implements VerbaleService {
 		if (cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser() && includiControlloUtenteProprietario)
 			throw new RuntimeException("l'utente non puo accedere a questo verbale");
 
-		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO && !includeEliminati)
+		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO && !includeEliminati)
 			throw new SecurityException("il verbale non e nello stato corretto per essere visualizzato");
 
 		// se il verbale e' pregresso, prendo anche i riferimenti normativi scaduti
@@ -446,7 +506,39 @@ public class VerbaleServiceImpl implements VerbaleService {
 		CnmTVerbale verbale = cnmTVerbaleRepository.findOne(idVerbale);
 		if (verbale != null) {
 			CnmDStatoManuale statoManuale = cnmDStatoManualeRepository.findOne(idStatoManuale);
-			verbale.setStatoManuale(statoManuale);
+			verbale.setCnmDStatoManuale(statoManuale);
+			verbale = cnmTVerbaleRepository.save(verbale);
+		}
+		return verbale;
+	}
+
+
+	@Override
+	@Transactional
+	public CnmTVerbale salvaNumeroProtocollo(Integer idVerbale,String numeroProtocollo, CnmTUser cnmTUser) {
+		CnmTVerbale verbale = cnmTVerbaleRepository.findOne(idVerbale);
+		CnmDStatoVerbale cnmDStatoVerbaleNext = null;
+		if(verbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ACQUISIZIONE) {
+			cnmDStatoVerbaleNext = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO);
+		} else if(verbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ACQUISIZIONE_CON_PAGAMENTO) {
+			cnmDStatoVerbaleNext = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
+		} else if(verbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ACQUISIZIONE_CON_SCRITTI_DIFENSIVI) {
+			cnmDStatoVerbaleNext = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI);
+		} else if(verbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_IN_ARCHIVIATO_IN_AUTOTUTELA) {
+			cnmDStatoVerbaleNext = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ARCHIVIATO_IN_AUTOTUTELA);
+		} else if(verbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_PROTOCOLLAZIONE_IN_ATTESA_VERIFICA_PAGAMENTO) {
+			cnmDStatoVerbaleNext = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO);
+		} else if(verbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_PROTOCOLLAZIONE_PER_MANCANZA_CF) {
+			cnmDStatoVerbaleNext = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO);
+		}  
+		
+		if (verbale != null && cnmDStatoVerbaleNext!= null) {
+			Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
+			verbale.setCnmDStatoVerbale(cnmDStatoVerbaleNext);
+			verbale.setNumeroProtocollo(numeroProtocollo);
+			verbale.setDataOraProtocollo(now);
+			verbale.setDataOraUpdate(now);
+			verbale.setCnmTUser1(cnmTUser);
 			verbale = cnmTVerbaleRepository.save(verbale);
 		}
 		return verbale;
@@ -472,12 +564,12 @@ public class VerbaleServiceImpl implements VerbaleService {
 
 	public MessageVO getMessaggioManualeByIdOrdinanza(Integer idOrdinanza) {
 		CnmTVerbale verbale = getVerbaleByIdOrdinanzaPrivate(idOrdinanza);
-		return getMessaggioStatoManuale(verbale.getStatoManuale());
+		return getMessaggioStatoManuale(verbale.getCnmDStatoManuale());
 	}
 	
 	public MessageVO getMessaggioManualeByIdVerbale(Integer idVerbale) {
 		CnmTVerbale verbale = cnmTVerbaleRepository.findOne(idVerbale);
-		return getMessaggioStatoManuale(verbale.getStatoManuale());
+		return getMessaggioStatoManuale(verbale.getCnmDStatoManuale());
 	}
 
 	
@@ -486,7 +578,7 @@ public class VerbaleServiceImpl implements VerbaleService {
 		CnmROrdinanzaVerbSog ordinanzaVerbaleSoggetto = cnmROrdinanzaVerbSogRepository.findOne(IdOrdinanzaVerbaleSoggetto);
 		if (ordinanzaVerbaleSoggetto == null) throw new IllegalArgumentException("Verbale non trovato");
 		CnmTVerbale verbale = ordinanzaVerbaleSoggetto.getCnmRVerbaleSoggetto().getCnmTVerbale();
-		return getMessaggioStatoManuale(verbale.getStatoManuale());
+		return getMessaggioStatoManuale(verbale.getCnmDStatoManuale());
 	}	
 	//FINE - Gestione Stato manuale
 

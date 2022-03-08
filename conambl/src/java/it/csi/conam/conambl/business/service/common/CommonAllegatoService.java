@@ -31,6 +31,8 @@ public interface CommonAllegatoService {
 	List<ConfigAllegatoVO> getConfigAllegati();
 
 	List<SelectVO> getDecodificaSelectAllegato(Long decodificaSelect);
+	
+	List<SelectVO> getDecodificaSelectSoggettiAllegato(Integer idVerbale);
 
 	ResponseProtocollaDocumento avviaProtocollazione(List<CnmRAllegatoVerbale> cnmRAllegatoVerbaleList, CnmTUser cnmTUser);		// 20200706_LC aggiunto user
 

@@ -8,6 +8,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
+import it.csi.conam.conambl.business.service.messaggio.MessaggioService;
 import it.csi.conam.conambl.business.service.notifica.NotificaService;
 import it.csi.conam.conambl.business.service.ordinanza.OrdinanzaService;
 import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
@@ -104,10 +105,11 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 	private CnmDStatoRataRepository cnmDStatoRataRepository;
 	@Autowired
 	private CnmDStatoPianoRateRepository cnmDStatoPianoRateRepository;
+	/*@Autowired
+	private CnmTSoggettoRepository cnmTSoggettoRepository;*/
 
 	@Autowired
 	private CnmROrdinanzaFiglioRepository cnmROrdinanzaFiglioRepository;
-
 
 	@Override
 	public void testIfOrdinanzaPagata(Integer idOrdinanza, UserDetails userDetails) {
@@ -116,16 +118,16 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 
 	@Override
 	@Transactional
-	public void testIfOrdinanzaPagata(CnmTOrdinanza ordinanza, UserDetails userDetails) {
+	public void testIfOrdinanzaPagata(CnmTOrdinanza cnmTOrdinanza, UserDetails userDetails) {
 		Double importoPagato = 0D;
-		for (CnmTAcconto acconto: ordinanza.getCnmTAccontos())
+		for (CnmTAcconto acconto: cnmTOrdinanza.getCnmTAccontos())
 			importoPagato = importoPagato + acconto.getImporto().doubleValue();
 		
 		// 20210707_LC Jira 150: importo totale da pagare compreso di spese notifica
-		OrdinanzaVO ordinanzaVO = ordinanzaEntityMapper.mapEntityToFullVO(ordinanza);
+		OrdinanzaVO ordinanzaVO = ordinanzaEntityMapper.mapEntityToFullVO(cnmTOrdinanza);
 		if (importoPagato >= ordinanzaVO.getImportoTotaleDaPagare().doubleValue())
-			ordinanza.setCnmDStatoOrdinanza(cnmDStatoOrdinanzaRepository.findOne(Constants.ID_STATO_ORDINANZA_PAGATA));
-		cnmTOrdinanzaRepository.save(ordinanza);
+			cnmTOrdinanza.setCnmDStatoOrdinanza(cnmDStatoOrdinanzaRepository.findOne(Constants.ID_STATO_ORDINANZA_PAGATA));
+		cnmTOrdinanzaRepository.save(cnmTOrdinanza);
 	}
 
 	//ID_STATO_ORDINANZA_PAGATA
@@ -193,6 +195,11 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		if (cnmRVerbaleSoggettoList == null || cnmRVerbaleSoggettoList.isEmpty())
 			throw new IllegalArgumentException("soggetti non trovati");
 
+		/*---------2021-12-15 - LUCIO ROSADINI - CONTROLLO CODICE FISCALE---------*/
+		if (idTipoAllegato.equals(TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO.getId())) {
+			utilsOrdinanza.isCFValid(cnmRVerbaleSoggettoList);
+		}
+
 		CnmTVerbale cnmTVerbale = cnmRVerbaleSoggettoList.get(0).getCnmTVerbale();
 
 		List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggettoIn(cnmRVerbaleSoggettoList);
@@ -234,8 +241,24 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		cnmTOrdinanza = cnmTOrdinanzaRepository.save(cnmTOrdinanza);
 
 		// salvo allegato
-		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO,
-				null, null, false, false, null, null, 0, null, null, null);
+		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(
+			byteFile,
+			fileName,
+			idTipoAllegato,
+			configAllegato,
+			cnmTUser,
+			TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO,
+			null,
+			null,
+			false,
+			false,
+			null,
+			null,
+			0,
+			null,
+			null,
+			null
+		);
 
 		// salvo relazione allegato ordinanza
 		CnmRAllegatoOrdinanza cnmRAllegatoOrdinanza = new CnmRAllegatoOrdinanza();
@@ -284,6 +307,7 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 
 		return cnmTOrdinanza.getIdOrdinanza();
 	}
+
 
 	@Override
 	public DatiSentenzaResponse getDatiSentenzaByIdOrdinanzaVerbaleSoggetto(Integer idOrdinanzaVerbaleSoggetto) {
@@ -378,11 +402,16 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		if (cnmRVerbaleSoggettoList == null || cnmRVerbaleSoggettoList.isEmpty())
 			throw new IllegalArgumentException("soggetti non trovati");
 
+		/*---------2021-12-15 - LUCIO ROSADINI - CONTROLLO CODICE FISCALE---------*/
+		if (idTipoAllegato.equals(TipoAllegato.ORDINANZA_ANNULLAMENTO_INGIUNZIONE.getId())) {
+			utilsOrdinanza.isCFValid(cnmRVerbaleSoggettoList);
+		}
+
 		@SuppressWarnings("unused")
 		CnmTVerbale cnmTVerbale = cnmRVerbaleSoggettoList.get(0).getCnmTVerbale();
 
 		List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggettoIn(cnmRVerbaleSoggettoList);
-		// controllo invertito rispetto al caso standard, questi soggetti devono già avere un'ordinanza 
+		// controllo invertito rispetto al caso standard, questi soggetti devono già avere un'ordinanza
 		if (cnmROrdinanzaVerbSogList == null || cnmROrdinanzaVerbSogList.isEmpty())
 			throw new SecurityException("nessuna ordinanza trovata per i soggetti in input");
 
@@ -497,7 +526,7 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 					pagamentiDaEstinguere = true;
 				}
 							
-				// aggiorna stato ordinanza annullata				
+				// aggiorna stato ordinanza annullata
 				cnmROrdinanzaVerbSogToUpdate.setCnmDStatoOrdVerbSog(cnmDStatoOrdVerbSogRepository.findOne(idTipoOrdinanzaSoggettoDefault));
 				
 				if (pagamentiDaEstinguere) {

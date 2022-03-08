@@ -1491,4 +1491,71 @@ public class AcarisObjectServiceImpl extends CommonManagementServiceImpl impleme
 	}
 
 	
+	// 20211019_LC Jira CONAM-152	-	numero allegati effettivo
+	public Integer getNumeroAllegatiPresenti(ObjectIdType repositoryId, PrincipalIdType principalId, String objectIdClassificazione) throws IntegrationException {
+		String method = "getNumeroAllegatiPresenti";
+		StopWatch stopWatch = new StopWatch(DoquiConstants.APPLICATION_CODE);
+		stopWatch.start();
+		
+		//String propertyName1 = "dbKeyClassificazionePrincipale";
+		String propertyName1 = "objectIdClassificazionePrincipale";
+		String propertyName2 = "stato";
+		PagingResponseType response = null;
+		Integer numAllegatiPresenti = null;
+		
+		QueryableObjectType target = new QueryableObjectType();
+		target.setObject("ElencoAllegatiAClassificazionePrincipaleView");
+
+
+		PropertyFilterType filter = new PropertyFilterType();
+		filter.setFilterType(EnumPropertyFilter.ALL);
+		
+		QueryConditionType condition1 = new QueryConditionType();
+		condition1.setOperator(EnumQueryOperator.EQUALS);
+		condition1.setPropertyName(propertyName1);
+		condition1.setValue(objectIdClassificazione);	
+		log.debug(method + ". condition dbKeyClassificazionePrincipale: " + objectIdClassificazione);
+
+		QueryConditionType condition2 = new QueryConditionType();
+		condition2.setOperator(EnumQueryOperator.EQUALS);
+		condition2.setPropertyName(propertyName2);
+		condition2.setValue("2");	
+		log.debug(method + ". condition dbKeyClassificazionePrincipale: " + "2");
+		
+		QueryConditionType []conditions = {condition1, condition2};
+
+		try {
+			// Chiamate tramite WSDL
+			response = acarisServiceFactory.getAcarisService().getObjectServicePort().query(repositoryId, principalId, target, filter, conditions, null, null, null);
+			
+			if(response == null)
+				throw new IntegrationException("Impossibile recuperare numero allegati presenti: response is null");
+
+			numAllegatiPresenti = response.getObjectsLength();
+			
+			log.debug(method + ". numero allegati presenti == " + numAllegatiPresenti);
+
+		}
+		catch (AcarisException acEx){
+			log.error(method + ". Si e' verificato un errore in fase di recupero numero allegati presenti " + acEx.getMessage());
+			if(acEx.getFaultInfo() != null) {
+				log.error(method + ". acEx.getFaultInfo().getErrorCode()     =  " + acEx.getFaultInfo().getErrorCode());
+				log.error(method + ". acEx.getFaultInfo().getPropertyName()  = " + acEx.getFaultInfo().getPropertyName());
+				log.error(method + ". acEx.getFaultInfo().getObjectId()      = " + acEx.getFaultInfo().getObjectId());
+				log.error(method + ". acEx.getFaultInfo().getExceptionType() = " + acEx.getFaultInfo().getExceptionType());
+				log.error(method + ". acEx.getFaultInfo().getClassName()     = " + acEx.getFaultInfo().getClassName());
+				log.error(method + ". acEx.getFaultInfo().getTechnicalInfo() = " + acEx.getFaultInfo().getTechnicalInfo());	
+			}
+			throw new IntegrationException("Impossibile recuperare numero allegati presenti: " + acEx.getMessage(), acEx);
+		}
+		catch (Exception e) {
+			log.error(method + ". Exception: " + e.getMessage());
+			throw new IntegrationException("Impossibile recuperare numero allegati presenti: " + e.getMessage(), e);
+		}
+		return numAllegatiPresenti;
+
+	}
+	
+	
+	
 }

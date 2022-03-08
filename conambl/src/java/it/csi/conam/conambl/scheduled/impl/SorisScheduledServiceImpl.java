@@ -5,6 +5,7 @@
 package it.csi.conam.conambl.scheduled.impl;
 
 import it.csi.conam.conambl.business.service.ordinanza.OrdinanzaService;
+import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
 import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.integration.entity.*;
@@ -62,7 +63,9 @@ public class SorisScheduledServiceImpl implements SorisScheduledService {
 	private CnmRSollecitoSoggRataRepository cnmRSollecitoSoggRataRepository;*/
 	@Autowired
 	private CnmDTipoSollecitoRepository cnmDTipoSollecitoRepository;
-	
+
+	@Autowired
+	private UtilsOrdinanza utilsOrdinanza;
 
 	@Override
 	public void elaboraStatoDellaRiscossione() {

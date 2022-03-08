@@ -33,4 +33,15 @@ public class IntegrationException extends Exception
     {
         this.itsOriginalException.printStackTrace();
     }
+
+	public Exception getItsOriginalException() {
+		return itsOriginalException;
+	}
+
+	public void setItsOriginalException(Exception itsOriginalException) {
+		this.itsOriginalException = itsOriginalException;
+	}
+    
+    
+    
 }

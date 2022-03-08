@@ -31,5 +31,6 @@ public interface SoggettoDispatcher {
 
 	@PreAuthorize(value = AuthorizationRoles.CREAZIONE_VERBALE_SOGGETTI)
 	SoggettoVO getSoggettoByIdAndIdVerbale(Integer id, Integer idVerbale, UserDetails utente);
+	
 
 }

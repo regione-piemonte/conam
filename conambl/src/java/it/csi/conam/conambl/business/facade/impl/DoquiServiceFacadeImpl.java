@@ -72,7 +72,7 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 	// 20200706_LC
 	@Autowired
 	private ManageSpostaDocumentoHelper manageSpostaDocumentoHelper;
-	
+		
 //	private StadocStadocSoapBindingStub binding;
 
 	public static final String TOPOLOGIA_SOGGETTO_MITTENTE = "MITTENTE";
@@ -257,6 +257,21 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		} else {
 			request.setParolaChiaveFolderTemp(null);	
 		}
+
+		
+		
+        // 20211014_LC Jira CONAM- 140
+        if (tipoDocumento == TipoAllegato.CONVOCAZIONE_AUDIZIONE.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_ORDINANZA.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_RATEIZZAZIONE.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_SOLLECITO.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_SOLLECITO_RATE.getId()
+        		||tipoDocumento == TipoAllegato.VERBALE_AUDIZIONE.getId()
+        		||tipoDocumento == TipoAllegato.COMUNICAZIONI_ALLA_CANCELLERIA.getId()
+        		||tipoDocumento == TipoAllegato.COMPARSA.getId()) {
+        	request.setDataTopica(DoquiConstants.LUOGO);
+        	request.setDataCronica(new Date()); // 
+        }
 
 		
 		
@@ -705,12 +720,27 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
             soggetto.setCognome("CONAM");
             soggetto.setNome("CONAM");
             request.setSoggetto(soggetto);
-            request.setDataTopica(DoquiConstants.LUOGO);
-            request.setDataCronica(dataCronica);
+            // 20211014_LC da lasciare NULL sulle ordinanza (valorizzare sulle rispettive lettere)
+//            request.setDataTopica(DoquiConstants.LUOGO);
+//            request.setDataCronica(dataCronica);
         }else {
             //JIRA - gestione metadati
             //--------------------------------------------------------------------------
             request.setCollocazioneCartacea(DoquiConstants.COLLOCAZIONE_CARTACEA);
+        }
+        
+        
+        // 20211014_LC Jira CONAM- 140
+        if (tipoDocumento == TipoAllegato.CONVOCAZIONE_AUDIZIONE.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_ORDINANZA.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_RATEIZZAZIONE.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_SOLLECITO.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_SOLLECITO_RATE.getId()
+        		||tipoDocumento == TipoAllegato.VERBALE_AUDIZIONE.getId()
+        		||tipoDocumento == TipoAllegato.COMUNICAZIONI_ALLA_CANCELLERIA.getId()
+        		||tipoDocumento == TipoAllegato.COMPARSA.getId()) {
+        	request.setDataTopica(DoquiConstants.LUOGO);
+        	request.setDataCronica(new Date()); // 
         }
 
 
@@ -759,10 +789,11 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 	}
 
 	@Override
-	public ResponseArchiviaDocumento archiviaDocumentoFisico(byte[] document, String nomeFile, String folder, String rootActa, int numeroAllegati, String idEntitaFruitore, long tipoDocumento, boolean isMaster) {
+	public ResponseArchiviaDocumento archiviaDocumentoFisico(byte[] document, String nomeFile, String folder, String rootActa, int numeroAllegati, String idEntitaFruitore, long tipoDocumento, boolean isMaster
+			, String idIndex, String soggettoActa) {
 		if (folder == null)
 			throw new IllegalArgumentException("folder non valido");
-		if (document == null)
+		if (document == null && StringUtils.isBlank(idIndex))
 			throw new IllegalArgumentException("document non valido");
 		if (nomeFile == null)
 			throw new IllegalArgumentException("nomeFile non valido");
@@ -770,6 +801,18 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 			throw new IllegalArgumentException("rootActa non valida");
 		if (tipoDocumento == 0)
 			throw new IllegalArgumentException("tipoDocumento non valido");
+		
+		// 20210804 PP - recupero doc da index
+		if(document == null) {
+			RequestRicercaAllegato requestRicercaAllegato = new RequestRicercaAllegato();
+			requestRicercaAllegato.setIdDocumento(idIndex); 
+			requestRicercaAllegato.setCodiceFruitore(DoquiConstants.CODICE_FRUITORE);
+			try {
+				document = manageDocumentoHelper.ricercaAllegato(requestRicercaAllegato).getDocumento().getFile();
+			} catch (RicercaAllegatoException e) {
+				throw new IllegalArgumentException("index document non valido");
+			}
+		}
 
 		// 20200708 PP - se il doc e .p7m, oppure se risulta firmato digitalmente
 		boolean isDocSigned = DocumentUtils.isDocumentSigned(document, nomeFile);
@@ -821,7 +864,7 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		Documento doc = new Documento();
 		doc.setFile(document);
 		doc.setNomeFile(nomeFile);
-		doc.setNumeroAllegati(numeroAllegati);
+		doc.setNumeroAllegati(MAX_NUMERO_ALLEGATI);
 		request.setDocumento(doc);
 		
 		// 20200731_LC 
@@ -831,11 +874,25 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		//--------------------------------------------------------------------------
 		request.setCollocazioneCartacea(DoquiConstants.COLLOCAZIONE_CARTACEA);
 
+		
+        // 20211014_LC Jira CONAM- 140
+        if (tipoDocumento == TipoAllegato.CONVOCAZIONE_AUDIZIONE.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_ORDINANZA.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_RATEIZZAZIONE.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_SOLLECITO.getId()
+        		||tipoDocumento == TipoAllegato.LETTERA_SOLLECITO_RATE.getId()
+        		||tipoDocumento == TipoAllegato.VERBALE_AUDIZIONE.getId()
+        		||tipoDocumento == TipoAllegato.COMUNICAZIONI_ALLA_CANCELLERIA.getId()
+        		||tipoDocumento == TipoAllegato.COMPARSA.getId()) {
+        	request.setDataTopica(DoquiConstants.LUOGO);
+        	request.setDataCronica(new Date()); // 
+        }
+
 
 		logger.info("[archiviaDocumentoFisico] -> " + "tipoDocumento :: " + tipoDocumento + " - REQUEST :: " + request);
 
 		try {
-			respose = manageArchiviaDocumentoHelper.archiviaDocumentoFisico(request);
+			respose = manageArchiviaDocumentoHelper.archiviaDocumentoFisico(request, soggettoActa);
 		} catch (ArchiviaDocumentoException e) {
 			logger.error("ArchiviaDocumento Exception:", e);
 			throw new RemoteWebServiceException(ErrorCode.DOQUI_SALVA_DOCUMENTO_NON_DISPONIBILE);
@@ -856,7 +913,12 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 			return manageRicercaDocumentoHelper.ricercaDocumentoProtocollato(numProtocollo, DoquiConstants.CODICE_FRUITORE);
 		} catch (RicercaDocumentoException e) {
 			logger.error("RicercaDocumento Exception:", e);
-			throw new RemoteWebServiceException(ErrorCode.DOQUI_RECUPERA_DOCUMENTO_NON_DISPONIBILE);
+			if(e.getNestedExcClassName().equalsIgnoreCase("RicercaDocumentoNoDocElettronicoException")) {
+				throw new RemoteWebServiceException(ErrorCode.DOQUI_RECUPERA_DOCUMENTO_NO_DOC_ELETTRONICO);
+			}
+			else {
+				throw new RemoteWebServiceException(ErrorCode.DOQUI_RECUPERA_DOCUMENTO_NON_DISPONIBILE);
+			}
 		} catch (Exception e) {
 			logger.error("Exception:", e);
 			throw new RemoteWebServiceException(ErrorCode.DOQUI_RECUPERA_DOCUMENTO_NON_DISPONIBILE);

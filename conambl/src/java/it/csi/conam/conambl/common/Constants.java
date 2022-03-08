@@ -49,6 +49,14 @@ public abstract class Constants {
 
 	// STATO VERBALE
 	public static final long STATO_VERBALE_INCOMPLETO = 1;
+	
+	public static final long STATO_VERBALE_IN_ACQUISIZIONE = 12;
+	public static final long STATO_VERBALE_IN_ACQUISIZIONE_CON_PAGAMENTO = 13;
+	public static final long STATO_VERBALE_IN_ACQUISIZIONE_CON_SCRITTI_DIFENSIVI = 14;
+	public static final long STATO_VERBALE_IN_ARCHIVIATO_IN_AUTOTUTELA = 15;
+	public static final long STATO_VERBALE_PROTOCOLLAZIONE_IN_ATTESA_VERIFICA_PAGAMENTO = 18;
+	public static final long STATO_VERBALE_PROTOCOLLAZIONE_PER_MANCANZA_CF = 19;
+	
 	public static final long STATO_VERBALE_ACQUISITO = 2;
 	public static final long STATO_VERBALE_ACQUISITO_CON_PAGAMENTO = 3;
 	public static final long STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI = 4;
@@ -56,6 +64,9 @@ public abstract class Constants {
 	public static final long STATO_VERBALE_ELIMINATO = 6;
 	public static final long STATO_VERBALE_ORDINANZA = 7;
 	public static final long STATO_VERBALE_FINE_PREGRESSO = 8;
+	
+	public static final long STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO = 16;
+	public static final long STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO = 17;
 	
 //	public static final String STATO_VERBALE_FINE_PREGRESSO_DESC = "Recupero pregresso terminato";
 
@@ -66,10 +77,15 @@ public abstract class Constants {
 	public static final long FIELD_TYPE_BOOLEAN = 4;
 	public static final long FIELD_TYPE_ELENCO = 5;
 	public static final long FIELD_TYPE_DATA_ORA = 6;
+	public static final long FIELD_TYPE_ELENCO_SOGGETTI = 7;
 
 	// ID FIELD CNM_C_FIELD
+	public static final long ID_FIELD_NUMERO_RACC_NOTIFICA = 1;
+	public static final long ID_FIELD_DATA_SPEDIZIONE_NOTIFICA = 2;
 	public static final long ID_FIELD_DATA_NOTIFICA = 3;
 	public static final long ID_FIELD_SPESE_NOTIFICA = 4;
+	public static final long ID_FIELD_MODALITA_NOTIFICA = 5;
+	public static final long ID_FIELD_NOTIFICATA_NOTIFICA = 6;
 	public static final long ID_FIELD_ESITO_SENTENZA = 12;
 	public static final long ID_FIELD_DATA_SENTENZA = 13;
 	public static final long ID_FIELD_DATA_PAGAMENTO_RICEVUTA_ORDINANZA = 16;

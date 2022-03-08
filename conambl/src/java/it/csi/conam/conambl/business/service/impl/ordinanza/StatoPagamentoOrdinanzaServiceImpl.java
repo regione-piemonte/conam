@@ -8,6 +8,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import it.csi.conam.conambl.business.service.ordinanza.OrdinanzaService;
 import it.csi.conam.conambl.business.service.ordinanza.StatoPagamentoOrdinanzaService;
+import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.integration.entity.*;
@@ -59,6 +60,10 @@ public class StatoPagamentoOrdinanzaServiceImpl implements StatoPagamentoOrdinan
 
 	@Autowired
 	private UtilsDate utilsDate;
+
+
+	@Autowired
+	private UtilsOrdinanza utilsOrdinanza;
 
 	@Override
 	@Transactional

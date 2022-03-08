@@ -43,6 +43,10 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 
 	// 20200731_LC
     private java.lang.String collocazioneCartacea;
+
+	// 20211014
+	private java.lang.String dataTopica;
+	private java.util.Date dataCronica;
     
     
 
@@ -52,7 +56,7 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 	public RequestArchiviaDocumentoFisico(java.lang.String applicativoAlimentante, java.lang.String autoreFisico, java.lang.String autoreGiuridico, java.lang.String codiceFruitore,
 			java.lang.String destinatarioFisico, java.lang.String destinatarioGiuridico, it.csi.conam.conambl.integration.beans.Documento documento, java.lang.String folder,
 			it.csi.conam.conambl.integration.beans.Metadati metadati, java.lang.String mimeType, java.lang.String originatore, java.lang.String rootFolder,
-			it.csi.conam.conambl.integration.beans.Soggetto soggetto, java.lang.String tipoDocumento, java.lang.String collocazioneCartacea) {
+			it.csi.conam.conambl.integration.beans.Soggetto soggetto, java.lang.String tipoDocumento, java.lang.String collocazioneCartacea, java.lang.String dataTopica, java.util.Date dataCronica) {
 		this.applicativoAlimentante = applicativoAlimentante;
 		this.autoreFisico = autoreFisico;
 		this.autoreGiuridico = autoreGiuridico;
@@ -68,8 +72,50 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 		this.soggetto = soggetto;
 		this.tipoDocumento = tipoDocumento;
         this.collocazioneCartacea = collocazioneCartacea;
+		this.dataTopica = dataTopica;
+		this.dataCronica = dataCronica;
+	}
+	
+	
+	/**
+	 * Gets the dataTopica value for this RequestProtocollaDocumentoFisico.
+	 * 
+	 * @return dataTopica
+	 */
+	public java.lang.String getDataTopica() {
+		return dataTopica;
 	}
 
+	/**
+	 * Sets the dataTopica value for this RequestProtocollaDocumentoFisico.
+	 * 
+	 * @param dataTopica
+	 */
+	public void setDataTopica(java.lang.String dataTopica) {
+		this.dataTopica = dataTopica;
+	}
+
+	
+	
+	/**
+	 * Gets the dataCronica value for this RequestProtocollaDocumentoFisico.
+	 * 
+	 * @return dataCronica
+	 */
+	public java.util.Date getDataCronica() {
+		return dataCronica;
+	}
+
+	/**
+	 * Sets the dataCronica value for this RequestProtocollaDocumentoFisico.
+	 * 
+	 * @param dataCronica
+	 */
+	public void setDataCronica(java.util.Date dataCronica) {
+		this.dataCronica = dataCronica;
+	}
+	
+	
 	/**
 	 * Gets the applicativoAlimentante value for this
 	 * RequestArchiviaDocumentoFisico.
@@ -544,6 +590,18 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
         elemField.setXmlType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "string"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
+		elemField = new org.apache.axis.description.ElementDesc();
+		elemField.setFieldName("dataTopica");
+		elemField.setXmlName(new javax.xml.namespace.QName("", "tipoDocumento"));
+		elemField.setXmlType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "string"));
+		elemField.setNillable(true);
+		typeDesc.addFieldDesc(elemField);
+		elemField = new org.apache.axis.description.ElementDesc();
+		elemField.setFieldName("dataCronica");
+		elemField.setXmlName(new javax.xml.namespace.QName("", "tipoDocumento"));
+		elemField.setXmlType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "date"));
+		elemField.setNillable(true);
+		typeDesc.addFieldDesc(elemField);
 	}
 
 	/**
@@ -571,7 +629,7 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 	public String toString() {
 		return "RequestArchiviaDocumentoFisico [applicativoAlimentante=" + applicativoAlimentante + ", autoreFisico=" + autoreFisico + ", autoreGiuridico=" + autoreGiuridico + ", codiceFruitore="
 				+ codiceFruitore + ", destinatarioFisico=" + destinatarioFisico + ", destinatarioGiuridico=" + destinatarioGiuridico + ", documento=" + documento + ", folder=" + folder + ", metadati="
-				+ metadati + ", mimeType=" + mimeType + ", originatore=" + originatore + ", rootFolder=" + rootFolder + ", soggetto=" + soggetto + ", tipoDocumento=" + tipoDocumento + "]";
+				+ metadati + ", mimeType=" + mimeType + ", originatore=" + originatore + ", rootFolder=" + rootFolder + ", soggetto=" + soggetto + ", tipoDocumento=" + tipoDocumento + ", dataTopica="	+ dataTopica + ", dataCronica="	+ dataCronica + "]";
 	}
 
 }

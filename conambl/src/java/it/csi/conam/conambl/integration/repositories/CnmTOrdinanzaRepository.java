@@ -4,15 +4,17 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.repositories;
 
-import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.List;
+import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
 
 @Repository
 public interface CnmTOrdinanzaRepository extends CrudRepository<CnmTOrdinanza, Integer>, JpaSpecificationExecutor<CnmTOrdinanza> {
@@ -24,8 +26,8 @@ public interface CnmTOrdinanzaRepository extends CrudRepository<CnmTOrdinanza, I
 			+ "o.cnmRAllegatoOrdinanzas ao join "//
 			+ "ao.cnmTAllegato a join "//
 			+ "a.cnmDStatoAllegato sa "//
-			+ "where sa.idStatoAllegato=?1")
-	List<CnmTOrdinanza> findCnmTOrdinanzaAndIdStatoAllegato(Long statoAvviaSpostamentoActa, Pageable pageable);
+			+ "where sa.idStatoAllegato=?1 and a.dataOraInsert >= ?2")
+	List<CnmTOrdinanza> findCnmTOrdinanzaAndIdStatoAllegato(Long statoAvviaSpostamentoActa, Timestamp fromDate, Pageable pageable);
 
 	// 20210426_LC lotto2scenario6
 	@Query(" select distinct o from "//
@@ -34,8 +36,8 @@ public interface CnmTOrdinanzaRepository extends CrudRepository<CnmTOrdinanza, I
 			+ "ovs.cnmRAllegatoOrdVerbSogs aovs join "//
 			+ "aovs.cnmTAllegato a join "//
 			+ "a.cnmDStatoAllegato sa "//
-			+ "where sa.idStatoAllegato=?1")
-	List<CnmTOrdinanza> findCnmTOrdinanzaSogAndIdStatoAllegato(Long statoAvviaSpostamentoActa, Pageable pageable);
+			+ "where sa.idStatoAllegato=?1 and a.dataOraInsert >= ?2")
+	List<CnmTOrdinanza> findCnmTOrdinanzaSogAndIdStatoAllegato(Long statoAvviaSpostamentoActa, Timestamp fromDate, Pageable pageable);
 	
 	
 	@Query("select o from CnmTOrdinanza o join o.cnmROrdinanzaVerbSogs ovb where ovb.idOrdinanzaVerbSog=?1")

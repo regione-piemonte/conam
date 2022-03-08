@@ -4,7 +4,21 @@
  ******************************************************************************/
 package it.csi.conam.conambl.scheduled.impl;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.Table;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
 import com.google.common.collect.Iterables;
+
 import it.csi.conam.conambl.business.facade.DoquiServiceFacade;
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
@@ -25,20 +39,15 @@ import it.csi.conam.conambl.integration.entity.CnmTAllegato;
 import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CsiLogAudit.TraceOperation;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.scheduled.AllegatoScheduledService;
 import it.csi.conam.conambl.scheduled.OrdinanzaScheduledService;
 import it.csi.conam.conambl.util.UtilsTipoAllegato;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
-import javax.persistence.Table;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author riccardo.bova
@@ -46,6 +55,8 @@ import java.util.List;
  */
 @Service
 public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService {
+
+	private static final int DAY_BEFORE = 2;
 
 	protected static Logger logger = Logger.getLogger(OrdinanzaScheduledServiceImpl.class);
 
@@ -104,8 +115,13 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 	
 	@SuppressWarnings("static-access")
 	public void sendAllegatiInCodaToActa_Stadoc() {
-		
-		List<CnmTOrdinanza> cnmTOrdinanzas = cnmTOrdinanzaRepository.findCnmTOrdinanzaAndIdStatoAllegato(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA, new PageRequest(0, 1));
+
+		Calendar calendar = Calendar.getInstance();
+	    calendar.setTime(new Date());
+	    calendar.add(Calendar.DAY_OF_WEEK, -DAY_BEFORE);
+	    Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
+	    
+		List<CnmTOrdinanza> cnmTOrdinanzas = cnmTOrdinanzaRepository.findCnmTOrdinanzaAndIdStatoAllegato(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA, timestamp, new PageRequest(0, 1));
 		if (cnmTOrdinanzas.isEmpty())
 			return;
 
@@ -173,8 +189,15 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 	// 20200625_LC
 	public void sendAllegatiInCodaToActa_Doqui() {
 		
-		List<CnmTOrdinanza> cnmTOrdinanzas = cnmTOrdinanzaRepository.findCnmTOrdinanzaAndIdStatoAllegato(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA, new PageRequest(0, 1));
-		List<CnmTOrdinanza> cnmTOrdinanzasSog = cnmTOrdinanzaRepository.findCnmTOrdinanzaSogAndIdStatoAllegato(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA, new PageRequest(0, 1));
+
+		Calendar calendar = Calendar.getInstance();
+	    calendar.setTime(new Date());
+	    calendar.add(Calendar.DAY_OF_WEEK, -DAY_BEFORE);
+	    Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
+	    
+	    
+		List<CnmTOrdinanza> cnmTOrdinanzas = cnmTOrdinanzaRepository.findCnmTOrdinanzaAndIdStatoAllegato(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA, timestamp, new PageRequest(0, 1));
+		List<CnmTOrdinanza> cnmTOrdinanzasSog = cnmTOrdinanzaRepository.findCnmTOrdinanzaSogAndIdStatoAllegato(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA, timestamp, new PageRequest(0, 1));
 		cnmTOrdinanzas.addAll(cnmTOrdinanzasSog);
 		
 		if (cnmTOrdinanzas.isEmpty())
@@ -183,8 +206,6 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 		logger.info("Send allegati Ordinanza To Acta START");
 
 		CnmTOrdinanza cnmTOrdinanza = cnmTOrdinanzas.get(0);
-		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
-		String operationToTrace = null;
 
 		
 		
@@ -200,88 +221,22 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 		cnmTAllegatos.addAll(cnmTAllegatosOrdSog);
 		
 		
-		// due tipi di master
-		CnmTAllegato cnmTAllegatoMaster = Iterables.tryFind(cnmTAllegatos, UtilsTipoAllegato.findCnmTAllegatoInCnmTAllegatosByTipoAllegato(TipoAllegato.LETTERA_ORDINANZA)).orNull();
+		// master 
+		manageLetteraOrdinanza(cnmTAllegatos, cnmTOrdinanza);
+		manageIstanzaRateizzazione(cnmTAllegatos, cnmTOrdinanza);
+		
+
+		
+	}
+
+	
+	private void manageIstanzaRateizzazione(List<CnmTAllegato> cnmTAllegatos, CnmTOrdinanza cnmTOrdinanza) {
+
+
+		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
+		String operationToTrace = null;
+		
 		CnmTAllegato cnmTAllegatoMasterIstanza = Iterables.tryFind(cnmTAllegatos, UtilsTipoAllegato.findCnmTAllegatoInCnmTAllegatosByTipoAllegato(TipoAllegato.ISTANZA_RATEIZZAZIONE)).orNull();
-		
-		
-		
-		
-		
-		
-		
-		
-		// GESTIONE ORDINANZE (11,12,34,35): se è presente la lettera già protocollata, allora bisogna spostare in acta il suo allegato (ordinanza)
-		if (cnmTAllegatoMaster != null && cnmTAllegatoMaster.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_PROTOCOLLATO) {
-			logger.info("Trovato allegato master (lettera) in stato protocollato");
-
-			// recupero allegati solo quelli del tipo giusto (11,12,34,35)
-			List<CnmTAllegato> cnmTAllegatoList = cnmTAllegatoRepository.findAllegatiLetteraOrdinanza(cnmTOrdinanza.getIdOrdinanza());	
-			
-			// aggiorno in spostamento
-			cnmTAllegatoList = allegatoScheduledService.updateCnmDStatoAllegatoInCoda(cnmTAllegatoList);
-
-			CnmDStatoAllegato avviospostamentoActa = cnmDStatoAllegatoRepository.findOne(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA);
-			for (CnmTAllegato cnmTAllegato : cnmTAllegatoList) {
-				if (cnmTAllegato.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_IN_CODA) {
-					logger.info("Sposto allegato su acta con id" + cnmTAllegato.getIdAllegato() + " Nome file: " + cnmTAllegato.getNomeFile());
-					ResponseAggiungiAllegato responseAggiungiAllegato = null;
-					try {
-
-						responseAggiungiAllegato = doquiServiceFacade.aggiungiAllegato(null, cnmTAllegato.getNomeFile(), cnmTAllegato.getIdIndex(), cnmTAllegatoMaster.getIdActa(),
-								utilsDoqui.createIdEntitaFruitore(cnmTOrdinanza, cnmTAllegato.getCnmDTipoAllegato()), "", utilsDoqui.getSoggettoActa(cnmTOrdinanza),
-								utilsDoqui.getRootActa(cnmTOrdinanza), cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegato.getDataOraInsert().getTime()));
-					} catch (Exception e) {
-						logger.error("Non riesco ad aggiungere l'allegato al master", e);
-						cnmTAllegato.setCnmDStatoAllegato(avviospostamentoActa);
-						cnmTAllegato.setDataOraUpdate(now);
-						allegatoScheduledService.updateCnmDStatoAllegato(cnmTAllegato);
-					}
-					if (responseAggiungiAllegato != null) {
-						logger.info("Spostato allegato con id" + cnmTAllegato.getIdAllegato() + "e di tipo:" + cnmTAllegato.getCnmDTipoAllegato().getDescTipoAllegato());
-
-						String idIndex = cnmTAllegato.getIdIndex();
-						cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
-						cnmTAllegato.setIdActa(responseAggiungiAllegato.getIdDocumento());
-						cnmTAllegato.setIdIndex(null);
-						cnmTAllegato.setIdActaMaster(cnmTAllegatoMaster.getIdActa());
-						// 20200711_LC
-						CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(DoquiConstants.USER_SCHEDULED_TASK);
-						cnmTAllegato.setCnmTUser1(cnmTUser);
-						cnmTAllegato.setDataOraUpdate(now);
-						allegatoScheduledService.updateCnmDStatoAllegato(cnmTAllegato);
-
-						try {
-//							20200729_ET modificato per JIRA http://jiraprod.csi.it:8083/browse/CONAM-78
-//								stadocServiceFacade.eliminaDocumentoIndex(idIndex);
-								doquiServiceFacade.eliminaDocumentoIndex(idIndex);
-						} catch (Exception e) {
-							logger.error("Non riesco ad eliminare l'allegato con idIndex :: " + idIndex);
-						}
-
-					
-						// 20200622_LC traccia job spostamento
-						String className=Thread.currentThread().getStackTrace()[1].getClassName().substring(Thread.currentThread().getStackTrace()[1].getClassName().lastIndexOf(".")+1);
-						utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.SPOSTAMENTO_ALLEGATO_DA_INDEX.getOperation(),cnmTAllegato.getClass().getAnnotation(Table.class).name(),"id_allegato="+cnmTAllegato.getIdAllegato(), className+"."+Thread.currentThread().getStackTrace()[1].getMethodName(), cnmTAllegato.getCnmDTipoAllegato().getDescTipoAllegato());
-						
-						// 20201120_LC	traccia inserimento allegato su Acta
-						operationToTrace = cnmTAllegato.isFlagDocumentoPregresso() ? TraceOperation.INSERIMENTO_ALLEGATO_PREGRESSO.getOperation() : TraceOperation.INSERIMENTO_ALLEGATO.getOperation();
-						utilsTraceCsiLogAuditService.traceCsiLogAudit(operationToTrace,Constants.OGGETTO_ACTA,"objectIdDocumento="+responseAggiungiAllegato.getObjectIdDocumento(), className+"."+Thread.currentThread().getStackTrace()[1].getMethodName(), cnmTAllegato.getCnmDTipoAllegato().getDescTipoAllegato());
-							
-					}
-					
-				
-				}
-			}
-		
-		} 
-		
-		
-		
-		
-
-		
-		
 		
 		// GESTIONE ISTANZA (38): se è presente l'istanza e non è ancora protocollata, allora aggiungere i suoi allegati e protocollare (tutto insieme)	
 		if (cnmTAllegatoMasterIstanza != null && cnmTAllegatoMasterIstanza.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_NON_PROTOCOLLARE) {
@@ -382,15 +337,115 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 			logger.info("Nessun allegato master trovato nello stato corretto");
 		}
 
-
 		
 	}
 
-	
-	
-	
-	
-	
+
+	private void manageLetteraOrdinanza(List<CnmTAllegato> cnmTAllegatos, CnmTOrdinanza cnmTOrdinanza) {
+
+		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
+		String operationToTrace = null;
+		
+		CnmTAllegato cnmTAllegatoMaster = Iterables.tryFind(cnmTAllegatos, UtilsTipoAllegato.findCnmTAllegatoInCnmTAllegatosByTipoAllegato(TipoAllegato.LETTERA_ORDINANZA)).orNull();
+		// GESTIONE ORDINANZE (11,12,34,35): se è presente la lettera già protocollata, allora bisogna spostare in acta il suo allegato (ordinanza)
+		if (cnmTAllegatoMaster != null && cnmTAllegatoMaster.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_NON_PROTOCOLLARE) {
+			logger.info("Trovato allegato master (lettera) in stato protocollato");
+
+			// recupero allegati solo quelli del tipo giusto (11,12,34,35)
+			List<CnmTAllegato> cnmTAllegatoList = cnmTAllegatoRepository.findAllegatiLetteraOrdinanza(cnmTOrdinanza.getIdOrdinanza());	
+			
+			// aggiorno in spostamento
+			cnmTAllegatoList = allegatoScheduledService.updateCnmDStatoAllegatoInCoda(cnmTAllegatoList);
+
+			CnmDStatoAllegato avviospostamentoActa = cnmDStatoAllegatoRepository.findOne(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA);
+			for (CnmTAllegato cnmTAllegato : cnmTAllegatoList) {
+				if (cnmTAllegato.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_IN_CODA) {
+					logger.info("Sposto allegato su acta con id" + cnmTAllegato.getIdAllegato() + " Nome file: " + cnmTAllegato.getNomeFile());
+					ResponseAggiungiAllegato responseAggiungiAllegato = null;
+					try {
+
+						responseAggiungiAllegato = doquiServiceFacade.aggiungiAllegato(null, cnmTAllegato.getNomeFile(), cnmTAllegato.getIdIndex(), cnmTAllegatoMaster.getIdActa(),
+								utilsDoqui.createIdEntitaFruitore(cnmTOrdinanza, cnmTAllegato.getCnmDTipoAllegato()), "", utilsDoqui.getSoggettoActa(cnmTOrdinanza),
+								utilsDoqui.getRootActa(cnmTOrdinanza), cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegato.getDataOraInsert().getTime()));
+					} catch (Exception e) {
+						logger.error("Non riesco ad aggiungere l'allegato al master", e);
+						cnmTAllegato.setCnmDStatoAllegato(avviospostamentoActa);
+						cnmTAllegato.setDataOraUpdate(now);
+						allegatoScheduledService.updateCnmDStatoAllegato(cnmTAllegato);
+					}
+					if (responseAggiungiAllegato != null) {
+						logger.info("Spostato allegato con id" + cnmTAllegato.getIdAllegato() + "e di tipo:" + cnmTAllegato.getCnmDTipoAllegato().getDescTipoAllegato());
+
+						String idIndex = cnmTAllegato.getIdIndex();
+						cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
+						cnmTAllegato.setIdActa(responseAggiungiAllegato.getIdDocumento());
+						cnmTAllegato.setIdIndex(null);
+						cnmTAllegato.setIdActaMaster(cnmTAllegatoMaster.getIdActa());
+						// 20200711_LC
+						CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(DoquiConstants.USER_SCHEDULED_TASK);
+						cnmTAllegato.setCnmTUser1(cnmTUser);
+						cnmTAllegato.setDataOraUpdate(now);
+						allegatoScheduledService.updateCnmDStatoAllegato(cnmTAllegato);
+
+						try {
+//									20200729_ET modificato per JIRA http://jiraprod.csi.it:8083/browse/CONAM-78
+//										stadocServiceFacade.eliminaDocumentoIndex(idIndex);
+								doquiServiceFacade.eliminaDocumentoIndex(idIndex);
+						} catch (Exception e) {
+							logger.error("Non riesco ad eliminare l'allegato con idIndex :: " + idIndex);
+						}
+
+					
+						// 20200622_LC traccia job spostamento
+						String className=Thread.currentThread().getStackTrace()[1].getClassName().substring(Thread.currentThread().getStackTrace()[1].getClassName().lastIndexOf(".")+1);
+						utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.SPOSTAMENTO_ALLEGATO_DA_INDEX.getOperation(),cnmTAllegato.getClass().getAnnotation(Table.class).name(),"id_allegato="+cnmTAllegato.getIdAllegato(), className+"."+Thread.currentThread().getStackTrace()[1].getMethodName(), cnmTAllegato.getCnmDTipoAllegato().getDescTipoAllegato());
+						
+						// 20201120_LC	traccia inserimento allegato su Acta
+						operationToTrace = cnmTAllegato.isFlagDocumentoPregresso() ? TraceOperation.INSERIMENTO_ALLEGATO_PREGRESSO.getOperation() : TraceOperation.INSERIMENTO_ALLEGATO.getOperation();
+						utilsTraceCsiLogAuditService.traceCsiLogAudit(operationToTrace,Constants.OGGETTO_ACTA,"objectIdDocumento="+responseAggiungiAllegato.getObjectIdDocumento(), className+"."+Thread.currentThread().getStackTrace()[1].getMethodName(), cnmTAllegato.getCnmDTipoAllegato().getDescTipoAllegato());
+							
+					}
+					
+				
+				}
+			}
+
+			
+			// 20210831 PP - CR_107 PROTOCOLLAZIONE ALLEGATO MASTER GIA ESISTENTE
+			// se tutti i cnmTAllegatoList hanno idActa != null, idActaMaster!=null, e idActaMaster == idACta di cnmTAllegatoMasterIstanza
+			// si fa la protocollazione
+			if (protocollazioneDaAvviare(cnmTAllegatoList, cnmTAllegatoMaster)
+					&& cnmTAllegatoMaster.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_NON_PROTOCOLLARE) {				
+				CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(DoquiConstants.USER_SCHEDULED_TASK);
+				ResponseProtocollaDocumento responseProtocollaEsistente = commonAllegatoService.avviaProtocollazioneDocumentoEsistente(cnmTAllegatoMaster, cnmTUser);
+				
+				// aggiorna num potocollo su tutti gli allegati e relativi cnmDocumento
+				String numProtocollo = responseProtocollaEsistente.getProtocollo();
+				for (CnmTAllegato cnmTAllegato : cnmTAllegatoList) {
+					cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
+					cnmTAllegato.setNumeroProtocollo(numProtocollo);
+					cnmTAllegato.setDataOraProtocollo(now);
+					cnmTAllegato.setCnmTUser1(cnmTUser);
+					cnmTAllegato.setDataOraUpdate(now);
+					allegatoScheduledService.updateCnmDStatoAllegato(cnmTAllegato);	// fa il semplice save
+					CnmTDocumento cnmTDocumento = cnmTDocumentoRepository.findOne(Integer.parseInt(cnmTAllegato.getIdActa()));
+					if (cnmTDocumento != null) {
+						cnmTDocumento.setProtocolloFornitore(numProtocollo);
+						cnmTDocumento.setCnmTUser1(cnmTUser);
+						cnmTDocumento.setDataOraUpdate(now);
+						cnmTDocumentoRepository.save(cnmTDocumento);
+					}
+				}				
+			}
+		
+		} 
+				
+				
+				
+				
+	}
+
+
 	private boolean protocollazioneDaAvviare(List<CnmTAllegato> allegati, CnmTAllegato master) {
 		
 		// se almeno uno degli allegati all'istanza ha idActa=null, idActaMaster=null, e idActa=!idActaDelMster, allora non parte la protocollazione
@@ -412,11 +467,6 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 		return true;
 	
 	}	
-	
-	
-	
-	
-	
 	
 	
 	

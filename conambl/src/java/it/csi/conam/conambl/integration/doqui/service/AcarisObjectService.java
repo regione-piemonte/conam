@@ -88,6 +88,9 @@ public interface AcarisObjectService {
 	public String getParolaChiaveDocumento(ObjectIdType repositoryId, PrincipalIdType principalId , ObjectIdType objectIdDocumento) throws  IntegrationException;
 	
 	// 20200722_LC
-	public String getUUIDDocumentoByObjectIdDocumento(ObjectIdType repositoryId, PrincipalIdType principalId, QueryableObjectType target, String objectIdDocumento) throws IntegrationException; 
+	public String getUUIDDocumentoByObjectIdDocumento(ObjectIdType repositoryId, PrincipalIdType principalId, QueryableObjectType target, String objectIdDocumento) throws IntegrationException;  
+
+	// 20211019_LC
+	public Integer getNumeroAllegatiPresenti(ObjectIdType repositoryId, PrincipalIdType principalId, String objectIdClassificazione) throws  IntegrationException;
 	
 }

@@ -37,6 +37,14 @@ public class ErrorCode {
 	public static final String VERIFICA_DATE_FASCICOLO_PREGRESSO = "VERDATEPRE";
 	public static final String CONFIRM_RECUPERO_PROTOCOLLO ="CONFRECPRO";
 	
+	public static final String WARNING_VERBALE_ACQUISISCI ="ACQUIWARN";
+	
+	public static final String WARNING_VERBALE_SOGGETTO_SENZA_CF ="NOCFWARN";
+	public static final String CONFIRM_VERBALE_SOGGETTO_SENZA_CF ="NOCFCONF";
+
+	public static final String WARNING_VERBALE_VERIFICA_PAGAMENTO ="VERPWARN";
+	public static final String CONFIRM_VERBALE_VERIFICA_PAGAMENTO ="VERPCONF";
+	
 	// prontuario
 	public static final String INSERIMENTO_AMBITO = "INSAMB01";
 	public static final String INSERIMENTO_LEGGE = "INSLEG01";
@@ -50,6 +58,7 @@ public class ErrorCode {
 	public static final String PROTOCOLLO_NON_PRESENTE_IN_ACTA = "SRCHPROT03";
 	public static final String SCRITTO_DIFENSIVO_DA_ASSOCIARE = "SRCHPROT04";
 	public static final String PROTOCOLLO_GIA_SCRITTO_DIFENSIVO = "PROTGIASCR";
+	public static final String STESSO_SOGGETTO_PIU_RELATE = "ERRSOGGREL";
 
 	// rateizzazione
 	public static final String CALCOLA_RATE_MINORE_DI_IMPORTO_MINIMO = "CALRATE01";
@@ -68,6 +77,7 @@ public class ErrorCode {
 	public static final String DOQUI_PROTOCOLLA_DOCUMENTO_NON_DISPONIBILE = "DOQUIND04";
 	public static final String DOQUI_SPOSTA_DOCUMENTO_NON_DISPONIBILE = "DOQUIND05";	// 2020706_LC
 	public static final String DOQUI_COPIA_DOCUMENTO_NON_DISPONIBILE = "DOQUIND06";	// 2020728_LC
+	public static final String DOQUI_RECUPERA_DOCUMENTO_NO_DOC_ELETTRONICO = "DOQUIND07";
 
 	// ORDINANZA
 	public static final String INSERIMENTO_ORDINANZA_NUMERO_DETERMINAZIONE_ESISTENTE = "INSORD01";
@@ -75,6 +85,7 @@ public class ErrorCode {
 	public static final String CONFIRM_SALVA_STATO_ORDINANZA_PREGRESSA = "SAVESTORPR";
 	public static final String DATE_ORDINANZA_NON_PREGRESSE ="DATORDNPR";
 	public static final String UPDATE_STATO_OK = "UPDSTATOOK";
+	public static final String NO_COD_FIS = "NOCODFIS";
 	
 	// SOLLECITO
 	public static final String BOLLETTINI_NON_ANCORA_GENERATI_SOLLECITO = "DOCSOL01";
@@ -93,5 +104,8 @@ public class ErrorCode {
 	public static final String ERRORE_GENERICO_SISTEMA = "ERRGENSIS";
 	public static final String UTENTE_NOACCESS_VERBALE = "VERBUTNAB";
 	
+	//SALVA VERBALE
+	public static final String ERRORE_COMUNE_ENTE = "ERRCOMENT";
+
 
 }

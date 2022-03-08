@@ -106,5 +106,18 @@ public class LuoghiResource extends SpringSupportedResource {
 		
 	}
 	
+	@GET
+	@Path("/comuniEnteValidInDate")
+	public Response comuniEnteValidInDate(@QueryParam("dataOraAccertamento") String dataOraAccertamento) {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm");
+		try {
+			List<ComuneVO> lista = luoghiDispatcher.getComuniEnte(sdf.parse(dataOraAccertamento));
+			return Response.ok().entity(lista).build();	
+		}catch(Throwable t) {
+			List<ComuneVO> lista = luoghiDispatcher.getComuniEnte(null);
+			return Response.ok().entity(lista).build();
+		}
+	}
+	
 
 }

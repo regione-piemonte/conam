@@ -83,16 +83,23 @@ public class SoggettoEntityMapperImpl implements SoggettoEntityMapper {
 					sogStas.setComuneNascita(comuneEntityMapper.mapEntityToVO(cnmTPersona.getCnmDComune()));
 				}
 			}
-			if (cnmTResidenza != null) {
+			
+			// 20211124_LC Jira 177	-	Se ci sono dati Stas non mappa dalla residenza del DB ma direttamente da Stas (fatto sopra in: mapWsTypeToVO), se non ci sonol mappa alal fine del metodo
+			
+			//if (cnmTResidenza != null) {
 				sogStas.setIndirizzoResidenzaStas(sogStas.getIndirizzoResidenza());
 				sogStas.setCivicoResidenzaStas(sogStas.getCivicoResidenza());
 				sogStas.setCapStas(sogStas.getCap());
-				sogStas = residenzaEntityMapper.mapEntitytoVOUpdate(sogStas, cnmTResidenza);
-			}
+				//sogStas = residenzaEntityMapper.mapEntitytoVOUpdate(sogStas, cnmTResidenza);
+			//}
+				
+				
 			sogStas.setId(dto.getIdSoggetto());
 			sogStas.setIdStas(dto.getIdStas());
 			return sogStas;
 		}
+		
+		
 		// soggetto non presente su stas
 		if (cnmTPersona != null) {
 			soggettoVO = personaEntityMapper.mapEntityToVO(cnmTPersona);
@@ -122,6 +129,7 @@ public class SoggettoEntityMapperImpl implements SoggettoEntityMapper {
 			soggettoVO.setRagioneSociale(dto.getRagioneSociale());
 		}
 
+		
 		if (cnmTResidenza != null) {
 			soggettoVO = residenzaEntityMapper.mapEntitytoVOUpdate(soggettoVO, cnmTResidenza);
 		}

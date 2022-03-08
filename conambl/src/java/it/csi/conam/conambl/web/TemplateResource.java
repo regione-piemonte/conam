@@ -37,7 +37,7 @@ public class TemplateResource extends SpringSupportedResource {
 
 	@POST
 	@Path("/getDatiTemplate")
-	public Response getDatiTemplate(@Valid @NotNull(message = "RESCON17") DatiTemplateRequest request) {
+	public Response getDatiTemplate(DatiTemplateRequest request) {//(@Valid @NotNull(message = "RESCON17") DatiTemplateRequest request) {
 		UserDetails userDetails = SecurityUtils.getUser();
 		DatiTemplateVO response = templateDispatcher.getDatiTemplate(request, userDetails);
 		return Response.ok().entity(response).build();

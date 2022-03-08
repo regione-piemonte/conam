@@ -114,7 +114,7 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 					)
 				);
 			} else {
-				cnmTSoggetto = cnmTSoggettoRepository.findOne(
+				List<CnmTSoggetto> soggettoList = cnmTSoggettoRepository.findAll(
 					CnmTSoggettoSpecification.findSoggettoFisicoByCodFiscaleOrModuloRicerca(
 						null, //
 						minSoggettoVO.getCognome(), //
@@ -125,6 +125,9 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 						minSoggettoVO.getNazioneNascita() != null ? minSoggettoVO.getNazioneNascita().getId() : null //
 					)
 				);
+				if(soggettoList != null && soggettoList.size()>0) {
+					cnmTSoggetto = soggettoList.get(0);
+				}
 			}
 		} else {
 			if (isRicercaCodFiscaleOrPiva) {
@@ -138,7 +141,8 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 						)
 					);
 			} else {
-				cnmTSoggetto = cnmTSoggettoRepository.findOne(
+				
+				List<CnmTSoggetto> soggettoList = cnmTSoggettoRepository.findAll(
 					CnmTSoggettoSpecification.findSocietaByCodFiscaleOrPivaOrRagioneSociale(
 						null,
 						null,
@@ -146,6 +150,9 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 						isRicerca
 					)
 				);
+				if(soggettoList != null && soggettoList.size()>0) {
+					cnmTSoggetto = soggettoList.get(0);
+				}
 			}
 		}
 		return cnmTSoggetto;

@@ -17,7 +17,11 @@ public interface CnmDNormaRepository extends CrudRepository<CnmDNorma, Integer> 
 
 	@Query("Select u from CnmDNorma u where u.riferimentoNormativo=?1 and (u.eliminato is null or u.eliminato=false)")
 	CnmDNorma findByRiferimentoNormativoAndNotEliminato(String riferimentoNormativo);
-
+	
+	
+	@Query("Select u from CnmDNorma u where u.riferimentoNormativo=?1 and (u.eliminato is null or u.eliminato=false) and cnmDAmbito = ?2")
+	CnmDNorma findByRiferimentoNormativoAndNotEliminatoAndNotAmbito(String riferimentoNormativo, CnmDAmbito ambito);
+	
 	@Query("Select u.cnmDAmbito from CnmDNorma u where u.cnmDAmbito  in ?1 ")
 	List<CnmDAmbito> findByCnmDAmbitoIn(List<CnmDAmbito> ambiti);
 

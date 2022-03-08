@@ -40,7 +40,8 @@ public class CnmTVerbale implements Serializable {
 	@Column(name="data_ora_update")
 	private Timestamp dataOraUpdate;
 
-	@Column(name="data_ora_violazione")
+//	@Column(name="data_ora_violazione")
+	@Column(name="data_ora_processo_verbale")
 	private Timestamp dataOraViolazione;
 
 	@Column(name="importo_verbale")
@@ -110,6 +111,10 @@ public class CnmTVerbale implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="id_stato_manuale")
 	private CnmDStatoManuale cnmDStatoManuale;
+	
+	@ManyToOne
+	@JoinColumn(name="id_comune_ente")
+	private CnmDComune cnmDComuneEnte;
 	
 	public CnmTVerbale() {
 	}
@@ -360,12 +365,20 @@ public class CnmTVerbale implements Serializable {
 		this.cnmDStatoPregresso = cnmDStatoPregresso;
 	}
 
-	public CnmDStatoManuale getStatoManuale() {
+	public CnmDStatoManuale getCnmDStatoManuale() {
 		return cnmDStatoManuale;
 	}
 
-	public void setStatoManuale(CnmDStatoManuale statoManuale) {
+	public void setCnmDStatoManuale(CnmDStatoManuale statoManuale) {
 		this.cnmDStatoManuale = statoManuale;
+	}
+
+	public CnmDComune getCnmDComuneEnte() {
+		return cnmDComuneEnte;
+	}
+
+	public void setCnmDComuneEnte(CnmDComune cnmDComuneEnte) {
+		this.cnmDComuneEnte = cnmDComuneEnte;
 	}
 
 }

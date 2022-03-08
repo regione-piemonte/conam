@@ -4,6 +4,8 @@
  ******************************************************************************/
 package it.csi.conam.conambl.response;
 
+import java.util.List;
+
 import it.csi.conam.conambl.vo.AzioneVO;
 import it.csi.conam.conambl.vo.ParentVO;
 
@@ -15,22 +17,22 @@ public class AzioneVerbaleResponse extends ParentVO {
 
 	private static final long serialVersionUID = 5502699540493590617L;
 
-	private AzioneVO azione;
+	private List<AzioneVO> azioneList;
 	private Boolean aggiungiAllegatoEnable;
 	private Boolean modificaVerbaleEnable;
 	private Boolean eliminaAllegatoEnable;
 	private Boolean riepilogoOrdinanzaEnable;
 
-	public AzioneVO getAzione() {
-		return azione;
+	public List<AzioneVO> getAzioneList() {
+		return azioneList;
 	}
 
 	public Boolean getAggiungiAllegatoEnable() {
 		return aggiungiAllegatoEnable;
 	}
 
-	public void setAzione(AzioneVO azione) {
-		this.azione = azione;
+	public void setAzioneList(List<AzioneVO> azioneList) {
+		this.azioneList = azioneList;
 	}
 
 	public Boolean getModificaVerbaleEnable() {

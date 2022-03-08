@@ -54,13 +54,13 @@ public class CnmDStatoManuale implements Serializable {
 
 	public CnmTVerbale addCnmTVerbale(CnmTVerbale cnmTVerbale) {
 		getCnmTVerbales().add(cnmTVerbale);
-		cnmTVerbale.setStatoManuale(this);
+		cnmTVerbale.setCnmDStatoManuale(this);
 		return cnmTVerbale;
 	}
 
 	public CnmTVerbale removeCnmTVerbale(CnmTVerbale cnmTVerbale) {
 		getCnmTVerbales().remove(cnmTVerbale);
-		cnmTVerbale.setStatoManuale(null);
+		cnmTVerbale.setCnmDStatoManuale(null);
 		return cnmTVerbale;
 	}
 

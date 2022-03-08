@@ -4,14 +4,15 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.repositories;
 
-import it.csi.conam.conambl.integration.entity.CnmDComune;
-import it.csi.conam.conambl.integration.entity.CnmDProvincia;
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.List;
+import it.csi.conam.conambl.integration.entity.CnmDComune;
+import it.csi.conam.conambl.integration.entity.CnmDProvincia;
 
 @Repository
 public interface CnmDComuneRepository extends CrudRepository<CnmDComune, Long> {
@@ -33,5 +34,16 @@ public interface CnmDComuneRepository extends CrudRepository<CnmDComune, Long> {
 	@Query("Select u from CnmDComune u where u.cnmDProvincia=?1 and ((u.fineValidita is null or u.fineValidita>?2) and (u.inizioValidita is null or u.inizioValidita<=?2)) ORDER BY u.denomComune ASC")
 	List<CnmDComune> findByCnmDProvinciaAndValidaOrderByDenomComuneAsc(CnmDProvincia cnmDProvincia,
 			Date convertToDateViaInstant);
+	
+	@Query("Select u from CnmDComune u where u.cnmDProvincia in ?1 and ((u.fineValidita is null or u.fineValidita>?2) and (u.inizioValidita is null or u.inizioValidita<=?2)) ORDER BY u.denomComune ASC")
+	List<CnmDComune> findByCnmDProvinciasInAndValidaOrderByDenomComuneAsc(List<CnmDProvincia> cnmDProvincias,
+			Date convertToDateViaInstant);
+
+	@Query("Select u from CnmDComune u where u.cnmDProvincia in ?1 ORDER BY u.denomComune ASC")
+	List<CnmDComune> findByCnmDProvinciasInOrderByDenomComuneAsc(List<CnmDProvincia> cnmDProvincias);
+
+	@Query("Select u from CnmDComune u where u.idComune=?1 and ((u.fineValidita is null or u.fineValidita>?2) and (u.inizioValidita is null or u.inizioValidita<=?2))")
+	CnmDComune findByidComuneAndData(long idComune, Date data);
+
 
 }

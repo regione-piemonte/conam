@@ -132,4 +132,27 @@ public class LuoghiServiceImpl implements LuoghiService {
 		return comuneEntityMapper.mapListEntityToListVO(cnmDComuneRepository.findByCnmDProvinciaAndValidaOrderByDenomComuneAsc(cnmDProvincia, dataOraAccertamento));
 	}
 
+	@Override
+	public List<ComuneVO> getComuniEnte(Date dataOraAccertamento) {
+		if(dataOraAccertamento == null) {
+			CnmDRegione cnmDRegione = cnmDRegioneRepository.findOne(1L);
+			List<CnmDProvincia> cnmDProvincias = cnmDProvinciaRepository.findByCnmDRegioneOrderByDenomProvinciaAsc(cnmDRegione);
+			if (cnmDProvincias == null)
+				return null;
+			
+			List<ComuneVO> comuni = comuneEntityMapper.mapListEntityToListVO(cnmDComuneRepository.findByCnmDProvinciasInOrderByDenomComuneAsc(cnmDProvincias));
+			comuni.add(0, new ComuneVO());
+			return comuni; 
+		}
+		CnmDRegione cnmDRegione = cnmDRegioneRepository.findOne(1L);
+		List<CnmDProvincia> cnmDProvincias = cnmDProvinciaRepository.findByCnmDRegioneAndValidaInDataOrderByDenomProvinciaAsc(cnmDRegione, dataOraAccertamento);
+		if (cnmDProvincias == null)
+			return null;
+
+		List<ComuneVO> comuni = comuneEntityMapper.mapListEntityToListVO(cnmDComuneRepository.findByCnmDProvinciasInAndValidaOrderByDenomComuneAsc(cnmDProvincias, dataOraAccertamento));
+		comuni.add(0, new ComuneVO());
+		return comuni; 
+	}
+	
+
 }

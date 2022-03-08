@@ -118,8 +118,8 @@ public class VerbaleServiceTest extends TestBaseService {
 
 	@Test
 	public void query() {
-		List<CnmTVerbale> cnmTVerbale = cnmTVerbaleRepository.findCnmTVerbaleAndIdStatoAllegato(Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO, new PageRequest(0, 1));
-		logger.info(cnmTVerbale);
+		//List<CnmTVerbale> cnmTVerbale = cnmTVerbaleRepository.findCnmTVerbaleAndIdStatoAllegato(Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO, new PageRequest(0, 1));
+		//logger.info(cnmTVerbale);
 		logger.info("END");
 	}
 }

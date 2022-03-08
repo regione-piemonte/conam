@@ -7,14 +7,9 @@
 	<info organisation="csipiemonte" module="starissrv" />
 	<dependencies>
 	
-		<!-- MTOM -->
+		<!-- MTOM
 		<dependency org="doqui" name="ecmengine-mtom-client" rev="13.4.0"
 			transitive="false" />
-			
-		<!-- INDEX -->
-		<dependency org="doqui" name="ecmengine-ws-client" rev="13.4.0">
-			<artifact name="ecmengine-ws-client-13.4.0" type="jar" />
-		</dependency>
 		<dependency org="doqui" name="ecmengine-common" rev="13.4.0">
 			<artifact name="ecmengine-common-13.4.0" type="jar" />
 		</dependency>
@@ -22,8 +17,10 @@
 		<dependency org="doqui" name="ecmengine-engine-client" rev="13.4.0">
 			<artifact name="ecmengine-engine-client-13.4.0" type="jar" />
 		</dependency>
-		<dependency org="doqui" name="ecmengine-engine-client" rev="13.4.0">
-			<artifact name="ecmengine-engine-client-13.4.0" type="jar" />
+			 -->
+		<!-- INDEX -->
+		<dependency org="doqui" name="ecmengine-ws-client" rev="13.4.0">
+			<artifact name="ecmengine-ws-client-13.4.0" type="jar" />
 		</dependency>
 		<!--  ACTA -->
 		<dependency org="doqui" name="actasrv-client" rev="3.5.0" />

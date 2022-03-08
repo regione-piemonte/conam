@@ -146,7 +146,10 @@ public class ProntuarioServiceImpl implements ProntuarioService {
 
 		// INSERIMENTO
 		if (lettera.getId() == null) {
-			CnmDNorma cnmDNormaDB = cnmDNormaRepository.findByRiferimentoNormativoAndNotEliminato(norma.getDenominazione());
+//			CnmDNorma cnmDNormaDB = cnmDNormaRepository.findByRiferimentoNormativoAndNotEliminato(norma.getDenominazione());
+			
+			// 20211213 PP - CONAM-168 Controllo se esiste già la norma, ma sullo stesso ambito
+			CnmDNorma cnmDNormaDB = cnmDNormaRepository.findByRiferimentoNormativoAndNotEliminatoAndNotAmbito(norma.getDenominazione(), cnmDAmbito);
 			// caso non trovo norma inserisco
 			if (cnmDNormaDB == null) {
 				CnmDNorma cnmDNorma = normaEntityMapper.mapVOtoEntity(norma);

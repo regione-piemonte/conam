@@ -59,6 +59,8 @@ public class SoggettoVO extends MinSoggettoVO {
 	// 20210330_LC
 	private String idPianoRateizzazione;
 	
+	private DatiRelataNotificaVO relataNotifica;
+	
 	public SoggettoVO() {
 		super();
 	}
@@ -305,6 +307,14 @@ public class SoggettoVO extends MinSoggettoVO {
 
 	public void setIdPianoRateizzazione(String idPianoRateizzazione) {
 		this.idPianoRateizzazione = idPianoRateizzazione;
+	}
+
+	public DatiRelataNotificaVO getRelataNotifica() {
+		return relataNotifica;
+	}
+
+	public void setRelataNotifica(DatiRelataNotificaVO relataNotifica) {
+		this.relataNotifica = relataNotifica;
 	}
 
 }
