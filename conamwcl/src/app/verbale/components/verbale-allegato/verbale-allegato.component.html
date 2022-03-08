@@ -18,7 +18,10 @@
                                 (onDelete)="confermaEliminazione($event)"
                                 (onLoaded)="onLoadedAllegato($event)">
                             </shared-verbale-allegato-tabella>
-                            <shared-allegato-metadati-inserimento *ngIf="loadedCategoriaAllegato && allegaDocumentoFlag" [tipoAllegatoInput]="tipoAllegatoModel"
+                            <shared-allegato-metadati-inserimento 
+                            *ngIf="loadedCategoriaAllegato && allegaDocumentoFlag" 
+                            [tipoAllegatoInput]="tipoAllegatoModel"
+                            [riepilogoVerbale]="riepilogoVerbale"
                                 (onNewFile)="salvaAllegato($event)">
                             </shared-allegato-metadati-inserimento>
                             <shared-allegato-form-ricerca-protocollo (onSearch)="ricercaProtocollo($event)">
@@ -43,5 +46,5 @@
     </div>
     <div class="principal-div col-xs-12 col-sm-12 col-md-0 col-lg-1"></div>
 </div>
-<shared-dialog [titolo]="'Attenzione'" [subMessages]="subMessagess" [buttonConfirmText]="buttonConfirmTexts"
+<shared-dialog [titolo]="'Attenzione'" [subMessages]="subMessagess" [id]="'myModalDelete'" [buttonConfirmText]="buttonConfirmTexts"
     [buttonAnnullaText]="buttonAnnullaTexts"></shared-dialog>

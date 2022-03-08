@@ -54,6 +54,7 @@ export class Routing {
     public static GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_RICERCA: string = "gest-cont-amministrativo/convocazione-audizione-ricerca";
     public static GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_RIEPILOGO: string = "gest-cont-amministrativo/convocazione-audizione-riepilogo/";
     public static GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_CREA: string = "gest-cont-amministrativo/convocazione-audizione-crea/";
+    public static GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_CREA_SOGG: string = "gest-cont-amministrativo/convocazione-audizione-crea-soggetto/";
     public static GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_TEMPLATE_LETTERA: string = "gest-cont-amministrativo/convocazione-audizione-template-lettera/"; //+id
 
     public static GESTIONE_CONT_AMMI_INSERIMENTO_CONTRODEDUZIONI_RICERCA: string = "gest-cont-amministrativo/controdeduzioni-verbale-ricerca";
@@ -111,7 +112,7 @@ export class Routing {
     //RICONCILIA ORDINANZA
     public static PAGAMENTI_RICONCILIA_ORDINANZA_RICERCA: string = "pagamenti/riconcilia-ordinanza-ricerca";
     public static PAGAMENTI_RICONCILIA_ORDINANZA_RIEPILOGO: string = "pagamenti/riconcilia-ordinanza-riepilogo/"; //+id
-    public static PAGAMENTI_RICONCILIA_ORDINANZA_ALLEGATO: string = "pagamenti/riconcilia-ordinanza-allegato";
+    public static PAGAMENTI_RICONCILIA_ORDINANZA_ALLEGATO: string = "pagamenti/riconcilia-ordinanza-allegato/";
 
     //RICONCILIA PIANO
     public static PAGAMENTI_RICONCILIA_PIANO_RICERCA: string = "pagamenti/riconcilia-piano-ricerca";

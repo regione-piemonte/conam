@@ -29,6 +29,7 @@ import { timer } from "rxjs/observable/timer";
 import { SharedDialogComponent } from "../shared-dialog/shared-dialog.component";
 import { UtilSubscribersService } from "../../../core/services/util-subscribers-service";
 import { SharedAlertComponent } from "../shared-alert/shared-alert.component";
+import { RiepilogoVerbaleVO } from "../../../commons/vo/verbale/riepilogo-verbale-vo";
 
 declare var $: any;
 const URL = "https://evening-anchorage-3159.herokuapp.com/api/";
@@ -51,7 +52,8 @@ interface Upload {
   styleUrls: ["./shared-allegato-metadati-inserimento.component.scss"],
 })
 export class SharedAllegatoMetadatiInserimentoComponent
-  implements OnInit, OnDestroy, OnChanges {
+  implements OnInit, OnDestroy, OnChanges
+{
   @ViewChild(SharedDialogComponent) sharedDialog: SharedDialogComponent;
 
   @Input()
@@ -82,7 +84,8 @@ export class SharedAllegatoMetadatiInserimentoComponent
 
   @Output()
   onChangeCategoriaDocumento = new EventEmitter<any>();
-
+  @Input()
+  riepilogoVerbale: RiepilogoVerbaleVO;
   public subscribers: any = {};
 
   public mapConfigAllegati: Map<number, Array<Array<ConfigAllegatoVO>>>;
@@ -111,10 +114,10 @@ export class SharedAllegatoMetadatiInserimentoComponent
   public allegatoM: boolean = false;
   public flagAllegatoMaster: boolean = false;
   public nuovoAllegatoMultiple: SalvaAllegatoMultipleRequest;
-
+  public pagamentoParziale: boolean = false;
   allowedFilesType = ["pdf", "tiff", "jpg", "jpeg", "p7m"];
   allowedFilesTypeMessage: string;
-
+  public idVerbale: number;
   constructor(
     private logger: LoggerService,
     private allegatoSharedService: AllegatoSharedService,
@@ -226,22 +229,43 @@ export class SharedAllegatoMetadatiInserimentoComponent
           this.tmpModel.push(elem);
           this.metaDataModel.push(new AllegatoFieldVO());
           if (this.typeAction.isCombo(el.fieldType)) {
-            this.subscribers.getSelect = this.allegatoSharedService
-              .getDecodificaSelectAllegato(el.idFonteElenco)
-              .subscribe(
-                (data) => {
-                  this.comboModel[el.idModel] = data;
-                  this.comboLoaded[el.idModel] = true;
-                  this.logger.info(
-                    "Caricata lista per il campo numero " + el.idModel
-                  );
-                },
-                (err) => {
-                  this.logger.error(
-                    "Errore nel recupero dell'elenco di " + el.idFonteElenco
-                  );
-                }
-              );
+            if (el.fieldType.id == 5) {
+              this.subscribers.getSelect = this.allegatoSharedService
+                .getDecodificaSelectAllegato(el.idFonteElenco)
+                .subscribe(
+                  (data) => {
+                    this.comboModel[el.idModel] = data;
+                    this.comboLoaded[el.idModel] = true;
+                    this.logger.info(
+                      "Caricata lista per il campo numero " + el.idModel
+                    );
+                  },
+                  (err) => {
+                    this.logger.error(
+                      "Errore nel recupero dell'elenco di " + el.idFonteElenco
+                    );
+                  }
+                );
+            } else {
+              this.subscribers.getSelect = this.allegatoSharedService
+                .getDecodificaSelectSoggettiAllegato(
+                  this.riepilogoVerbale.verbale.id
+                )
+                .subscribe(
+                  (data) => {
+                    this.comboModel[el.idModel] = data;
+                    this.comboLoaded[el.idModel] = true;
+                    this.logger.info(
+                      "Caricata lista per il campo numero " + el.idModel
+                    );
+                  },
+                  (err) => {
+                    this.logger.error(
+                      "Errore nel recupero dell'elenco di " + el.idFonteElenco
+                    );
+                  }
+                );
+            }
           }
         });
       });
@@ -273,8 +297,84 @@ export class SharedAllegatoMetadatiInserimentoComponent
     this.validMetadata = true;
     this._onValid();
   }
+  checkPagamento() {
+    const differenza =
+      this.riepilogoVerbale.verbale.importoResiduo - this.tmpModel[1].value;
+    const isParziale =
+      this.tmpModel[3].value == null ||
+      this.tmpModel[3].value == "" ||
+      this.tmpModel[3].value == "false"
+        ? false
+        : true;
+    if (differenza < 0) {
+      this.manageMessageTop(
+        "Attenzione! Non inserire un importo superiore al residuo da pagare",
+        "DANGER",
+        false
+      );
+    } else if (differenza > 0 && !isParziale) {
+      this.manageMessageTop(
+        "Attenzione! Non è stato selezionato pagamento parziale, non inserire un importo inferiore al totale",
+        "DANGER",
+        false
+      );
+    } else if (differenza === 0 && isParziale) {
+      this.manageMessageTop(
+        'Attenzione, è stato selezionato "pagamento parziale" inserire un importo inferiore al totale',
+        "DANGER",
+        false
+      );
+    } else {
+      this.confermaPagamento(isParziale);
+    }
+  }
+  confermaPagamento(isParziale: boolean) {
+    if (isParziale)
+      this.generaMessaggio(
+        "Si sta inserendo un pagamento parziale per il fascicolo con Numero Verbale " +
+          this.riepilogoVerbale.verbale.numero +
+          ". Il fascicolo potrà procedere con l'iter sanzionatorio. Per procedere con il salvataggio selezionare il tasto Conferma. Annulla pertornare indietro."
+      );
+    else
+      this.generaMessaggio(
+        "Si sta inserendo un pagamento completo per il fascicolo con Numero Verbale " +
+          this.riepilogoVerbale.verbale.numero +
+          ". Si ricorda che il fascicolo in stato CONCILIATO non potrà procedere con l'iter sanzionatorio. Per procedere con il salvataggio selezionare il tasto Conferma. Annulla per tornare indietro."
+      );
 
+    this.buttonAnnullaText = "Indietro";
+    this.buttonConfirmText = "Conferma";
+
+    //mostro un messaggio
+    this.sharedDialog.open();
+
+    //unsubscribe
+    this.utilSubscribersService.unsbscribeByName(this.subscribers, "save");
+    this.utilSubscribersService.unsbscribeByName(this.subscribers, "close");
+
+    //premo "Conferma"
+    this.subscribers.save = this.sharedDialog.salvaAction.subscribe((data) => {
+      this._confermaMetadatiSenzaAllegati();
+    });
+
+    //premo "Annulla"
+    this.subscribers.close = this.sharedDialog.closeAction.subscribe((data) => {
+      this.subMessages = new Array<string>();
+    });
+  }
   confermaMetadatiSenzaAllegati() {
+    // caso ricevuta di pagamento del verbale
+    if (
+      this.riepilogoVerbale &&
+      this.riepilogoVerbale.verbale &&
+      this.tipoAllegatoSelezionato.id === 7
+    ) {
+      this.checkPagamento();
+    } else {
+      this._confermaMetadatiSenzaAllegati();
+    }
+  }
+  _confermaMetadatiSenzaAllegati() {
     //bisogna mappare tmpModel in metaDataModel
     this.mapMetadati();
     //disabilito tutti i campi
@@ -333,8 +433,8 @@ export class SharedAllegatoMetadatiInserimentoComponent
         this.flagAllegatoMaster = true;
       },
       onFilesAdded: () => {
-        const files: { [key: string]: File } = this.upload.uploader
-          .nativeElement.files;
+        const files: { [key: string]: File } =
+          this.upload.uploader.nativeElement.files;
         for (let key in files) {
           if (!isNaN(parseInt(key))) {
             if (files[key].size > this.maxSize) {
@@ -344,7 +444,8 @@ export class SharedAllegatoMetadatiInserimentoComponent
               this.sizeAlert = false;
               this.nuovoAllegato.file = files[key];
               this.nuovoAllegato.filename = this.nuovoAllegato.file.name;
-              this.nuovoAllegato.idTipoAllegato = this.tipoAllegatoSelezionato.id;
+              this.nuovoAllegato.idTipoAllegato =
+                this.tipoAllegatoSelezionato.id;
 
               let type: string = "";
               let array: string[] = this.nuovoAllegato.filename.split(".");
@@ -393,13 +494,15 @@ export class SharedAllegatoMetadatiInserimentoComponent
                   if (this.isCreaOrdinanza)
                     this.onNewFile.emit(this.nuovoAllegato);
                 } else {
-                  let allegato: AllegatoMultipleFieldVO = new AllegatoMultipleFieldVO();
+                  let allegato: AllegatoMultipleFieldVO =
+                    new AllegatoMultipleFieldVO();
                   allegato.file = files[key];
                   allegato.filename = this.nuovoAllegato.filename;
                   allegato.idTipoAllegato = this.nuovoAllegato.idTipoAllegato;
                   allegato.master = true;
 
-                  this.nuovoAllegatoMultiple.allegati = new Array<AllegatoMultipleFieldVO>();
+                  this.nuovoAllegatoMultiple.allegati =
+                    new Array<AllegatoMultipleFieldVO>();
                   this.nuovoAllegatoMultiple.allegati.push(allegato);
                   this.nomeAllegatoTmp = allegato.filename;
 
@@ -628,7 +731,11 @@ export class SharedAllegatoMetadatiInserimentoComponent
 
   typeAction: any = {
     isCombo: (t: SelectVO): boolean => {
-      return t ? t.id === Constants.FT_ELENCO : false;
+      if (t.id === Constants.FT_ELENCO) {
+        return t ? t.id === Constants.FT_ELENCO : false;
+      } else {
+        return t ? t.id === Constants.FT_ELENCO_SOGG : false;
+      }
     },
     isDate: (t: SelectVO): boolean => {
       return t ? t.id === Constants.FT_DATE : false;
@@ -653,13 +760,17 @@ export class SharedAllegatoMetadatiInserimentoComponent
       )
         return "text";
       if (this.typeAction.isNumeric(ft)) return "number";
+
       if (this.typeAction.isCheckbox(ft)) return "checkbox";
     },
   };
 
   check(index: number, type: FieldTypeVO) {
     if (!this.typeAction.isCheckbox(type)) return;
-    this.tmpModel[index].value = !this.tmpModel[index].value;
+    if (this.tmpModel[index].value == null || this.tmpModel[index].value == "")
+      this.tmpModel[index].value = "false";
+    this.tmpModel[index].value =
+      this.tmpModel[index].value == "false" ? "true" : "false";
   }
 
   onBlur($event, index: number, type: FieldTypeVO) {
@@ -669,7 +780,8 @@ export class SharedAllegatoMetadatiInserimentoComponent
   }
 
   manageDatePicker(i: number) {
-    var str: string = "#datetimepicker_" + i.toString();
+    var str: string =
+      "#datetimepicker_" + this.current.toString() + "_" + i.toString();
     if (this.typeAction.isDataOra(this.tmpModel[i].fieldType)) {
       if ($(str).length) {
         $(str).datetimepicker({
@@ -685,9 +797,18 @@ export class SharedAllegatoMetadatiInserimentoComponent
     }
   }
 
-  isKeyPressed(code: number, type: FieldTypeVO): boolean {
+  isKeyPressed(code: number, type: FieldTypeVO, label: string): boolean {
     if (!this.typeAction.isNumeric(type)) return true;
-    return this.numberUtilsSharedService.numberValid(code);
+    if (label !== "Numero raccomandata") {
+      return this.numberUtilsSharedService.numberValid(code);
+    } else {
+      return (
+        (code >= 48 && code <= 57) ||
+        (code >= 96 && code <= 105) ||
+        code == 8 ||
+        code == 46
+      );
+    }
   }
 
   byId(o1: SelectVO, o2: SelectVO) {

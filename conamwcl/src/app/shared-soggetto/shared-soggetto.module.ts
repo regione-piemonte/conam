@@ -9,6 +9,7 @@ import { SharedSoggettoDatiResidenza } from "./components/shared-soggetto-dati-r
 import { SharedSoggettoRuolo } from "./components/shared-soggetto-ruolo/shared-soggetto-ruolo";
 import { SharedSoggettoDatiAziendali } from "./components/shared-soggetto-dati-aziendali/shared-soggetto-dati-aziendali";
 import { SharedSoggettoRecidivita } from "./components/shared-soggetto-recidivita/shared-soggetto-recidivita";
+import { SharedSoggettoNotificaRelata } from "./components/shared-soggetto-notifica-relata/shared-soggetto-notifica-relata";
 
 @NgModule({
     imports: [
@@ -23,7 +24,8 @@ import { SharedSoggettoRecidivita } from "./components/shared-soggetto-recidivit
         SharedSoggettoDatiResidenza,
         SharedSoggettoRuolo,
         SharedSoggettoDatiAziendali,
-        SharedSoggettoRecidivita
+        SharedSoggettoRecidivita,
+        SharedSoggettoNotificaRelata
     ],
     declarations: [
         SharedSoggettoRiepilogoComponent,
@@ -31,7 +33,8 @@ import { SharedSoggettoRecidivita } from "./components/shared-soggetto-recidivit
         SharedSoggettoDatiResidenza,
         SharedSoggettoRuolo,
         SharedSoggettoDatiAziendali,
-        SharedSoggettoRecidivita
+        SharedSoggettoRecidivita,
+        SharedSoggettoNotificaRelata
     ],
     providers: []
 })

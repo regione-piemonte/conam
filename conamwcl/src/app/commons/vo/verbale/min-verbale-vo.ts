@@ -9,4 +9,5 @@ export class MinVerbaleVO {
 	public user: string;
 	public dataCaricamento: string;
 	public modificabile: boolean;
+	public dataOraAccertamento: string; 
 }

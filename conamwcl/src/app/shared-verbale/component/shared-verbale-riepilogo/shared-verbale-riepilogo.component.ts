@@ -61,6 +61,7 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.logger.init(SharedVerbaleRiepilogoComponent.name); 
+       
         this.load();
     }
     
@@ -113,6 +114,8 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
 
                     this.loaded = true;
                 });
+
+               
             });
 
         });

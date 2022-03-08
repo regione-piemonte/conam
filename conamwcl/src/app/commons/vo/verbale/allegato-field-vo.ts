@@ -2,7 +2,7 @@ import { FieldTypeVO } from "../../../commons/vo/select-vo";
 
 export class AllegatoFieldVO {
 
-    public booleanValue: boolean;
+    public booleanValue: any;
     public numberValue: number;
     public stringValue: string;
     public dateValue: Date;

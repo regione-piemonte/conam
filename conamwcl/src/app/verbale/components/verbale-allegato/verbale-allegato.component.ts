@@ -19,6 +19,7 @@ import { ConfigSharedService } from "../../../shared/service/config-shared.servi
 import { DOCUMENT } from "@angular/platform-browser";
 import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
 import { FascicoloService } from "../../../fascicolo/services/fascicolo.service";
+import { RiepilogoVerbaleVO } from "../../../commons/vo/verbale/riepilogo-verbale-vo";
 
 @Component({
   selector: "verbale-allegato",
@@ -34,6 +35,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
   public loadedConfig: boolean;
   public loadedAllegato: boolean = true;
   public loadedCategoriaAllegato: boolean;
+  public riepilogoVerbale: RiepilogoVerbaleVO;
 
   public allegatoModel: RiepilogoAllegatoVO = new RiepilogoAllegatoVO();
   public tipoAllegatoModel: Array<TipoAllegatoVO>;
@@ -126,6 +128,10 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
         );
 
       this.loadTipoAllegato();
+      // recupero il riepilogoverbale
+      this.subscribers.riepilogo = this.sharedVerbaleService.riepilogoVerbale(this.idVerbale).subscribe(data => {
+        this.riepilogoVerbale = data;
+      }); 
     });
   }
 

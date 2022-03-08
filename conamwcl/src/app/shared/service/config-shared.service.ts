@@ -27,6 +27,10 @@ export class ConfigSharedService implements OnDestroy {
                 displayName: 'Numero Verbale'
             },
             {
+                columnName: 'dataOraAccertamento',
+                displayName: 'Data e ora di accertamento'
+            },
+            {
                 columnName: 'numeroProtocollo',
                 displayName: 'Numero protocollo'
             },
@@ -38,10 +42,7 @@ export class ConfigSharedService implements OnDestroy {
                 columnName: 'stato.denominazione',
                 displayName: 'Stato del fascicolo'
             },
-            {
-                columnName: 'dataCaricamento',
-                displayName: 'Data e ora caricamento'
-            },
+            
             {
                 columnName: 'user',
                 displayName: 'Utente creatore'

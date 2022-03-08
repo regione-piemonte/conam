@@ -47,6 +47,7 @@ import { SharedVerbaleConfigService } from "../../../shared-verbale/service/shar
 import { TableSoggettiVerbale } from "../../../commons/table/table-soggetti-verbale";
 import { SalvaConvocazioneAudizioneRequest } from "../../../commons/request/pregresso/salva-convocazione-audizione-request";
 import { SalvaVerbaleAudizioneRequest } from "../../../commons/request/pregresso/salva-verbale-audizione-request";
+import { RiepilogoVerbaleVO } from "../../../commons/vo/verbale/riepilogo-verbale-vo";
 
 type saveRequestFascicoloAllegatoDaActaComponent =
   | SalvaAllegatoProtocollatoOrdinanzaSoggettoRequest
@@ -139,6 +140,8 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   modeSuper: boolean = false;
   currentSuper: number = -1;
 
+  riepilogoVerbale: RiepilogoVerbaleVO;
+
   constructor(
     private logger: LoggerService,
     private router: Router,
@@ -164,11 +167,11 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       if (isNaN(this.idVerbale))
         this.router.navigateByUrl(Routing.VERBALE_DATI);
 
-      this.configRicercaProtocollo = this.configSharedService.getConfigRicercaProtocollo(
-        true
-      );
+      this.configRicercaProtocollo =
+        this.configSharedService.getConfigRicercaProtocollo(true);
       // carico la stringa di ricerca da cui arrivo
-      this.searchFormRicercaProtocol = this.fascicoloService.searchFormRicercaProtocol;
+      this.searchFormRicercaProtocol =
+        this.fascicoloService.searchFormRicercaProtocol;
 
       // carico i dati della ricerca da cui arrivo e utilizzo il tipo url per lo scaricamento dei file
 
@@ -194,23 +197,24 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
 
       if (this.activatedRoute.snapshot.paramMap.get("numDeterminazione")) {
         // setto il riferimento per la ricerca documento protocollato
-        this.numDeterminazione = this.activatedRoute.snapshot.paramMap.get(
-          "numDeterminazione"
-        );
+        this.numDeterminazione =
+          this.activatedRoute.snapshot.paramMap.get("numDeterminazione");
       }
       this.modeSuper = false;
       this.currentSuper = -1;
 
       this.loadTipoAllegato();
-      const typeLoadTipoAllegato = this.fascicoloService.getTypeLoadTipoAllegato();
-      if (typeLoadTipoAllegato === 1) this.loadRiepilogo();
+      const typeLoadTipoAllegato =
+        this.fascicoloService.getTypeLoadTipoAllegato();
+      this.isPregresso =
+        typeLoadTipoAllegato == 6 || typeLoadTipoAllegato == 7 ? true : false;
 
+      if (typeLoadTipoAllegato === 1 || this.isPregresso) this.loadRiepilogo();
 
-      if(this.fascicoloService.message){
+      if (this.fascicoloService.message) {
         this.mess = this.fascicoloService.message;
         this.manageMessageBottom();
       }
-
     });
   }
 
@@ -246,7 +250,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
 
   resetMessageBottom() {
     this.showMessageBottom = false;
-    this.typeMessageBottom= null;
+    this.typeMessageBottom = null;
     this.messageBottom = null;
   }
 
@@ -254,15 +258,19 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     this.subscribers.riepilogo = this.sharedVerbaleService
       .riepilogoVerbale(this.idVerbale)
       .subscribe((data) => {
-        if (data.verbale && data.verbale.stato && data.verbale.stato.id === 1) {
-          this.incompleted = true;
+        if (data.verbale) {
+          if (data.verbale.stato && data.verbale.stato.id === 1) {
+            this.incompleted = true;
+          }
+          this.riepilogoVerbale = data;
         }
       });
   }
 
   //recupero le tipologie di allegato allegabili
   loadTipoAllegato() {
-    const typeLoadTipoAllegato = this.fascicoloService.getTypeLoadTipoAllegato();
+    const typeLoadTipoAllegato =
+      this.fascicoloService.getTypeLoadTipoAllegato();
     this.isPregresso =
       typeLoadTipoAllegato == 6 || typeLoadTipoAllegato == 7 ? true : false;
     this.loadedCategoriaAllegato = false;
@@ -293,21 +301,25 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     request.aggiungiCategoriaEmail = true;
 
     if (request instanceof TipologiaAllegabiliOrdinanzaSoggettoRequest) {
-      call = this.sharedOrdinanzaService.getTipologiaAllegatiAllegabiliByOrdinanzaVerbaleSoggetto(
-        request
-      );
+      call =
+        this.sharedOrdinanzaService.getTipologiaAllegatiAllegabiliByOrdinanzaVerbaleSoggetto(
+          request
+        );
     } else if (typeLoadTipoAllegato === 4) {
-      call = this.sharedOrdinanzaService.getTipologiaAllegatiAllegabiliByOrdinanza(
-        request
-      );
+      call =
+        this.sharedOrdinanzaService.getTipologiaAllegatiAllegabiliByOrdinanza(
+          request
+        );
     } else if (typeLoadTipoAllegato === 6) {
-      call = this.pregressoVerbaleService.getTipologiaAllegatiAllegabiliVerbale(
-        request
-      );
+      call =
+        this.pregressoVerbaleService.getTipologiaAllegatiAllegabiliVerbale(
+          request
+        );
     } else if (typeLoadTipoAllegato === 7) {
-      call = this.pregressoVerbaleService.getTipologiaAllegatiAllegabiliByOrdinanza(
-        request
-      );
+      call =
+        this.pregressoVerbaleService.getTipologiaAllegatiAllegabiliByOrdinanza(
+          request
+        );
     } else {
       call = this.verbaleService.getTipologiaAllegatiAllegabiliVerbale(request);
     }
@@ -422,7 +434,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
         if (data.messaggio) {
           this.mess = data.messaggio;
           this.manageMessageBottom();
-        }else{
+        } else {
           this.mess = null;
           this.resetMessageBottom();
         }
@@ -431,7 +443,8 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
         this.loaded = true;
         this.fascicoloService.searchFormRicercaProtocol =
           ricerca.numeroProtocollo;
-        this.searchFormRicercaProtocol = this.fascicoloService.searchFormRicercaProtocol;
+        this.searchFormRicercaProtocol =
+          this.fascicoloService.searchFormRicercaProtocol;
         this.dataRicercaProtocollo = data.documentoProtocollatoVOList;
 
         // reset sezione assegna documenti
@@ -520,36 +533,38 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     } else if ($idTipo == 27) {
       // convocazione audizione
       this.typeSaveRequestCategory = 6;
-      this.configSoggetti = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
-        true,
-        1,
-        (el: TableSoggettiVerbale) => {
-          if (el.verbaleAudizioneCreato) {
-            return false;
-          } else {
-            return true;
-          }
-        },
-        false
-      );
+      this.configSoggetti =
+        this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
+          true,
+          1,
+          (el: TableSoggettiVerbale) => {
+            if (el.verbaleAudizioneCreato) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          false
+        );
       this.showCompMeta = 27;
       this.compMetaDataDisabled = true;
       this._checkSave();
     } else if ($idTipo == 10) {
       // verbale audizione
       this.typeSaveRequestCategory = 7;
-      this.configSoggetti = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
-        true,
-        1,
-        (el: TableSoggettiVerbale) => {
-          if (el.verbaleAudizioneCreato) {
-            return false;
-          } else {
-            return true;
-          }
-        },
-        false
-      );
+      this.configSoggetti =
+        this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
+          true,
+          1,
+          (el: TableSoggettiVerbale) => {
+            if (el.verbaleAudizioneCreato) {
+              return false;
+            } else {
+              return true;
+            }
+          },
+          false
+        );
       this.showCompMeta = 10;
       this.compMetaDataDisabled = true;
       this._checkSave();
@@ -557,6 +572,11 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       // letter accompagnatoria ordinanza
       this.typeSaveRequestCategory = 4;
       this.showCompMeta = 19;
+      this.compMetaDataDisabled = true;
+      this._checkSave();
+    }
+    if ($idTipo == 5) {
+      // ordinanza
       this.compMetaDataDisabled = true;
       this._checkSave();
     } else {
@@ -583,11 +603,12 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
         this.validsAllegatoMetadata.find((item: any) => item.valid === false))
     ) {
       this.saveDisabled = true;
-    }
-    if (this.modeSuper && this.compMetaDataDisabled) {
-      this.saveDisabled = true;
     } else {
-      this.saveDisabled = false;
+      if (this.modeSuper && this.compMetaDataDisabled) {
+        this.saveDisabled = true;
+      } else {
+        this.saveDisabled = false;
+      }
     }
   }
 
@@ -667,23 +688,19 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       let saveRequest: saveRequestFascicoloAllegatoDaActaComponent;
       if (this.typeSaveRequestCategory == 1) {
         saveRequest = new SalvaOrdinanzaPregressiRequest(this.idVerbale);
-        (<SalvaOrdinanzaPregressiRequest>(
-          saveRequest
-        )).soggetti = this.compMetaData.soggetti;
-        (<SalvaOrdinanzaPregressiRequest>(
-          saveRequest
-        )).notifica = this.compMetaData.notifica;
-        (<SalvaOrdinanzaPregressiRequest>(
-          saveRequest
-        )).ordinanza = this.compMetaData.ordinanza;
+        (<SalvaOrdinanzaPregressiRequest>saveRequest).soggetti =
+          this.compMetaData.soggetti;
+        (<SalvaOrdinanzaPregressiRequest>saveRequest).notifica =
+          this.compMetaData.notifica;
+        (<SalvaOrdinanzaPregressiRequest>saveRequest).ordinanza =
+          this.compMetaData.ordinanza;
       } else if (this.typeSaveRequestCategory == 2) {
         saveRequest = new SalvaPianoPregressiRequest(
           this.idVerbale,
           this.idOrdinanza
         );
-        (<SalvaPianoPregressiRequest>(
-          saveRequest
-        )).piano = this.compMetaData.piano;
+        (<SalvaPianoPregressiRequest>saveRequest).piano =
+          this.compMetaData.piano;
       } else if (this.typeSaveRequestCategory == 3) {
         if (
           (this.compMetaData.getData &&
@@ -694,7 +711,8 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
             this.idVerbale,
             this.idOrdinanza
           );
-          const myData = this.pregressoRiscossioneSollecitoDettaglioInsComponent.getData();
+          const myData =
+            this.pregressoRiscossioneSollecitoDettaglioInsComponent.getData();
           (<SalvaSollecitoPregressiRequest>saveRequest).notifica =
             myData.notifica;
           (<SalvaSollecitoPregressiRequest>saveRequest).sollecito =
@@ -709,7 +727,8 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
         );
       } else if (this.typeSaveRequestCategory == 5) {
         let request = new SalvaAllegatoOrdinanzaVerbaleSoggettoRequest();
-        request.idOrdinanzaVerbaleSoggetto = this.compMetaData.idOrdinanzaVerbaleSoggetto;
+        request.idOrdinanzaVerbaleSoggetto =
+          this.compMetaData.idOrdinanzaVerbaleSoggetto;
         request.idTipoAllegato = this.compMetaData.tipoAllegatoSelezionatoId;
         request.allegatoField = this.compMetaData.metaDataModel;
         this._saveRequestAsis(typeSaveRequest, request);
@@ -717,24 +736,20 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       } else if (this.typeSaveRequestCategory == 6) {
         // convocazione audizione
         saveRequest = new SalvaConvocazioneAudizioneRequest(this.idVerbale);
-        (<SalvaConvocazioneAudizioneRequest>(
-          saveRequest
-        )).idVerbaleSoggettoList = this.compMetaData.idVerbaleSoggettoList;
+        (<SalvaConvocazioneAudizioneRequest>saveRequest).idVerbaleSoggettoList =
+          this.compMetaData.idVerbaleSoggettoList;
       } else if (this.typeSaveRequestCategory == 7) {
         // verbale audizione
         saveRequest = new SalvaVerbaleAudizioneRequest(this.idVerbale);
-        (<SalvaVerbaleAudizioneRequest>(
-          saveRequest
-        )).idVerbaleSoggettoList = this.compMetaData.idVerbaleSoggettoList;
+        (<SalvaVerbaleAudizioneRequest>saveRequest).idVerbaleSoggettoList =
+          this.compMetaData.idVerbaleSoggettoList;
       } else if (this.isRicevutaPagamentoPregressa()) {
         let request = new SalvaAllegatoVerbaleRequest();
         request.idVerbale = this.idVerbale;
-        request.idTipoAllegato = this.validsAllegatoMetadata[
-          this.currentSuper
-        ].idTipo;
-        request.allegatoField = this.validsAllegatoMetadata[
-          this.currentSuper
-        ].metaDataModel;
+        request.idTipoAllegato =
+          this.validsAllegatoMetadata[this.currentSuper].idTipo;
+        request.allegatoField =
+          this.validsAllegatoMetadata[this.currentSuper].metaDataModel;
         this._saveRequestAsis(typeSaveRequest, request);
         return;
       } else if (typeSaveRequest === 2) {
@@ -824,9 +839,10 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     } else if (
       saveRequest instanceof SalvaAllegatoOrdinanzaVerbaleSoggettoRequest
     ) {
-      call = this.pregressoVerbaleService.salvaAllegatoOrdinanzaVerbaleSoggetto(
-        saveRequest
-      );
+      call =
+        this.pregressoVerbaleService.salvaAllegatoOrdinanzaVerbaleSoggetto(
+          saveRequest
+        );
     }
 
     if (call) {
@@ -879,9 +895,10 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
         <SalvaSollecitoPregressiRequest>saveRequest
       );
     } else if (this.typeSaveRequestCategory == 4) {
-      call = this.pregressoVerbaleService.salvaAllegatoProtocollatoOrdinanzaSoggetto(
-        <SalvaAllegatoProtocollatoOrdinanzaSoggettoRequest>saveRequest
-      );
+      call =
+        this.pregressoVerbaleService.salvaAllegatoProtocollatoOrdinanzaSoggetto(
+          <SalvaAllegatoProtocollatoOrdinanzaSoggettoRequest>saveRequest
+        );
     } else if (this.typeSaveRequestCategory == 6) {
       call = this.pregressoVerbaleService.salvaConvocazioneAudizione(
         <SalvaConvocazioneAudizioneRequest>saveRequest
@@ -891,9 +908,10 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
         <SalvaVerbaleAudizioneRequest>saveRequest
       );
     } else if (typeSaveRequest === 2) {
-      call = this.sharedOrdinanzaService.salvaAllegatoProtocollatoOrdinanzaSoggetto(
-        <SalvaAllegatoProtocollatoOrdinanzaSoggettoRequest>saveRequest
-      );
+      call =
+        this.sharedOrdinanzaService.salvaAllegatoProtocollatoOrdinanzaSoggetto(
+          <SalvaAllegatoProtocollatoOrdinanzaSoggettoRequest>saveRequest
+        );
     } else if (typeSaveRequest === 3) {
       call = this.sharedOrdinanzaService.salvaAllegatoProtocollatoOrdinanza(
         <SalvaAllegatoProtocollatoOrdinanzaRequest>saveRequest
@@ -1305,12 +1323,12 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
           saveAs(data, myFilename || "Unknown");
         } else {
           let myBlob: any = data;
-          if(myBlob.type=='application/json'){
+          if (myBlob.type == "application/json") {
             win.close();
-            myBlob.text().then(text => {
+            myBlob.text().then((text) => {
               this.manageMessage(JSON.parse(text));
             });
-          }else{
+          } else {
             myBlob.name = myFilename;
             var fileURL = URL.createObjectURL(myBlob);
             win.location.href = fileURL;
@@ -1344,12 +1362,12 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
           saveAs(data, myFilename || "Unknown");
         } else {
           let myBlob: any = data;
-          if(myBlob.type=='application/json'){
+          if (myBlob.type == "application/json") {
             win.close();
-            myBlob.text().then(text => {
+            myBlob.text().then((text) => {
               this.manageMessage(JSON.parse(text));
             });
-          }else{
+          } else {
             myBlob.name = myFilename;
             var fileURL = URL.createObjectURL(myBlob);
             win.location.href = fileURL;
@@ -1467,6 +1485,10 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   }
 
   back(): void {
-    this.router.navigateByUrl(this.fascicoloService.backPage);
+    if (this.incompleted) {
+      this.router.navigateByUrl(this.fascicoloService.backPage);
+    } else {
+      this.goToVerbaleRiepilogo();
+    }
   }
 }

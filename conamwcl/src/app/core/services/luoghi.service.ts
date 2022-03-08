@@ -17,6 +17,10 @@ export class LuoghiService {
         var url: string = this.config.getBEServer() + '/restfacade/luoghi/regioni';
         return this.http.get<Array<RegioneVO>>(url);
     }
+    getcomuniEnteValidInDate () {
+        var url: string = this.config.getBEServer() + '/restfacade/luoghi/comuniEnteValidInDate';
+        return this.http.get<Array<ProvinciaVO>>(url);
+    }
 
     getProvinciaByIdRegione(id: number) {
         var url: string = this.config.getBEServer() + '/restfacade/luoghi/provinceByIdRegione';

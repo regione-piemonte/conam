@@ -5,8 +5,14 @@
             <h4 class="border-title"><strong>Aggiornamento stato fascicolo pregresso</strong></h4>
         </div>
         <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop"></shared-alert>
-        <div *ngIf="!showMessageTop" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 alert alert-warning" role="alert">
+        <div *ngIf="!showMessageTop && !(statoCurrent && statoCurrent.warningMessage)" 
+            class="col-xs-12 col-sm-12 col-md-12 col-lg-12 alert alert-warning" role="alert">
             <span [innerHTML]="alertWarning"></span>
+        </div>
+        <div *ngIf="statoCurrent &&  statoCurrent.warningMessage" 
+        class="{{'col-xs-12 col-sm-12 col-md-12 col-lg-12 alert alert-' + statoCurrent.warningMessage?.type}}" role="alert"
+        [innerHTML]="statoCurrent.warningMessage?.message">
+        
         </div>
 
         <div *ngIf="!showMessageTop  && statiVerbaliModel.length>0" class="col-xs-12 col-sm-12 col-md-12 col-lg-6"
@@ -16,10 +22,11 @@
                 *ngIf="!loadedstativerbale;  else elseStatoIstr"></shared-spinner-form>
             <ng-template #elseStatoIstr>
                 <select class="form-control"
-                    (change)="changeStato(salvaStatoVerbaleRequest.idAzione)"
+                    (change)="changeStato()"
                     [(ngModel)]="salvaStatoVerbaleRequest.idAzione" name="statoIstr" required>
                     <option *ngFor="let stato of statiVerbaliModel" [value]="stato.id">
-                        {{stato.denominazione}}</option>
+                        {{stato.denominazione}}
+                    </option>
                 </select>
             </ng-template>
         </div>

@@ -21,7 +21,9 @@ declare var $: any;
   selector: "shared-inserimento-notifica",
   templateUrl: "./shared-inserimento-notifica.component.html",
 })
-export class SharedInserimentoNotificaComponent implements OnInit, OnDestroy, OnChanges {
+export class SharedInserimentoNotificaComponent
+  implements OnInit, OnDestroy, OnChanges
+{
   public subscribers: any = {};
 
   public loadedModalita: boolean;
@@ -89,9 +91,8 @@ export class SharedInserimentoNotificaComponent implements OnInit, OnDestroy, On
         );
         let notifivaVuota = new ModalitaNotificaVO();
         this.modalitaModel.push(notifivaVuota);
-        this.notifica.modalita = this.modalitaModel[
-          this.modalitaModel.length - 1
-        ];
+        this.notifica.modalita =
+          this.modalitaModel[this.modalitaModel.length - 1];
       } else if (
         this.notifica.dataNotifica == undefined ||
         this.notifica.dataNotifica == ""
@@ -101,9 +102,8 @@ export class SharedInserimentoNotificaComponent implements OnInit, OnDestroy, On
         );
         let notifivaVuota = new ModalitaNotificaVO();
         this.modalitaModel.push(notifivaVuota);
-        this.notifica.modalita = this.modalitaModel[
-          this.modalitaModel.length - 1
-        ];
+        this.notifica.modalita =
+          this.modalitaModel[this.modalitaModel.length - 1];
       } else {
         this.modalitaModel = this.modalitaModelAll.filter((modalita) =>
           this.makeNotifyTRUE.includes(modalita.id)
@@ -114,47 +114,48 @@ export class SharedInserimentoNotificaComponent implements OnInit, OnDestroy, On
 
   loadNotifica() {
     this.loaded = false;
-    if(this.idOrdinanza || this.idPiano || this.idSollecito){
-    this.subscribers.getModalitaNotifica = this.sharedNotificaService
-      .getNotificaBy(this.idOrdinanza, this.idPiano, this.idSollecito)
-      .subscribe(
-        (data) => {
-          this.notifica = data;
-          this.loaded = true;
-          if (this.notifica != null || this.notifica != undefined) {
-                if( this.notifica.modalita != null ||
-                  this.notifica.modalita != undefined){
-                    if (
-                      this.notifica.importoSpeseNotifica != null ||
-                      this.notifica.importoSpeseNotifica != undefined
-                    ) {
-                      this.notificata = true;
-                    } 
-                    else {
-                      this.notificata = false;
-                    }
-              }
-              else{
-                if(this.notifica.modalita && (this.notifica.modalita.id == 1 || this.notifica.modalita.id == 2)){
-                this.notificata = true;}
-                else{
+    if (this.idOrdinanza || this.idPiano || this.idSollecito) {
+      this.subscribers.getModalitaNotifica = this.sharedNotificaService
+        .getNotificaBy(this.idOrdinanza, this.idPiano, this.idSollecito)
+        .subscribe(
+          (data) => {
+            this.notifica = data;
+            this.loaded = true;
+            if (this.notifica != null || this.notifica != undefined) {
+              if (
+                this.notifica.modalita != null ||
+                this.notifica.modalita != undefined
+              ) {
+                if (
+                  this.notifica.importoSpeseNotifica != null ||
+                  this.notifica.importoSpeseNotifica != undefined
+                ) {
+                  this.notificata = true;
+                } else {
+                  this.notificata = false;
+                }
+              } else {
+                if (
+                  this.notifica.modalita &&
+                  (this.notifica.modalita.id == 1 ||
+                    this.notifica.modalita.id == 2)
+                ) {
+                  this.notificata = true;
+                } else {
                   this.notificata = false;
                 }
               }
-        
-          } 
-          else {
-            this.notifica = new NotificaVO();
-            this.notificata = false;
+            } else {
+              this.notifica = new NotificaVO();
+              this.notificata = false;
+            }
+            this.settaComboMadiltaByCodeModalitaNotifica();
+          },
+          (err) => {
+            this.logger.error("Errore durante il recupero delle notifiche");
           }
-          this.settaComboMadiltaByCodeModalitaNotifica();
-        },
-        (err) => {
-          this.logger.error("Errore durante il recupero delle notifiche");
-        }
-      );
-    }
-    else{
+        );
+    } else {
       this.loaded = true;
     }
   }
@@ -218,9 +219,8 @@ export class SharedInserimentoNotificaComponent implements OnInit, OnDestroy, On
             );
             let notifivaVuota = new ModalitaNotificaVO();
             this.modalitaModel.push(notifivaVuota);
-            this.notifica.modalita = this.modalitaModel[
-              this.modalitaModel.length - 1
-            ];
+            this.notifica.modalita =
+              this.modalitaModel[this.modalitaModel.length - 1];
           } else {
             this.modalitaModel = this.modalitaModelAll.filter((modalita) =>
               this.makeNotifyTRUE.includes(modalita.id)
@@ -271,8 +271,17 @@ export class SharedInserimentoNotificaComponent implements OnInit, OnDestroy, On
   }
   //-----------------------------
 
-  isKeyPressed(code: number): boolean {
-    return this.numberUtilsSharedService.numberValid(code);
+  isKeyPressed(code: number, label: string): boolean {
+    if (label !== "Numero raccomandata") {
+      return this.numberUtilsSharedService.numberValid(code);
+    } else {
+      return  (
+        (code >= 48 && code <= 57) ||
+        (code >= 96 && code <= 105) ||
+        code == 8 ||
+        code == 46
+      );
+    }
   }
 
   manageMessage(type: string, message: string) {

@@ -57,7 +57,7 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
   public regioneModel: Array<RegioneVO>;
   public provinciaModel: Array<ProvinciaVO>;
   public comuneModel: Array<ComuneVO>;
-
+  public comuneEnteModel: Array<ComuneVO>;
   public enteAccertatoreModel: Array<EnteVO>;
   public enteModel: Array<EnteVO>;
   public ambitoModel: Array<Array<AmbitoVO>> = [];
@@ -122,11 +122,12 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
               "salvato_con_warning"
             )
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 
             this.loadRegioni();
+            this.comuniEnteValidInDate();
             this.loadEnti(data.entiAccertatore, data.entiLegge);
 
             if (!this.idVerbale) this.nuovoVerbale();
@@ -284,7 +285,7 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
               );
             if (azione == "salvato_con_warning")
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 
@@ -417,6 +418,19 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
         this.logger.error("Errore nel recupero delle regioni");
       }
     );
+  }
+
+  comuniEnteValidInDate() {
+    this.subscribers.comuniEnteValidInDate = this.luoghiService
+      .getcomuniEnteValidInDate()
+      .subscribe(
+        (data) => {
+          this.comuneEnteModel = data;
+        },
+        (err) => {
+          this.logger.error("Errore nel recupero dei comuni Ente");
+        }
+      );
   }
 
   loadProvinceByIdRegione(idRegione: number) {
@@ -839,6 +853,7 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
   }
 
   manageDatePicker(event: any, i: number) {
+   
     var str: string = "#datetimepicker" + i.toString();
     if ($(str).length) {
       $(str).datetimepicker({
@@ -854,11 +869,15 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
           break;
         case 2:
           this.verbale.dataOraAccertamento = event.srcElement.value;
+          this.verbale.dataOraViolazione = this.verbale.dataOraAccertamento
           break;
       }
     }
+   
   }
-
+  modelChangeFn(value: string){
+    this.verbale.dataOraViolazione = value
+  }
   //restituisce true se la dataOra1 è successiva alla dataOra2
   isAfter(dataOra1: string, dataOra2: string): boolean {
     let DD1, DD2, MM1, MM2, YYYY1, YYYY2, HH1, HH2, mm1, mm2: string;

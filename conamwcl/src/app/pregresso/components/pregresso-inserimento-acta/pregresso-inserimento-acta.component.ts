@@ -77,7 +77,7 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
   public regioneModel: Array<RegioneVO>;
   public provinciaModel: Array<ProvinciaVO>;
   public comuneModel: Array<ComuneVO>;
-
+  public comuneEnteModel: Array<ComuneVO>;
   public enteAccertatoreModel: Array<EnteVO>;
   public enteModel: Array<EnteVO>;
   public ambitoModel: Array<Array<AmbitoVO>> = [];
@@ -176,12 +176,13 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
               "salvato_con_warning"
             )
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 
             this.loadTipoAllegato();
             this.loadRegioni();
+            this.comuniEnteValidInDate();
             this.loadEnti(data.entiAccertatore, data.entiLegge);
 
             if (!this.idVerbale) this.nuovoVerbale();
@@ -367,7 +368,7 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
               )
             )
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 
@@ -537,6 +538,7 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
   }
 
   _messageSave(message: string) {
+   
     /* genera messaggio */
     this.subLinks = new Array<any>();
     this.subMessagess = new Array<string>();
@@ -556,8 +558,9 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
     //premo "Conferma"
     this.subscribers.save = this.sharedDialog.salvaAction.subscribe(
       (data) => {
-        this.subLinks = new Array<any>();
+       this.subLinks = new Array<any>();
         this.subMessagess = new Array<string>();
+       
       },
       (err) => {
         this.logger.error(err);
@@ -703,6 +706,19 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
     ) {
       this.loadProvinceByIdRegione(this.verbale.regione.id);
     }
+  }
+
+  comuniEnteValidInDate() {
+    this.subscribers.comuniEnteValidInDate = this.luoghiService
+      .getcomuniEnteValidInDate()
+      .subscribe(
+        (data) => {
+          this.comuneEnteModel = data;
+        },
+        (err) => {
+          this.logger.error("Errore nel recupero dei comuni Ente");
+        }
+      );
   }
 
   loadProvinceByIdRegione(idRegione: number) {
@@ -1173,8 +1189,9 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
           break;
         case 2:
           const isChangedDataOraAccertamento =
-            this.verbale.dataOraAccertamento !== event.srcElement.value;
+          this.verbale.dataOraAccertamento !== event.srcElement.value;
           this.verbale.dataOraAccertamento = event.srcElement.value;
+          this.verbale.dataOraViolazione = this.verbale.dataOraAccertamento
           break;
       }
     }
@@ -1427,7 +1444,9 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
         }
       });
   }
-
+  modelChangeFn(value: string){
+    this.verbale.dataOraViolazione = value
+  }
   openAllegato(el: DocumentoProtocollatoVO) {
     const myFilename =
       typeof el.filename == "string" ? el.filename : el.filename.nomeFile;

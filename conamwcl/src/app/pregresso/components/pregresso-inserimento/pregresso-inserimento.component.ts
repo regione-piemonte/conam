@@ -152,7 +152,7 @@ export class PregressoInserimentoComponent implements OnInit, OnDestroy {
               "salvato_con_warning"
             )
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 
@@ -314,7 +314,7 @@ export class PregressoInserimentoComponent implements OnInit, OnDestroy {
               );
             if (azione == "salvato_con_warning")
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 

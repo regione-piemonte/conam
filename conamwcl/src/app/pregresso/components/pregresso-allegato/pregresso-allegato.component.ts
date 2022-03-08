@@ -77,7 +77,6 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.logger.init(PregressoAllegatoComponent.name);
-
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
       this.idVerbale = +params["id"];
       if (isNaN(this.idVerbale))

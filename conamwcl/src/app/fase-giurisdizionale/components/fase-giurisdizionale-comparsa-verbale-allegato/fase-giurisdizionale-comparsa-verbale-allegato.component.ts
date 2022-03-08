@@ -84,7 +84,7 @@ export class FaseGiurisdizionaleComparsaCostituzioneRispostaAllegatoComponent im
         
         //mando il file al Back End
         this.loaded = false;
-        this.subscribers.salvaAllegato = this.sharedVerbaleService.salvaAllegatoOrdinanzaMaster(allegati).subscribe(data => {
+        this.subscribers.salvaAllegato = this.sharedVerbaleService.salvaAllegatoVerbaleMaster(allegati).subscribe(data => {
             this.loadTipoAllegato();
             let azione: string;
             if(!this.multipli)

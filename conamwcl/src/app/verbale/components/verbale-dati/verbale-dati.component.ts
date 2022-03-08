@@ -41,6 +41,7 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
   public loadedRegioni: boolean;
   public loadedProvince: boolean;
   public loadedComuni: boolean;
+  public loadedComuneEnte: boolean = true;
 
   public singoloEnte: boolean;
   public loadedAmbito: Array<boolean> = [];
@@ -56,6 +57,7 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
   public regioneModel: Array<RegioneVO>;
   public provinciaModel: Array<ProvinciaVO>;
   public comuneModel: Array<ComuneVO>;
+  public comuneEnteModel: Array<ComuneVO>;
 
   public enteAccertatoreModel: Array<EnteVO>;
   public enteModel: Array<EnteVO>;
@@ -120,13 +122,13 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
               "salvato_con_warning"
             )
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 
             this.loadRegioni();
             this.loadEnti(data.entiAccertatore, data.entiLegge);
-
+            this.comuniEnteValidInDate();
             if (!this.idVerbale) this.nuovoVerbale();
             else this.modificaVerbale();
           }
@@ -282,7 +284,7 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
               );
             if (azione == "salvato_con_warning")
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 
@@ -329,7 +331,8 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
   cleanRiferimentiNormativi() {
     let i: number,
       lenght: number = this.verbale.riferimentiNormativi.length;
-    let arr: Array<RiferimentiNormativiVO> = new Array<RiferimentiNormativiVO>();
+    let arr: Array<RiferimentiNormativiVO> =
+      new Array<RiferimentiNormativiVO>();
     for (i = 0; i < lenght; i++) {
       if (this.isVisible[i]) {
         arr.push(this.verbale.riferimentiNormativi[i]);
@@ -415,6 +418,18 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
         this.logger.error("Errore nel recupero delle regioni");
       }
     );
+  }
+  comuniEnteValidInDate() {
+    this.subscribers.comuniEnteValidInDate = this.luoghiService
+      .getcomuniEnteValidInDate()
+      .subscribe(
+        (data) => {
+          this.comuneEnteModel = data;
+        },
+        (err) => {
+          this.logger.error("Errore nel recupero dei comuni Ente");
+        }
+      );
   }
 
   loadProvinceByIdRegione(idRegione: number) {
@@ -705,8 +720,12 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
       )
         flag = true;
     }
-    if(this.verbale.numero && this.verbale.numero.length>0 && this.verbale.numero.length>50){
-      flag=true;
+    if (
+      this.verbale.numero &&
+      this.verbale.numero.length > 0 &&
+      this.verbale.numero.length > 50
+    ) {
+      flag = true;
     }
     return flag;
   }
@@ -778,7 +797,6 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
   }
 
   manageDatePicker(event: any, i: number) {
-   
     var str: string = "#datetimepicker" + i.toString();
     if ($(str).length) {
       $(str).datetimepicker({
@@ -794,11 +812,11 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
           break;
         case 2:
           this.verbale.dataOraAccertamento = event.srcElement.value;
-          this.verbale.dataOraViolazione = this.verbale.dataOraAccertamento
+          this.verbale.dataOraViolazione = this.verbale.dataOraAccertamento;
+          this.modelChangeFn(event.srcElement.value);
           break;
       }
     }
-   
   }
 
   //restituisce true se la dataOra1 è successiva alla dataOra2
@@ -863,8 +881,8 @@ export class VerbaleDatiComponent implements OnInit, OnDestroy {
       this.scrollEnable = false;
     }
   }
-  modelChangeFn(value: string){
-    this.verbale.dataOraViolazione = value
+  modelChangeFn(value: string) {
+    this.verbale.dataOraViolazione = value;
   }
 
   ngOnDestroy(): void {

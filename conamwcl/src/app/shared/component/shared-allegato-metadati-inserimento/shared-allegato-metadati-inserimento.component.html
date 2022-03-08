@@ -62,7 +62,12 @@
         (click)="upload.actions.addFile()"
       >
         <i
-          class="glyphicon glyphicon-paperclip btn-glyphicon img-circle text-red-conam"
+          class="
+            glyphicon glyphicon-paperclip
+            btn-glyphicon
+            img-circle
+            text-red-conam
+          "
         ></i>
         Carica Allegato
       </button>
@@ -79,7 +84,12 @@
         (click)="conferma()"
       >
         <i
-          class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"
+          class="
+            glyphicon glyphicon-ok
+            btn-glyphicon
+            img-circle
+            text-green-conam
+          "
         ></i>
         Conferma Allegato
       </button>
@@ -114,8 +124,27 @@
 
   <!--Metadati degli allegati-->
   <div *ngIf="loadedConfig">
+    <div
+      *ngIf="tipoAllegatoSelezionato && tipoAllegatoSelezionato.id==7 && riepilogoVerbale.verbale && riepilogoVerbale.verbale.importoResiduo"
+      class="col-xs-12 col-sm-12 col-md-2 col-lg-2"
+    ></div>
+    <div
+      *ngIf="tipoAllegatoSelezionato && tipoAllegatoSelezionato.id==7 && riepilogoVerbale.verbale && riepilogoVerbale.verbale.importoResiduo"
+      class="col-xs-12 col-sm-12 col-md-10 col-lg-10"
+      style="padding-bottom: 30px"
+    >
+      <strong
+        >Importo da pagare residuo:
+        {{ riepilogoVerbale.verbale.importoResiduo | currency: "EUR":"symbol" }}
+      </strong>
+    </div>
     <ng-container *ngFor="let cc of configAllegatoSelezionato; let j = index">
-      <div class="col-xs-12 col-sm-12 col-mFaggiungid-12 col-lg-12 allineamento-top">
+      <div
+        class="
+          col-xs-12 col-sm-12 col-mFaggiungid-12 col-lg-12
+          allineamento-top
+        "
+      >
         <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2"></div>
         <ng-container *ngFor="let r of cc; let i = index">
           <div class="form-group col-md-4">
@@ -132,7 +161,7 @@
                     typeAction.isDate(r.fieldType) ||
                     typeAction.isDataOra(r.fieldType)
                 }"
-                id="datetimepicker_{{ r.idModel }}"
+                id="datetimepicker_{{current}}_{{ r.idModel }}"
               >
                 {{ r.nomeCampo }}
                 <input
@@ -146,20 +175,16 @@
                       typeAction.isDate(r.fieldType) ||
                       typeAction.isDataOra(r.fieldType)
                   }"
-                  [attr.maxlength]="r.maxLength"
-                  min="0"
-                  [step]="r.scale"
+                  [maxlength]="r.maxLength"
+                  min="1"
+                  step = "r.scale"
                   [required]="r.required"
-                  [pattern]="
-                    typeAction.isNumeric(r.fieldType)
-                      ? '[0-9]+(\.[0-9]{1,2})?'
-                      : ''
-                  "
                   (change)="check(r.idModel, r.fieldType)"
                   (blur)="onBlur($event, r.idModel, r.fieldType)"
                   [disabled]="disableAll"
-                  (keydown)="isKeyPressed($event.keyCode, r.fieldType)"
+                  (keydown)="isKeyPressed($event.keyCode, r.fieldType, r.label)"
                   decimalPlaces="r.fieldType.id"
+               
                 />
                 <!--
                                 [pattern]="dynamicForm.getPattern(r.fieldType)"
@@ -293,7 +318,12 @@
         (click)="upload.actions.addFileMaster()"
       >
         <i
-          class="glyphicon glyphicon-paperclip btn-glyphicon img-circle text-red-conam"
+          class="
+            glyphicon glyphicon-paperclip
+            btn-glyphicon
+            img-circle
+            text-red-conam
+          "
         ></i>
         Aggiungi Allegato Master
       </button>
@@ -348,7 +378,12 @@
         (click)="fileInput.click()"
       >
         <i
-          class="glyphicon glyphicon-plus btn-glyphicon img-circle text-green-conam"
+          class="
+            glyphicon glyphicon-plus
+            btn-glyphicon
+            img-circle
+            text-green-conam
+          "
         ></i>
         Aggiungi
       </button>
@@ -401,7 +436,12 @@
                 (click)="eliminaFile(item, null)"
               >
                 <i
-                  class="glyphicon glyphicon-trash btn-glyphicon img-circle text-garnet-conam"
+                  class="
+                    glyphicon glyphicon-trash
+                    btn-glyphicon
+                    img-circle
+                    text-garnet-conam
+                  "
                 ></i>
                 Elimina
               </button>
@@ -418,7 +458,12 @@
           [disabled]="isDisabledConfermaAllegato()"
         >
           <i
-            class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"
+            class="
+              glyphicon glyphicon-ok
+              btn-glyphicon
+              img-circle
+              text-green-conam
+            "
           ></i>
           Conferma
         </button>
@@ -430,7 +475,12 @@
           [disabled]="isDisabledCaricaAllegato()"
         >
           <i
-            class="glyphicon glyphicon-paperclip btn-glyphicon img-circle text-red-conam"
+            class="
+              glyphicon glyphicon-paperclip
+              btn-glyphicon
+              img-circle
+              text-red-conam
+            "
           ></i>
           Allega
         </button>
@@ -441,7 +491,12 @@
           [disabled]="!uploaderM.queue.length"
         >
           <i
-            class="glyphicon glyphicon-trash btn-glyphicon img-circle text-garnet-conam"
+            class="
+              glyphicon glyphicon-trash
+              btn-glyphicon
+              img-circle
+              text-garnet-conam
+            "
           ></i>
           Elimina tutti
         </button>
@@ -462,3 +517,15 @@
   [buttonConfirmText]="buttonConfirmText"
   [buttonAnnullaText]="buttonAnnullaText"
 ></shared-dialog>
+<shared-dialog
+  [titolo]="'Attenzione'"
+  [subMessages]="subMessages"
+  [testo]="messageDialog"
+  [buttonConfirmText]="buttonConfirmText"
+  [buttonAnnullaText]="buttonAnnullaText"
+></shared-dialog>
+<shared-alert
+  [message]="messageTop"
+  [type]="typeMessageTop"
+  *ngIf="showMessageTop"
+></shared-alert>

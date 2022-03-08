@@ -77,6 +77,11 @@ $dropDown       : false;
     font-size: 14px;
   }
 
+/* CONAM160 */
+.navbar-header img,
+.navbar-brand img {
+    margin-right: 20px;
+}
 
 
 @media (min-width: 766px) and (max-width: 1300px) {

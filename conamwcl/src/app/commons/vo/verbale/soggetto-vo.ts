@@ -1,4 +1,5 @@
 import { RegioneVO, ComuneVO, RuoloVO, ProvinciaVO, NazioneVO, StatoSoggettoOrdinanzaVO, StatoOrdinanzaVO } from "../../../commons/vo/select-vo";
+import { RelataNotifica } from "../relata-notifica-vo";
 import { MinSoggettoVO } from "./min-soggetto-vo";
 
 export class SoggettoVO extends MinSoggettoVO {
@@ -39,7 +40,7 @@ export class SoggettoVO extends MinSoggettoVO {
 	public comuneNascitaValido: boolean;
 	public verbale: any;
 	public hasMasterIstanza: boolean;
-
+	public relataNotifica: RelataNotifica
 	constructor() {
 		super();
 		if (!this.regioneResidenza) this.regioneResidenza = new RegioneVO();

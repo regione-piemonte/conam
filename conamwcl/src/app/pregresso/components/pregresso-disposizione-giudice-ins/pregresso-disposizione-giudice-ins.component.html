@@ -35,7 +35,7 @@
                                                         type="{{typeAction.getInputType(r.fieldType)}}"
                                                         name="{{r.label}}" id="{{r.label}}" [ngClass]="{'form-control': !typeAction.isCheckbox(r.fieldType),
                                 'date-picker':typeAction.isDate(r.fieldType) || typeAction.isDataOra(r.fieldType)}"
-                                                        [attr.maxlength]="r.maxLength" min="0" [step]="r.scale"
+                                                        [maxlength]="r.maxLength" min="0" [step]="r.scale"
                                                         [required]="r.required"
                                                         [pattern]="typeAction.isNumeric(r.fieldType)? '[0-9]+(\.[0-9]{1,2})?' :''"
                                                         (change)="check(r.idModel, r.fieldType)"

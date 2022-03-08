@@ -42,7 +42,7 @@
           />
         </div>
         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
-          <label for="ente" class="control-label">Ente</label>
+          <label for="ente" class="control-label">Ente – riferimenti normativi</label>
           <shared-spinner-form
             [diameter]="30"
             *ngIf="!loadedEnte; else elseEnte"
@@ -55,7 +55,7 @@
               [(ngModel)]="ricercaVerbale.datiVerbale.ente"
               [disabled]="!tabVerbale"
               name="ente"
-              required
+              
             >
               <option *ngFor="let ent of entiLegge" [ngValue]="ent">
                 {{ ent.denominazione }}
@@ -106,7 +106,7 @@
               "
               [(ngModel)]="ricercaVerbale.datiVerbale.norma"
               name="leggeViolata"
-              required
+              
             >
               <option *ngFor="let norm of normaModel" [ngValue]="norm">
                 {{ norm.denominazione }}

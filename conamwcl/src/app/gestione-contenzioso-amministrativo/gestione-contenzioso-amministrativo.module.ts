@@ -32,6 +32,9 @@ import { ConvocazioneAudizioneTemplateLetteraGestContAmministrativoComponent } f
 import { ConvocazioneAudizioneRiepilogoComponent } from "./components/convocazione-audizione-riepilogo/convocazione-audizione-riepilogo.component";
 import { RecidivitaRicercaComponent } from "./components/recidivita-ricerca/recidivita-ricerca.component";
 import { RecidivitaDettaglioComponent } from "./components/recidivita-dettaglio/recidivita-dettaglio.component";
+import { ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent } from "./components/convocazione-audizione-crea-soggetto/convocazione-audizione-crea-soggetto.component";
+
+
 
 
 @NgModule({
@@ -64,11 +67,13 @@ import { RecidivitaDettaglioComponent } from "./components/recidivita-dettaglio/
         ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent,
         ControdeduzioniVerbaleAllegatoComponent,                
         ConvocazioneAudizioneCreaGestContAmministrativoComponent,
+        ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent,
         ConvocazioneAudizioneRicercaComponent,
         ConvocazioneAudizioneRiepilogoComponent,
         ConvocazioneAudizioneTemplateLetteraGestContAmministrativoComponent,
         RecidivitaRicercaComponent,
-        RecidivitaDettaglioComponent
+        RecidivitaDettaglioComponent,
+      
 
     ],
     declarations: [
@@ -88,11 +93,13 @@ import { RecidivitaDettaglioComponent } from "./components/recidivita-dettaglio/
         ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent,
         ControdeduzioniVerbaleAllegatoComponent,                
         ConvocazioneAudizioneCreaGestContAmministrativoComponent,
+        ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent,
         ConvocazioneAudizioneRicercaComponent,
         ConvocazioneAudizioneRiepilogoComponent,
         ConvocazioneAudizioneTemplateLetteraGestContAmministrativoComponent,
         RecidivitaRicercaComponent,
-        RecidivitaDettaglioComponent
+        RecidivitaDettaglioComponent,
+       
     ],
     providers: [FaseGiurisdizionaleOrdinanzaService, FaseGiurisdizionaleVerbaleAudizioneService]
 })

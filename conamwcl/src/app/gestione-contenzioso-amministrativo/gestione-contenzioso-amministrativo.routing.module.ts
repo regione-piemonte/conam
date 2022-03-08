@@ -21,6 +21,7 @@ import { ConvocazioneAudizioneCreaGestContAmministrativoComponent } from "./comp
 import { ConvocazioneAudizioneTemplateLetteraGestContAmministrativoComponent } from "./components/convocazione-audizione-template-lettera/convocazione-audizione-template-lettera.component";
 import { RecidivitaRicercaComponent } from "./components/recidivita-ricerca/recidivita-ricerca.component";
 import { RecidivitaDettaglioComponent } from "./components/recidivita-dettaglio/recidivita-dettaglio.component";
+import { ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent } from "./components/convocazione-audizione-crea-soggetto/convocazione-audizione-crea-soggetto.component";
 
 const routes: Routes = [
     {
@@ -48,6 +49,7 @@ const routes: Routes = [
             { path: 'convocazione-audizione-ricerca', component: ConvocazioneAudizioneRicercaComponent },
             { path: 'convocazione-audizione-riepilogo/:id', component: ConvocazioneAudizioneRiepilogoComponent },
             { path: 'convocazione-audizione-crea/:id', component: ConvocazioneAudizioneCreaGestContAmministrativoComponent },
+            { path: 'convocazione-audizione-crea-soggetto/:id', component: ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent },
             { path: 'convocazione-audizione-template-lettera/:id', component: ConvocazioneAudizioneTemplateLetteraGestContAmministrativoComponent },
             { path: 'recidivita-ricerca', component: RecidivitaRicercaComponent },
             { path: 'recidivita-dettaglio/:id', component: RecidivitaDettaglioComponent },

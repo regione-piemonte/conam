@@ -78,7 +78,7 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
 
   //insert soggetto
   public isAggiungiSoggetto: boolean;
-  public soggetto: SoggettoPregressiVO;
+  public soggetto: SoggettoPregressiVO  = new SoggettoPregressiVO();
   public modalita: string;
   public showResidenza: boolean = false;
   public loadedSalvaRicerca: boolean;
@@ -126,7 +126,7 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.logger.init(PregressoSoggettoComponent.name);
-
+    
     this.loadSoggettiAssociatiAVerbale();
     this.loadNazioni();
     this.loadRegioni();

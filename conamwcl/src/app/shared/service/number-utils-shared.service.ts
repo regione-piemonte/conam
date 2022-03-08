@@ -19,7 +19,7 @@ export class NumberUtilsSharedService implements OnDestroy {
       //block numeric
       if ((code >= 96 && code <= 105) || code == 110) return true;
       //punto virgola backspace canc
-      if (code == 188 || code == 190 || code == 8 || code == 46) return true;
+      if (code == 8 || code == 46) return true;
       else return false;
     }
     //xchrome
@@ -27,6 +27,7 @@ export class NumberUtilsSharedService implements OnDestroy {
       return code != 69 && code != 107 && code != 109;
     }
   }
+ 
   ngOnDestroy(): void {
     this.logger.destroyService(NumberUtilsSharedService.name);
   }

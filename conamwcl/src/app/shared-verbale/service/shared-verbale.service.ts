@@ -124,6 +124,28 @@ export class SharedVerbaleService {
         return this.http.post<AllegatoVO>(url, form);
     }
 
+    salvaAllegatoVerbaleMaster (input: SalvaAllegatoMultipleRequest): Observable<AllegatoVO> { 
+        var url: string = this.config.getBEServer() + '/restfacade/verbale/salvaAllegatoVerbaleMaster';
+        let form = new FormData();
+        form.append("data", JSON.stringify(input, (k, v) => {
+            if (v instanceof File)
+                return undefined;
+            return null === v ? undefined : v;
+        }));
+       
+        input.allegati.forEach(e => {
+            let name = null;
+            if (e.file != null) {
+
+                name = e.file.name;
+                form.append("files", e.file, name)
+            }
+        }
+        );
+
+        return this.http.post<AllegatoVO>(url, form);
+    }
+
     creaAllegatoVerbale(input: SalvaAllegatoVerbaleRequest): Observable<AllegatoVO> {
         var url: string = this.config.getBEServer() + '/restfacade/verbale/salvaAllegatoVerbale';
         let form = new FormData();

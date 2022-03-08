@@ -1,3 +1,5 @@
+import { MessageVO } from "./messageVO";
+
 export class SelectVO {
 
     public id: number;
@@ -14,7 +16,10 @@ export class ProvinciaVO extends SelectVO {
 export class ComuneVO extends SelectVO { }
 export class NazioneVO extends SelectVO { }
 
-export class StatoVerbaleVO extends SelectVO { }
+export class StatoVerbaleVO extends SelectVO { 
+    public confirmMessage: MessageVO;
+    public warningMessage: MessageVO;
+}
 export class StatoOrdinanzaVO extends SelectVO { }
 export class StatoSentenzaVO extends SelectVO { }
 export class StatoSoggettoOrdinanzaVO extends SelectVO { }
@@ -35,6 +40,8 @@ export class IstruttoreVO extends SelectVO {
 
 export class AzioneVO extends SelectVO {
     public listaIstruttoriEnable: boolean;
+    public confirmMessage: MessageVO;
+    public warningMessage: MessageVO;
 }
 
 export class AmbitoVO extends SelectVO {

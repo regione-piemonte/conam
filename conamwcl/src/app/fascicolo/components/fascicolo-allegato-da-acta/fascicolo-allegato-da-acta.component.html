@@ -61,6 +61,7 @@
                                     [current]="i"  
                                     [senzaAllegatiForce]="true" 
                                     [pregresso]="isPregresso"
+                                    [riepilogoVerbale]="riepilogoVerbale"
                                     [tipoAllegatoInput]="tipoAllegatoModel"  
                                     (onChangeCategoriaDocumento)="onChangeCategoriaDocumento($event)"
                                     (onValid)="onValidAllegatoMetadati($event)">
@@ -134,6 +135,6 @@
     <div class="principal-div col-xs-12 col-sm-12 col-md-0 col-lg-1"></div>
 </div>
 <shared-dialog [titolo]="'Allegato da ACTA'" [subMessages]="subMessagess" [subLinks]="subLinks" [buttonConfirmText]="buttonConfirmTexts"
-    [buttonAnnullaText]="buttonAnnullaTexts" 
+    [buttonAnnullaText]="buttonAnnullaTexts"  [id]="'modalAllegatoACTA_1'"
     (clickLinkEvent)="openAllegatoFisico($event)"
     ></shared-dialog>

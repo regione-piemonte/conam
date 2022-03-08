@@ -68,7 +68,7 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
   public articoloModel: Array<Array<ArticoloVO>> = [];
   public commaModel: Array<Array<CommaVO>> = [];
   public letteraModel: Array<Array<LetteraVO>> = [];
-
+  public comuneEnteModel: Array<ComuneVO>;
   public idVerbale: number;
 
   private uIdCounter: number = 0;
@@ -139,12 +139,13 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
               "salvato_con_warning"
             )
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
 
             this.loadTipoAllegato();
             this.loadRegioni();
+            this.comuniEnteValidInDate();
             this.loadEnti(data.entiAccertatore, data.entiLegge);
 
             if (!this.idVerbale) this.nuovoVerbale();
@@ -303,7 +304,7 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
               )
             )
               this.manageMessageSuccess(
-                "Il Fascicolo è stato salvato, ma la Data e ora violazione sono successive alla Data e ora accertamento",
+                "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
             this.verbale.regione = {
@@ -419,7 +420,8 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
   cleanRiferimentiNormativi() {
     let i: number,
       lenght: number = this.verbale.riferimentiNormativi.length;
-    let arr: Array<RiferimentiNormativiVO> = new Array<RiferimentiNormativiVO>();
+    let arr: Array<RiferimentiNormativiVO> =
+      new Array<RiferimentiNormativiVO>();
     for (i = 0; i < lenght; i++) {
       if (this.isVisible[i]) {
         arr.push(this.verbale.riferimentiNormativi[i]);
@@ -518,7 +520,20 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
       this.loadProvinceByIdRegione(this.verbale.regione.id);
     }
   }
-
+  comuniEnteValidInDate() {
+   
+    this.subscribers.comuniEnteValidInDate = this.luoghiService
+      .getcomuniEnteValidInDate()
+      .subscribe(
+        (data) => {
+          this.comuneEnteModel = data;
+    
+        },
+        (err) => {
+          this.logger.error("Errore nel recupero dei comuni Ente");
+        }
+      );
+  }
   loadProvinceByIdRegione(idRegione: number) {
     this.loadedProvince = false;
     if (this.verbale.dataOraAccertamento) {
@@ -894,8 +909,12 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
         flag = true;
     }
     if (!this.showRiferimentiNormativi) flag = false;
-    if(this.verbale.numero && this.verbale.numero.length>0 && this.verbale.numero.length>50){
-      flag=true;
+    if (
+      this.verbale.numero &&
+      this.verbale.numero.length > 0 &&
+      this.verbale.numero.length > 50
+    ) {
+      flag = true;
     }
     return flag;
   }
@@ -972,6 +991,7 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
   }
 
   manageDatePicker(event: any, i: number) {
+   
     var str: string = "#datetimepicker" + i.toString();
     if ($(str).length) {
       $(str).datetimepicker({
@@ -987,12 +1007,15 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
           break;
         case 2:
           const isChangedDataOraAccertamento =
-            this.verbale.dataOraAccertamento !== event.srcElement.value;
+          this.verbale.dataOraAccertamento !== event.srcElement.value;
           this.verbale.dataOraAccertamento = event.srcElement.value;
+          this.verbale.dataOraViolazione = this.verbale.dataOraAccertamento;
           break;
       }
     }
+   
   }
+
 
   //restituisce true se la dataOra1 è successiva alla dataOra2
   isAfter(dataOra1: string, dataOra2: string): boolean {
@@ -1056,7 +1079,9 @@ export class PregressoInserimentoManualeComponent implements OnInit, OnDestroy {
       this.scrollEnable = false;
     }
   }
-
+  modelChangeFn(value: string) {
+    this.verbale.dataOraViolazione = value;
+  }
   ngOnDestroy(): void {
     this.logger.destroy(PregressoInserimentoManualeComponent.name);
   }

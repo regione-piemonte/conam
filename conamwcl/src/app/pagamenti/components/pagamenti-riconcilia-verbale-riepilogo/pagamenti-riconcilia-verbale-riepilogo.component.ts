@@ -33,10 +33,11 @@ export class PagamentiRiconciliaVerbaleRiepilogoComponent implements OnInit, OnD
         this.logger.init(PagamentiRiconciliaVerbaleRiepilogoComponent.name);
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idVerbale = +params['id'];
-
             if (this.activatedRoute.snapshot.paramMap.get('action') == 'allegato')
-                this.manageMessage("Verbale riconciliato con successo", 'SUCCESS');
-
+                this.manageMessage("Pagamento inserito con successo. Per riconciliare il fascicolo, ricercarlo dalla funzionalità 'Riepilogo Fascicolo'.", 'SUCCESS');
+                if (this.activatedRoute.snapshot.paramMap.get('action') == 'parziale')
+                this.manageMessage("Pagamento parziale inserito con successo.", 'SUCCESS');
+           
             this.getAggiugiAllegatoRiconciliazioneVerbale();
         });
     }

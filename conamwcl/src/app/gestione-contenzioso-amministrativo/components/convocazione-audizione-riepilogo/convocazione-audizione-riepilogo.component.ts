@@ -55,6 +55,9 @@ export class ConvocazioneAudizioneRiepilogoComponent implements OnInit, OnDestro
     goToCreaVerbaleAudizione() {
         this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_CREA + this.idVerbale);
     }
+    goToCreaSoggettoAudizione() {
+        this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_CREA_SOGG + this.idVerbale);
+    }
 
 
     ngOnDestroy(): void {

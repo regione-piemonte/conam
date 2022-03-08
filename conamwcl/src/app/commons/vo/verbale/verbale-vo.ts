@@ -16,7 +16,9 @@ export class VerbaleVO {
     public dataOraViolazione: string;
     public enteAccertatore: EnteVO;
     public dataOraAccertamento: string;
+    public comuneEnte: number;
     public importo: number;
+    public importoResiduo: number;
     public stato: StatoVerbaleVO;
     public regione: RegioneVO;
     public provincia: ProvinciaVO;

@@ -55,6 +55,8 @@ export class PregressoStatoComponent implements OnInit, OnDestroy {
 
 
     public alertWarning: string;
+
+    public statoCurrent: StatoVerbaleVO;
     
 
     constructor(
@@ -95,6 +97,7 @@ export class PregressoStatoComponent implements OnInit, OnDestroy {
 
     loadStatiVerbale() {
         this.statiVerbaliModel = [];
+        this.statoCurrent = null; 
         this.subscribers.statiVerbale = this.pregressoVerbaleService.getStatiVerbaleById(this.idVerbale).subscribe(data => {
            if(data.messaggio && data.messaggio.message){
                 this.statiVerbaliMessage = data.messaggio.message;
@@ -107,7 +110,10 @@ export class PregressoStatoComponent implements OnInit, OnDestroy {
         });
     }
 
-    changeStato(idStato: number){
+    changeStato(){
+        const idStato = this.salvaStatoVerbaleRequest.idAzione;
+        const stato = this.statiVerbaliModel.find(i=>i.id==idStato);
+        this.statoCurrent = stato;
         if(idStato==8) { // stato recupero pregresso terminato
             this.showIstruttore = true;
         }else{
@@ -122,9 +128,17 @@ export class PregressoStatoComponent implements OnInit, OnDestroy {
         /* genera messaggio */ 
         this.subMessagess = new Array<string>();
        
-        let incipit:string = this.statiVerbaliMessage;
-        const nuovoStato=this.statiVerbaliModel.find(i=>i.id==this.salvaStatoVerbaleRequest.idAzione).denominazione;
-        incipit = incipit.replace('<VALORE_SELEZIONATO_DA_TENDINA>', nuovoStato);
+        let incipit:string = '';
+        if(this.statoCurrent && this.statoCurrent.confirmMessage && this.statoCurrent.confirmMessage.message){
+            incipit = this.statoCurrent.confirmMessage.message;
+        }else{
+            incipit = this.statiVerbaliMessage;
+            const nuovoStato=this.statiVerbaliModel.find(i=>i.id==this.salvaStatoVerbaleRequest.idAzione).denominazione;
+            incipit = incipit.replace('<VALORE_SELEZIONATO_DA_TENDINA>', nuovoStato);
+        }
+        
+        
+        
         this.subMessagess.push(incipit);
        
         this.buttonAnnullaTexts = "Annulla";

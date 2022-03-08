@@ -9,8 +9,8 @@
         {{sogg?.ragioneSociale}},
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"
-        *ngIf="sogg.indirizzoResidenza!=null && sogg.civicoResidenza!=null">
-        {{sogg?.indirizzoResidenza}}, n° {{sogg?.civicoResidenza}}
+        *ngIf="sogg.indirizzoResidenza!=null">
+      <span>   {{sogg?.indirizzoResidenza}}</span><span *ngIf="sogg.civicoResidenza!=null">, n° {{sogg?.civicoResidenza}}</span>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"
         *ngIf="sogg.comuneResidenza!=null && sogg.provinciaResidenza!=null">
