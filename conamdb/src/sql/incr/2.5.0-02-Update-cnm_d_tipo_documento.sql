@@ -1,0 +1,1 @@
+update cnm_d_tipo_documento set cartaceo = false, id_stato_efficacia = 8 where id_tipo_documento = 27;

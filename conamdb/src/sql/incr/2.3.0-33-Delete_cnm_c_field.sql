@@ -1,0 +1,1 @@
+DELETE FROM cnm_c_field where id_field = 20;
