@@ -103,5 +103,5 @@ platforms:
   - mac
 releaseDate: '2022-03-04'
 softwareType: standalone/web
-softwareVersion: 3.4.1
+softwareVersion: 3.7.0
 url: 'https://github.com/regione-piemonte/conam.git'
