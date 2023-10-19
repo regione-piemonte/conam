@@ -49,9 +49,12 @@ export class SharedInserimentoNotificaComponent
   idPiano: number;
   @Input()
   idSollecito: number;
-
+  @Input()
+  tipoAllegato: boolean;
   @Input()
   piano: PianoRateizzazioneVO;
+  @Input()
+  causaleModel: SelectVO;
 
   @Output()
   save: EventEmitter<number> = new EventEmitter<number>();
@@ -71,6 +74,8 @@ export class SharedInserimentoNotificaComponent
     this.logger.error("idOrdinanza - idPiano -idSollecito non valorizzato");
     this.loadNotifica();
     this.loadModalita();
+    this.notifica.importoSpeseNotifica=0;
+    this.onChangeNotifica(null, 0)
   }
 
   isToVisualize(): boolean {
@@ -262,12 +267,15 @@ export class SharedInserimentoNotificaComponent
   }
 
   //JIRA - Gestione Notifica
-  onChangeImportoNotifica(event: Event, value: number) {
-    if (value == undefined || value == null) {
-      this.importNotificaInserito.emit(true);
-    } else {
-      this.importNotificaInserito.emit(isNaN(Number(value)));
-    }
+  onChangeNotifica(event: Event, value: number) {  
+ 
+  // issue 5 - ob 167 Causale, Numero accertamento, Anno accertamento divetano opzionali
+      if (value == undefined || value == null) {
+        
+        this.importNotificaInserito.emit(true);
+      } else {
+        this.importNotificaInserito.emit(isNaN(Number(value)));
+      }
   }
   //-----------------------------
 
@@ -275,7 +283,7 @@ export class SharedInserimentoNotificaComponent
     if (label !== "Numero raccomandata") {
       return this.numberUtilsSharedService.numberValid(code);
     } else {
-      return  (
+      return (
         (code >= 48 && code <= 57) ||
         (code >= 96 && code <= 105) ||
         code == 8 ||

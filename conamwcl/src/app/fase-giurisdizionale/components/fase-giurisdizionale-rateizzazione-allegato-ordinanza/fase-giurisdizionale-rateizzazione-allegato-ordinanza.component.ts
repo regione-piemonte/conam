@@ -218,6 +218,10 @@ export class FaseGiurisdizionaleRateizzazioneAllegatoOrdinanzaComponent
           data.documentoProtocollatoVOList;
         this.fascicoloService.idOrdinanzaVerbaleSoggetto = this.idOrdinanzaVerbaleSoggetto;
 
+        const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+        this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
+		    this.fascicoloService.dataRicercaProtocolloNumResults = +data.totalLineResp;
+
         this.fascicoloService.successPage =
           Routing.FASE_GIURISDIZIONALE_RATEIZZAZIONE_DETTAGLIO_ORDINANZA +
           this.idOrdinanza;

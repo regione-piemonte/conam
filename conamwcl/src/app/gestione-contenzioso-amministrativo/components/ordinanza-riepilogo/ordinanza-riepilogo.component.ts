@@ -9,6 +9,7 @@ import { AzioneOrdinanzaRequest } from "../../../commons/request/ordinanza/azion
 import { saveAs } from 'file-saver';
 import { SharedOrdinanzaRiepilogoComponent } from "../../../shared-ordinanza/component/shared-ordinanza-riepilogo/shared-ordinanza-riepilogo.component";
 import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
+import { TemplateService } from "../../../template/services/template.service";
 
 @Component({
     selector: 'gestione-cont-amministrativo-ordinanza-riepilogo',
@@ -46,7 +47,8 @@ export class OrdinanzaRiepilogoGestContAmministrativoComponent implements OnInit
         private activatedRoute: ActivatedRoute,
         private sharedOrdinanzaService: SharedOrdinanzaService,
         private sharedVerbaleService: SharedVerbaleService,
-        private router: Router
+        private router: Router,
+        private templateService: TemplateService
     ) { }
 
     ngOnInit(): void {
@@ -78,6 +80,20 @@ export class OrdinanzaRiepilogoGestContAmministrativoComponent implements OnInit
             if (this.activatedRoute.snapshot.paramMap.get('action') == 'SUCCESS')
                 this.manageMessageTop("Ordinanza creata con successo", 'SUCCESS');
         });
+
+        this.activatedRoute.queryParams.subscribe((params) => {
+            let paramsvalue = params["letteraProtocollo"];
+            if (paramsvalue == "true") {
+                this.templateService.getMessage('PROTLET01').subscribe(data => {
+                
+                    this.manageMessageTop(data.message, data.type);
+
+                }, err => {
+                    this.logger.error("Errore nel recupero del messaggio");
+                });
+            }
+        });
+
         this.callAzioneOrdinanza();
         this.getVerbaleByIdOrdinanza();
         this.sharedOrdinanzaService

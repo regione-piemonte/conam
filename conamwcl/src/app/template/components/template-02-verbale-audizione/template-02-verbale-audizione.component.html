@@ -55,11 +55,16 @@
                         [(ngModel)]="datiCompilati.indirizzo" placeholder="Indirizzo" required> presso il
                     settore delle politiche fiscali e contenzioso amministrativo, dinnanzi ai sottoscritti funzionari all'uopo
                     designati dall'ufficio
-                    <span> {{comparizione}}</span>
+
+                   <span class="form-control-view" *ngIf="isAnteprima || isStampa">{{datiCompilati.testoLibero}}</span> 
+                    <input type="text" id="testoLibero" *ngIf="!isAnteprima && !isStampa" class="form-control" style="display: inline-block; width: 75%" name="testoLibero"
+                        [(ngModel)]="datiCompilati.testoLibero" placeholder=" " required>
+                    
+                        <!-- <span> {{comparizione}}</span>
                     <span *ngFor="let d of denominazioneList">{{d}}</span>
                     <span *ngIf="denominazioneList.length==1; else soggettiMultipli2">assistito</span>
                     <ng-template #soggettiMultipli2>assistiti</ng-template>
-                    da
+                    da -->
                     <span class="form-control-view" *ngIf="isAnteprima || isStampa">{{datiCompilati.nomeAvvocato}}</span>
                     <input type="text" id="nomeAvvocato" *ngIf="!isAnteprima && !isStampa" class="form-control" style="display: inline-block; width: 15%"
                         name="nomeAvvocato" [(ngModel)]="datiCompilati.nomeAvvocato" placeholder="Nome Cognome Avvocato" required>                    quale
@@ -71,7 +76,7 @@
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top:10%">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center">DICHIARA</div>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center"></div>
                 <div class="form-control-view" *ngIf="isAnteprima || isStampa">{{datiCompilati.dichiara}}</div>
                 <textarea style="resize: none" id="testoLib" class="form-control" name="testoLib" rows="10" [(ngModel)]="datiCompilati.dichiara"
                     required placeholder="Inserire la dichiarazione " *ngIf="!isAnteprima && !isStampa"></textarea>
@@ -87,30 +92,31 @@
                 Dott. {{funzionario}}
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right padding-top-25">
-                <span *ngIf="denominazioneList.length==1; else soggettiMultipli3"> Il Dichiarante</span>
-                <ng-template #soggettiMultipli3>I Dichiaranti</ng-template>
+                <!-- <span *ngIf="denominazioneList.length==1; else soggettiMultipli3"> 
+        
+                   
+                   </span>
+                <ng-template #soggettiMultipli3>I Dichiaranti</ng-template> -->
+                <div class="form-control-view" *ngIf="isAnteprima || isStampa">{{datiCompilati.testoDichiarante}}</div>
+                <input type="text" id="testoDichiarante" *ngIf="!isAnteprima && !isStampa" class="form-control" style="display: inline-block; width: 15%" name="testoDichiarante"
+                [(ngModel)]="datiCompilati.testoDichiarante" placeholder="">
+            
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
-                <span *ngFor="let d of denominazioneList">{{d}}</span>
-
+                <!-- <span *ngFor="let d of denominazioneList; let i = index">
+                
+                 {{d}}</span>
+                </span> -->
+                <div class="form-control-view" *ngIf="isAnteprima || isStampa">{{datiCompilati.dichiarante}}</div>
+                <input type="text" id="dichiarante" *ngIf="!isAnteprima && !isStampa" class="form-control" style="display: inline-block; width: 35%" name="dichiarante"
+                placeholder=""  [(ngModel)]="datiCompilati.dichiarante">
+    
             </div>
         </div>
 
         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-top-25">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                Corso Regina Margherita, 153 bis
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                10122 Torino
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                Tel: 011 4321288
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                Fax: 011 4325386
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                Email: settore.tributi@regione.piemonte.it
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font" *ngFor="let info of infoEnteArray">
+                {{info}}
             </div>
         </div>
     </form>

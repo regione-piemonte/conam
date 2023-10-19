@@ -175,6 +175,12 @@ export class SharedVerbaleService {
         if(!('flagPregresso' in ricerca)){
             ricerca.flagPregresso = false;
         }
+        if(!('pageRequest' in ricerca)){
+            ricerca.pageRequest = 1;
+        }
+        if(!('maxLineRequest' in ricerca)){
+            ricerca.maxLineRequest = 5;
+        }
         var url: string = this.config.getBEServer() + '/restfacade/allegato/ricercaProtocolloSuACTA';
         let params;
         if( ricerca.idVerbale){
@@ -182,6 +188,8 @@ export class SharedVerbaleService {
         }else{
             params = new HttpParams().set('protocollo',ricerca.numeroProtocollo).set('flagPregresso',ricerca.flagPregresso.toString());
         }
+        params=params.set('pageRequest',ricerca.pageRequest.toString());
+        params=params.set('maxLineRequest',ricerca.maxLineRequest.toString());
         return this.http.get<RicercaProtocolloResponse>(url, { params: params });
     }
 

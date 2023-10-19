@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from "@angular/core";
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Config } from "../../../shared/module/datatable/classes/config";
@@ -24,6 +24,7 @@ import { SharedAllegatoMetadatiInserimentoComponent } from "../../../shared/comp
 
 import { SharedInserimentoNotificaComponent } from "../../../shared-notifica/components/shared-inserimento-notifica/shared-inserimento-notifica.component";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
+import { Column } from "../../../shared/module/datatable/classes/settings";
 
 
 declare var $: any;
@@ -36,6 +37,7 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
   implements OnInit, OnDestroy {
   @ViewChild(SharedAllegatoMetadatiInserimentoComponent)
   allegatiSubComponent: SharedAllegatoMetadatiInserimentoComponent;
+  @ViewChild('settingsTemplate') settingsTemplate: TemplateRef<any>;
 
   @ViewChild(SharedInserimentoNotificaComponent)
   insertNotifica: SharedInserimentoNotificaComponent;
@@ -51,7 +53,7 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
   
 
   tipoOrdinanzaSoggettoModel: Array<StatoSoggettoOrdinanzaVO>;
-
+  causaleModel: Array<SelectVO>;
   loadedCategoriaAllegato: boolean;
   tipoAllegatoModel: Array<TipoAllegatoVO>;
   allegatoCaricato: boolean;
@@ -65,6 +67,7 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
   idOrdinanza : number; 
   //JIRA - Gestione Notifica
   isImportoNotificaInserito: boolean = true;
+  loadedcausale: boolean = false;
 
   isSelectable: (el: TableSoggettiVerbale) => boolean = (
     el: TableSoggettiVerbale
@@ -113,9 +116,17 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
     this.config = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
       true,
       1,
-      this.isSelectable,
+      //true,
+     //this.isSelectable,
+     ()=>true,
       false
     );
+   /* let column:Column= {columnName: 'listaOrdinanze', displayName: 'Lista Ordinanze', link: {fileName:'str'}}
+this.config.columns.push(column)
+*/
+
+
+
 
     this.configSoggettiOrdinanza = this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggetti(
       true,
@@ -132,10 +143,12 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
     this.soggettiArray = new Array();
     this.loadTipoAllegato();
     this.loadStatiOrdinanzaSoggettoInCreazioneOrdinanza();
+    this.getCausuale();
     this.loaded = true;
     }
 
   addToArraySoggettiSelezionati(e: Array<TableSoggettiVerbale>) {
+   
     this.soggettiArray = e;
   }
   
@@ -160,7 +173,6 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
         this.tipoAllegatoModel = data;
         this.loadedCategoriaAllegato = true;
       });
-     
     }
     else{
       this.subscribers.tipoAllegato = this.faseGiurisdizionaleOrdinanzaService
@@ -180,7 +192,14 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
         this.tipoOrdinanzaSoggettoModel = data;
       });
   }
-
+  getCausuale() {
+    this.subscribers.causale = this.faseGiurisdizionaleOrdinanzaService
+      .getCausale()
+      .subscribe((data) => {
+        this.causaleModel = data;
+        this.loadedcausale = true
+      });
+  }
   scrollEnable: boolean;
   ngAfterViewChecked() {
     this.manageDatePicker(null, 1, null);
@@ -240,7 +259,7 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
       : false
     : false;
   }
-  else{
+  else{ 
     return this.allegatiSubComponent
       ? this.allegatiSubComponent.getTipoAllegatoSelezionato()
         ? this.allegatiSubComponent.getTipoAllegatoSelezionato().id ==
@@ -248,6 +267,7 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
         : false
       : false;
     }
+ 
   }
   isTipoAllegatoOrdinanza(): boolean {
     if(this.showAnnullamentoParts) {
@@ -320,6 +340,9 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
       request.idTipoAllegato = Constants.ID_TIPO_ALLEGATO_ARCHIVIAZIONE;
       this.ordinanza.importoOrdinanza = null;
       this.ordinanza.dataScadenza = null;
+      this.ordinanza.causale = null;
+      this.ordinanza.numeroAccertamento = null;
+      this.ordinanza.annoAccertamento = null;
     }
 
     //request.idTipoAllegato = this.salvaAllegatoRequest.idTipoAllegato;
@@ -352,6 +375,11 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
           if (err instanceof ExceptionVO) {
             this.manageMessage(err);
           }
+    	  this.soggettiArray = new Array();
+          this.salvaAllegatoRequest = null;
+          //this.showCheckboxWarning();
+          //this.isAllegatoCaricato();
+          this.isImportoNotificaInserito = true;
           this.scrollEnable = true;
           this.logger.error("Errore nel salvataggio dell'ordinanza");
         }
@@ -403,6 +431,11 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
           if (err instanceof ExceptionVO) {
             this.manageMessage(err);
           }
+    	  this.soggettiArray = new Array();
+          this.salvaAllegatoRequest = null;
+          //this.showCheckboxWarning();
+          //this.isAllegatoCaricato();
+          this.isImportoNotificaInserito = true;
           this.scrollEnable = true;
           this.logger.error("Errore nel salvataggio dell'ordinanza");
         }

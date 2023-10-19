@@ -254,7 +254,7 @@
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                                         <label for="indirizzo" class="control-label">Indirizzo</label>
-                                        <input type="text" id="indirizzo" class="form-control" name="indirizzo"
+                                        <input type="text" id="indirizzo" maxlength="200" class="form-control" name="indirizzo"
                                             #indirizzo="ngModel" [(ngModel)]="verbale.indirizzo" required>
                                         <div *ngIf="indirizzo.invalid && (indirizzo.dirty || indirizzo.touched)"
                                             class="alert alert-danger">

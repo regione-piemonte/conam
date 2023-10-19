@@ -36,7 +36,7 @@ export class SoggettoVO extends MinSoggettoVO {
 
 	public importoSpeseProcessuali: number;
 	public importoTitoloSanzione: number;
-
+	public listaOrdinanze?:any
 	public comuneNascitaValido: boolean;
 	public verbale: any;
 	public hasMasterIstanza: boolean;

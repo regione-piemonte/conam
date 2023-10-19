@@ -179,9 +179,10 @@ export class EmissioneVerbaleAudizioneTemplateLetteraGestContAmministrativoCompo
           (data1) => {
             saveAs(data1, nome);
             this.loaded = true;
-            this.router.navigateByUrl(
+            this.router.navigate([
               Routing.GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_RIEPILOGO +
-                this.idVerbale
+                this.idVerbale],
+                { queryParams: { letteraProtocollo: true } }
             );
           },
           (err) => {

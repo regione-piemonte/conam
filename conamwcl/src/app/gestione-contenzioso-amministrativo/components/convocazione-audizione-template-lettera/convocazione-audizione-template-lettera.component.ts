@@ -197,9 +197,10 @@ export class ConvocazioneAudizioneTemplateLetteraGestContAmministrativoComponent
           (data1) => {
             saveAs(data1, nome);
             this.loaded = true;
-            this.router.navigateByUrl(
+            this.router.navigate([
               Routing.GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_RIEPILOGO +
-                this.idVerbale
+                this.idVerbale],
+                { queryParams: { letteraProtocollo: true } }
             );
           },
           (err) => {

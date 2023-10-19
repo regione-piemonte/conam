@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { ConfigService } from "../../core/services/config.service";
 import { TipologiaAllegabiliRequest } from "../../commons/request/tipologia-allegabili-request";
-import { TipoAllegatoVO, StatoSoggettoOrdinanzaVO } from "../../commons/vo/select-vo";
+import { TipoAllegatoVO, StatoSoggettoOrdinanzaVO, SelectVO } from "../../commons/vo/select-vo";
 import { SalvaOrdinanzaRequest } from "../../commons/request/ordinanza/salva-ordinanza-request";
 
 
@@ -24,7 +24,10 @@ export class FaseGiurisdizionaleOrdinanzaService implements OnDestroy {
         let params = new HttpParams().set('idOrdinanzaAnnullata', id.toString());
         return this.http.get<Array<TipoAllegatoVO>>(url,{ params: params });
     }
-
+    getCausale(): Observable<Array<SelectVO>> {
+        var url: string = this.config.getBEServer() + '/restfacade/ordinanza/getCausaleSelect';
+        return this.http.get<Array<TipoAllegatoVO>>(url);
+    }
     getStatiOrdinanzaSoggettoInCreazioneOrdinanza(): Observable<Array<StatoSoggettoOrdinanzaVO>> {
         var url: string = this.config.getBEServer() + '/restfacade/ordinanza/getStatiOrdinanzaSoggettoInCreazioneOrdinanza';
         return this.http.get<Array<StatoSoggettoOrdinanzaVO>>(url);

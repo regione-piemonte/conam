@@ -43,7 +43,7 @@ const routes: Routes = [
 
             { path: 'riconcilia-ordinanza-ricerca', component: PagamentiRiconciliaRicercaOrdinanzaComponent },
             { path: 'riconcilia-ordinanza-riepilogo/:id', component: PagamentiRiconciliaOrdinanzaRiepilogoComponent },
-            { path: 'riconcilia-ordinanza-allegato/id', component: PagamentiRiconciliaOrdinanzaAllegatoComponent },
+            { path: 'riconcilia-ordinanza-allegato/:id', component: PagamentiRiconciliaOrdinanzaAllegatoComponent },
 
             { path: 'riconcilia-piano-ricerca', component: PagamentiRiconciliaPianoComponent },
             { path: 'riconcilia-piano-dettaglio/:idPiano', component: PagamentiRiconciliaPianoDettaglioComponent },

@@ -58,6 +58,10 @@
                                     <strong>Attenzione!</strong> La richiesta di creazione bollettini è stata inviata alla piattaforma dei pagamenti online PiemontePAY.
                                      Per poter generare il PDF dei bollettini, cliccare sul pulsante "Scarica Bollettini".
                             </div>
+                            <div *ngIf="!sollecito?.downloadBollettiniEnable && sollecito?.statoSollecito?.id === 8 && loadedAction" 
+                            class="alert alert-info col-xs-12 col-sm-12 col-md-12 col-lg-12" role="alert">
+                                    <strong>Info: </strong> {{message}}
+                            </div>
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right padding-top-25">
                                 <button type="button" class="btn-conam button-green" (click)="annullaModifica()"
                                     *ngIf="isModifica && loadedAction">

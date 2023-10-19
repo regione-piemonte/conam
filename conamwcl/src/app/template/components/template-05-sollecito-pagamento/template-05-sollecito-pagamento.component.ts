@@ -30,7 +30,7 @@ export class Template05SollecitoPagamentoComponent
   @Input()
   data: DatiTemplateVO;
   funzionario: string;
-
+  public infoEnteArray: string[] 
   //output
   @Output()
   formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -65,6 +65,12 @@ export class Template05SollecitoPagamentoComponent
     });
     //La richiesta Bertinetti riguarda solo l'ordinanza
     this.data.mailSettoreTributi = null;
+    this.infoEnteArray= this.data.sedeEnte.split(";");
+    this.datiCompilati.sedeEnteRiga1 =  this.infoEnteArray[0] ? this.infoEnteArray[0] : ' '
+    this.datiCompilati.sedeEnteRiga2 =  this.infoEnteArray[1] ? this.infoEnteArray[1] : ' '
+    this.datiCompilati.sedeEnteRiga3 =  this.infoEnteArray[2] ? this.infoEnteArray[2] : ' '
+    this.datiCompilati.sedeEnteRiga4 =  this.infoEnteArray[3] ? this.infoEnteArray[3] : ' '
+    this.datiCompilati.sedeEnteRiga5 =  this.infoEnteArray[4] ? this.infoEnteArray[4] : ' '
   }
 
   setStampa(flag: boolean) {

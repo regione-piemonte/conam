@@ -217,8 +217,7 @@
                                                 [(ngModel)]="riferimentoNormativo.comma.dataInizioValidita"
                                                 name="dataInizioComma" #datePicker="ngModel"
                                                 (blur)="manageDatePicker($event, 8)" class="form-control date-picker"
-                                                [required]="riferimentoNormativo.comma.denominazione" 
-                                                [disabled]="isDisabled('DATACOMMA')" />
+                                                [required]="riferimentoNormativo.comma.denominazione" />
                                             <span class="input-group-addon">
                                                 <span class="glyphicon glyphicon-calendar"></span>
                                             </span>
@@ -232,8 +231,7 @@
                                                 [(ngModel)]="riferimentoNormativo.lettera.dataInizioValidita"
                                                 name="dataInizioLettera" #datePicker="ngModel"
                                                 (blur)="manageDatePicker($event, 9)" class="form-control date-picker"
-                                                [required]="riferimentoNormativo.lettera.denominazione"
-                                                [disabled]="isDisabled('DATALETTERA')" />
+                                                [required]="riferimentoNormativo.lettera.denominazione" />
                                             <span class="input-group-addon">
                                                 <span class="glyphicon glyphicon-calendar"></span>
                                             </span>

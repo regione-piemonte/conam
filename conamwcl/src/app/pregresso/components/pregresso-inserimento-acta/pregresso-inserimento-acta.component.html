@@ -17,6 +17,15 @@
                                 
                     </shared-allegato-form-ricerca-protocollo>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="overflow-x: scroll;">
+                        <shared-allegato-documento-protocollato-pag
+                            *ngIf="numPages" 
+                            [currentPage]="currentPage" 
+                            [numPages]="numPages"
+                            [numResults]="numResults"
+                            (pageChange)="pageChange($event)"
+                        >
+
+                        </shared-allegato-documento-protocollato-pag>
                         <datatable
                             *ngIf="dataRicercaProtocollo"
                             [data]="dataRicercaProtocollo"
@@ -296,7 +305,7 @@
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                                         <label for="indirizzo" class="control-label">Indirizzo</label>
-                                        <input type="text" id="indirizzo" class="form-control" name="indirizzo"
+                                        <input type="text" id="indirizzo" maxlength="200" class="form-control" name="indirizzo"
                                             #indirizzo="ngModel" [(ngModel)]="verbale.indirizzo" required>
                                         <div *ngIf="indirizzo.invalid && (indirizzo.dirty || indirizzo.touched)"
                                             class="alert alert-danger">

@@ -51,6 +51,7 @@ export class ConfigSharedService implements OnDestroy {
     };
 
     public configRicercaOrdinanza: Config = {
+        
         pagination: {
             enable: true
         },
@@ -72,6 +73,10 @@ export class ConfigSharedService implements OnDestroy {
             {
                 columnName: 'numDeterminazione',
                 displayName: 'Numero Determinazione'
+            },
+            {
+                columnName: 'numVerbale',
+                displayName: 'Numero Verbale'
             },
             {
                 columnName: 'tipo.denominazione',

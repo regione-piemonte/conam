@@ -14,3 +14,12 @@
         </button> 
     </div>   
 </div>
+<ng-template #settingsTemplate let-el="el" >
+   
+        <button type="button" class="btn-conam button-light-blue" (click)="toDetail(el)">
+            <span class="glyphicon glyphicon-zoom-in btn-glyphicon img-circle text-light-blue-conam"></span>
+        </button> 
+
+  </ng-template>
+
+  <app-lista-ordinanze  [listaOrdinanze]="subject" [ordinanze]="ordinanze" [hideButton]="true" [titolo]="'Lista Ordinanze'" ></app-lista-ordinanze>

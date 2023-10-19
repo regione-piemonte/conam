@@ -12,6 +12,7 @@ import { SharedVerbaleConfigService } from './service/shared-verbale-config.serv
 import { SharedVerbaleScrittoDifensivoSoggettoComponent } from './component/shared-verbale-scritto-difensivo-soggetto/shared-verbale-scritto-difensivo-soggetto.component';
 import { SharedVerbaleScrittoDifensivoDatiVerbaleComponent } from './component/shared-verbale-scritto-difensivo-dati-verbale/shared-verbale-scritto-difensivo-dati-verbale.component';
 import { SharedVerbaleRicercaScrittoDifensivoComponent } from './component/shared-verbale-ricerca-scritto-difensivo/shared-verbale-ricerca-scritto-difensivo.component';
+import { ListaOrdinanzeComponent } from './component/shared-verbale-dettaglio-soggetti/lista-ordinanze-modal/lista-ordinanze';
 
 @NgModule({
     imports: [CommonModule, RouterModule, FormsModule, SharedModule],
@@ -26,6 +27,7 @@ import { SharedVerbaleRicercaScrittoDifensivoComponent } from './component/share
     ],
     declarations: [
         SharedVerbaleRicercaComponent,
+        ListaOrdinanzeComponent,
         SharedVerbaleRicercaScrittoDifensivoComponent,
         SharedVerbaleRiepilogoComponent,
         SharedVerbaleDettaglioSoggettiComponent,

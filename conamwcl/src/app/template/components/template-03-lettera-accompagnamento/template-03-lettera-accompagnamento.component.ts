@@ -44,7 +44,7 @@ export class Template03LetteraAccompagnamentoComponent
   private formTemplate: NgForm;
   @ViewChild(SharedTemplateIntestazioneComponent)
   intestazione: SharedTemplateIntestazioneComponent;
-
+  public infoEnteArray: string[] 
   constructor(
     private logger: LoggerService,
     private userService: UserService
@@ -64,6 +64,20 @@ export class Template03LetteraAccompagnamentoComponent
         this.formTemplate.valid && this.formIntestazioneValid
       );
     });
+    this.infoEnteArray= this.data.sedeEnte.split(";");
+    this.datiCompilati.sedeEnteRiga1 =  this.infoEnteArray[0] ? this.infoEnteArray[0] : ' '
+    this.datiCompilati.sedeEnteRiga2 =  this.infoEnteArray[1] ? this.infoEnteArray[1] : ' '
+    this.datiCompilati.sedeEnteRiga3 =  this.infoEnteArray[2] ? this.infoEnteArray[2] : ' '
+    this.datiCompilati.sedeEnteRiga4 =  this.infoEnteArray[3] ? this.infoEnteArray[3] : ' '
+    this.datiCompilati.sedeEnteRiga5 =  this.infoEnteArray[4] ? this.infoEnteArray[4] : ' '
+    this.popolaCampi();
+  }
+
+  popolaCampi() {
+    this.datiCompilati.testoLibero = this.data.testoLibero;
+    this.datiCompilati.intestazioneConoscenza = this.data.intestazioneConoscenza;
+    this.datiCompilati.emailOrgano = this.data.emailOrgano;
+    this.datiCompilati.email = this.data.email; 
   }
 
   setAnteprima(flag: boolean) {

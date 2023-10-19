@@ -34,7 +34,7 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
   //dati precompilati
   @Input()
   data: DatiTemplateVO;
-
+  public infoEnteArray: string[] 
   denominazioneList: Array<String> = new Array<String>();
   //output
   @Output()
@@ -68,7 +68,12 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
         this.formTemplate.valid && this.formIntestazioneValid
       );
     });
-
+    this.infoEnteArray= this.data.sedeEnte.split(";");
+    this.datiCompilati.sedeEnteRiga1 =  this.infoEnteArray[0] ? this.infoEnteArray[0] : ' '
+    this.datiCompilati.sedeEnteRiga2 =  this.infoEnteArray[1] ? this.infoEnteArray[1] : ' '
+    this.datiCompilati.sedeEnteRiga3 =  this.infoEnteArray[2] ? this.infoEnteArray[2] : ' '
+    this.datiCompilati.sedeEnteRiga4 =  this.infoEnteArray[3] ? this.infoEnteArray[3] : ' '
+    this.datiCompilati.sedeEnteRiga5 =  this.infoEnteArray[4] ? this.infoEnteArray[4] : ' '
     this.setDenominazione();
     this.gestisciSingolariPlurali();
   }
@@ -79,6 +84,15 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
       let nome = s.personaFisica ? s.nome + " " + s.cognome : s.ragioneSociale;
       if (size != this.denominazioneList.length + 1) nome = nome + ", ";
       this.denominazioneList.push(nome);
+   
+     
+    }
+    this.datiCompilati.dichiarante = this.denominazioneList.join('');
+    if(this.denominazioneList.length===1){
+      this.datiCompilati.testoDichiarante= 'Il Dichiarante'
+    }else{
+      this.datiCompilati.testoDichiarante= 'I Dichiaranti'
+    
     }
   }
 
@@ -93,6 +107,7 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
   }
 
   getDatiCompilati(): DatiTemplateCompilatiVO {
+    
     return this.datiCompilati;
   }
 
@@ -164,6 +179,8 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
         this.comparizione = "sono comparse le aziende";
       else this.comparizione = "sono comparsi i soggetti";
     }
+    let assistito= this.denominazioneList.length==1 ? 'assistito da' : 'assistiti da'
+    this.datiCompilati.testoLibero = this.comparizione + ' ' +  this.denominazioneList.join('') + ' ' + assistito 
   }
 
   /*

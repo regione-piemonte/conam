@@ -1,0 +1,18 @@
+/* .navbar-default[_ngcontent-c1] {
+    background-color: #D10511!important;
+    border-color: #D10511!important;
+}  */
+
+.navbar-header img,
+.navbar-brand img {
+  margin-right: 20px;
+}
+
+body
+  .page__footer
+  .region-footer
+  #block-piedipagina
+  .nav:not(.contextual-links)
+  .nav-item:after {
+  position: relative !important;
+}

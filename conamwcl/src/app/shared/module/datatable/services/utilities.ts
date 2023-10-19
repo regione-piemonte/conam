@@ -16,6 +16,16 @@ export class UtilsService {
         let a = s.split('.');
         return a.reduce((xs, x) => (xs && xs[x] != null) ? xs[x] : null, o);
     }
+
+    byStringGetDate = function(o:any, s:string):any {
+        const dateString = this.byString(o,s);
+        if(dateString){
+            const tmpDate=dateString.split('/');
+            return  new Date(tmpDate[1]+'/'+tmpDate[0]+'/'+tmpDate[2]);
+        }else{
+            return new Date('1900-01-01');
+        }
+    }
 	
 	spawnNewUID() {
 		return this._uidCounter++;

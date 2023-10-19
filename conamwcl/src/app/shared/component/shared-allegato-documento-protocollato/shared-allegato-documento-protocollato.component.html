@@ -11,6 +11,16 @@
 
             </shared-allegato-form-ricerca-protocollo>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"  *ngIf="configRicercaProtocollo">
+                <shared-allegato-documento-protocollato-pag
+                *ngIf="numPages" 
+                [currentPage]="currentPage" 
+                [numPages]="numPages"
+                [numResults]="numResults"
+                (pageChange)="pageChange($event)"
+                >
+
+                </shared-allegato-documento-protocollato-pag>
+
                 <datatable *ngIf="dataRicercaProtocollo" 
                     [data]="dataRicercaProtocollo"
                     [dataSelected]="allegatiProtocollati"

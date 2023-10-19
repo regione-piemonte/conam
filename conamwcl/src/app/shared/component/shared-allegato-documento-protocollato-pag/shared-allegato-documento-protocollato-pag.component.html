@@ -1,0 +1,30 @@
+<nav class="col-lg-12 col-md-12 col-sm-12 col-xs-12" *ngIf="numPages > 1 ">
+  <div class="elem-2 text-center padding">
+    <a [attr.href]="null" aria-label="Previous" (click)="openPage(1)" *ngIf="currentPage>1"
+      class="clickable text-color">
+      <span aria-hidden="true">&#8810;</span>
+    </a>
+    <a [attr.href]="null" aria-label="Previous" (click)="openPage(currentPage-1)" *ngIf="currentPage>1"
+      class="clickable text-color">
+      <span aria-hidden="true">&#8249;</span>
+    </a>
+    <button *ngFor=" let page of createRange(currentPage,numPages)"
+      [ngClass]="{'clickable':true, 'active': page==currentPage}" class="btn-paginazione"
+      (click)="openPage(page)">{{page}}</button>
+    <a [attr.href]="null" aria-label="Next" (click)="openPage(currentPage+1)" *ngIf="currentPage<numPages"
+      class="clickable text-color">
+      <span aria-hidden="true">&#8250;</span>
+    </a>
+    <a [attr.href]="null" aria-label="Last" (click)="openPage(numPages)" *ngIf="currentPage < numPages"
+      class="clickable text-color">
+      <span aria-hidden="true">&#8811;</span>
+    </a>
+  </div>
+
+  
+  <div class="elem-3 pag-right padding" *ngIf="numResults">
+    5 risultati di
+    <strong>{{numResults}}</strong>
+    , totale <strong>{{numPages}}</strong> pagine
+  </div>
+</nav>

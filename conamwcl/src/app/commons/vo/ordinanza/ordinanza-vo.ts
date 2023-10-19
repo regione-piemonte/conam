@@ -1,4 +1,4 @@
-import { StatoOrdinanzaVO, TipoOrdinanzaVO } from "../../../commons/vo/select-vo";
+import { SelectVO, StatoOrdinanzaVO, TipoOrdinanzaVO } from "../../../commons/vo/select-vo";
 
 export class OrdinanzaVO {
 
@@ -21,5 +21,9 @@ export class OrdinanzaVO {
     public superatoIlMassimo: boolean;
     public dettaglioOrdinanzaAnnullata: string;
     public listaAcconti: any;
+    public causale: SelectVO;
+    public numVerbale?: any;
+    public numeroAccertamento: number;
+    public annoAccertamento: number;
 
 }

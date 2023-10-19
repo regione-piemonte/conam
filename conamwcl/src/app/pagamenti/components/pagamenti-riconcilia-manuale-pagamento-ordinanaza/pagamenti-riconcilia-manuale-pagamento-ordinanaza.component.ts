@@ -46,7 +46,8 @@ export class pagamentiRiconciliaManualePagamentoOrdinanazaComponent
     this.logger.init(
       pagamentiRiconciliaManualePagamentoOrdinanazaComponent.name
     );
-    this.config = this.configSharedService.configRicercaOrdinanza;
+    this.config =  this.configSharedService.configRicercaOrdinanza
+
     this.loadStatiOrdinanza();
   }
 
@@ -67,10 +68,12 @@ export class pagamentiRiconciliaManualePagamentoOrdinanazaComponent
     this.request.statoManualeDiCompetenza = true;
     this.request.tipoRicerca = "RICERCA_ORDINANZA";
 
+
     this.sharedOrdinanzaService
       .ricercaOrdinanzaNonPagata(ricercaOrdinanzaRequest)
       .subscribe(
         (data) => {
+       
           this.resetMessageTop();
           if (data.length == 1) {
             data.map((value) => {

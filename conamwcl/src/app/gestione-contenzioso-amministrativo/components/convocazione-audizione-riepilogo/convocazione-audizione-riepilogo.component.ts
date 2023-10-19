@@ -44,6 +44,12 @@ export class ConvocazioneAudizioneRiepilogoComponent implements OnInit, OnDestro
              this.manageMessage(data.message, data.type)
            }
         });
+        this.activatedRoute.queryParams.subscribe((params) => {
+            let paramsvalue = params["letteraProtocollo"];
+            if (paramsvalue == "true") {
+                this.manageMessage("La protocollazione della lettera è stata presa in carico. Al termine del processo di generazione del bollettino di pagamento, la lettera disporrà del numero di protocollo", 'SUCCESS');
+            }
+        });
         
     }
     getAggiungiVerbaleDiAudizione() {

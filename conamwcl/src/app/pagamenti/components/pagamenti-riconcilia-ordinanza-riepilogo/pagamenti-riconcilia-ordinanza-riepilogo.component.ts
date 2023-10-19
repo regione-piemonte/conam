@@ -31,7 +31,7 @@ export class PagamentiRiconciliaOrdinanzaRiepilogoComponent implements OnInit, O
     private intervalIdS: number = 0;
 
     isSelectable: (el: TableSoggettiOrdinanza) => boolean = (el: TableSoggettiOrdinanza) => {
-        let stato: number = el.statoSoggettoOrdinanza.id;
+        let stato: number = el.statoSoggettoOrdinanza.id; 
         if (stato == Constants.STATO_ORDINANZA_SOGGETTO_PAGATO_OFFLINE || stato == Constants.STATO_ORDINANZA_SOGGETTO_PAGATO_ONLINE || stato == Constants.STATO_ORDINANZA_SOGGETTO_ARCHIVIATO)
             return false;
         else
@@ -108,7 +108,7 @@ export class PagamentiRiconciliaOrdinanzaRiepilogoComponent implements OnInit, O
 
     onDettaglio(event: TableSoggettiOrdinanza) {
         this.pagamentiUtilService.setId([event.idSoggettoOrdinanza], this.idOrdinanza);
-        this.router.navigateByUrl(Routing.PAGAMENTI_RICONCILIA_ORDINANZA_ALLEGATO);
+        this.router.navigateByUrl(Routing.PAGAMENTI_RICONCILIA_ORDINANZA_ALLEGATO+this.idOrdinanza);
     }
 
     ngOnDestroy(): void {

@@ -119,6 +119,9 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
             }else{
                 this.fascicoloService.message = null;
             }
+            const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+            this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
+			this.fascicoloService.dataRicercaProtocolloNumResults = +data.totalLineResp;
             this.router.navigateByUrl(Routing.FASCICOLO_ALLEGATO_DA_ACTA + this.idOrdinanza);   
         }, err => {
             if (err instanceof ExceptionVO) {

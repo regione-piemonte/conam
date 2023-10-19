@@ -6,6 +6,8 @@ import {
   Output,
   EventEmitter,
   ViewChild,
+  TemplateRef,
+  AfterViewInit,
 } from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Config } from "../../../shared/module/datatable/classes/config";
@@ -16,13 +18,16 @@ import { SharedVerbaleConfigService } from "../../service/shared-verbale-config.
 import { DataTableComponent } from "../../../shared/module/datatable/components/datatable/datatable.component";
 import { t } from "@angular/core/src/render3";
 import { PregressoVerbaleService } from "../../../pregresso/services/pregresso-verbale.service";
-
+import { Column } from "../../../shared/module/datatable/classes/settings";
+import { ListaOrdinanzeComponent } from "./lista-ordinanze-modal/lista-ordinanze";
+import { ActivatedRoute } from "@angular/router";
 @Component({
   selector: "shared-verbale-dettaglio-soggetti",
   templateUrl: "./shared-verbale-dettaglio-soggetti.component.html",
 })
 export class SharedVerbaleDettaglioSoggettiComponent
-  implements OnInit, OnDestroy {
+  implements OnInit, OnDestroy, AfterViewInit
+{
   public subscribers: any = {};
 
   @Input()
@@ -41,13 +46,18 @@ export class SharedVerbaleDettaglioSoggettiComponent
   >();
   @Output()
   notSelected: EventEmitter<any> = new EventEmitter<any>();
-
+  @ViewChild("settingsTemplate") settingsTemplate: TemplateRef<any>;
+  @ViewChild(ListaOrdinanzeComponent) listaOrdinanze: ListaOrdinanzeComponent;
+  modalLoaded = false;
   //pagina
   loaded: boolean;
+  listaOrdinanzeControl: boolean = false;
   soggetti: Array<TableSoggettiVerbale> = new Array<TableSoggettiVerbale>();
   soggettoSelected: boolean;
-
+  subject: any;
+  ordinanze: any = [];
   constructor(
+    private activatedRoute: ActivatedRoute,
     private logger: LoggerService,
     private sharedVerbaleService: SharedVerbaleService,
     private pregressoVerbaleService: PregressoVerbaleService,
@@ -63,6 +73,14 @@ export class SharedVerbaleDettaglioSoggettiComponent
   };
 
   ngOnInit(): void {
+    //QUERY PARAMS ADDED TO MANAGE THE NEW COLUMN ONLY IN THE COMPONENT DEFINED
+    this.activatedRoute.queryParams.subscribe((params) => {
+      let paramsvalue = params["listaOrdinanze"];
+      if (paramsvalue == "true") {
+        this.listaOrdinanzeControl = true;
+        console.log(paramsvalue);
+      }
+    });
     this.logger.init(SharedVerbaleDettaglioSoggettiComponent.name);
     if (this.isVerbaleConvocazione) {
       this.sharedVerbaleService
@@ -70,6 +88,7 @@ export class SharedVerbaleDettaglioSoggettiComponent
         .subscribe((data) => {
           if (data != null) {
             this.soggetti = data.map((value) => {
+              console.log(value);
               return TableSoggettiVerbale.map(value);
             });
             this.loaded = true;
@@ -96,7 +115,37 @@ export class SharedVerbaleDettaglioSoggettiComponent
     }
     this.soggettoSelected = false;
   }
+  ngAfterViewInit() {
+    if (this.listaOrdinanzeControl) {
+      if (
+        this.config.columns.find(
+          (el) => el.columnName === "listaOrdinanzeDialog"
+        )
+      ) {
+        const index = this.config.columns.findIndex(
+          (value) => value.columnName === "listaOrdinanzeDialog"
+        );
+        this.config.columns.splice(index, 1);
+      }
 
+      //
+      let column: Column = {
+        columnName: "listaOrdinanzeDialog",
+        displayName: "Lista Ordinanze",
+        cellTemplate: this.settingsTemplate,
+      };
+      this.config.columns.push(column);
+    }
+  }
+
+  toDetail(el: any) {
+    this.modalLoaded = true;
+   
+    this.ordinanze = el.listaOrdinanze;
+    this.subject = el;
+
+    this.listaOrdinanze.open();
+  }
   onSelected(el: Array<TableSoggettiVerbale>) {
     if (this.isVerbaleAudizione) {
       if (
@@ -112,12 +161,15 @@ export class SharedVerbaleDettaglioSoggettiComponent
               this.soggetti = data.map((value) => {
                 return TableSoggettiVerbale.map(value);
               });
-              this.config = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
-                true,
-                1,
-                (el: TableSoggettiVerbale) => false,
-                false
-              );
+
+              this.config =
+                this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
+                  true,
+                  1,
+                  (el: TableSoggettiVerbale) => false,
+                  false
+                );
+
               this.loaded = true;
               this.soggettoSelected = true;
             }
@@ -141,18 +193,19 @@ export class SharedVerbaleDettaglioSoggettiComponent
           this.soggetti = data.map((value) => {
             return TableSoggettiVerbale.map(value);
           });
-          this.config = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
-            true,
-            1,
-            this.isSelectablePerAllegare,
-            false
-          );
+          this.config =
+            this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
+              true,
+              1,
+              this.isSelectablePerAllegare,
+              false
+            );
+
           this.loaded = true;
         }
       });
     this.notSelected.emit();
   }
- 
 
   ngOnDestroy(): void {
     this.logger.destroy(SharedVerbaleDettaglioSoggettiComponent.name);

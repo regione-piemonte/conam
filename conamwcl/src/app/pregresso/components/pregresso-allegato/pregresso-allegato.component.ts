@@ -293,6 +293,11 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
         }else{
           this.fascicoloService.message = null;
         }
+        
+        const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+        this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
+		    this.fascicoloService.dataRicercaProtocolloNumResults = +data.totalLineResp;
+
         if (this.idOrdinanza && this.numDeterminazione) {
           this.router.navigate([
             Routing.FASCICOLO_ALLEGATO_DA_ACTA + this.idVerbale,

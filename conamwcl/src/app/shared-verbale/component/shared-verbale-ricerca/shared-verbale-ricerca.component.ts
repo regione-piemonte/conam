@@ -192,7 +192,8 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
             this.statoVerbaleModel = data.filter(
               (a) =>
                 a.id == Constants.ID_STATO_VERBALE_IN_SCRITTI_DIFENSIVI ||
-                a.id == Constants.ID_STATO_VERBALE_ACQUISITO
+                a.id == Constants.ID_STATO_VERBALE_ACQUISITO ||
+                a.id == Constants.ID_STATO_VERBALE_ORDINANZA
             );
           } else {
             this.statoVerbaleModel = data;

@@ -6,6 +6,7 @@ import { FaseGiurisdizionaleVerbaleAudizioneService } from "../../service/fase-g
 import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
 import { Constants } from "../../../commons/class/constants";
 import { timer } from "rxjs/observable/timer";
+import { TemplateService } from "../../../template/services/template.service";
 
 @Component({
     selector: 'emissione-verbale-audizione-riepilogo',
@@ -25,7 +26,8 @@ export class EmissioneVerbaleAudizioneRiepilogoComponent implements OnInit, OnDe
         private router: Router,
         private activatedRoute: ActivatedRoute,
         private faseGiurisdizionaleVerbaleAudizioneService: FaseGiurisdizionaleVerbaleAudizioneService,
-        private sharedVerbaleService: SharedVerbaleService
+        private sharedVerbaleService: SharedVerbaleService,
+        private templateService: TemplateService
     ) { }
 
     ngOnInit(): void {
@@ -43,6 +45,18 @@ export class EmissioneVerbaleAudizioneRiepilogoComponent implements OnInit, OnDe
                     }
                   
                  });
+
+                 this.activatedRoute.queryParams.subscribe((params) => {
+                    let paramsvalue = params["letteraProtocollo"];
+                    if (paramsvalue == "true") {
+                        this.templateService.getMessage('PROTLET01').subscribe(data => {
+                
+                            this.manageMessageTop(data.message, data.type);
+        
+                        }, err => {
+                            this.logger.error("Errore nel recupero del messaggio");
+                        });    }
+                });
     }
 
 

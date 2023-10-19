@@ -19,6 +19,7 @@ import { AllegatoUtilsSharedService } from './service/allegato-utils-shared.serv
 import { FileSelectDirective } from 'ng2-file-upload';
 import { SharedAllegatoComponent } from './component/shared-allegato/shared-allegato.component';
 import { SharedAllegatoDocumentoProtocollatoComponent } from './component/shared-allegato-documento-protocollato/shared-allegato-documento-protocollato.component';
+import { SharedAllegatoDocumentoProtocollatoPagComponent } from './component/shared-allegato-documento-protocollato-pag/shared-allegato-documento-protocollato-pag.component';
 
 
 
@@ -37,7 +38,8 @@ import { SharedAllegatoDocumentoProtocollatoComponent } from './component/shared
         SharedAllegatoRicercaProtocolloComponent,
         SharedAllegatoComponent,
         SharedAllegatoDocumentoProtocollatoComponent,
-        FileSelectDirective
+        FileSelectDirective,
+        SharedAllegatoDocumentoProtocollatoPagComponent
     ],
     declarations: [SharedSpinnerComponent,
         SharedDialogComponent,
@@ -50,7 +52,8 @@ import { SharedAllegatoDocumentoProtocollatoComponent } from './component/shared
         SharedAllegatoRicercaProtocolloComponent, 
         FileSelectDirective,
         SharedAllegatoComponent,
-        SharedAllegatoDocumentoProtocollatoComponent
+        SharedAllegatoDocumentoProtocollatoComponent,
+        SharedAllegatoDocumentoProtocollatoPagComponent
     ],
     providers: [AllegatoSharedService, ConfigSharedService, AllegatoUtilsSharedService, NumberUtilsSharedService],
 })

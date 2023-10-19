@@ -142,6 +142,10 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
 
   riepilogoVerbale: RiepilogoVerbaleVO;
 
+  currentPage: number = 1;
+  numPages: number;
+  numResults: number;
+
   constructor(
     private logger: LoggerService,
     private router: Router,
@@ -183,6 +187,12 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
           }
         });
       }
+
+      // setto numPages
+      this.numPages = this.fascicoloService.dataRicercaProtocolloNumPages;
+      this.numResults = this.fascicoloService.dataRicercaProtocolloNumResults;
+      this.currentPage = 1;
+
       // setto e recupero le info del numberdocument
       this.numberDocument = this.fascicoloService.setNumberDocument();
       this.loadedConfig = true;
@@ -223,7 +233,11 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     this.messageTop = mess.message;
     this.timerShowMessageTop();
   }
-
+  manageMessageBottom() {
+    this.showMessageBottom = true;
+    this.typeMessageBottom = this.mess.type;
+    this.messageBottom = this.mess.message;
+  }
   timerShowMessageTop() {
     this.showMessageTop = true;
     let seconds: number = 20; //this.configService.getTimeoutMessagge();
@@ -240,12 +254,6 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     this.typeMessageTop = null;
     this.messageTop = null;
     clearInterval(this.intervalIdS);
-  }
-
-  manageMessageBottom() {
-    this.showMessageBottom = true;
-    this.typeMessageBottom = this.mess.type;
-    this.messageBottom = this.mess.message;
   }
 
   resetMessageBottom() {
@@ -405,6 +413,13 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       );
   }
 
+  pageChange(page:number){
+    let ricercaProtocolloRequest:RicercaProtocolloRequest = new RicercaProtocolloRequest();
+    ricercaProtocolloRequest.pageRequest = page;
+    ricercaProtocolloRequest.numeroProtocollo = this.searchFormRicercaProtocol;
+    this.ricercaProtocollo(ricercaProtocolloRequest);
+  }
+
   ricercaProtocollo(ricerca: RicercaProtocolloRequest) {
     ricerca.idVerbale = this.idVerbale;
     if (this.fascicoloService.getTypeRicerca() === 2) {
@@ -431,9 +446,19 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
           data.documentoProtocollatoVOList = [];
         }
 
+        const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+        this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
+        this.numPages = numpages;
+        this.currentPage = +data.pageResp;
+        this.numResults  = +data.totalLineResp;
+
         if (data.messaggio) {
           this.mess = data.messaggio;
-          this.manageMessageBottom();
+          if(!this.dataRicercaProtocolloSelected){
+            this.manageMessage(data.messaggio);
+          }else{
+            this.manageMessageBottom();
+          }
         } else {
           this.mess = null;
           this.resetMessageBottom();
@@ -574,8 +599,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       this.showCompMeta = 19;
       this.compMetaDataDisabled = true;
       this._checkSave();
-    }
-    if ($idTipo == 5) {
+    } else if ($idTipo == 5) {
       // ordinanza
       this.compMetaDataDisabled = true;
       this._checkSave();

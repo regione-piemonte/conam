@@ -11,11 +11,20 @@
                 </div>
                 <div class="panel-body panel-body-background">
                     <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop"></shared-alert>
-
                     <shared-allegato-form-ricerca-protocollo [numeroProtocollo]="searchFormRicercaProtocol" (onSearch)="ricercaProtocollo($event)">
                                 
                     </shared-allegato-form-ricerca-protocollo>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="overflow-x: scroll;">
+                        <shared-allegato-documento-protocollato-pag
+                            *ngIf="numPages" 
+                            [currentPage]="currentPage" 
+                            [numPages]="numPages"
+                            [numResults]="numResults"
+                            (pageChange)="pageChange($event)"
+                        >
+
+                        </shared-allegato-documento-protocollato-pag>
+                    
                         <datatable
                             *ngIf="dataRicercaProtocollo"
                             [data]="dataRicercaProtocollo"

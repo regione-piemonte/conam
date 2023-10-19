@@ -93,7 +93,8 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
                 this.getMessaggioManualeByidOrdinanzaVerbaleSoggetto();
             }
             else this.router.navigateByUrl(Routing.PAGAMENTI_CREA_PIANO);
-        });       
+        });     
+          
     }
     getMessaggioManualeByidOrdinanzaVerbaleSoggetto(){
         this.pagamentiService.getMessaggioManualeByidOrdinanzaVerbaleSoggetto(this.idSoggettiOrdinanza[0]).subscribe(data => {
@@ -141,8 +142,9 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
     loadPiano() {
         this.loaded = false;        
         if (!this.isModifica) {
-            this.subscribers.precompilaPiano = this.pagamentiService.precompilaPiano(this.idSoggettiOrdinanza).subscribe(data => {
-                this.piano = data;
+            this.subscribers.precompilaPiano = this.pagamentiService.precompilaPiano(this.idSoggettiOrdinanza).subscribe(data => {                
+                data.importoSpeseProcessuali = 0;
+                this.piano = data;                
                 this.importoTotale = this.piano.importoSanzione + 
                                      this.piano.importoSpeseNotifica + 
                                      this.piano.importoSpeseProcessuali + 

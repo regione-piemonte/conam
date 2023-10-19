@@ -11,7 +11,7 @@
                 </div>
                 <div class="panel-body panel-body-background">
                     <div class="form-group row">
-                        <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop"></shared-alert>
+                        <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop && !alertBottom"></shared-alert>
                         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <shared-verbale-allegato-tabella *ngIf="loadedConfig" [riepilogoAllegato]="allegatoModel" [configDocumentiVerbale]="configVerb"
                                 [configDocumentiIstruttoria]="configIstr" [configDocumentiFaseGiurisdizionale]="configGiurisd" [configDocumentiRateizzazione]="configRateizzazione"
@@ -24,9 +24,11 @@
                             [riepilogoVerbale]="riepilogoVerbale"
                                 (onNewFile)="salvaAllegato($event)">
                             </shared-allegato-metadati-inserimento>
+                           
                             <shared-allegato-form-ricerca-protocollo (onSearch)="ricercaProtocollo($event)">
                                 
                             </shared-allegato-form-ricerca-protocollo>
+                            <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop && alertBottom"></shared-alert>
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
                             <button type="button" class="btn-conam button-blue" (click)="goToVerbaleDati()" *ngIf="buttonModificaFlag">

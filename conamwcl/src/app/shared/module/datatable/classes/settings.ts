@@ -1,3 +1,5 @@
+import { TemplateRef } from "@angular/core";
+
 export interface Column extends Configurable {
   /**
    * Nome proprietà dell' oggetto da stampare in tabella
@@ -10,7 +12,7 @@ export interface Column extends Configurable {
   /**
    * Ordinamento iniziale.
    * Valori validi:
-   * 
+   *
    * - 0 : senza ordinamento
    * - 1 : ascendente
    * - -1 : discendente
@@ -21,12 +23,15 @@ export interface Column extends Configurable {
    */
   link?: Link;
 
-
   /**
    * gestione css da applicare alla colonna`.
    */
   class?: string;
 
+  /**
+   * handle the cellTemplate for the relative column`.
+   */
+  cellTemplate?: TemplateRef<any>;
 }
 
 /**
@@ -46,7 +51,7 @@ export interface Link extends Configurable {
    * <datatable [data]="data" [config]="config" (download)="doDownload($event)"></datatable>
    * ```
    * per gestire il click sul link.
-   * 
+   *
    * Può essere creato un url da un oggetto di tipo `File` chiamando il metodo creaUrl definito nel service DatatableService
    * già disponibile all'import del modulo di datatable:
    * ```javascript
@@ -84,16 +89,12 @@ export interface PaginationOptions extends Configurable {
 /**
  * Opzioni di filtro globale
  */
-export interface FilterOptions extends Configurable {
-
-}
+export interface FilterOptions extends Configurable {}
 
 /**
  * Opzioni per sort delle colonne
  */
-export interface SortOptions extends Configurable {
-
-}
+export interface SortOptions extends Configurable {}
 
 /**
  * Opzioni per la selezione singola / multipla dei record in tabella.
@@ -101,21 +102,21 @@ export interface SortOptions extends Configurable {
  * attravero la proprietà `selectionType`
  */
 export interface SelectionOptions extends Configurable {
-  /** 
+  /**
    * Tipo di selezione:
    * - 0 per singola (default)
    * - 1 per multipla
-   * 
+   *
    * Preferire la enum `SelectionType` per indicare il tipo di selezione
    */
   selectionType?: number;
-  /** 
+  /**
    * fa comparire o scoparire il radio button o checkbox
    */
   isSelectable?: (any) => boolean;
 }
 
-/** 
+/**
  * Tipo di eliminazione:
  * -internal = true -> viene gestita dalla datatable
  * -internal = false -> va gestita dalla componente chiamante
@@ -147,9 +148,9 @@ export interface Configurable {
   enable?: boolean;
 }
 
-/** 
-* Edit Option
-*/
+/**
+ * Edit Option
+ */
 export interface EditOptions extends Configurable {
   isEditable?: (any) => boolean;
 }

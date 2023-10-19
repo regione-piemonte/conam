@@ -32,5 +32,12 @@ export class DatiTemplateVO {
     public dirigenteLettera?: string;
     public inizialiLettera?: string;
     public sedeEnte?: string;
+    public sedeEnteTesto?: string;
 
+    // Rif: ordinanza ingiunzione testi liberi 
+    public intestazioneConoscenza?: string;
+    public email?: string;
+    public emailOrgano?: string;
+    public testoLibero?: string;
+  
 }

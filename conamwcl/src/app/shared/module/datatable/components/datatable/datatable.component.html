@@ -107,6 +107,17 @@
               <button class="button-text" (click)="goDownload(el)">{{byString(el,c.columnName)[c.link.fileName || 'nomeFile']}}
               </button>
             </ng-template>
+
+
+  <!-----Handle the TemplateRef Cell in a column -->
+              <ng-container *ngIf="c?.cellTemplate"
+            
+              [ngTemplateOutlet]='c?.cellTemplate'
+              [ngTemplateOutletContext]='{
+            el: el
+          }'
+        ></ng-container>
+           
           </td>
           <td *ngIf="config.delete?.enable">
             <button class="btn btn-danger btn-xs" type="button" data-title="Delete" data-toggle="modal" data-target="#delete" (click)="delete(el)"
@@ -126,6 +137,7 @@
               <span class="glyphicon glyphicon-edit"></span>
             </button>
           </td>
+          
         </tr>
       </ng-container>
     </ng-template>

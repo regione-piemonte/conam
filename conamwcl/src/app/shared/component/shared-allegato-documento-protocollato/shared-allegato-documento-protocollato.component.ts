@@ -66,7 +66,10 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
     dataRicercaProtocollo: Array<DocumentoProtocollatoVO>;
     dataRicercaProtocolloSelected: DocumentoProtocollatoVO;
     nameFiles: string;
-
+    numPages:number = null;
+    currentPage: number = 0;
+    numResults: number = null;
+    
     constructor(
         private logger: LoggerService,
         public configSharedService: ConfigSharedService,
@@ -269,6 +272,14 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
             });
     }
 
+    
+    pageChange(page:number){
+        let ricercaProtocolloRequest:RicercaProtocolloRequest = new RicercaProtocolloRequest();
+        ricercaProtocolloRequest.pageRequest = page;
+        ricercaProtocolloRequest.numeroProtocollo = this.searchFormRicercaProtocol;
+        this.ricercaProtocollo(ricercaProtocolloRequest);
+    }
+
     /* Ricerca */
 
     ricercaProtocollo(ricerca: RicercaProtocolloRequest) {
@@ -305,6 +316,11 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
                 if (data.messaggio) {
                     this.manageMessage(data.messaggio);
                 }
+                
+                const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+                this.numPages = numpages;
+                this.currentPage = +data.pageResp;
+                this.numResults = +data.totalLineResp; 
 
                 this.loaded = true;
                 this.searchFormRicercaProtocol = ricerca.numeroProtocollo;

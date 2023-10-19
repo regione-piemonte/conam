@@ -933,6 +933,9 @@ export class PregressoInserimentoComponent implements OnInit, OnDestroy {
             this.fascicoloService.message = null;
           }
 
+          const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+          this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
+          this.fascicoloService.dataRicercaProtocolloNumResults = +data.totalLineResp;
           this.router.navigateByUrl(Routing.PREGRESSO_INSERIMENTO_ACTA);
         } else {
           this.manageMessage(data.messaggio);

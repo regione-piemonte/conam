@@ -129,6 +129,11 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
   public subMessagess: Array<string>;
   public subLinks: Array<any>;
 
+  currentPage: number = 1;
+  numPages: number;
+  numResults: number;
+
+
   constructor(
     private logger: LoggerService,
     private router: Router,
@@ -205,6 +210,10 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
           all.filename = new MyUrl(<string>all.filename, null);
         });
       }
+      // setto numPages
+      this.numPages = this.fascicoloService.dataRicercaProtocolloNumPages;
+      this.numResults = this.fascicoloService.dataRicercaProtocolloNumResults;
+      this.currentPage = 1;
       // setto e recupero le info del numberdocument
       this.numberDocument = this.fascicoloService.setNumberDocument();
       // forzo il readonly in questa pagina
@@ -1263,6 +1272,13 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.logger.destroy(PregressoInserimentoActaComponent.name);
   }
+  
+  pageChange(page:number){
+    let ricercaProtocolloRequest:RicercaProtocolloRequest = new RicercaProtocolloRequest();
+    ricercaProtocolloRequest.pageRequest = page;
+    ricercaProtocolloRequest.numeroProtocollo = this.searchFormRicercaProtocol;
+    this.ricercaProtocollo(ricercaProtocolloRequest);
+  }
 
   ricercaProtocollo(ricerca: RicercaProtocolloRequest) {
     ricerca.flagPregresso = true;
@@ -1289,6 +1305,12 @@ export class PregressoInserimentoActaComponent implements OnInit, OnDestroy {
         if (data.messaggio) {
           this.manageMessage(data.messaggio);
         }
+
+        const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+        this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
+        this.numPages = numpages;
+        this.currentPage = +data.pageResp;
+        this.numResults  = +data.totalLineResp;
 
         this.fascicoloService.categoriesDuplicated = tipiAllegatoDuplicabili;
         this.loaded = true;

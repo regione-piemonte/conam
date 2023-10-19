@@ -66,16 +66,39 @@ export class PagamentiPianoViewComponent implements OnInit, OnDestroy {
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idPiano = +params['idPiano'];
 
-            if (this.activatedRoute.snapshot.paramMap.get('action') == 'creazione')
-                this.manageMessageTop("Piano creato con successo", 'SUCCESS');
+            if (this.activatedRoute.snapshot.paramMap.get('action') == 'creazione' && !this.piano){
+            
+                this.manageMessageTop(`Piano creato con successo.`, 'SUCCESS');
 
+            
+             
+             
+            
+            
+            }
             if (this.idPiano)
                 this.loadPiano();
             else
                 this.router.navigateByUrl(Routing.PAGAMENTI_RICERCA_PIANO);
         });
     }
-
+checkMessage(){
+    if (this.activatedRoute.snapshot.paramMap.get('action') == 'creazione'){
+        console.log(this.piano)
+       if( this.piano && this.piano.isLetteraCreata){
+        
+        let message; 
+        let type;
+        this.templateService.getMessage('PROTLET01').subscribe(data => {
+        message= data.message;
+        type= data.type;
+        this.manageMessageTop(`Piano creato con successo. \n ${message}`, 'SUCCESS');
+        }, err => {
+            this.logger.error("Errore nel recupero del messaggio");
+        }); 
+       }
+    }
+}
     loadPiano() {
         this.loaded = false;
         this.loadedIdSoggettiOrdinanza = false;
@@ -89,6 +112,7 @@ export class PagamentiPianoViewComponent implements OnInit, OnDestroy {
             this.listaSoggetti = this.piano.soggetti.map(sogg => TableSoggettiOrdinanza.map(sogg));
             this.loadedIdSoggettiOrdinanza = true;
             this.loaded = true;
+            this.checkMessage()
         }, err => {
             this.logger.error("Errore durante il caricamento del piano");
             this.loaded = true;

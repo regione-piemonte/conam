@@ -8,6 +8,9 @@ export class DatiTemplateCompilatiVO {
   public oggetto: string;
   public descrizione: string;
 
+  ///
+  public testoDichiarante?: string;
+  public dichiarante?: string;
   //lettera ordinanza
   public riferimentoNormativo: string;
 
@@ -44,4 +47,14 @@ export class DatiTemplateCompilatiVO {
   public listaSoggetti?: any;
   public mailSettoreTributi?: string;
   public funzionario?: string;
+  public sedeEnteRiga1?: string;
+  public sedeEnteRiga2?: string;
+  public sedeEnteRiga3?: string;
+  public sedeEnteRiga4?: string;
+  public sedeEnteRiga5?: string;
+  // Rif: ordinanza ingiunzione testi liberi  
+  public intestazioneConoscenza?: string;
+  public email?: string;
+  public emailOrgano?: string;
+   
 }

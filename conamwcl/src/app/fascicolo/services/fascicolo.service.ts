@@ -17,6 +17,8 @@ export class FascicoloService {
   private _tipoAllegatoModel: Array<TipoAllegatoVO>;
   private _searchFormRicercaProtocol: string;
   private _dataRicercaProtocollo: Array<DocumentoProtocollatoVO>;
+  private _dataRicercaProtocolloNumPages: number;
+  private _dataRicercaProtocolloNumResults: number;
   private _idOrdinanzaVerbaleSoggetto: Array<number> = [];
   private _categoriesDuplicated: Array<number> = [];
   private _message: MessageVO;
@@ -247,6 +249,26 @@ export class FascicoloService {
 
   get dataRicercaProtocollo(): Array<DocumentoProtocollatoVO> {
     return this._dataRicercaProtocollo;
+  }
+
+  set dataRicercaProtocolloNumPages(
+    dataRicercaProtocolloNumPages:number
+  ) {
+    this._dataRicercaProtocolloNumPages = dataRicercaProtocolloNumPages;
+  }
+
+  get dataRicercaProtocolloNumPages(): number {
+    return this._dataRicercaProtocolloNumPages;
+  }
+
+  set dataRicercaProtocolloNumResults(
+    dataRicercaProtocolloNumResults:number
+  ) {
+    this._dataRicercaProtocolloNumResults = dataRicercaProtocolloNumResults;
+  }
+
+  get dataRicercaProtocolloNumResults(): number {
+    return this._dataRicercaProtocolloNumResults;
   }
 
   set idOrdinanzaVerbaleSoggetto(idOrdinanzaVerbaleSoggetto: Array<number>) {

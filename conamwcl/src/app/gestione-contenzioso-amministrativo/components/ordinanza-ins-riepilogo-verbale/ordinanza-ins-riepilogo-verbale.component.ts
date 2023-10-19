@@ -48,7 +48,7 @@ export class OrdinanzaInsVerbaleRiepilogoGestContAmministrativoComponent impleme
 
 
     goToCreaOrdinanza() {
-        this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_INS_ORDINANZA_CREA_ORDINANZA + this.idVerbale);
+        this.router.navigate([Routing.GESTIONE_CONT_AMMI_INS_ORDINANZA_CREA_ORDINANZA + this.idVerbale], { queryParams: { listaOrdinanze: true } });
     }
 
     ngOnDestroy(): void {

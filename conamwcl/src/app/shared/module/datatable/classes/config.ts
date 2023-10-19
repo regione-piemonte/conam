@@ -1,3 +1,4 @@
+import { TemplateRef } from "@angular/core";
 import { Column, PaginationOptions, SelectionOptions, SortOptions, FilterOptions, ButtonDataTable, DeleteOptions, InfoOptions, EditOptions } from "./settings";
 
 /**
@@ -66,4 +67,6 @@ export interface Config {
    * Configurazione del campo che viene utilizzato per comparare con i selezionati mandati alla tabella da esterno della componente. Default : nessuna comparatore
    */
   comparatorField?: string;
+
+ 
 }

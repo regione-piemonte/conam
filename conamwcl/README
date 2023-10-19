@@ -1,0 +1,13 @@
+### PER AVVIARE IL PROGETTO
+npm install
+
+- connettere la VPN
+- avviare jboss (dentro JBOSS-6.4\bin e lancia standalone.bat)
+- avviare inlocale il progetto (da visual studio)
+- npm start
+- http://localhost:4200/conam
+
+ ### AMBIENTE
+ NODE V: 14.15.0
+
+

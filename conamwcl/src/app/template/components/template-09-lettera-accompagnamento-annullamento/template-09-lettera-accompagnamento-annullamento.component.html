@@ -212,26 +212,10 @@
         <span class="form-control-view" >
           /{{ datiCompilati.datiLetteraAnnullamento.inizialiLettera }}
           </span>
-      
       </div>
-      <div class="col-12 small-font padding-top-2">
-        <span class="form-control-view" >{{
-          datiCompilati.datiLetteraAnnullamento.sedeEnteRiga1
-        }}</span>
-        
+      <div class="col-12 small-font padding-top-2"  *ngFor="let info of infoEnteArray">
+        <span class="form-control-view" >  {{info}}</span>  
       </div>
-      <div class="col-12 small-font padding-top-2">
-        <span class="form-control-view">{{
-          datiCompilati.datiLetteraAnnullamento.sedeEnteRiga2
-        }}</span>
-       
-      </div>
-      <div class="col-12 small-font padding-top-2">
-        <span class="form-control-view" >{{
-          datiCompilati.datiLetteraAnnullamento.sedeEnteRiga3
-        }}</span>
-      </div>
-
     </div>
   </form>
 </div>

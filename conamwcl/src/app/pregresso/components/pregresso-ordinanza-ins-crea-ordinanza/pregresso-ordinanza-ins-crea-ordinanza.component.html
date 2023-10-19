@@ -59,7 +59,7 @@
                     <div class="form-group col-xs-12 col-sm-12  col-md-6 col-lg-6">
                         <label for="numDeterminazione" class="control-label">Numero determinazione</label>
                         <input type="text" id="numDeterminazione" class="form-control" required
-                            #numeroDeterminazione="ngModel" name="numDeterminazione" maxlength="12"
+                            #numeroDeterminazione="ngModel" name="numDeterminazione" maxlength="50"
                             [(ngModel)]="ordinanza.numDeterminazione">
                     </div>
                     <div class="form-group col-xs-12 col-sm-12  col-md-6 col-lg-6"
@@ -131,7 +131,7 @@
                         <button type="button" class="btn-conam button-green" (click)="salvaOrdinanza()"
                             [disabled]="!creaOrdinanza.valid || soggettiArray.length==0 || showCheckboxWarning() || isImportoNotificaInserito">
                             <i class="glyphicon glyphicon-floppy-save btn-glyphicon img-circle text-green-conam"></i>
-                            Crea ordinanza</button>
+                            Inserisci ordinanza</button>
                     </div>
                 </div>
             </div>

@@ -13,13 +13,14 @@ export class TableSoggettiVerbale {
     idAllegatoVerbaleAudizione: number;
     nomeCognomeRagioneSociale: string;
 
+
     id: number;
     name: string;
     surname: string;
     birthdayDate: string;
     ragioneSociale: string;
     partitaIva: string;
-
+    listaOrdinanze?:Array<any>;
     public static map(value: SoggettoVO): TableSoggettiVerbale {
         let tableSoggetti = new TableSoggettiVerbale();
 
@@ -41,6 +42,8 @@ export class TableSoggettiVerbale {
         tableSoggetti.birthdayDate = value.dataNascita;
         tableSoggetti.ragioneSociale = value.ragioneSociale;
         tableSoggetti.partitaIva = value.partitaIva;
+
+        tableSoggetti.listaOrdinanze= value.listaOrdinanze;
         return tableSoggetti;
     }
 }

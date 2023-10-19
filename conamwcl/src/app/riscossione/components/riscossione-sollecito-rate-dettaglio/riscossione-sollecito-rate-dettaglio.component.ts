@@ -23,6 +23,7 @@ import { PianoRateizzazioneVO } from "../../../commons/vo/piano-rateizzazione/pi
 import { TableSoggettiRata } from "../../../commons/table/table-soggetti-rata";
 import { SharedRateConfigService } from "../../../shared-pagamenti/services/shared-pagamenti-config.service";
 import { SalvaSollecitoRateRequest } from "../../../commons/request/riscossione/salva-sollecito-rate-request";
+import { TemplateService } from "../../../template/services/template.service";
 
 declare var $: any; 
 
@@ -69,6 +70,8 @@ export class RiscossioneSollecitoRateDettaglioComponent implements OnInit, OnDes
   //flag nuovo
   public isNuovo: boolean = true; 
 
+
+  public message: string;
   // piano rate
   configRate: Config;
   rate: Array<TableSoggettiRata>;
@@ -77,6 +80,7 @@ export class RiscossioneSollecitoRateDettaglioComponent implements OnInit, OnDes
   constructor(
      private logger: LoggerService,
     private router: Router,
+    private templateService: TemplateService,
     private riscossioneService: RiscossioneService,
     private sharedRiscossioneService: SharedRiscossioneService,
     private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
@@ -90,6 +94,14 @@ export class RiscossioneSollecitoRateDettaglioComponent implements OnInit, OnDes
     this.soggettoSollecito = [];
     this.soggettoSollecito[0] = this.riscossioneService.soggettoSollecito;
     //this.riscossioneService.soggettoSollecito = null;
+    
+    this.templateService.getMessage('PROTLET01').subscribe(data => {
+      this.message= data.message
+      }, err => {
+          this.logger.error("Errore nel recupero del messaggio");
+      }); 
+  
+    
     if (!this.soggettoSollecito[0]) {
       this.router.navigateByUrl(Routing.RISCOSSIONE_SOLLECITO_RICERCA_RATE);
     } else {

@@ -43,6 +43,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
   public showMessageTop: boolean;
   public typeMessageTop: string;
   public messageTop: string;
+  public alertBottom: boolean =  false;
   private intervalIdS: number = 0;
 
   public buttonModificaFlag: boolean;
@@ -151,14 +152,13 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
       }
     }, 1000);
   }
-
   resetMessageTop() {
     this.showMessageTop = false;
     this.typeMessageTop = null;
     this.messageTop = null;
     clearInterval(this.intervalIdS);
   }
-
+  
   //recupero le tipologie di allegato allegabili
   loadTipoAllegato() {
     this.loadedCategoriaAllegato = false;
@@ -265,17 +265,22 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
           ricerca.numeroProtocollo;
         // setto i dati per la ricerca documento protocollato
         this.fascicoloService.dataRicercaProtocollo =
-          data.documentoProtocollatoVOList;
+          data.documentoProtocollatoVOList;      
         if (data.messaggio) {
+          this.alertBottom = true;
           this.fascicoloService.message = data.messaggio;
+          this.manageMessage(data.messaggio.type, data.messaggio.message, )
         }else{
           this.fascicoloService.message = null;
-        }
+        const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+        this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
+        this.fascicoloService.dataRicercaProtocolloNumResults = +data.totalLineResp;
         this.fascicoloService.successPage =
           Routing.VERBALE_RIEPILOGO + this.idVerbale;
         this.router.navigateByUrl(
           Routing.FASCICOLO_ALLEGATO_DA_ACTA + this.idVerbale
         );
+      }
       },
       (err) => {
         if (err instanceof ExceptionVO) {

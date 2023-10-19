@@ -168,6 +168,8 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
     let tmp: DatiTemplateCompilatiVO
     this.isPrinted = true;
     this.isStampa = true;
+
+    let fieldsNotRequired:string[]=[];
     
     if(this.itsLetteraAnnullamento){
       this.templateAnnullamento.setStampa(true);
@@ -180,15 +182,14 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
        tmp = this.templateArchiviazione.getDatiCompilati()
     }
     else{
+      fieldsNotRequired = ['intestazioneConoscenza','email','email','emailOrgano','testoLibero'];
       this.template.setStampa(true);
       this.template.setDatiCompilati(this.datiTemplateModelStampa);
       tmp = this.template.getDatiCompilati()
     }
-   
-
     
     this.resetMessageTop();
-    if (this.checkDatiTemplate(tmp)) {
+    if (this.checkDatiTemplate(tmp,fieldsNotRequired)) {
       //this.loaded = false;
       let request: DatiTemplateRequest = new DatiTemplateRequest();
       if(this.itsLetteraAnnullamento){
@@ -268,8 +269,9 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
         (data) => {
           saveAs(data, nome);
           this.loaded = true;
-          this.router.navigateByUrl(
-            Routing.GESTIONE_CONT_AMMI_ORDINANZA_RIEPILOGO + this.idOrdinanza
+          this.router.navigate([
+            Routing.GESTIONE_CONT_AMMI_ORDINANZA_RIEPILOGO + this.idOrdinanza],
+            { queryParams: { letteraProtocollo: true } }
           );
         },
         (err) => {
@@ -280,10 +282,10 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
     });
   }
 
-  checkDatiTemplate(dati: DatiTemplateCompilatiVO): boolean {
+  checkDatiTemplate(dati: DatiTemplateCompilatiVO,fieldsNotRequired:string[]=[]): boolean {
     let flag: boolean = true;
     for (let field in dati) {
-      if (!dati[field]) flag = false;
+      if (!fieldsNotRequired.includes(field) && !dati[field]) flag = false;
     }
     return flag;
   }

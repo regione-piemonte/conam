@@ -29,7 +29,8 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
   public comparire: string;
 
   public dirigente: string; //user
-
+  public dirigenteLettera: string
+  public sedeEnte: string;
   public subscribers: any = {};
 
   public funzionario: string;
@@ -37,7 +38,8 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
   //gestione anteprima
   public isAnteprima: boolean;
   public isStampa: boolean;
-
+  public infoEnteArray: string[] 
+  public sedeEnteArray: string[] 
   //dati precompilati
   @Input()
   data: DatiTemplateVO;
@@ -81,7 +83,15 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
     this.gestisciSingolariPlurali();
 
     this.dirigente = this.data.dirigente;
-
+    this.dirigenteLettera = this.data.dirigenteLettera
+    this.sedeEnte = this.data.sedeEnteTesto
+    this.sedeEnteArray= this.data.sedeEnteTesto.split(";");
+    this.infoEnteArray= this.data.sedeEnte.split(";");
+    this.datiCompilati.sedeEnteRiga1 =  this.infoEnteArray[0] ? this.infoEnteArray[0] : ' '
+    this.datiCompilati.sedeEnteRiga2 =  this.infoEnteArray[1] ? this.infoEnteArray[1] : ' '
+    this.datiCompilati.sedeEnteRiga3 =  this.infoEnteArray[2] ? this.infoEnteArray[2] : ' '
+    this.datiCompilati.sedeEnteRiga4 =  this.infoEnteArray[3] ? this.infoEnteArray[3] : ' '
+    this.datiCompilati.sedeEnteRiga5 =  this.infoEnteArray[4] ? this.infoEnteArray[4] : ' '
     //La richiesta Bertinetti riguarda solo l'ordinanza
     this.data.mailSettoreTributi = null;
   }

@@ -111,28 +111,15 @@
                 Distinti saluti.
             </div>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right padding-top-25">
-                Il Dirigente del Settore
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
-                {{data.dirigente}}
+                Il Dirigente del Settore <br />
+                {{ data.dirigenteLettera }} <br />
+                {{ data.dirigente }}
             </div>
         </div>
 
         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                Corso Regina Margherita, 153 bis
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                10122 Torino
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                Tel: 011 4321288
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                Fax: 011 4325386
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font">
-                Email: settore.tributi@regione.piemonte.it
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 small-font" *ngFor="let info of infoEnteArray">
+                {{info}}
             </div>
         </div>
     </form>

@@ -27,7 +27,7 @@ export class Template10LetteraAccompagnamentoArchiviazioneComponent
   //gestione anteprima
   public isAnteprima: boolean;
   public isStampa: boolean;
-
+  public infoEnteArray: string[] 
   //dati precompilati
   @Input()
   data: DatiTemplateVO;
@@ -64,6 +64,12 @@ export class Template10LetteraAccompagnamentoArchiviazioneComponent
         this.formTemplate.valid && this.formIntestazioneValid
       );
     });
+    this.infoEnteArray= this.data.sedeEnte.split(";");
+    this.datiCompilati.sedeEnteRiga1 =  this.infoEnteArray[0] ? this.infoEnteArray[0] : ' '
+    this.datiCompilati.sedeEnteRiga2 =  this.infoEnteArray[1] ? this.infoEnteArray[1] : ' '
+    this.datiCompilati.sedeEnteRiga3 =  this.infoEnteArray[2] ? this.infoEnteArray[2] : ' '
+    this.datiCompilati.sedeEnteRiga4 =  this.infoEnteArray[3] ? this.infoEnteArray[3] : ' '
+    this.datiCompilati.sedeEnteRiga5 =  this.infoEnteArray[4] ? this.infoEnteArray[4] : ' '
   }
 
   setAnteprima(flag: boolean) {

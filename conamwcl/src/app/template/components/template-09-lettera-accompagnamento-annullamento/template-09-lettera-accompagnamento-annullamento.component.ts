@@ -35,6 +35,7 @@ export class Template09LetteraAccompagnamentoAnnullamentoComponent
   public isAnteprima: boolean;
   public isStampa: boolean;
   //dati precompilati
+  public infoEnteArray: string[] 
   @Input()
   data: DatiTemplateVO;
 
@@ -83,16 +84,16 @@ export class Template09LetteraAccompagnamentoAnnullamentoComponent
     }
     this.dataOdierna = new Date().toLocaleDateString();
 
-    this.popolaCampi();
+       this.popolaCampi();
   }
   splitterMetod() {
-    let sedeEnteSplited = this.data.sedeEnte.split(";");
-    this.datiCompilati.datiLetteraAnnullamento.sedeEnteRiga1 =
-      sedeEnteSplited[0];
-    this.datiCompilati.datiLetteraAnnullamento.sedeEnteRiga2 =
-      sedeEnteSplited[1];
-    this.datiCompilati.datiLetteraAnnullamento.sedeEnteRiga3 =
-      sedeEnteSplited[2];
+    this.infoEnteArray = this.data.sedeEnte.split(";");
+    this.datiCompilati.sedeEnteRiga1 =  this.infoEnteArray[0] ? this.infoEnteArray[0] : ' '
+    this.datiCompilati.sedeEnteRiga2 =  this.infoEnteArray[1] ? this.infoEnteArray[1] : ' '
+    this.datiCompilati.sedeEnteRiga3 =  this.infoEnteArray[2] ? this.infoEnteArray[2] : ' '
+    this.datiCompilati.sedeEnteRiga4 =  this.infoEnteArray[3] ? this.infoEnteArray[3] : ' '
+    this.datiCompilati.sedeEnteRiga5 =  this.infoEnteArray[4] ? this.infoEnteArray[4] : ' '
+       
     let infoOrganoAccertatoreSplited = this.data.infoOrganoAccertatore.split(
       ";"
     );

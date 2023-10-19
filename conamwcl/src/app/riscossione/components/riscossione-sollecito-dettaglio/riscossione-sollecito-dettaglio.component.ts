@@ -20,6 +20,7 @@ import { CurrencyPipe } from "@angular/common";
 //JIRA - Gestione Notifica
 import { SalvaSollecitoRequest } from "../../../commons/request/riscossione/salva-sollecito-request";
 import { SharedRiscossioneSollecitoDettaglioComponent } from "../../../shared-riscossione/components/shared-riscossione-sollecito-dettaglio/shared-riscossione-sollecito-dettaglio.component";
+import { TemplateService } from "../../../template/services/template.service";
 
 declare var $: any;
 
@@ -67,13 +68,18 @@ export class RiscossioneSollecitoDettaglioComponent
   //flag nuovo
   public isNuovo: boolean = true;
 
+
+  //
+  public message: string; 
+
   constructor(
     private logger: LoggerService,
     private router: Router,
     private riscossioneService: RiscossioneService,
     private sharedRiscossioneService: SharedRiscossioneService,
     private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
-    private utilSubscribersService: UtilSubscribersService
+    private utilSubscribersService: UtilSubscribersService,
+    private templateService: TemplateService
   ) {}
 
   ngOnInit(): void {
@@ -83,6 +89,14 @@ export class RiscossioneSollecitoDettaglioComponent
     this.soggettoSollecito = [];
     this.soggettoSollecito[0] = this.riscossioneService.soggettoSollecito;
   
+    
+    this.templateService.getMessage('PROTLET01').subscribe(data => {
+    this.message= data.message
+    }, err => {
+        this.logger.error("Errore nel recupero del messaggio");
+    }); 
+
+
     //this.riscossioneService.soggettoSollecito = null;
     if (!this.soggettoSollecito[0]) {
       this.router.navigateByUrl(Routing.RISCOSSIONE_SOLLECITO_RICERCA);
@@ -351,6 +365,7 @@ export class RiscossioneSollecitoDettaglioComponent
       selection: {
         enable: true,
         isSelectable: (el: SollecitoVO) => {
+          console.log('prova',el)
           return el.isCreatoDalloUserCorrente;
         },
       },
