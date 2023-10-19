@@ -64,7 +64,7 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 			"join cnm_t_sollecito s on s.id_sollecito = ras.id_sollecito " + //
 			"join cnm_r_ordinanza_verb_sog ovs on ovs.id_ordinanza_verb_sog = s.id_ordinanza_verb_sog " + //
 			"join cnm_t_ordinanza o on o.id_ordinanza = ovs.id_ordinanza " + //
-			"where a.id_tipo_allegato in (20,36) and o.id_ordinanza = ?1 ", nativeQuery = true)
+			"where a.id_tipo_allegato in (20,36,21,37) and o.id_ordinanza = ?1 ", nativeQuery = true)
 	List<CnmTAllegato> findAllegatiSollecito(Integer idOrdinanza);
 	
 	
@@ -74,6 +74,8 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 	// 20200728_LC
 	List<CnmTAllegato> findByNumeroProtocolloAndObjectidSpostamentoActaIsNull(String numeroProtocollo);
 
+	List<CnmTAllegato> findByNumeroProtocolloAndObjectidSpostamentoActaIsNotNull(String numeroProtocollo);
+
 	// 20200907_LC
 	List<CnmTAllegato> findByNumeroProtocollo(String numeroProtocollo);
 	
@@ -81,7 +83,7 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 	// 20210422_LC
 	@Query(value = "select a.* from cnm_t_allegato a " + //
 			"join cnm_r_allegato_ordinanza ao on ao.id_allegato = a.id_allegato " + //
-			"where  a.id_tipo_allegato in (11,12,34,35) and ao.id_ordinanza = ?1 ", nativeQuery = true)
+			"where  a.id_tipo_allegato in (11,12,34,35, 21) and ao.id_ordinanza = ?1 ", nativeQuery = true)
 	List<CnmTAllegato> findAllegatiLetteraOrdinanza(Integer idOrdinanza);
 	
 	@Query(value = "select a.* from cnm_t_allegato a " + //

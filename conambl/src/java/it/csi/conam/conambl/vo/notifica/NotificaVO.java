@@ -5,6 +5,7 @@
 package it.csi.conam.conambl.vo.notifica;
 
 import it.csi.conam.conambl.vo.ParentVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.web.serializer.CustomDateDeserializer;
 import it.csi.conam.conambl.web.serializer.CustomDateSerializer;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
@@ -35,6 +36,10 @@ public class NotificaVO extends ParentVO {
 	public Integer idPiano;
 	public Integer idSollecito;
 	public boolean pregresso;
+    
+    private SelectVO causale;
+    private String numeroAccertamento;
+    private Long annoAccertamento;
 
 	public BigDecimal getImportoSpeseNotifica() {
 		return importoSpeseNotifica;
@@ -114,6 +119,30 @@ public class NotificaVO extends ParentVO {
 
 	public void setPregresso(boolean pregresso) {
 		this.pregresso = pregresso;
+	}
+
+	public SelectVO getCausale() {
+		return causale;
+	}
+
+	public void setCausale(SelectVO causale) {
+		this.causale = causale;
+	}
+
+	public String getNumeroAccertamento() {
+		return numeroAccertamento;
+	}
+
+	public void setNumeroAccertamento(String numeroAccertamento) {
+		this.numeroAccertamento = numeroAccertamento;
+	}
+
+	public Long getAnnoAccertamento() {
+		return annoAccertamento;
+	}
+
+	public void setAnnoAccertamento(Long annoAccertamento) {
+		this.annoAccertamento = annoAccertamento;
 	}
 
 }

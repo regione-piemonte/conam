@@ -3,7 +3,7 @@
     	updateCheck="true"
     	monitoring="autodetect"
     	dynamicConfig="true"
-    	maxBytesLocalHeap="150M"
+    	maxBytesLocalHeap="200M"
     	>
     	
     	<diskStore path="java.io.tmpdir"/>
@@ -53,6 +53,15 @@
     	      overflowToDisk="true"
     	      maxElementsOnDisk="5000"
     	      memoryStoreEvictionPolicy="LRU"/>
+    	
+    	<cache name="documentoProtocollatoPaged"
+    	      maxBytesLocalHeap="50M"
+    	      eternal="false"
+    	      timeToIdleSeconds="3600"
+    	      overflowToDisk="true"
+    	      maxElementsOnDisk="5000"
+    	      memoryStoreEvictionPolicy="LRU"/> 	 
+  
     	      
  </ehcache>
  

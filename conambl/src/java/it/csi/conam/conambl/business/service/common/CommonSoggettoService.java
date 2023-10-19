@@ -4,6 +4,8 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.common;
 
+import java.util.List;
+
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
@@ -16,6 +18,8 @@ public interface CommonSoggettoService {
 	CnmTSoggetto updateSoggettoDBWithIdStas(CnmTSoggetto cnmTSoggetto, CnmTUser cnmTUser, SoggettoVO sogDb, SoggettoVO sogStas, SoggettoVO soggetto);
 
 	CnmTSoggetto getSoggettoFromDb(MinSoggettoVO minSoggettoVO, boolean isRicerca);
+	
+	List<CnmTSoggetto> getSoggettiFromDb(MinSoggettoVO minSoggettoVO, boolean isRicerca);
 
 	// 20201217_LC - JIRA 118
 	SoggettoVO attachResidenzaPregressi(SoggettoVO sog, CnmTSoggetto cnmTSoggetto, Integer id);

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 
 import it.csi.conam.conambl.business.service.TemplateService;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
@@ -26,6 +27,7 @@ import it.csi.conam.conambl.business.service.pianorateizzazione.AllegatoPianoRat
 import it.csi.conam.conambl.business.service.sollecito.AllegatoSollecitoService;
 import it.csi.conam.conambl.business.service.util.UtilsReport;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
+import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.common.Report;
 import it.csi.conam.conambl.integration.beans.Soggetto;
 import it.csi.conam.conambl.integration.entity.CnmCParametro;
@@ -46,6 +48,7 @@ import it.csi.conam.conambl.integration.repositories.CnmTSollecitoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.request.template.DatiTemplateRequest;
 import it.csi.conam.conambl.security.UserDetails;
+import it.csi.conam.conambl.util.UtilsParametro;
 import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.luoghi.ComuneVO;
 import it.csi.conam.conambl.vo.luoghi.ProvinciaVO;
@@ -120,7 +123,9 @@ public class TemplateServiceImpl implements TemplateService {
 			break;
 		case REPORT_LETTERA_ACCOMPAGNAMENTO_INGIUNZIONE:			
 			response = getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza());		
-			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));					
+			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));		
+			// 20230110 PP
+			setTestiLiberiIngiunzione(response);
 			break;
 		case REPORT_LETTERA_RATEIZZAZIONE:
 			response = getDatiTemplateRateizzazione(request.getIdPiano());
@@ -139,8 +144,26 @@ public class TemplateServiceImpl implements TemplateService {
 		default:
 			throw new IllegalArgumentException("codice report non trovato");
 		}
+		
 
+		// 20230605 - E9 - imposto dati sede ente su tutti i template
+		CnmCParametro cnmCParametroSe = cnmCParametroRepository.findByIdParametro(Constants.ID_SEDE_ENTE);
+		if(cnmCParametroSe != null) response.setSedeEnte(cnmCParametroSe.getValoreString());
+		CnmCParametro cnmCParametroSet = cnmCParametroRepository.findByIdParametro(Constants.ID_SEDE_ENTE_TESTO_WEB);
+		if(cnmCParametroSet != null) response.setSedeEnteTesto(cnmCParametroSet.getValoreString());
+		// 20230605 - E8 - imposto dati sede ente su tutti i template
+		CnmCParametro cnmCParametroDir = cnmCParametroRepository.findByIdParametro(Constants.ID_DIRIGENTE_SETTORE);
+		if(cnmCParametroDir != null) response.setDirigenteLettera(cnmCParametroDir.getValoreString());
+		
 		return response;
+	}
+
+	private void setTestiLiberiIngiunzione(DatiTemplateVO response) {
+		// TODO capire se portare su db per conf default
+		response.setEmail("XXXX@legalmail.it");
+		response.setEmailOrgano("YYYYYY@cert.regione.piemonte.it");
+		response.setIntestazioneConoscenza("e p.c.:");
+		response.setTestoLibero("Si tramette all'accertatore per conoscenza, senza richiedere ulteriori attività da parte sua.");		
 	}
 
 	@Override
@@ -413,12 +436,16 @@ public class TemplateServiceImpl implements TemplateService {
 					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getBloccoFirmaOmessa() : "");	
 			jasperParam.put("inizialiLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getInizialiLettera()) 
 					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getInizialiLettera() : "");				
-			jasperParam.put("sedeEnteRiga1", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga1()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga1() : "");	
-			jasperParam.put("sedeEnteRiga2", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga2()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga2() : "");	
-			jasperParam.put("sedeEnteRiga3", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga3()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga3() : "");	
+//			jasperParam.put("sedeEnteRiga1", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga1()) 
+//					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga1() : "");	
+//			jasperParam.put("sedeEnteRiga2", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga2()) 
+//					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga2() : "");	
+//			jasperParam.put("sedeEnteRiga3", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga3()) 
+//					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga3() : "");	
+//			jasperParam.put("sedeEnteRiga2", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga4()) 
+//					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga4() : "");	
+//			jasperParam.put("sedeEnteRiga3", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga5()) 
+//					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga5() : "");
 			
 			
 			jasperParam.put("indirizzoOrganoAccertatoreRiga1", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1()) 
@@ -467,7 +494,28 @@ public class TemplateServiceImpl implements TemplateService {
 			
 		}
 
-		
+		// 20230110 PP Lett. Acc. Ordinanaza ingiunzione - testi liberi
+		if (codice.equals(Report.REPORT_LETTERA_ACCOMPAGNAMENTO_INGIUNZIONE.getCodiceDB())) {	
+			jasperParam.put("email", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getEmail()) 
+					? request.getDatiTemplateCompilatiVO().getEmail() : "");				
+			jasperParam.put("emailOrgano", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getEmailOrgano()) 
+					? request.getDatiTemplateCompilatiVO().getEmailOrgano() : "");			
+			jasperParam.put("intestazioneConoscenza", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIntestazioneConoscenza()) 
+					? request.getDatiTemplateCompilatiVO().getIntestazioneConoscenza() : "");				
+			jasperParam.put("testoLibero", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getTestoLibero()) 
+					? request.getDatiTemplateCompilatiVO().getTestoLibero() : "");			
+			
+//			if (StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getEmail()) &&
+//					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2()) &&
+//					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3()) &&
+//					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())) {
+//				jasperParam.put("intestazioneOrganoAccertatore", "");				
+//			} else {
+//				jasperParam.put("intestazioneOrganoAccertatore", "e p.c.");		
+//			}
+//			// --
+			
+		}
 		
 		// 20210401_LC lotto2scenario5 lettera sollecito rate
 		if (codice.equals(Report.REPORT_LETTERA_SOLLECITO_RATE.getCodiceDB())) {	
@@ -479,9 +527,21 @@ public class TemplateServiceImpl implements TemplateService {
 			
 			jasperParam.put("dirigenteLettera", dati.getDirigenteLettera());
 			
+		}		
+
+		
+		if (codice.equals(Report.REPORT_VERBALE_AUDIZIONE.getCodiceDB())) {
+			if (datiTemplateCompilatiVO.getTestoLibero() != null) {
+				jasperParam.put("testoLibero", datiTemplateCompilatiVO.getTestoLibero());
+			}
+			if (datiTemplateCompilatiVO.getTestoDichiarante() != null) {
+				jasperParam.put("testoDichiarante", datiTemplateCompilatiVO.getTestoDichiarante());
+			}
+			if(datiTemplateCompilatiVO.getDichiarante() != null) {
+				jasperParam.put("dichiarante", datiTemplateCompilatiVO.getDichiarante());				
+			}
 		}
 		
-
 		if (codice.equals(Report.REPORT_CONVOCAZIONE_AUDIZIONE.getCodiceDB())) {
 			if (dati.getListaSoggetti().size() > 1) {
 				jasperParam.put("sp1", "alle S.S.V.V.");
@@ -489,14 +549,29 @@ public class TemplateServiceImpl implements TemplateService {
 				jasperParam.put("sp3", "le S.S.V.V. non comparissero");
 			} else {
 				jasperParam.put("sp1", "alla S.V.");
-				jasperParam.put("sp2", " è convocata");
+				jasperParam.put("sp2", " é convocata");
 				jasperParam.put("sp3", "la S.V. non comparisse");
 			}
+			
+			CnmCParametro cnmCParametroSet = cnmCParametroRepository.findByIdParametro(Constants.ID_SEDE_ENTE_TESTO);
+			jasperParam.put("sedeEnteTesto", cnmCParametroSet!=null 
+				? cnmCParametroSet.getValoreString() : "");
 		}
-
 		
+		jasperParam.put("sedeEnteRiga1", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga1()) 
+			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga1() : "");	
+		jasperParam.put("sedeEnteRiga2", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga2()) 
+			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga2() : "");	
+		jasperParam.put("sedeEnteRiga3", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga3()) 
+			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga3() : "");	
+		jasperParam.put("sedeEnteRiga4", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga4()) 
+			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga4() : "");	
+		jasperParam.put("sedeEnteRiga5", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga5()) 
+			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga5() : "");
 		
-		
+		CnmCParametro cnmCParametroDir = cnmCParametroRepository.findByIdParametro(Constants.ID_DIRIGENTE_SETTORE);
+		if(cnmCParametroDir != null) jasperParam.put("dirigenteLettera", cnmCParametroDir.getValoreString());
+				
 		try {
 			report = utilsReport.printReportPDF(codice, jasperParam, null);
 		} catch (PrintException | IOException | SQLException | JRException e) {

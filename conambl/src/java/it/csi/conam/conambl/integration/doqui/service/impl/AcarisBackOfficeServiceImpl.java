@@ -182,6 +182,18 @@ public class AcarisBackOfficeServiceImpl extends CommonManagementServiceImpl imp
 		}
 		return result;
 	}
+	
+
+	public ObjectIdType recuperaInfoMoveDocumentOfflineView(String objectIdRichiestaPrenotazione, ObjectIdType repositoryId, PrincipalIdType  principalId) throws IntegrationException{
+		String method = "moveDocumentOfflineView";
+		ObjectIdType result = null;
+		
+		result = this.getInfoMoveDocumentOfflineView(repositoryId, principalId, getTarget("moveDocumentOfflineView"), objectIdRichiestaPrenotazione);
+		if(log.isDebugEnabled()){
+			log.debug(method + ". moveDocumentOfflineView = " + result.getValue());
+		}
+		return result;
+	}
 
 	private QueryableObjectType getTarget(String val) {
 		QueryableObjectType target = new QueryableObjectType();
@@ -207,6 +219,57 @@ public class AcarisBackOfficeServiceImpl extends CommonManagementServiceImpl imp
 		condition.setOperator(EnumQueryOperator.EQUALS);
 		condition.setPropertyName("dbKey");
 		condition.setValue(dbKey);
+		QueryConditionType []conditions = {condition};
+		try {
+			// Chiamate tramite WSDL
+//			response = backOfficeService.query(repositoryId,principalId, target, filter, conditions, null, null, null);
+			response = acarisServiceFactory.getAcarisService().getBackOfficeServicePort().query(repositoryId,principalId, target, filter, conditions, null, null, null);
+			if(response == null){
+				throw new IntegrationException("Impossibile recuperare l'identificatore ", new NullPointerException("response is null"));
+			}
+			
+			if(response != null && response.getObjectsLength() > 0) {
+				identificatore = response.getObjects()[0].getObjectId();
+			}
+			
+			if(identificatore == null){
+				throw new IntegrationException("Impossibile recuperare l'identificatore ", new NullPointerException("identificatore is null"));
+			}
+		}
+		catch (AcarisException acEx) {
+			log.error(method + ". Impossibile recuperare l'identificatore: " + acEx.getMessage());
+			log.error(method + ". acEx.getFaultInfo().getErrorCode() =  " + acEx.getFaultInfo().getErrorCode());
+			log.error(method + ". acEx.getFaultInfo().getPropertyName() = " + acEx.getFaultInfo().getPropertyName());
+			log.error(method + ". acEx.getFaultInfo().getObjectId() = " + acEx.getFaultInfo().getObjectId());
+			log.error(method + ". acEx.getFaultInfo().getExceptionType() = " + acEx.getFaultInfo().getExceptionType());
+			log.error(method + ". acEx.getFaultInfo().getClassName() = " + acEx.getFaultInfo().getClassName());
+			log.error(method + ". acEx.getFaultInfo().getTechnicalInfo = " + acEx.getFaultInfo().getTechnicalInfo());
+			throw new IntegrationException("AcarisException ", acEx);
+		} 
+		catch (Exception e) {
+			log.error(method + ". Exception = " + e.getMessage());
+			throw new IntegrationException("Impossibile recuperare l'identificatore ", e);
+		}	
+		return identificatore;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see it.csi.stacore.stadoc.business.stadoc.integration.AcarisBackOfficeServiceStadoc#getIdentificatore(it.doqui.acta.actasrv.dto.acaris.type.common.ObjectIdType, it.doqui.acta.actasrv.dto.acaris.type.common.PrincipalIdType, it.doqui.acta.actasrv.dto.acaris.type.common.QueryableObjectType, java.lang.String)
+	 */
+	public ObjectIdType getInfoMoveDocumentOfflineView(ObjectIdType repositoryId, PrincipalIdType principalId, QueryableObjectType target, String objectIdRichiestaPrenotazione) throws IntegrationException {
+		
+		String method = "getIdentificatore";
+		
+		ObjectIdType identificatore = null;
+		PagingResponseType response = null;
+
+		PropertyFilterType filter = new PropertyFilterType();
+		filter.setFilterType(EnumPropertyFilter.NONE);
+		QueryConditionType condition = new QueryConditionType();
+		condition.setOperator(EnumQueryOperator.EQUALS);
+		condition.setPropertyName("objectIdRichiestaPrenotazione");
+		condition.setValue(objectIdRichiestaPrenotazione);
 		QueryConditionType []conditions = {condition};
 		try {
 			// Chiamate tramite WSDL

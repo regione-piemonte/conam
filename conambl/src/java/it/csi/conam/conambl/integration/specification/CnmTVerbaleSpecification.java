@@ -94,11 +94,15 @@ public class CnmTVerbaleSpecification {
 					predicates.add(root.in(subqueryRVerbaleSoggetto));
 				}
 
-				if (numeroPrototocollo != null)
+				if (numeroPrototocollo != null) {
 					predicates.add(builder.equal(root.get("numeroProtocollo"), numeroPrototocollo));
+				}
 
-				if (StringUtils.isNotEmpty(numeroVerbale))
-					predicates.add(builder.equal(root.get("numVerbale"), numeroVerbale.toUpperCase()));
+				if (StringUtils.isNotEmpty(numeroVerbale)) {
+					// 20230110 PP - ricerca per numero verbale in like
+//					predicates.add(builder.equal(root.get("numVerbale"), numeroVerbale.toUpperCase()));
+					predicates.add(builder.like(root.get("numVerbale"), "%"+numeroVerbale+"%"));
+				}
 
 				if(statiPregresso != null && !statiPregresso.isEmpty()) {
 					predicates.add(root.get("cnmDStatoPregresso").in(statiPregresso));

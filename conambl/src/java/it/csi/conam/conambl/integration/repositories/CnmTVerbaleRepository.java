@@ -38,7 +38,7 @@ public interface CnmTVerbaleRepository extends CrudRepository<CnmTVerbale, Integ
 	
 	@Query(value = "select distinct v.* " + //
 			"from cnm_t_verbale v " + //
-			"where v.id_stato_verbale in (12, 13, 14, 15, 18, 19) ", nativeQuery = true)
+			"where v.id_stato_verbale in (12, 13, 14, 15, 18, 19) and id_stato_pregresso = 1", nativeQuery = true)
 	List<CnmTVerbale> findCnmTVerbalePending();
 
 

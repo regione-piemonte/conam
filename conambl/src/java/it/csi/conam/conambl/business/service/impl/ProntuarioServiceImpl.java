@@ -196,7 +196,17 @@ public class ProntuarioServiceImpl implements ProntuarioService {
 
 				CnmDLettera cnmDLetteraDB = cnmDLetteraRepository.findByCnmDCommaAndLetteraAndNotEliminato(cnmDCommaDB, lettera.getDenominazione());
 				if (cnmDLetteraDB == null) {
-					CnmDLettera cnmDLettera = insertCnmDLettera(cnmDCommaDB, now, cnmTUser, lettera);
+					
+					// verifico se esiste una cancellata
+					CnmDLettera cnmDLettera = cnmDLetteraRepository.findByCnmDCommaAndLetteraAndEliminato(cnmDCommaDB, lettera.getDenominazione());
+					if(cnmDLettera == null) {
+						cnmDLettera = insertCnmDLettera(cnmDCommaDB, now, cnmTUser, lettera);						
+					}else {
+						cnmDLettera.setEliminato(false);
+						cnmDLettera.setDataOraUpdate(now);
+						cnmDLettera.setCnmTUser1(cnmTUser);
+						cnmDLetteraRepository.save(cnmDLettera);
+					}
 
 					ProntuarioVO p = prontuarioEntityMapper.mapEntityToVO(cnmDLettera);
 					p.setEnteLegge(enteEntityMapper.mapEntityToVO(cnmDEnte));

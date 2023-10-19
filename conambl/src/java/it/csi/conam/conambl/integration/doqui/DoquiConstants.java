@@ -16,7 +16,8 @@ public class DoquiConstants {
 	//public static final String COLLOCAZIONE_CARTACEA = "Archivio settore competente";
 	public static final String COLLOCAZIONE_CARTACEA = "Ufficio Contenzioso Amministrativo";
 
-	public static final String DIRIGENTE = "FABRIZIO ZANELLA"; //provvisorio, recuperarlo da tabella su TAU
+	// Configurato su DB
+//	public static final String DIRIGENTE = "FABRIZIO ZANELLA"; //provvisorio, recuperarlo da tabella su TAU
 	public static final String ENTE = "REGIONE PIEMONTE"; //provvisorio, recuperarlo da tabella su TAU	
 	public static final String SI = "Si";
 	public static final String NO = "No";

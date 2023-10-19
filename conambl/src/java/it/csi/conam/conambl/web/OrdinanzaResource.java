@@ -20,6 +20,7 @@ import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.SpringSupportedResource;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.ordinanza.StatoOrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.StatoSoggettoOrdinanzaVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
@@ -342,5 +343,14 @@ public class OrdinanzaResource extends SpringSupportedResource {
 		List<MessageVO> msgList = ordinanzaDispatcher.salvaAllegatiMultipli(map.get("data"), map.get("files"), userDetails);
 		return Response.ok(msgList).build();
 	}	
+	
+
+	@GET
+	@Path("/getCausaleSelect")
+	public Response getCausaleSelect() {
+		List<SelectVO> select = ordinanzaDispatcher.getCausaleSelect();
+		return Response.ok(select).build();
+	}
+	
 	
 }

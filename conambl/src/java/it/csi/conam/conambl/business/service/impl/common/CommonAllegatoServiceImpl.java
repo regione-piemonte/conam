@@ -47,7 +47,6 @@ import it.csi.conam.conambl.business.facade.DoquiServiceFacade;
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.ordinanza.OrdinanzaService;
-import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
 import it.csi.conam.conambl.business.service.scrittodifensivo.ScrittoDifensivoService;
 import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
@@ -70,6 +69,8 @@ import it.csi.conam.conambl.integration.beans.ResponseRicercaDocumento;
 import it.csi.conam.conambl.integration.beans.ResponseRicercaDocumentoMultiplo;
 import it.csi.conam.conambl.integration.beans.ResponseSalvaDocumento;
 import it.csi.conam.conambl.integration.beans.ResponseSpostaDocumento;
+import it.csi.conam.conambl.integration.doqui.entity.CnmTSpostamentoActa;
+import it.csi.conam.conambl.integration.doqui.repositories.CnmTSpostamentoActaRepository;
 import it.csi.conam.conambl.integration.doqui.utils.DateFormat;
 import it.csi.conam.conambl.integration.entity.CnmCField;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
@@ -94,7 +95,9 @@ import it.csi.conam.conambl.integration.entity.CnmTAllegatoField;
 import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
 import it.csi.conam.conambl.integration.entity.CnmTScrittoDifensivo;
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTSollecito;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.entity.CsiLogAudit.TraceOperation;
 import it.csi.conam.conambl.integration.mapper.entity.ConfigAllegatoEntityMapper;
@@ -104,12 +107,12 @@ import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDElementoElencoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
-import it.csi.conam.conambl.integration.repositories.CnmDStatoManualeRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoOrdinanzaRepository;
-import it.csi.conam.conambl.integration.repositories.CnmDStatoVerbaleRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdVerbSogRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoPianoRateRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbSogRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbaleRepository;
 import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
@@ -119,7 +122,6 @@ import it.csi.conam.conambl.integration.repositories.CnmTAllegatoFieldRepository
 import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTOrdinanzaRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTScrittoDifensivoRepository;
-import it.csi.conam.conambl.integration.repositories.CnmTVerbaleRepository;
 import it.csi.conam.conambl.request.ParentRequest;
 import it.csi.conam.conambl.request.SalvaAllegatiMultipliRequest;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
@@ -162,6 +164,8 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	@Autowired
 	private CnmDStatoAllegatoRepository cnmDStatoAllegatoRepository;
 	@Autowired
+	private CnmRAllegatoPianoRateRepository cnmRAllegatoPianoRateRepository;
+	@Autowired
 	private CnmTAllegatoRepository cnmTAllegatoRepository;
 	@Autowired
 	private UtilsDoqui utilsDoqui;
@@ -189,6 +193,8 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	@Autowired
 	private CnmRAllegatoOrdinanzaRepository cnmRAllegatoOrdinanzaRepository;
 	@Autowired
+	private CnmRAllegatoSollecitoRepository cnmRAllegatoSollecitoRepository;
+	@Autowired
 	private CnmDStatoOrdinanzaRepository cnmDStatoOrdinanzaRepository;
 	@Autowired
 	private OrdinanzaService ordinanzaService;
@@ -214,11 +220,6 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	@Autowired
 	private CnmRVerbaleIllecitoRepository cnmRVerbaleIllecitoRepository;
 
-	@Autowired
-	private CnmDStatoVerbaleRepository cnmDStatoVerbaleRepository;
-	
-	@Autowired
-	private CnmTVerbaleRepository cnmTVerbaleRepository;
 	
 	@Autowired
 	private UtilsVerbale utilsVerbale;
@@ -227,12 +228,10 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	private VerbaleService verbaleService;
 
 	@Autowired
-	private CnmDStatoManualeRepository cnmDStatoManualeRepository;
-
-	@Autowired
 	private SoggettoService soggettoService;
-	@Autowired
-	private UtilsOrdinanza utilsOrdinanza;
+	
+	@Autowired 
+	private CnmTSpostamentoActaRepository cnmTSpostamentoActaRepository;
 	
 	// 20201127_LC cache ricerca protocollo
 	//CRP    private Map<String, RicercaProtocolloSuActaResponse> cacheRicercaProtocollo = new HashMap<String, RicercaProtocolloSuActaResponse>();
@@ -527,8 +526,8 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			if (folder == null)
 				throw new IllegalArgumentException("folder non valorizzato");
 			CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO);
-			ResponseProtocollaDocumento responseProtocollaDocumento = doquiServiceFacade.protocollaDocumentoFisico(folder, file, filename, idEntitaFruitore, isMaster, protocollazioneInUscita,
-					soggettoActa, rootActa, idTipoAllegato.longValue(), tipoActa, cnmTSoggettoList, null);
+			ResponseProtocollaDocumento responseProtocollaDocumento = doquiServiceFacade.protocollaDocumentoFisico(folder, file, filename, idEntitaFruitore, 
+					isMaster, protocollazioneInUscita, soggettoActa, rootActa, idTipoAllegato.longValue(), tipoActa, cnmTSoggettoList, null);
 			cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegato);
 			cnmTAllegato.setIdActa(responseProtocollaDocumento.getIdDocumento());
 			
@@ -729,7 +728,12 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			soggettiRelataVO = new ArrayList<SelectVO>();
 			for(SoggettoVO soggettoRelata : soggettiRelata) {
 				SelectVO soggettoVO = new SelectVO();
-				soggettoVO.setDenominazione(soggettoRelata.getCognome() + " " +soggettoRelata.getNome());
+				// 30/03/2022 PP - jira CONAM-216
+				if(soggettoRelata.getCognome() == null || soggettoRelata.getCognome().length()==0) {
+					soggettoVO.setDenominazione(soggettoRelata.getRagioneSociale());
+				}else {
+					soggettoVO.setDenominazione(soggettoRelata.getCognome() + " " +soggettoRelata.getNome());
+				}
 				soggettoVO.setId(new Long(soggettoRelata.getIdSoggettoVerbale()));
 				soggettiRelataVO.add(soggettoVO);
 			}
@@ -792,7 +796,6 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	}
 	
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends ParentRequest> T getRequest(List<InputPart> data, List<InputPart> file, Class<? extends ParentRequest> generic) {
 		return getRequest(data, file, generic, false);
@@ -854,12 +857,26 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	}
 
 	private ResponseProtocollaDocumento avviaProtocollazione_Doqui(List<CnmRAllegatoVerbale> cnmRAllegatoVerbaleList, CnmTUser cnmTUser) {
+
+		ResponseProtocollaDocumento responseProtocollaDocumento = null;		// 20200706_LC
+		
+		// 2023-03-08 PP - verifico che i protocolli che si stanno cercado di inserire sul fascicoli non siano in fase di spostamento
+		for(CnmRAllegatoVerbale cnmRAllegatoVerbale : cnmRAllegatoVerbaleList) {
+			if (cnmRAllegatoVerbale.getCnmTAllegato().getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_PROTOCOLLATO_IN_ALTRA_STRUTTURA) {
+				List<String> statiInCorso = Arrays.asList(CnmTSpostamentoActa.STATO_IN_CORSO, CnmTSpostamentoActa.STATO_AGGIORNAMENTO_DATI, CnmTSpostamentoActa.STATO_RICHIESTA_RICEVUTA, CnmTSpostamentoActa.STATO_INVIO_RICHIESTA, CnmTSpostamentoActa.STATO_ERRORE);
+				List<CnmTSpostamentoActa>  cnmTSpostamentoActaList = cnmTSpostamentoActaRepository.findByNumeroProtocolloAndStatoIn(cnmRAllegatoVerbale.getCnmTAllegato().getNumeroProtocollo(), statiInCorso);
+				if(cnmTSpostamentoActaList != null && !cnmTSpostamentoActaList.isEmpty()) {
+					throw new BusinessException(ErrorCode.PROTOCOLLO_IN_SPOSTAMENTO);
+				}
+			}
+		}
+		
+		
 		CnmRAllegatoVerbale cnmRAllegatoVerbale = Iterables.tryFind(cnmRAllegatoVerbaleList, UtilsTipoAllegato.findAllegatoInCnmRAllegatoVerbaleByTipoAllegato(TipoAllegato.RAPPORTO_TRASMISSIONE))
 				.orNull();
 		if (cnmRAllegatoVerbale == null)
 			throw new RuntimeException("verbale di trasmissione non trovato");
 		
-		ResponseProtocollaDocumento responseProtocollaDocumento = null;		// 20200706_LC
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
 
 		List<CnmTAllegato> cnmTAllegatoList = new ArrayList<>();
@@ -892,17 +909,22 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			}
 			responseProtocollaDocumento.setProtocollo(cnmTAllegato.getNumeroProtocollo());
 			
-			
+	
+			// 20230227 - gestione tipo registrazione
+			boolean protocollazioneUscita = false;
 			
 			// aggiornare allegati (vanno in stato 2), ma hanno già numero e data protocollo. non solo il RapportoTrasmissione, ma tutti
 			for (CnmRAllegatoVerbale cnmRAllegatoVerbaleTs : cnmRAllegatoVerbaleList) {
-				CnmTAllegato cnmTAllegatoTs = cnmRAllegatoVerbaleTs.getCnmTAllegato();				
+				CnmTAllegato cnmTAllegatoTs = cnmRAllegatoVerbaleTs.getCnmTAllegato();		
+				
+				// 20230227 - gestione tipo registrazione
+				protocollazioneUscita = Constants.ALLEGATI_REGISTRAZIONE_IN_USCITA.contains(cnmTAllegatoTs.getCnmDTipoAllegato().getIdTipoAllegato());
 				
 //				20201014_ET  JIRA CONAM-98 potrebbero esserci degli allegati che non sono associati al protocollo, sono quindi da protocollare
 				if(cnmTAllegatoTs.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO) {
 					
 					ResponseProtocollaDocumento responseProtocollaDocumentoAllegato = doquiServiceFacade.protocollaDocumentoFisico(utilsDoqui.createOrGetfolder(cnmTVerbale), null, cnmTAllegatoTs.getNomeFile(),
-							utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegatoTs.getCnmDTipoAllegato()), false, false, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale),
+							utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegatoTs.getCnmDTipoAllegato()), false, protocollazioneUscita, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale),
 							cnmTAllegatoTs.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, null, cnmTAllegatoTs.getIdIndex());
 			
 					cnmTAllegatoTs.setIdActa(responseProtocollaDocumentoAllegato.getIdDocumento());
@@ -926,7 +948,11 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 						operationToTrace = cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() > 1 ? TraceOperation.INSERIMENTO_FASCICOLO_PREGRESSO.getOperation() : TraceOperation.INSERIMENTO_FASCICOLO.getOperation();
 						utilsTraceCsiLogAuditService.traceCsiLogAudit(operationToTrace,Constants.OGGETTO_ACTA,"idFolder="+responseProtocollaDocumentoAllegato.getIdFolder(), Thread.currentThread().getStackTrace()[1].getMethodName(), "creaFascicoloSuActa");
 					}
-					
+
+					cnmTAllegatoTs.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
+					cnmTAllegatoTs.setObjectidSpostamentoActa(null);
+					cnmTAllegatoTs.setDataOraUpdate(now);					
+					cnmTAllegatoTs.setCnmTUser1(cnmTUser);	
 				} 
 				else {
 					
@@ -938,10 +964,12 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 					}
 						
 				}
-				cnmTAllegatoTs.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
-				cnmTAllegatoTs.setObjectidSpostamentoActa(null);
-				cnmTAllegatoTs.setDataOraUpdate(now);					
-				cnmTAllegatoTs.setCnmTUser1(cnmTUser);	
+
+				// 2023/02/25 PP - faro' l'update nel batch a spostamento completato
+//				cnmTAllegatoTs.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
+//				cnmTAllegatoTs.setObjectidSpostamentoActa(null);
+//				cnmTAllegatoTs.setDataOraUpdate(now);					
+//				cnmTAllegatoTs.setCnmTUser1(cnmTUser);	
 					
 				// 20200722_LC non lo fa qui, lo fa prima quando li assegni al verbale - per essere spostato il doc deve già essere assegnato al verbale
 				// trace allegati appena spostati con la moveDocument
@@ -956,9 +984,10 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 				
 //				20201014_ET  JIRA CONAM-98 potrebbero esserci degli allegati che non sono associati al protocollo, sono quindi da protocollare
 				if(cnmTAllegatoTs.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO) {
+					protocollazioneUscita = false; // relata: in ingresso
 					
 					ResponseProtocollaDocumento responseProtocollaDocumentoAllegato = doquiServiceFacade.protocollaDocumentoFisico(utilsDoqui.createOrGetfolder(cnmTVerbale), null, cnmTAllegatoTs.getNomeFile(),
-							utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegatoTs.getCnmDTipoAllegato()), false, false, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale),
+							utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegatoTs.getCnmDTipoAllegato()), false, protocollazioneUscita, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale),
 							cnmTAllegatoTs.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, null, cnmTAllegatoTs.getIdIndex());
 			
 					cnmTAllegatoTs.setIdActa(responseProtocollaDocumentoAllegato.getIdDocumento());
@@ -982,7 +1011,11 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 						operationToTrace = cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() > 1 ? TraceOperation.INSERIMENTO_FASCICOLO_PREGRESSO.getOperation() : TraceOperation.INSERIMENTO_FASCICOLO.getOperation();
 						utilsTraceCsiLogAuditService.traceCsiLogAudit(operationToTrace,Constants.OGGETTO_ACTA,"idFolder="+responseProtocollaDocumentoAllegato.getIdFolder(), Thread.currentThread().getStackTrace()[1].getMethodName(), "creaFascicoloSuActa");
 					}
-					
+
+					cnmTAllegatoTs.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
+					cnmTAllegatoTs.setObjectidSpostamentoActa(null);
+					cnmTAllegatoTs.setDataOraUpdate(now);					
+					cnmTAllegatoTs.setCnmTUser1(cnmTUser);	
 				} 
 				else {
 					
@@ -994,10 +1027,12 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 					}
 						
 				}
-				cnmTAllegatoTs.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
-				cnmTAllegatoTs.setObjectidSpostamentoActa(null);
-				cnmTAllegatoTs.setDataOraUpdate(now);					
-				cnmTAllegatoTs.setCnmTUser1(cnmTUser);	
+
+				// 2023/02/25 PP - faro' l'update nel batch a spostamento completato
+//				cnmTAllegatoTs.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
+//				cnmTAllegatoTs.setObjectidSpostamentoActa(null);
+//				cnmTAllegatoTs.setDataOraUpdate(now);					
+//				cnmTAllegatoTs.setCnmTUser1(cnmTUser);	
 					
 				// 20200722_LC non lo fa qui, lo fa prima quando li assegni al verbale - per essere spostato il doc deve già essere assegnato al verbale
 				// trace allegati appena spostati con la moveDocument
@@ -1011,8 +1046,10 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO);
 			allegatiRelata = cnmTAllegatoRepository.findAllegatiRelataDaProtocollare(cnmTVerbale.getIdVerbale());
 			for(CnmTAllegato cnmTAllegatoTs : allegatiRelata) {
+				protocollazioneUscita = false; // relata: in ingresso
+				
 				ResponseProtocollaDocumento responseProtocollaDocumentoAllegato = doquiServiceFacade.protocollaDocumentoFisico(utilsDoqui.createOrGetfolder(cnmTVerbale), null, cnmTAllegatoTs.getNomeFile(),
-						utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegatoTs.getCnmDTipoAllegato()), false, false, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale),
+						utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegatoTs.getCnmDTipoAllegato()), false, protocollazioneUscita, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale),
 						cnmTAllegatoTs.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, null, cnmTAllegatoTs.getIdIndex());
 		
 				cnmTAllegatoTs.setIdActa(responseProtocollaDocumentoAllegato.getIdDocumento());
@@ -1114,10 +1151,12 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 						ResponseProtocollaDocumento responseProtocollaDocumentoGiaProt = gestisciDocumentoProtocollato(cnmTAllegatoT, cnmTVerbale, protocolliGestiti);
 						tracciaSuCsiLogAudit(protocolliGestiti, cnmTAllegatoT, responseProtocollaDocumentoGiaProt != null ? responseProtocollaDocumentoGiaProt.getObjectIdDocumentoToTraceList() : null);
 						
-						cnmTAllegatoT.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));			
-						cnmTAllegatoT.setObjectidSpostamentoActa(null);
-						cnmTAllegatoT.setCnmTUser1(cnmTUser);		 // 20200706_LC 
-						cnmTAllegatoList.add(cnmTAllegatoT);
+
+						// 2023/02/25 PP - faro' l'update nel batch a spostamento completato
+//						cnmTAllegatoT.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));			
+//						cnmTAllegatoT.setObjectidSpostamentoActa(null);
+//						cnmTAllegatoT.setCnmTUser1(cnmTUser);		 // 20200706_LC 
+//						cnmTAllegatoList.add(cnmTAllegatoT);
 					}
 			
 				
@@ -1182,7 +1221,6 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 		// 20200728_LC verifica presenza del protocollo in Conam
 		if (cnmTAllegatoRepository.findByNumeroProtocolloAndObjectidSpostamentoActaIsNull(cnmTAllegato.getNumeroProtocollo()).isEmpty()) {
 			// se è vuota sposta (protocollo non presente in Conam)
-			
 			// responseSpostaDOcumento extends responseProtocollaDocumento
 			responseProtocollaDocumento = doquiServiceFacade.spostaDocumentoProtocollato(utilsDoqui.createOrGetfolder(cnmTVerbale), cnmTAllegato.getNomeFile(),
 					utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegato.getCnmDTipoAllegato()), true, false, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale), 
@@ -1190,7 +1228,7 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 
 //CRP			if (cacheRicercaProtocollo.containsKey(cnmTAllegato.getNumeroProtocollo()))
 //CRP				cacheRicercaProtocollo.remove(cnmTAllegato.getNumeroProtocollo());
-			
+
 			protocolliGestiti.put(cnmTAllegato.getNumeroProtocollo(), Constants.OPERAZIONE_TAGLIA_INCOLLA);
 			
 			// 20201123_LC traccia inserimento su ACTA fascicolo post TI/CI	-	se il folder è stato creato
@@ -1203,7 +1241,7 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 //				utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.INSERIMENTO_ALLEGATO_PREGRESSO_TI.getOperation(),Constants.OGGETTO_ACTA,"objectIdDocumento="+cnmTAllegato.getObjectidSpostamentoActa(), Thread.currentThread().getStackTrace()[1].getMethodName(), null);
 		} else {
 			// se non è vuota copia (protocollo già presente in Conam)
-			
+
 			// responseSpostaDOcumento extends responseProtocollaDocumento
 			if(checkDocumentoGiaCopiato(cnmTAllegato.getNumeroProtocollo(), cnmTVerbale.getIdVerbale(), cnmTAllegato.getIdAllegato())) {
 				logger.info("Documento gia' copiato nel fascicolo, non serve aggiungere la classificazione per il verbale "+cnmTVerbale.getIdVerbale());
@@ -1211,7 +1249,8 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			}else {
 				responseProtocollaDocumento = doquiServiceFacade.copiaDocumentoProtocollato(utilsDoqui.createOrGetfolder(cnmTVerbale), cnmTAllegato.getNomeFile(),
 					utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegato.getCnmDTipoAllegato()), true, false, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale), 
-					cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), cnmTAllegato.getNumeroProtocollo(), cnmTVerbale.getIdVerbale());	
+					cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), cnmTAllegato.getNumeroProtocollo(), cnmTVerbale.getIdVerbale());
+
 //				if(cnmTAllegato.isFlagDocumentoPregresso())
 //					utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.INSERIMENTO_ALLEGATO_PREGRESSO_CI.getOperation(),Constants.OGGETTO_ACTA,"objectIdDocumento="+cnmTAllegato.getObjectidSpostamentoActa(), Thread.currentThread().getStackTrace()[1].getMethodName(), null);
 				protocolliGestiti.put(cnmTAllegato.getNumeroProtocollo(), Constants.OPERAZIONE_COPIA_INCOLLA);
@@ -1475,7 +1514,7 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	}
 	
 	@Override
-	public RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, Integer idVerbale, Boolean flagPregresso) {
+	public RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, Integer idVerbale, Boolean flagPregresso, Integer pageRequest, Integer maxLineRequest) {
 		
 		if (numProtocollo == null)
 			throw new IllegalArgumentException("numProtocollo non valorizzato");
@@ -1490,8 +1529,19 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 		MessageVO messaggio = null;	
 		Date dataProtocolloRicercato = null;	
 		RicercaProtocolloSuActaResponse response = new RicercaProtocolloSuActaResponse();
+
+		// 2023/02/25 PP - verifico se il protocollo cercato è in fase di spostamento su altri fascicoli. In questo caso restituisco errore, poiche' il protocollo al moemnto non puo' essere aggiunto su altri fascicoli
+		// aggiungere su db messaggio con codice SRCHPROT05
+		List<String> statiInCorso = Arrays.asList(CnmTSpostamentoActa.STATO_IN_CORSO, CnmTSpostamentoActa.STATO_AGGIORNAMENTO_DATI, CnmTSpostamentoActa.STATO_RICHIESTA_RICEVUTA, CnmTSpostamentoActa.STATO_INVIO_RICHIESTA, CnmTSpostamentoActa.STATO_ERRORE);
+		List<CnmTSpostamentoActa>  cnmTSpostamentoActaList = cnmTSpostamentoActaRepository.findByNumeroProtocolloAndStatoIn(numProtocollo, statiInCorso);
+		if(cnmTSpostamentoActaList != null && !cnmTSpostamentoActaList.isEmpty()) { 
+			CnmDMessaggio cnmDMessaggio = cnmDMessaggioRepository.findByCodMessaggio(ErrorCode.PROTOCOLLO_IN_SPOSTAMENTO);
+			if(cnmDMessaggio!=null) response.setMessaggio(new MessageVO(cnmDMessaggio.getDescMessaggio(), cnmDMessaggio.getCnmDTipoMessaggio().getDescTipoMessaggio()));
+			else throw new SecurityException("Messaggio non trovato");
+			return response;
+		}
 		
-		
+				
 		// 20210427_LC eventuale scritto difensivo da associare
 		List<CnmTScrittoDifensivo> cnmTScrittoDifensivoDaAssociareList = cnmTScrittoDifensivoRepository.findByNumeroProtocolloAndFlagAssociatoIsFalse(numProtocollo);
 		
@@ -1510,12 +1560,12 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			// no return, continua normalmente (il msg è solo di alert)
 			response.setMessaggio(messaggio);
 		}
+		//20220321_SB modifica per gestione della paginazione nella ricerca
 		
-		
-		List<DocumentoProtocollatoVO> ricercaProtocolloSuACTA = doquiServiceFacade.ricercaProtocolloSuACTA(numProtocollo);
+		RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA = doquiServiceFacade.ricercaProtocolloSuACTA(numProtocollo, pageRequest!=null?pageRequest:0, maxLineRequest!=null?maxLineRequest:0);
 		utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.RICERCA_PROTOCOLLO.getOperation(), "cnm_t_verbale", "id_verbale="+idVerbale, Thread.currentThread().getStackTrace()[1].getMethodName(), null);
 		
-		if(ricercaProtocolloSuACTA==null) {
+		if(ricercaProtocolloSuACTA.getDocumentoProtocollatoVOList()==null) {
 			
 			// JIRA CONAM-105
 			// 20201119_LC se esito ricerca NULL: torna msg SRCHPROT03
@@ -1552,7 +1602,7 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 				giaPresenteSuActa = isNuovoVerbale?false:checkDocumentoGiaCopiato(numProtocollo, idVerbale, null);
 			
 			// 20200723_LC_P2 se l'id è già presente in CnmTAllegato allora torna il booleano true, altrimenti false
-			for (DocumentoProtocollatoVO docDaActa:ricercaProtocolloSuACTA) {	
+			for (DocumentoProtocollatoVO docDaActa:ricercaProtocolloSuACTA.getDocumentoProtocollatoVOList()) {	
 				docDaActa.setGiaPresenteSuActa(giaPresenteSuActa);
 				docDaActa.setGiaSalvato(false);
 				
@@ -1616,9 +1666,13 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 				
 		}
 		
-		// setta lista nella response
-		response.setDocumentoProtocollatoVOList(ricercaProtocolloSuACTA);
-		
+		// setta lista nella response ed i dati dalle paginazione
+		response.setDocumentoProtocollatoVOList(ricercaProtocolloSuACTA.getDocumentoProtocollatoVOList());
+		response.setLineRes(ricercaProtocolloSuACTA.getLineRes());
+		response.setMaxLineReq(ricercaProtocolloSuACTA.getMaxLineReq());
+		response.setPageReq(ricercaProtocolloSuACTA.getPageReq());
+		response.setPageResp(ricercaProtocolloSuACTA.getPageResp());
+		response.setTotalLineResp(ricercaProtocolloSuACTA.getTotalLineResp());
 		
 		
 		
@@ -1664,9 +1718,6 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 		
 		
 
-		
-		
-		
 		
 		// 20200903_LC gestione pregresso
 		// se dataProtocollo è > dataDiscriminante, torna null ed il messaggio SRCHPROT01
@@ -2501,9 +2552,9 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 		// e quindi la valorizzazione di idTipoALlegato e idEntitaFruitore da passare a doquiServiceFacade.spostaDocumentoProtocollato
 		
 		//ResponseProtocollaDocumento responseProtocollaDocumento = null;
-		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
+		//Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
 
-		List<CnmTAllegato> cnmTAllegatoList = new ArrayList<>();
+		//List<CnmTAllegato> cnmTAllegatoList = new ArrayList<>();
 		String operationToTrace = null;
 							
 
@@ -2599,25 +2650,24 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 		
 		
 		
+		// 2023/02/25 PP - non piu necessario, sarà eseguito nel batch quando si aggiorneranno i riferimenti al protocollo spostato		
 		
-		// aggiorna allegati con stato 2
-		for (CnmTAllegato cnmTAllegatoTs : cnmTAllegatoMultiTipoList) {
-			cnmTAllegatoTs.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
-			cnmTAllegatoTs.setObjectidSpostamentoActa(null);
-			cnmTAllegatoTs.setDataOraUpdate(now);					
-			cnmTAllegatoTs.setCnmTUser1(cnmTUser);	
-						
-			// 20200722_LC non qui, ma quando si crea l'allegato (quindi in salvaAllegatoProtocollato
-			// trace allegati appena assegnati al verbale e spostati in acta
-			// utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.INSERIMENTO_ALLEGATO.getOperation(),cnmTAllegatoTs.getClass().getAnnotation(Table.class).name(),"id_allegato="+cnmTAllegatoTs.getIdAllegato(), Thread.currentThread().getStackTrace()[1].getMethodName());
-			
-			cnmTAllegatoList.add(cnmTAllegatoTs);
-			
-		}
-		
-
-		
-		cnmTAllegatoRepository.save(cnmTAllegatoList);
+//		// aggiorna allegati con stato 2
+//		for (CnmTAllegato cnmTAllegatoTs : cnmTAllegatoMultiTipoList) {
+//			cnmTAllegatoTs.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
+//			cnmTAllegatoTs.setObjectidSpostamentoActa(null);
+//			cnmTAllegatoTs.setDataOraUpdate(now);					
+//			cnmTAllegatoTs.setCnmTUser1(cnmTUser);	
+//						
+//			// 20200722_LC non qui, ma quando si crea l'allegato (quindi in salvaAllegatoProtocollato
+//			// trace allegati appena assegnati al verbale e spostati in acta
+//			// utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.INSERIMENTO_ALLEGATO.getOperation(),cnmTAllegatoTs.getClass().getAnnotation(Table.class).name(),"id_allegato="+cnmTAllegatoTs.getIdAllegato(), Thread.currentThread().getStackTrace()[1].getMethodName());
+//			
+//			cnmTAllegatoList.add(cnmTAllegatoTs);
+//			
+//		}
+				
+//		cnmTAllegatoRepository.save(cnmTAllegatoList);
 
 		// return responseProtocollaDocumento;
 	}
@@ -2716,9 +2766,9 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 
 	@Override
 	@Transactional
-	public ResponseProtocollaDocumento avviaProtocollazioneDocumentoEsistente(CnmTAllegato cnmTAllegato, CnmTUser cnmTUser) {
+	public ResponseProtocollaDocumento avviaProtocollazioneDocumentoEsistente(CnmTAllegato cnmTAllegato, CnmTUser cnmTUser, List<CnmTSoggetto> cnmTSoggettoList, boolean protocollazioneInUscita) {
 		if(isDoquiDirect()) {
-			return avviaProtocollazioneDocumentoEsistente_Doqui(cnmTAllegato, cnmTUser);
+			return avviaProtocollazioneDocumentoEsistente_Doqui(cnmTAllegato, cnmTUser, cnmTSoggettoList, protocollazioneInUscita);
 		}
 		return null;
 //		else {
@@ -2727,7 +2777,7 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	}
 	
 
-	private ResponseProtocollaDocumento avviaProtocollazioneDocumentoEsistente_Doqui(CnmTAllegato cnmTAllegato, CnmTUser cnmTUser) {
+	private ResponseProtocollaDocumento avviaProtocollazioneDocumentoEsistente_Doqui(CnmTAllegato cnmTAllegato, CnmTUser cnmTUser, List<CnmTSoggetto> cnmTSoggettoList, boolean protocollazioneInUscita) {
 		
 		// entra qui dentro con l'allegato master che va protocollato (in modo che il protocollo venga asseganto anche a tutti i suoi allegati)
 		// ISTANZA RATEIZZAZIONE (gia presente in acta ma non protocollata, il batch ci ha appena spostato tutti i suoi allegati, ed ora si procede alal protocollazione di tutti quanti)
@@ -2774,6 +2824,23 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			idEntitaFruitore = utilsDoqui.createIdEntitaFruitore(cnmTOrdinanza, cnmTAllegato.getCnmDTipoAllegato()); // + " [" + formattedDate + "]";
 			soggettoActa = utilsDoqui.getSoggettoActa(cnmTOrdinanza);
 			rootActa = utilsDoqui.getRootActa(cnmTOrdinanza);			
+		} else if (cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_SOLLECITO.getId() ||
+				cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_SOLLECITO_RATE.getId()) {
+			CnmTSollecito cnmTsollecito = cnmRAllegatoSollecitoRepository.findByCnmTAllegato(cnmTAllegato).get(0).getCnmTSollecito(); 
+			folder = utilsDoqui.createOrGetfolder(cnmTsollecito);
+//			SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyy hh:mm:ss");	
+//			String formattedDate = dateFormatter.format(new Date());
+			idEntitaFruitore = utilsDoqui.createIdEntitaFruitore(cnmTsollecito, cnmTAllegato.getCnmDTipoAllegato()); // + " [" + formattedDate + "]";
+			soggettoActa = utilsDoqui.getSoggettoActa(cnmTsollecito);
+			rootActa = utilsDoqui.getRootActa(cnmTsollecito);	
+		} else if (cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_RATEIZZAZIONE.getId()) {
+			CnmTPianoRate cnmTPianoRate = cnmRAllegatoPianoRateRepository.findByCnmTAllegato(cnmTAllegato).get(0).getCnmTPianoRate();
+			folder = utilsDoqui.createOrGetfolder(cnmTPianoRate);
+	//		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyy hh:mm:ss");	
+	//		String formattedDate = dateFormatter.format(new Date());
+			idEntitaFruitore = utilsDoqui.createIdEntitaFruitore(cnmTPianoRate, cnmTAllegato.getCnmDTipoAllegato()); // + " [" + formattedDate + "]";
+			soggettoActa = utilsDoqui.getSoggettoActa(cnmTPianoRate);
+			rootActa = utilsDoqui.getRootActa(cnmTPianoRate);			
 		} else if (cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.COMPARSA.getId()) {
 			cnmTVerbale = cnmRAllegatoVerbaleRepository.findByCnmTAllegato(cnmTAllegato).getCnmTVerbale(); 
 			folder = utilsDoqui.createOrGetfolder(cnmTVerbale);
@@ -2791,8 +2858,8 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 		if (cnmTAllegato.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_NON_PROTOCOLLARE) {
 			// DOCUMENTO DA PROTOCOLLARE
 			responseProtocollaDocumento = doquiServiceFacade.protocollaDocumentoFisicoEsistente(folder, cnmTAllegato.getNomeFile(),
-					idEntitaFruitore, true, false, soggettoActa, rootActa,
-					cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_MASTER_INGRESSO_CON_ALLEGATI, null, cnmTAllegato.getIdActa());
+					idEntitaFruitore, true, protocollazioneInUscita, soggettoActa, rootActa,
+					cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_MASTER_INGRESSO_CON_ALLEGATI, cnmTSoggettoList, cnmTAllegato.getIdActa());
 			
 			// nessun tracciamento (questo allegato già esiste in acta)
 			

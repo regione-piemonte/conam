@@ -10,6 +10,7 @@ import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.response.DatiSentenzaResponse;
 import it.csi.conam.conambl.response.ImportoResponse;
 import it.csi.conam.conambl.security.UserDetails;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.ordinanza.OrdinanzaVO;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
@@ -34,5 +35,7 @@ public interface OrdinanzaService {
 	void saveSStatoOrdinanza(CnmTOrdinanza cnmTOrdinanza, CnmTUser cnmTUser);
 
 	Integer salvaOrdinanzaAnnullamento(List<InputPart> data, List<InputPart> file, UserDetails userDetails);
+
+	List<SelectVO> getCausaleSelect();
 
 }

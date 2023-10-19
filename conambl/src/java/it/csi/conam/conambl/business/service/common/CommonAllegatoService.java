@@ -43,7 +43,8 @@ public interface CommonAllegatoService {
 			List<CnmTSoggetto> cnmTSoggettoList);
 	
 	// 20200903_LC gestione pregresso (nuova response)
-	RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, Integer idVerbale, Boolean flagPregresso);
+	//20220321_SB modifica per gestione della paginazione nella ricerca
+	RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, Integer idVerbale, Boolean flagPregresso, Integer pageRequest, Integer maxLineRequest);
 	
 	// 20200706_LC
 	List<CnmTAllegato> salvaAllegatoProtocollatoVerbale(SalvaAllegatiProtocollatiRequest request, CnmTUser cnmTUser, CnmTVerbale cnmTVerbale, boolean pregresso);
@@ -74,7 +75,7 @@ public interface CommonAllegatoService {
 
 	// 20210312 PP - Per protocollare master non protocollati ai quali sono stati agganciati gli allegati
 	// Per implementazione CR Jira_92 (riportare su allegati al master il numero di protocollo)
-	public ResponseProtocollaDocumento avviaProtocollazioneDocumentoEsistente(CnmTAllegato cnmTAllegato, CnmTUser cnmTUser);
+	public ResponseProtocollaDocumento avviaProtocollazioneDocumentoEsistente(CnmTAllegato cnmTAllegato, CnmTUser cnmTUser, List<CnmTSoggetto> cnmTSoggettoList, boolean protocollazioneInUscita);
 	
 	
 	

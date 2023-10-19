@@ -2,25 +2,20 @@
  * AggiornaPosizioniDebitorieResponse.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ * by the Apache Axis 1.4 Nov 13, 2013 (09:13:21 GMT) WSDL2Java emitter.
  */
 
 package it.csi.conam.conambl.integration.epay.to;
 
-public class AggiornaPosizioniDebitorieResponse  extends it.csi.conam.conambl.integration.epay.to.ResponseType  implements java.io.Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 7161921048970140004L;
-	
-	private it.csi.conam.conambl.integration.epay.to.EsitoAggiornamentoType esitoAggiornamento;
+public class AggiornaPosizioniDebitorieResponse  extends ResponseType  implements java.io.Serializable {
+    private EsitoAggiornamentoType esitoAggiornamento;
 
     public AggiornaPosizioniDebitorieResponse() {
     }
 
     public AggiornaPosizioniDebitorieResponse(
-           it.csi.conam.conambl.integration.epay.to.ResultType result,
-           it.csi.conam.conambl.integration.epay.to.EsitoAggiornamentoType esitoAggiornamento) {
+           ResultType result,
+           EsitoAggiornamentoType esitoAggiornamento) {
         super(
             result);
         this.esitoAggiornamento = esitoAggiornamento;
@@ -32,7 +27,7 @@ public class AggiornaPosizioniDebitorieResponse  extends it.csi.conam.conambl.in
      * 
      * @return esitoAggiornamento
      */
-    public it.csi.conam.conambl.integration.epay.to.EsitoAggiornamentoType getEsitoAggiornamento() {
+    public EsitoAggiornamentoType getEsitoAggiornamento() {
         return esitoAggiornamento;
     }
 
@@ -42,15 +37,15 @@ public class AggiornaPosizioniDebitorieResponse  extends it.csi.conam.conambl.in
      * 
      * @param esitoAggiornamento
      */
-    public void setEsitoAggiornamento(it.csi.conam.conambl.integration.epay.to.EsitoAggiornamentoType esitoAggiornamento) {
+    public void setEsitoAggiornamento(EsitoAggiornamentoType esitoAggiornamento) {
         this.esitoAggiornamento = esitoAggiornamento;
     }
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (obj == null) return false;
         if (!(obj instanceof AggiornaPosizioniDebitorieResponse)) return false;
         AggiornaPosizioniDebitorieResponse other = (AggiornaPosizioniDebitorieResponse) obj;
+        if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
             return (__equalsCalc == obj);

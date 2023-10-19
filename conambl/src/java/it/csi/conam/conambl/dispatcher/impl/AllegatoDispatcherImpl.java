@@ -46,9 +46,12 @@ public class AllegatoDispatcherImpl implements AllegatoDispatcher {
 	}
 
 	// 20200903_LC gestione pregresso
+	//20220321_SB modifica per gestione della paginazione nella ricerca
 	@Override
-	public RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, Integer idVerbale, Boolean flagPregresso) {
-		return commonAllegatoService.ricercaProtocolloSuACTA(numProtocollo, idVerbale, flagPregresso);
+	public RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(
+			String numProtocollo, Integer idVerbale, Boolean flagPregresso, Integer pageRequest, Integer maxLineRequest
+		) {
+			return commonAllegatoService.ricercaProtocolloSuACTA(numProtocollo, idVerbale, flagPregresso, pageRequest, maxLineRequest);
 	}
 
 	// 20200711_LC

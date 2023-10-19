@@ -4,8 +4,10 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.doqui.service.impl;
 
+import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.integration.doqui.DoquiServiceFactory;
 import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
+import it.csi.conam.conambl.integration.doqui.exception.TroppiAllegatiPerSpostamentoException;
 import it.csi.conam.conambl.integration.doqui.service.AcarisMultifilingService;
 import it.csi.conam.conambl.integration.doqui.utils.XmlSerializer;
 import it.doqui.acta.acaris.multifilingservice.AcarisException;
@@ -95,7 +97,7 @@ public class AcarisMultifilingServiceImpl extends CommonManagementServiceImpl im
 	
 
 	// 20200618_LC
-	public ObjectIdType aggiungiClassificazione(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType sourceClassificazioneId, ObjectIdType destinationFolderId, boolean isRichiestaOffline) throws IntegrationException {
+	public ObjectIdType aggiungiClassificazione(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType sourceClassificazioneId, ObjectIdType destinationFolderId, boolean isRichiestaOffline) throws IntegrationException, TroppiAllegatiPerSpostamentoException {
 		String method = "spostaDocumento";
 
 		// id nuova classificazione
@@ -166,6 +168,10 @@ public class AcarisMultifilingServiceImpl extends CommonManagementServiceImpl im
 				log.error(method + ". acEx.getFaultInfo().getClassName()     = " + acEx.getFaultInfo().getClassName());
 				log.error(method + ". acEx.getFaultInfo().getTechnicalInfo() = " + acEx.getFaultInfo().getTechnicalInfo());	
 			}
+			
+			if (acEx.getFaultInfo() != null && acEx.getFaultInfo().getErrorCode() != null && acEx.getFaultInfo().getErrorCode().equals(Constants.ACARIS_CODICE_EXC_E167))
+				throw new TroppiAllegatiPerSpostamentoException(acEx.getMessage(), acEx);
+			
 			throw new IntegrationException("Impossibile copiare il documento ", acEx);
 		}
 		catch (Exception e) {

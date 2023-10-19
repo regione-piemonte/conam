@@ -14,6 +14,7 @@ import it.csi.conam.conambl.response.DatiSentenzaResponse;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.ordinanza.MinOrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.OrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.StatoOrdinanzaVO;
@@ -112,4 +113,7 @@ public interface OrdinanzaDispatcher {
 	
 	@PreAuthorize(value = AuthorizationRoles.SALVATAGGIO_ALLEGATI_ORDINANZA)
 	List<MessageVO> salvaAllegatiMultipli(List<InputPart> data, List<InputPart> file, UserDetails userDetails);
+
+	@PreAuthorize(value = AuthorizationRoles.UTENTE)
+	List<SelectVO> getCausaleSelect();
 }

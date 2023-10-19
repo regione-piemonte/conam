@@ -57,6 +57,7 @@ public class ErrorCode {
 	public static final String PROTOCOLLO_GIA_PRESENTE_IN_CONAM = "SRCHPROT02";
 	public static final String PROTOCOLLO_NON_PRESENTE_IN_ACTA = "SRCHPROT03";
 	public static final String SCRITTO_DIFENSIVO_DA_ASSOCIARE = "SRCHPROT04";
+	public static final String PROTOCOLLO_IN_SPOSTAMENTO = "SRCHPROT05";
 	public static final String PROTOCOLLO_GIA_SCRITTO_DIFENSIVO = "PROTGIASCR";
 	public static final String STESSO_SOGGETTO_PIU_RELATE = "ERRSOGGREL";
 
@@ -86,6 +87,8 @@ public class ErrorCode {
 	public static final String DATE_ORDINANZA_NON_PREGRESSE ="DATORDNPR";
 	public static final String UPDATE_STATO_OK = "UPDSTATOOK";
 	public static final String NO_COD_FIS = "NOCODFIS";
+	public static final String INSERIMENTO_ORDINANZA_NOTIFICA_DATI_MANCANTI = "INSORD02";
+	public static final String INSERIMENTO_ORDINANZA_NOTIFICA_DATI_MANCANTI_IMP_NEG = "INSORD03";
 	
 	// SOLLECITO
 	public static final String BOLLETTINI_NON_ANCORA_GENERATI_SOLLECITO = "DOCSOL01";

@@ -45,7 +45,20 @@ public class DatiTemplateCompilatiVO extends ParentVO {
 	private String oggettoLettera;
 	private String corpoLettera;
 	
+	// 20230110_PP
+	private String email;	
+	private String emailOrgano;	
+	private String intestazioneConoscenza;
 	
+
+	private String sedeEnteRiga1;
+	private String sedeEnteRiga2;
+	private String sedeEnteRiga3;
+	private String sedeEnteRiga4;
+	private String sedeEnteRiga5;
+
+	private String testoDichiarante;
+	private String dichiarante;
 	
 	public String getStudioAvvocato() {
 		return studioAvvocato;
@@ -237,6 +250,86 @@ public class DatiTemplateCompilatiVO extends ParentVO {
 
 	public void setCorpoLettera(String corpoLettera) {
 		this.corpoLettera = corpoLettera;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getEmailOrgano() {
+		return emailOrgano;
+	}
+
+	public void setEmailOrgano(String emailOrgano) {
+		this.emailOrgano = emailOrgano;
+	}
+
+	public String getIntestazioneConoscenza() {
+		return intestazioneConoscenza;
+	}
+
+	public void setIntestazioneConoscenza(String intestazioneConoscenza) {
+		this.intestazioneConoscenza = intestazioneConoscenza;
+	}
+
+	public String getSedeEnteRiga1() {
+		return sedeEnteRiga1;
+	}
+
+	public void setSedeEnteRiga1(String sedeEnteRiga1) {
+		this.sedeEnteRiga1 = sedeEnteRiga1;
+	}
+
+	public String getSedeEnteRiga2() {
+		return sedeEnteRiga2;
+	}
+
+	public void setSedeEnteRiga2(String sedeEnteRiga2) {
+		this.sedeEnteRiga2 = sedeEnteRiga2;
+	}
+
+	public String getSedeEnteRiga3() {
+		return sedeEnteRiga3;
+	}
+
+	public void setSedeEnteRiga3(String sedeEnteRiga3) {
+		this.sedeEnteRiga3 = sedeEnteRiga3;
+	}
+
+	public String getSedeEnteRiga4() {
+		return sedeEnteRiga4;
+	}
+
+	public void setSedeEnteRiga4(String sedeEnteRiga4) {
+		this.sedeEnteRiga4 = sedeEnteRiga4;
+	}
+
+	public String getSedeEnteRiga5() {
+		return sedeEnteRiga5;
+	}
+
+	public void setSedeEnteRiga5(String sedeEnteRiga5) {
+		this.sedeEnteRiga5 = sedeEnteRiga5;
+	}
+
+	public String getTestoDichiarante() {
+		return testoDichiarante;
+	}
+
+	public void setTestoDichiarante(String testoDichiarante) {
+		this.testoDichiarante = testoDichiarante;
+	}
+
+	public String getDichiarante() {
+		return dichiarante;
+	}
+
+	public void setDichiarante(String dichiarante) {
+		this.dichiarante = dichiarante;
 	}
 
 	

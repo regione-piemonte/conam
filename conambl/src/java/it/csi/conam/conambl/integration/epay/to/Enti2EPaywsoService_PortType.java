@@ -8,6 +8,8 @@
 package it.csi.conam.conambl.integration.epay.to;
 
 public interface Enti2EPaywsoService_PortType extends java.rmi.Remote {
+    public it.csi.conam.conambl.integration.epay.to.ResponseType inserisciListaDiCarico(it.csi.conam.conambl.integration.epay.to.InserisciListaDiCaricoRequest parameters, String wsUser, String wsPWD) throws java.rmi.RemoteException;
     public it.csi.conam.conambl.integration.epay.to.ResponseType inserisciListaDiCarico(it.csi.conam.conambl.integration.epay.to.InserisciListaDiCaricoRequest parameters) throws java.rmi.RemoteException;
+    public it.csi.conam.conambl.integration.epay.to.ResponseType aggiornaPosizioniDebitorie(it.csi.conam.conambl.integration.epay.to.AggiornaPosizioniDebitorieRequest parameters, String wsUser, String wsPWD) throws java.rmi.RemoteException;
     public it.csi.conam.conambl.integration.epay.to.ResponseType aggiornaPosizioniDebitorie(it.csi.conam.conambl.integration.epay.to.AggiornaPosizioniDebitorieRequest parameters) throws java.rmi.RemoteException;
 }

@@ -21,6 +21,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
+import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.util.UtilsTraceCsiLogAuditService;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleService;
@@ -57,6 +58,7 @@ import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.entity.CsiLogAudit.TraceOperation;
 import it.csi.conam.conambl.integration.mapper.entity.EnteEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.VerbaleEntityMapper;
@@ -140,7 +142,9 @@ public class VerbaleServiceImpl implements VerbaleService {
 	private UtilsVerbale utilsVerbale;
 	@Autowired
 	private CnmDStatoPregressoRepository cnmDStatoPregressoRepository;
-	
+
+	@Autowired
+	private UtilsCnmCProprietaService utilsCnmCProprietaService;
 
 	@Autowired
 	private UtilsOrdinanza utilsOrdinanza;
@@ -304,6 +308,8 @@ public class VerbaleServiceImpl implements VerbaleService {
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
 		SecurityUtils.verbaleSecurityView(cnmTVerbale, getEnteLeggeByCnmTVerbale(cnmTVerbale));
 
+		includiControlloUtenteProprietario = includiControlloUtenteProprietario && Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED));
+		
 		if (cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser() && includiControlloUtenteProprietario)
 			throw new RuntimeException("l'utente non puo accedere a questo verbale");
 
@@ -542,6 +548,13 @@ public class VerbaleServiceImpl implements VerbaleService {
 			verbale = cnmTVerbaleRepository.save(verbale);
 		}
 		return verbale;
+	}
+	
+	
+	@Override
+	@Transactional
+	public CnmTVerbale salvaCnmTVerbale(CnmTVerbale cnmTVerbale) {
+			return cnmTVerbaleRepository.save(cnmTVerbale);
 	}
 
 

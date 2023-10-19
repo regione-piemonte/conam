@@ -2,23 +2,19 @@
  * ListaDiCarico.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ * by the Apache Axis 1.4 Nov 13, 2013 (09:13:21 GMT) WSDL2Java emitter.
  */
 
 package it.csi.conam.conambl.integration.epay.to;
 
 public class ListaDiCarico  implements java.io.Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -304565615002485355L;
-	private it.csi.conam.conambl.integration.epay.to.PosizioneDaInserireType[] posizioniDaInserire;
+    private PosizioneDaInserireType[] posizioniDaInserire;
 
     public ListaDiCarico() {
     }
 
     public ListaDiCarico(
-           it.csi.conam.conambl.integration.epay.to.PosizioneDaInserireType[] posizioniDaInserire) {
+           PosizioneDaInserireType[] posizioniDaInserire) {
            this.posizioniDaInserire = posizioniDaInserire;
     }
 
@@ -28,7 +24,7 @@ public class ListaDiCarico  implements java.io.Serializable {
      * 
      * @return posizioniDaInserire
      */
-    public it.csi.conam.conambl.integration.epay.to.PosizioneDaInserireType[] getPosizioniDaInserire() {
+    public PosizioneDaInserireType[] getPosizioniDaInserire() {
         return posizioniDaInserire;
     }
 
@@ -38,15 +34,15 @@ public class ListaDiCarico  implements java.io.Serializable {
      * 
      * @param posizioniDaInserire
      */
-    public void setPosizioniDaInserire(it.csi.conam.conambl.integration.epay.to.PosizioneDaInserireType[] posizioniDaInserire) {
+    public void setPosizioniDaInserire(PosizioneDaInserireType[] posizioniDaInserire) {
         this.posizioniDaInserire = posizioniDaInserire;
     }
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (obj == null) return false;
         if (!(obj instanceof ListaDiCarico)) return false;
         ListaDiCarico other = (ListaDiCarico) obj;
+        if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
             return (__equalsCalc == obj);

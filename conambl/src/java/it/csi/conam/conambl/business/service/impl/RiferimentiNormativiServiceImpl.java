@@ -168,10 +168,10 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 				if(dataAccertamento.after(dataDiscriminantePregresso)) {
 					throw new BusinessException(ErrorCode.DATA_ACCERTAMENTO_NON_PREGRESSA);
 				}
-				CnmREnteNorma cnmREnteNorma = cnmREnteNormaRepository.findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(cnmDNorma, cnmDEnte, dataAccertamento);
+				List<CnmREnteNorma> cnmREnteNorma = cnmREnteNormaRepository.findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(cnmDNorma, cnmDEnte, dataAccertamento);
 				if (cnmREnteNorma == null)
 					return new ArrayList<>();
-				articoloList = cnmDArticoloRepository.findByCnmREnteNormaAndFineValiditaAndNotEliminato(cnmREnteNorma, dataAccertamento);
+				articoloList = cnmDArticoloRepository.findByCnmREnteNormaAndFineValiditaAndNotEliminato(cnmREnteNorma.get(0), dataAccertamento);
 			}else {
 				CnmREnteNorma cnmREnteNorma = cnmREnteNormaRepository.findByCnmDNormaAndCnmDEntePregressoAndNotEliminato(cnmDNorma, cnmDEnte, dataDiscriminantePregresso);
 				if (cnmREnteNorma == null)
@@ -181,10 +181,10 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 			
 		}
 		else if (filterDataValidita) {
-			CnmREnteNorma cnmREnteNorma = cnmREnteNormaRepository.findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(cnmDNorma, cnmDEnte, new Date());
+			List<CnmREnteNorma> cnmREnteNorma = cnmREnteNormaRepository.findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(cnmDNorma, cnmDEnte, new Date());
 			if (cnmREnteNorma == null)
 				return new ArrayList<>();
-			articoloList = cnmDArticoloRepository.findByCnmREnteNormaAndFineValiditaAndNotEliminato(cnmREnteNorma, new Date());
+			articoloList = cnmDArticoloRepository.findByCnmREnteNormaAndFineValiditaAndNotEliminato(cnmREnteNorma.get(0), new Date());
 		} else {
 			CnmREnteNorma cnmREnteNorma = cnmREnteNormaRepository.findByCnmDNormaAndCnmDEnteAndNotEliminato(cnmDNorma, cnmDEnte);
 			if (cnmREnteNorma == null)
@@ -302,10 +302,10 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 		List<CnmDComma> commaList;
 		List<CnmDLettera> output;
 		if (filterDataValidita) {
-			CnmREnteNorma cnmREnteNorma = cnmREnteNormaRepository.findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(cnmDNorma, cnmDEnte, new Date());
+			List<CnmREnteNorma> cnmREnteNorma = cnmREnteNormaRepository.findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(cnmDNorma, cnmDEnte, new Date());
 			if (cnmREnteNorma == null)
 				throw new RuntimeException("cnmREnteNorma inesistente");
-			List<CnmDArticolo> articoli = cnmDArticoloRepository.findByCnmREnteNormaAndFineValiditaAndNotEliminato(cnmREnteNorma, new Date());
+			List<CnmDArticolo> articoli = cnmDArticoloRepository.findByCnmREnteNormaAndFineValiditaAndNotEliminato(cnmREnteNorma.get(0), new Date());
 			commaList = cnmDCommaRepository.findByCnmDArticoloInAndFineValiditaAndNotEliminato(articoli);
 			output = cnmDLetteraRepository.findByCnmDCommaInAndFineValiditaAndNotEliminato(commaList);
 		} else {

@@ -5,6 +5,7 @@
 package it.csi.conam.conambl.integration.doqui.service.impl;
 
 import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
+import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.integration.beans.MimeType;
 import it.csi.conam.conambl.integration.doqui.DoquiConstants;
 import it.csi.conam.conambl.integration.doqui.DoquiServiceFactory;
@@ -15,7 +16,9 @@ import it.csi.conam.conambl.integration.doqui.service.AcarisDocumentService;
 import it.csi.conam.conambl.integration.doqui.utils.CleanUtil;
 import it.csi.conam.conambl.integration.doqui.utils.DateFormat;
 import it.csi.conam.conambl.integration.doqui.utils.XmlSerializer;
+import it.csi.conam.conambl.integration.entity.CnmCParametro;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
+import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
 import it.doqui.acta.acaris.documentservice.DocumentServicePort;
 import it.doqui.acta.actasrv.dto.acaris.type.archive.*;
 import it.doqui.acta.actasrv.dto.acaris.type.common.*;
@@ -45,6 +48,9 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
 
 	@Autowired
 	private DoquiServiceFactory acarisServiceFactory;
+
+	@Autowired
+	private CnmCParametroRepository cnmCParametroRepository;
 	
 	private String pdFile;
 	private String actaDigitalSignStepToBypass;
@@ -284,7 +290,10 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
     		if(!StringUtils.isEmpty(documentoActa.getMetadatiActa().getNumeroRegistrazionePrecedente()))
     			intestazioneOggetto = "RISPOSTA_AL_PROT_IN_"+documentoActa.getMetadatiActa().getNumeroRegistrazionePrecedente() + "/" +documentoActa.getMetadatiActa().getAnnoRegistrazionePrecedente() +" - ";
     		properties.setOrigineInterna(true);
-    		properties.setAutoreFisico(new String[]{DoquiConstants.DIRIGENTE});
+    		
+
+    		CnmCParametro cnmCParametro = cnmCParametroRepository.findOne(Constants.ID_AUTORE_FISICO_ACTA);    		
+    		properties.setAutoreFisico(new String[]{cnmCParametro.getValoreString()});
     	    
     		//properties.setAutoreGiuridico(new String[]{Constants.ENTE});
     	    
@@ -349,28 +358,29 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
 		contentStream.setFilename(fileName);
 		contentStream.setMimeType(EnumMimeTypeType.fromValue(mimeType));
 		
-		final InputStream iS = new ByteArrayInputStream(stream);
-		final OutputStream oS = new ByteArrayOutputStream(stream.length);
+//		final InputStream iS = new ByteArrayInputStream(stream);
+//		final OutputStream oS = new ByteArrayOutputStream(stream.length);
 		
+		
+
 		javax.activation.DataSource a = new javax.activation.DataSource() {
-			
-			public OutputStream getOutputStream() throws IOException {
-				return oS;
-			}
-			
-			public String getName() {
-				return fileName;
-			}
-			
-			public InputStream getInputStream() throws IOException {
-				return iS;
-			}
-			
+		       
+	        public OutputStream getOutputStream() throws IOException {
+	            return new ByteArrayOutputStream(stream.length);
+	        }
+	       
+	        public String getName() {
+	            return fileName;
+	        }
+	       
+	        public InputStream getInputStream() throws IOException {
+	            return new ByteArrayInputStream(stream);
+	        }
 			public String getContentType() {
 				return estensioneFile;
 			}
 		};
-		
+				
 		// valorizzare StreamMTOM se servizio invocato via WS SOAP
 		contentStream.setStreamMTOM(new DataHandler(a));
 				
@@ -675,8 +685,10 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
     	// autore fisico
     	if(documentoElettronicoActa.getAutoreFisico() != null)
     		properties.setAutoreFisico(new String[]{CleanUtil.cleanNullValue(documentoElettronicoActa.getAutoreFisico())});
-    	else
-    		properties.setAutoreFisico(new String[]{DoquiConstants.DIRIGENTE});
+    	else {
+    		CnmCParametro cnmCParametro = cnmCParametroRepository.findOne(Constants.ID_AUTORE_FISICO_ACTA);
+    		properties.setAutoreFisico(new String[]{cnmCParametro.getValoreString()});
+    	}
     	
     	// scrittore
     	if(documentoElettronicoActa.getScrittore() != null)

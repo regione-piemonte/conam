@@ -4,15 +4,30 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.doqui.helper.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import it.csi.conam.conambl.integration.beans.Documento;
 import it.csi.conam.conambl.integration.beans.RequestRicercaDocumento;
 import it.csi.conam.conambl.integration.beans.ResponseRicercaDocumentoMultiplo;
 import it.csi.conam.conambl.integration.doqui.DoquiConstants;
+import it.csi.conam.conambl.integration.doqui.bean.DocumentiProtocollatiActaPaged;
 import it.csi.conam.conambl.integration.doqui.bean.DocumentoActa;
 import it.csi.conam.conambl.integration.doqui.bean.DocumentoElettronicoActa;
 import it.csi.conam.conambl.integration.doqui.bean.DocumentoProtocollatoActa;
 import it.csi.conam.conambl.integration.doqui.bean.UtenteActa;
-import it.csi.conam.conambl.integration.doqui.entity.*;
+import it.csi.conam.conambl.integration.doqui.entity.CnmDTipoDocumento;
+import it.csi.conam.conambl.integration.doqui.entity.CnmDTipoFornitore;
+import it.csi.conam.conambl.integration.doqui.entity.CnmTDocumento;
+import it.csi.conam.conambl.integration.doqui.entity.CnmTFruitore;
+import it.csi.conam.conambl.integration.doqui.entity.CnmTRichiesta;
 import it.csi.conam.conambl.integration.doqui.exception.FruitoreException;
 import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
 import it.csi.conam.conambl.integration.doqui.exception.ProtocollaDocumentoException;
@@ -21,16 +36,10 @@ import it.csi.conam.conambl.integration.doqui.exception.RicercaDocumentoNoDocEle
 import it.csi.conam.conambl.integration.doqui.helper.ManageRicercaDocumentoHelper;
 import it.csi.conam.conambl.integration.doqui.service.ActaManagementService;
 import it.csi.conam.conambl.integration.doqui.utils.XmlSerializer;
+import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
 import it.csi.conam.conambl.vo.verbale.DocumentoProtocollatoVO;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
 
 @Service
 public class ManageRicercaDocumentoHelperImpl  extends CommonManageDocumentoHelperImpl implements ManageRicercaDocumentoHelper
@@ -43,6 +52,9 @@ public class ManageRicercaDocumentoHelperImpl  extends CommonManageDocumentoHelp
 	@Autowired
 	private ActaManagementService	actaManagementService;
 	
+
+	@Autowired
+	private CacheManager ehCacheManager;
 	
 //	public ActaManagementService getActaManagementService() {
 //		return actaManagementService;
@@ -200,9 +212,164 @@ public class ManageRicercaDocumentoHelperImpl  extends CommonManageDocumentoHelp
 		}
 	}
 	
+
 	@SuppressWarnings("unused")
 	@Transactional(propagation=Propagation.REQUIRED)	
-	public List<DocumentoProtocollatoVO> ricercaDocumentoProtocollato(String numProtocollo, String codiceFruitore) throws RicercaDocumentoException 
+	public String recuperaInfoMoveDocument(String objectIdRichiestaPrenotazione) throws RicercaDocumentoException 
+	{
+		String method = "recuperaInfoMoveDocument";
+		log.debug(method + ". BEGIN");
+		List<DocumentoProtocollatoVO> response = null;
+		boolean containsError = false;
+		
+		try
+		{
+			
+			// recupero fruitore
+			CnmTFruitore docTFruitore = getFruitore();
+			
+			// tipo documento
+//			CnmDTipoDocumento cnmDTipoDocumento = getTipoDocumentoByIdArchiviazione(request.getIdDocumento());
+			
+			//tipo fornitore
+			CnmDTipoFornitore cnmDTipoFornitore = getCnmDTipoFornitoreRepository().findOne(DoquiConstants.FORNITORE_ACTA);
+			
+			// RICHIESTA	// 20200610_LC inutile? (e senza id!)
+			CnmTRichiesta cnmTRichiestaDto = createCnmTRichiesta(docTFruitore.getIdFruitore(), DoquiConstants.SERVIZIO_CONSULTAZIONE_PROTOCOLLAZIONE);
+			
+			
+			//POJO
+			UtenteActa utenteActa = new UtenteActa();
+			utenteActa.setCodiceFiscale(docTFruitore.getCfActa());
+			utenteActa.setIdAoo(new Integer(docTFruitore.getIdAooActa()));
+			utenteActa.setIdNodo(new Integer(docTFruitore.getIdNodoActa()));
+			utenteActa.setIdStruttura(new Integer(docTFruitore.getIdStrutturaActa()));
+			utenteActa.setApplicationKeyActa(cnmDTipoFornitore.getApplicationKey());
+			utenteActa.setRepositoryName(cnmDTipoFornitore.getRepository());
+			
+
+			return actaManagementService.infoMoveDocument(utenteActa, objectIdRichiestaPrenotazione).getValue();
+			
+		}
+		catch (FruitoreException e)
+		{
+			containsError = true;
+			log.error(method + ". FruitoreException: " + e);
+			throw new RicercaDocumentoException(e.getMessage());
+		} catch (IntegrationException e) 
+		{
+			containsError = true;
+			log.error(method + ". IntegrationException: " + e);
+			if(e.getItsOriginalException()!= null && e.getItsOriginalException() instanceof RicercaDocumentoNoDocElettronicoException) {
+				throw new RicercaDocumentoException(e.getMessage(), "recuperaInfoMoveDocument", e.getItsOriginalException().getMessage());
+			}
+			throw new RicercaDocumentoException(e.getMessage());
+		}
+		catch (Exception e) 
+		{
+			containsError = true;
+			log.error(method + ". Exception: " + e);
+			throw new RicercaDocumentoException(e.getMessage());
+		}
+		finally
+		{
+//			if(containsError)
+//			{
+//				if(docTRichiestaPk != null)
+//					getStatoRichiestaService().changeStatoRichiesta(docTRichiestaPk.getIdRichiesta(), STATO_RICHIESTA_ERRATA);
+//				else
+//				{
+//					log.debug(method + ". nessuna richiesta inserita: non è possibile aggiornare la richiesta");
+//				}
+//			}
+			log.debug(method + ". END");
+		}
+
+	}
+
+	
+	@SuppressWarnings("unused")
+	@Transactional(propagation=Propagation.REQUIRED)	
+	public String recuperaParolaChiave(String objectIdDocumento) throws RicercaDocumentoException 
+	{
+		String method = "recuperaParolaChiave";
+		log.debug(method + ". BEGIN");
+		List<DocumentoProtocollatoVO> response = null;
+		boolean containsError = false;
+		
+		try
+		{
+			
+			// recupero fruitore
+			CnmTFruitore docTFruitore = getFruitore();
+			
+			// tipo documento
+//			CnmDTipoDocumento cnmDTipoDocumento = getTipoDocumentoByIdArchiviazione(request.getIdDocumento());
+			
+			//tipo fornitore
+			CnmDTipoFornitore cnmDTipoFornitore = getCnmDTipoFornitoreRepository().findOne(DoquiConstants.FORNITORE_ACTA);
+			
+			// RICHIESTA	// 20200610_LC inutile? (e senza id!)
+			CnmTRichiesta cnmTRichiestaDto = createCnmTRichiesta(docTFruitore.getIdFruitore(), DoquiConstants.SERVIZIO_CONSULTAZIONE_PROTOCOLLAZIONE);
+			
+			
+			//POJO
+			UtenteActa utenteActa = new UtenteActa();
+			utenteActa.setCodiceFiscale(docTFruitore.getCfActa());
+			utenteActa.setIdAoo(new Integer(docTFruitore.getIdAooActa()));
+			utenteActa.setIdNodo(new Integer(docTFruitore.getIdNodoActa()));
+			utenteActa.setIdStruttura(new Integer(docTFruitore.getIdStrutturaActa()));
+			utenteActa.setApplicationKeyActa(cnmDTipoFornitore.getApplicationKey());
+			utenteActa.setRepositoryName(cnmDTipoFornitore.getRepository());
+			
+
+			return actaManagementService.getParolaChiaveByObjectIdDocumento(objectIdDocumento, utenteActa);
+			
+		}
+		catch (FruitoreException e)
+		{
+			containsError = true;
+			log.error(method + ". FruitoreException: " + e);
+			throw new RicercaDocumentoException(e.getMessage());
+		} catch (IntegrationException e) 
+		{
+			containsError = true;
+			log.error(method + ". IntegrationException: " + e);
+			if(e.getItsOriginalException()!= null && e.getItsOriginalException() instanceof RicercaDocumentoNoDocElettronicoException) {
+				throw new RicercaDocumentoException(e.getMessage(), "recuperaInfoMoveDocument", e.getItsOriginalException().getMessage());
+			}
+			throw new RicercaDocumentoException(e.getMessage());
+		}
+		catch (Exception e) 
+		{
+			containsError = true;
+			log.error(method + ". Exception: " + e);
+			throw new RicercaDocumentoException(e.getMessage());
+		}
+		finally
+		{
+//			if(containsError)
+//			{
+//				if(docTRichiestaPk != null)
+//					getStatoRichiestaService().changeStatoRichiesta(docTRichiestaPk.getIdRichiesta(), STATO_RICHIESTA_ERRATA);
+//				else
+//				{
+//					log.debug(method + ". nessuna richiesta inserita: non è possibile aggiornare la richiesta");
+//				}
+//			}
+			log.debug(method + ". END");
+		}
+
+	}
+
+	
+	
+	
+	
+	
+	@SuppressWarnings("unused")
+	@Transactional(propagation=Propagation.REQUIRED)	
+	public List<DocumentoProtocollatoVO> ricercaDocumentoProtocollatoPostSpostaCopia(String numProtocollo, String codiceFruitore, List<String> objectIdDocumentoList) throws RicercaDocumentoException 
 	{
 		String method = "ricercaDocumentoProtocollato";
 		log.debug(method + ". BEGIN");
@@ -272,7 +439,7 @@ public class ManageRicercaDocumentoHelperImpl  extends CommonManageDocumentoHelp
 //				log.debug(method + ". inserita richiesta           = " + docTRichiestaPk);
 //			}
 			
-			List<DocumentoProtocollatoActa> documentoProtocollatoActaList = actaManagementService.ricercaDocumentoProtocollato(numProtocollo, utenteActa);
+			List<DocumentoProtocollatoActa> documentoProtocollatoActaList = actaManagementService.ricercaDocumentoProtocollatoPostSpostaCopia(numProtocollo, utenteActa, objectIdDocumentoList);
 			
 			if(documentoProtocollatoActaList!=null && !documentoProtocollatoActaList.isEmpty()) {
 				response = new ArrayList<DocumentoProtocollatoVO>();
@@ -281,41 +448,45 @@ public class ManageRicercaDocumentoHelperImpl  extends CommonManageDocumentoHelp
 				boolean filenameMasterToSet=false;
 				for (DocumentoProtocollatoActa documentoProtocollatoActa : documentoProtocollatoActaList) {
 					DocumentoProtocollatoVO docProtocollato = new DocumentoProtocollatoVO();
-					docProtocollato.setFile(documentoProtocollatoActa.getStream());
-					docProtocollato.setFilename(documentoProtocollatoActa.getNomeFile());
+					
+					docProtocollato.setRegistrazioneId(documentoProtocollatoActa.getRegistrazioneId());	// 20200707_LC
 					docProtocollato.setObjectIdDocumento(documentoProtocollatoActa.getIdDocumento());
 					docProtocollato.setClassificazione(documentoProtocollatoActa.getClassificazioneEstesa());
 					docProtocollato.setClassificazioneId(documentoProtocollatoActa.getClassificazioneId());
-					docProtocollato.setRegistrazioneId(documentoProtocollatoActa.getRegistrazioneId());	// 20200707_LC
-					docProtocollato.setFolderId(documentoProtocollatoActa.getFolderId());	// 20200707_LC
-					docProtocollato.setDataOraProtocollo(documentoProtocollatoActa.getDataProtocollo());
-					
-					// 20200722_LC solo se è il "master"
-					if (documentoProtocollatoActa.getRegistrazioneId()!=null) {
-						docProtocollato.setNumProtocollo(numProtocollo);
-						//20200923_ET aggiunto per gestire correttamente i parametri del messaggio SAVEDOC01
-						filenameMaster=documentoProtocollatoActa.getNomeFile();
-					} else {
-						docProtocollato.setNumProtocolloMaster(numProtocollo);
-						//20200923_ET aggiunto per gestire correttamente i parametri del messaggio SAVEDOC01
-						if(StringUtils.isNotBlank(filenameMaster)) {
-							docProtocollato.setFilenameMaster(filenameMaster);
-						}else {
-							filenameMasterToSet=true;
-						}
-					}
-								
-					
-					// 20200708_LC
-					docProtocollato.setIdActa(null);	
-					docProtocollato.setIdActaMaster(null);
-					
-					// 20200711
 					docProtocollato.setParolaChiave(documentoProtocollatoActa.getParolaChiave());
 					docProtocollato.setDocumentoUUID(documentoProtocollatoActa.getUiidDocumento());
+					docProtocollato.setFolderId(documentoProtocollatoActa.getFolderId());	// 20200707_LC
 					
-					// 20200825_LC
-					docProtocollato.setFilenamesDocMultiplo(documentoProtocollatoActa.getFilenamesDocMultiplo());
+
+					// post scopia/copia non servono tuttq queste info
+//					docProtocollato.setFile(documentoProtocollatoActa.getStream());
+//					docProtocollato.setFilename(documentoProtocollatoActa.getNomeFile());
+//					docProtocollato.setDataOraProtocollo(documentoProtocollatoActa.getDataProtocollo());
+//					
+//					// 20200722_LC solo se è il "master"
+//					if (documentoProtocollatoActa.getRegistrazioneId()!=null) {
+//						docProtocollato.setNumProtocollo(numProtocollo);
+//						//20200923_ET aggiunto per gestire correttamente i parametri del messaggio SAVEDOC01
+//						filenameMaster=documentoProtocollatoActa.getNomeFile();
+//					} else {
+//						docProtocollato.setNumProtocolloMaster(numProtocollo);
+//						//20200923_ET aggiunto per gestire correttamente i parametri del messaggio SAVEDOC01
+//						if(StringUtils.isNotBlank(filenameMaster)) {
+//							docProtocollato.setFilenameMaster(filenameMaster);
+//						}else {
+//							filenameMasterToSet=true;
+//						}
+//					}
+//								
+//					
+//					// 20200708_LC
+//					docProtocollato.setIdActa(null);	
+//					docProtocollato.setIdActaMaster(null);
+//					
+//					// 20200711
+//					
+//					// 20200825_LC
+//					docProtocollato.setFilenamesDocMultiplo(documentoProtocollatoActa.getFilenamesDocMultiplo());
 					
 					response.add(docProtocollato);
 				}
@@ -371,7 +542,138 @@ public class ManageRicercaDocumentoHelperImpl  extends CommonManageDocumentoHelp
 		}
 	}
 
-
+	//20220321_SB modifica per gestione della paginazione nella ricerca
+	@SuppressWarnings("unused")
+	@Transactional(propagation=Propagation.REQUIRED)	
+	public RicercaProtocolloSuActaResponse ricercaDocumentoProtocollatoPaged(String numProtocollo, String codiceFruitore, int pagina, int numeroRigheMax) throws RicercaDocumentoException 
+	{
+		String method = "ricercaDocumentoProtocollato";
+		log.debug(method + ". BEGIN");
+		RicercaProtocolloSuActaResponse ricercaProtocolloSuActaResponse = new RicercaProtocolloSuActaResponse(); 
+		List<DocumentoProtocollatoVO> response = null;
+		
+		boolean containsError = false;
+		if(log.isDebugEnabled())
+		{	
+			log.debug(method + ". codice fruitore  = " + codiceFruitore);
+			log.debug(method + ". numProtocollo  = " + numProtocollo);
+		}
+		CnmTRichiesta docTRichiestaPk = null;
+		
+		try
+		{
+			if(StringUtils.isBlank(codiceFruitore)) throw new RicercaDocumentoException("Codice fruitore non presente");
+			if(StringUtils.isBlank(numProtocollo)) throw new RicercaDocumentoException("numProtocollo non presente");
+		
+			CnmTFruitore docTFruitore = getFruitore();
+			CnmDTipoFornitore cnmDTipoFornitore = getCnmDTipoFornitoreRepository().findOne(DoquiConstants.FORNITORE_ACTA);
+			CnmTRichiesta cnmTRichiestaDto = createCnmTRichiesta(docTFruitore.getIdFruitore(), DoquiConstants.SERVIZIO_CONSULTAZIONE_PROTOCOLLAZIONE);
+			
+			UtenteActa utenteActa = new UtenteActa();
+			utenteActa.setCodiceFiscale(docTFruitore.getCfActa());
+			utenteActa.setIdAoo(new Integer(docTFruitore.getIdAooActa()));
+			utenteActa.setIdNodo(new Integer(docTFruitore.getIdNodoActa()));
+			utenteActa.setIdStruttura(new Integer(docTFruitore.getIdStrutturaActa()));
+			utenteActa.setApplicationKeyActa(cnmDTipoFornitore.getApplicationKey());
+			utenteActa.setRepositoryName(cnmDTipoFornitore.getRepository());
+			
+			if(log.isDebugEnabled()) {
+				log.debug(method + ". UtenteActa =\n " + XmlSerializer.objectToXml(utenteActa));
+			}
+					
+			DocumentiProtocollatiActaPaged documentiProtocollatiActaPaged = 
+				actaManagementService.ricercaDocumentoProtocollatoPaged(numProtocollo, utenteActa, pagina, numeroRigheMax);
+			
+			List<DocumentoProtocollatoActa> documentoProtocollatoActaList=null;
+			if (documentiProtocollatiActaPaged.getNumeroRigheRestituite()>0) {
+				documentoProtocollatoActaList = documentiProtocollatiActaPaged.getDocumentoProtocollatoActa();
+			} else {
+				Ehcache cache = ehCacheManager.getEhcache("documentoProtocollatoPaged");
+				String key = numProtocollo.toUpperCase() + '_' + pagina + '_' + numeroRigheMax;
+				cache.remove(key);
+			}
+			
+			if(documentoProtocollatoActaList!=null && !documentoProtocollatoActaList.isEmpty()) {
+				response = new ArrayList<DocumentoProtocollatoVO>();
+				String filenameMaster=null;
+				boolean filenameMasterToSet=false;
+				for (DocumentoProtocollatoActa documentoProtocollatoActa : documentoProtocollatoActaList) {
+					DocumentoProtocollatoVO docProtocollato = new DocumentoProtocollatoVO();
+					docProtocollato.setFile(documentoProtocollatoActa.getStream());
+					docProtocollato.setFilename(documentoProtocollatoActa.getNomeFile());
+					docProtocollato.setObjectIdDocumento(documentoProtocollatoActa.getIdDocumento());
+					docProtocollato.setClassificazione(documentoProtocollatoActa.getClassificazioneEstesa());
+					docProtocollato.setClassificazioneId(documentoProtocollatoActa.getClassificazioneId());
+					docProtocollato.setRegistrazioneId(documentoProtocollatoActa.getRegistrazioneId());	// 20200707_LC
+					docProtocollato.setFolderId(documentoProtocollatoActa.getFolderId());	// 20200707_LC
+					docProtocollato.setDataOraProtocollo(documentoProtocollatoActa.getDataProtocollo());
+					
+					if (documentoProtocollatoActa.getRegistrazioneId()!=null) {
+						docProtocollato.setNumProtocollo(numProtocollo);
+						filenameMaster=documentoProtocollatoActa.getNomeFile();
+					} else {
+						docProtocollato.setNumProtocolloMaster(numProtocollo);
+						if(StringUtils.isNotBlank(filenameMaster)) {
+							docProtocollato.setFilenameMaster(filenameMaster);
+						}else {
+							filenameMasterToSet=true;
+						}
+					}
+					docProtocollato.setIdActa(null);	
+					docProtocollato.setIdActaMaster(null);
+					docProtocollato.setParolaChiave(documentoProtocollatoActa.getParolaChiave());
+					docProtocollato.setDocumentoUUID(documentoProtocollatoActa.getUiidDocumento());
+					docProtocollato.setFilenamesDocMultiplo(documentoProtocollatoActa.getFilenamesDocMultiplo());
+					
+					response.add(docProtocollato);
+				}
+				if(filenameMasterToSet) {
+					if(StringUtils.isNotBlank(filenameMaster)) {
+						log.debug(method + ". devo settare il filename del master per il protocollo  = " + numProtocollo);
+						for(DocumentoProtocollatoVO doc: response) {
+							if(StringUtils.isBlank(doc.getRegistrazioneId())) 
+								doc.setFilenameMaster(filenameMaster);
+						}
+					} else {
+						log.warn(method + ". non e' stato possibile recuperare il filename del master per il protocollo  = " + numProtocollo);
+					}
+				}
+			}
+			ricercaProtocolloSuActaResponse.setDocumentoProtocollatoVOList(response);
+			ricercaProtocolloSuActaResponse.setPageReq(documentiProtocollatiActaPaged.getPaginaRichiesta());
+			ricercaProtocolloSuActaResponse.setPageResp(documentiProtocollatiActaPaged.getPaginaRichiesta());
+			ricercaProtocolloSuActaResponse.setLineRes(documentiProtocollatiActaPaged.getNumeroRigheRestituite());
+			ricercaProtocolloSuActaResponse.setTotalLineResp(documentiProtocollatiActaPaged.getNumeroRigheTotale());
+			ricercaProtocolloSuActaResponse.setMaxLineReq(numeroRigheMax);
+			return ricercaProtocolloSuActaResponse;
+			
+		}
+		catch (FruitoreException e)
+		{
+			containsError = true;
+			log.error(method + ". FruitoreException: " + e);
+			throw new RicercaDocumentoException(e.getMessage());
+		}
+		catch (IntegrationException e) 
+		{
+			containsError = true;
+			log.error(method + ". IntegrationException: " + e);
+			if(e.getItsOriginalException()!= null && e.getItsOriginalException() instanceof RicercaDocumentoNoDocElettronicoException) {
+				throw new RicercaDocumentoException(e.getMessage(), "RicercaDocumentoNoDocElettronicoException", e.getItsOriginalException().getMessage());
+			}
+			throw new RicercaDocumentoException(e.getMessage());
+		}
+		catch (Exception e) 
+		{
+			containsError = true;
+			log.error(method + ". Exception: " + e);
+			throw new RicercaDocumentoException(e.getMessage());
+		}
+		finally
+		{
+			log.debug(method + ". END");
+		}
+	}
 
 	// 20200717_LC
 	@SuppressWarnings("unused")

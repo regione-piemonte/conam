@@ -2,22 +2,19 @@
  * TestataAggiornaPosizioniDebitorie.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ * by the Apache Axis 1.4 Nov 13, 2013 (09:13:21 GMT) WSDL2Java emitter.
  */
 
 package it.csi.conam.conambl.integration.epay.to;
 
 public class TestataAggiornaPosizioniDebitorie  implements java.io.Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1699034740157001907L;
-
-	private java.lang.String idMessaggio;
+    private java.lang.String idMessaggio;
 
     private java.lang.String CFEnteCreditore;
 
     private java.lang.String codiceVersamento;
+
+    private java.lang.Boolean multiBeneficiario;
 
     private java.math.BigInteger numeroPosizioniDebitorie;
 
@@ -28,10 +25,12 @@ public class TestataAggiornaPosizioniDebitorie  implements java.io.Serializable 
            java.lang.String idMessaggio,
            java.lang.String CFEnteCreditore,
            java.lang.String codiceVersamento,
+           java.lang.Boolean multiBeneficiario,
            java.math.BigInteger numeroPosizioniDebitorie) {
            this.idMessaggio = idMessaggio;
            this.CFEnteCreditore = CFEnteCreditore;
            this.codiceVersamento = codiceVersamento;
+           this.multiBeneficiario = multiBeneficiario;
            this.numeroPosizioniDebitorie = numeroPosizioniDebitorie;
     }
 
@@ -97,6 +96,26 @@ public class TestataAggiornaPosizioniDebitorie  implements java.io.Serializable 
 
 
     /**
+     * Gets the multiBeneficiario value for this TestataAggiornaPosizioniDebitorie.
+     * 
+     * @return multiBeneficiario
+     */
+    public java.lang.Boolean getMultiBeneficiario() {
+        return multiBeneficiario;
+    }
+
+
+    /**
+     * Sets the multiBeneficiario value for this TestataAggiornaPosizioniDebitorie.
+     * 
+     * @param multiBeneficiario
+     */
+    public void setMultiBeneficiario(java.lang.Boolean multiBeneficiario) {
+        this.multiBeneficiario = multiBeneficiario;
+    }
+
+
+    /**
      * Gets the numeroPosizioniDebitorie value for this TestataAggiornaPosizioniDebitorie.
      * 
      * @return numeroPosizioniDebitorie
@@ -117,9 +136,9 @@ public class TestataAggiornaPosizioniDebitorie  implements java.io.Serializable 
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (obj == null) return false;
         if (!(obj instanceof TestataAggiornaPosizioniDebitorie)) return false;
         TestataAggiornaPosizioniDebitorie other = (TestataAggiornaPosizioniDebitorie) obj;
+        if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
             return (__equalsCalc == obj);
@@ -136,6 +155,9 @@ public class TestataAggiornaPosizioniDebitorie  implements java.io.Serializable 
             ((this.codiceVersamento==null && other.getCodiceVersamento()==null) || 
              (this.codiceVersamento!=null &&
               this.codiceVersamento.equals(other.getCodiceVersamento()))) &&
+            ((this.multiBeneficiario==null && other.getMultiBeneficiario()==null) || 
+             (this.multiBeneficiario!=null &&
+              this.multiBeneficiario.equals(other.getMultiBeneficiario()))) &&
             ((this.numeroPosizioniDebitorie==null && other.getNumeroPosizioniDebitorie()==null) || 
              (this.numeroPosizioniDebitorie!=null &&
               this.numeroPosizioniDebitorie.equals(other.getNumeroPosizioniDebitorie())));
@@ -158,6 +180,9 @@ public class TestataAggiornaPosizioniDebitorie  implements java.io.Serializable 
         }
         if (getCodiceVersamento() != null) {
             _hashCode += getCodiceVersamento().hashCode();
+        }
+        if (getMultiBeneficiario() != null) {
+            _hashCode += getMultiBeneficiario().hashCode();
         }
         if (getNumeroPosizioniDebitorie() != null) {
             _hashCode += getNumeroPosizioniDebitorie().hashCode();
@@ -188,6 +213,13 @@ public class TestataAggiornaPosizioniDebitorie  implements java.io.Serializable 
         elemField.setFieldName("codiceVersamento");
         elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "CodiceVersamento"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("multiBeneficiario");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "MultiBeneficiario"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        elemField.setMinOccurs(0);
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();

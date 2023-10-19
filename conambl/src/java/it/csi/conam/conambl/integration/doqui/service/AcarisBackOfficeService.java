@@ -13,6 +13,16 @@ import it.doqui.acta.actasrv.dto.acaris.type.common.QueryableObjectType;
 
 public interface AcarisBackOfficeService {
 	
+
+	/**
+	 * 
+	 * @param repositoryId
+	 * @param principalId
+	 * @param objectIdRichiestaPrenotazione
+	 * @return
+	 * @throws IntegrationException
+	 */
+	public ObjectIdType recuperaInfoMoveDocumentOfflineView(String objectIdRichiestaPrenotazione, ObjectIdType repositoryId, PrincipalIdType  principalId) throws IntegrationException;
 	
 	/**
 	 * 

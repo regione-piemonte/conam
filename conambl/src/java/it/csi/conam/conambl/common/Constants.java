@@ -117,6 +117,7 @@ public abstract class Constants {
 	public static final long ID_INTESTATARIO_VERSAMENTO_POSTALE = 10L;
 	public static final long ID_SETTORE_ENTE = 11L;
 	public static final long ID_INFO_ENTE = 12L;
+	public static final long ID_AUTORE_FISICO_ACTA= 15L;
 	public static final long ID_MAIL_SETTORE_TRIBUTI = 16L;
 	
 	
@@ -147,7 +148,9 @@ public abstract class Constants {
 	public static final long ID_OGGETTO_LETSOLRATE_NP = 34L;
 	public static final long ID_CORPO1_LETSOLRATE_NP = 35L;
 	public static final long ID_CORPO2_LETSOLRATE_NP = 36L;
-	
+
+	public static final long ID_SEDE_ENTE_TESTO_WEB= 38L;
+	public static final long ID_SEDE_ENTE_TESTO= 39L;
 	
 
 	public static final long ID_OGGETTO_PAGAMENTO_RATEIZZAZIONE = 3L;
@@ -208,6 +211,10 @@ public abstract class Constants {
 
 	// EPAY
 	public static final String CFEPAY = "EPAY";
+	
+	// ACARIS
+	public static final String ACARIS_CODICE_EXC_E167 = "SER-E167";
+	
 
 	// ALLEGATI CREA ORDINANZA
 	public static final List<Long> ALLEGATI_ALLEGABILI_IN_CREAZIONE_ORDINANZA = Arrays.asList(TipoAllegato.ORDINANZA_ARCHIVIAZIONE.getId(), TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO.getId());
@@ -259,6 +266,7 @@ public abstract class Constants {
 	public static final Long ID_STATO_SOLLECITO_PAGATO_OFFLINE = 5L;
 	public static final Long ID_STATO_SOLLECITO_PAGATO_ONLINE = 6L;
 	public static final Long ID_STATO_SOLLECITO_ESTINTO = 7L;
+	public static final Long ID_STATO_SOLLECITO_IN_PROTOCOLLAZIONE = 8L;
 
 	// TIPO SOLLECITO
 	public static final Long ID_TIPO_SOLLECITO_ORDINANZA = 1L;
@@ -294,6 +302,21 @@ public abstract class Constants {
 			TipoAllegato.LETTERA_SOLLECITO.getId(), //
 			TipoAllegato.LETTERA_SOLLECITO_RATE.getId());//
 
+	public static final List<Long> ALLEGATI_REGISTRAZIONE_IN_USCITA = Arrays.asList(//
+			TipoAllegato.LETTERA_RATEIZZAZIONE.getId(), //
+			TipoAllegato.LETTERA_SOLLECITO.getId(), //
+			TipoAllegato.LETTERA_SOLLECITO_RATE.getId(),//
+			TipoAllegato.LETTERA_ORDINANZA.getId(),//
+			TipoAllegato.ORDINANZA_ARCHIVIAZIONE.getId(),//
+			TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO.getId(),//
+			TipoAllegato.ORDINANZA_ANNULLAMENTO_ARCHIVIAZIONE.getId(),//
+			TipoAllegato.ORDINANZA_ANNULLAMENTO_INGIUNZIONE.getId(),//
+			TipoAllegato.CONVOCAZIONE_AUDIZIONE.getId(),//
+			TipoAllegato.VERBALE_AUDIZIONE.getId(),//
+			TipoAllegato.COMUNICAZIONI_ALLA_CANCELLERIA.getId(),//
+			TipoAllegato.COMPARSA.getId(),//
+			TipoAllegato.COMPARSA_ALLEGATO.getId());//
+	
 	// STATO_RISCOSSIONE
 	public static final long ID_STATO_RISCOSSIONE_BOZZA = 1L;
 	public static final long ID_STATO_RISCOSSIONE_AVVIATA = 2L;

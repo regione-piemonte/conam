@@ -15,6 +15,7 @@ import it.csi.conam.conambl.response.DatiSentenzaResponse;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.ordinanza.MinOrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.OrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.StatoOrdinanzaVO;
@@ -187,6 +188,11 @@ public class OrdinanzaDispatcherImpl implements OrdinanzaDispatcher {
 	@Override
 	public List<MessageVO> salvaAllegatiMultipli(List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
 		return allegatoOrdinanzaService.salvaAllegatiMultipli(data, file, userDetails, false);
+	}
+
+	@Override
+	public List<SelectVO> getCausaleSelect() {
+		return ordinanzaService.getCausaleSelect();
 	}
 	
 }

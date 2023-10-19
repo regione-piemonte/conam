@@ -46,8 +46,10 @@ public class SendToActaTask implements Runnable {
 
 
 		logger.info("STARTED SendToActaTask on thread " + Thread.currentThread().getName());
-		// -
+		// -		
 		verbaleScheduledService.sendAllegatiInCodaToActa();
+		verbaleScheduledService.manageSpostamento();
+		verbaleScheduledService.checkSpostamento();
 		ordinanzaScheduledService.sendAllegatiInCodaToActa();
 		// -
 		logger.info("ENDED SendToActaTask on thread " + Thread.currentThread().getName());

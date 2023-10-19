@@ -4,26 +4,52 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.doqui.service.impl;
 
-import it.csi.conam.conambl.integration.doqui.bean.*;
-import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
-import it.csi.conam.conambl.integration.doqui.exception.RicercaDocumentoNoDocElettronicoException;
-import it.csi.conam.conambl.integration.doqui.service.*;
-import it.csi.conam.conambl.integration.doqui.utils.DateFormat;
-import it.doqui.acta.actasrv.dto.acaris.type.common.*;
-import it.doqui.acta.actasrv.dto.acaris.type.document.IdentificatoreDocumento;
-import it.doqui.acta.actasrv.dto.acaris.type.management.VitalRecordCodeType;
-import it.doqui.acta.actasrv.dto.acaris.type.officialbook.IdentificazioneRegistrazione;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import it.csi.conam.conambl.integration.doqui.bean.DocumentiProtocollatiActaPaged;
+import it.csi.conam.conambl.integration.doqui.bean.DocumentoActa;
+import it.csi.conam.conambl.integration.doqui.bean.DocumentoElettronicoActa;
+import it.csi.conam.conambl.integration.doqui.bean.DocumentoProtocollatoActa;
+import it.csi.conam.conambl.integration.doqui.bean.KeyDocumentoActa;
+import it.csi.conam.conambl.integration.doqui.bean.UtenteActa;
+import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
+import it.csi.conam.conambl.integration.doqui.exception.RicercaDocumentoNoDocElettronicoException;
+import it.csi.conam.conambl.integration.doqui.exception.TroppiAllegatiPerSpostamentoException;
+import it.csi.conam.conambl.integration.doqui.service.AcarisBackOfficeService;
+import it.csi.conam.conambl.integration.doqui.service.AcarisDocumentService;
+import it.csi.conam.conambl.integration.doqui.service.AcarisManagementService;
+import it.csi.conam.conambl.integration.doqui.service.AcarisMultifilingService;
+import it.csi.conam.conambl.integration.doqui.service.AcarisNavigationService;
+import it.csi.conam.conambl.integration.doqui.service.AcarisObjectService;
+import it.csi.conam.conambl.integration.doqui.service.AcarisOfficialBookService;
+import it.csi.conam.conambl.integration.doqui.service.AcarisRelationshipService;
+import it.csi.conam.conambl.integration.doqui.service.AcarisRepositoryService;
+import it.csi.conam.conambl.integration.doqui.service.ActaManagementService;
+import it.csi.conam.conambl.integration.doqui.utils.DateFormat;
+import it.doqui.acta.actasrv.dto.acaris.type.common.AcarisContentStreamType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.EnumObjectType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.ObjectIdType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.ObjectResponseType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PagingResponseType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PrincipalIdType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PropertyType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.QueryableObjectType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.ValueType;
+import it.doqui.acta.actasrv.dto.acaris.type.document.IdentificatoreDocumento;
+import it.doqui.acta.actasrv.dto.acaris.type.management.VitalRecordCodeType;
+import it.doqui.acta.actasrv.dto.acaris.type.officialbook.IdentificazioneRegistrazione;
 
 @Service
 public class ActaManagementServiceImpl implements ActaManagementService {
@@ -783,6 +809,37 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 		}
 	}
 	
+
+	@Transactional(propagation=Propagation.REQUIRED)	
+	public ObjectIdType infoMoveDocument(UtenteActa utenteActa, String objectIdRichiestaPrenotazione) throws IntegrationException 
+	{
+		String method = "infoMoveDocument";
+		log.debug(method + ". BEGIN");
+
+		ObjectIdType repositoryId = null;
+		PrincipalIdType  principalId = null;
+		ObjectIdType infoMoveDocument = null;
+
+		try {
+			if(utenteActa == null)
+				throw new IntegrationException("Utente acta non valorizzato");
+			
+			//repositoryId
+			repositoryId = acarisRepositoryService.recuperaIdRepository(utenteActa.getRepositoryName());
+			
+			//principalId
+			principalId = acarisBackOfficeService.recuperaPrincipalId(utenteActa, repositoryId);
+			
+			infoMoveDocument = acarisObjectService.recuperaInfoMoveDocumentOfflineView(objectIdRichiestaPrenotazione, repositoryId, principalId);
+			   
+			return infoMoveDocument;
+		}
+		finally
+		{
+			log.debug(method + ". END");
+		}
+	}
+	
 	@Transactional(propagation=Propagation.REQUIRED)	
 	public KeyDocumentoActa protocollaDocumentoFisicoEsistente(DocumentoElettronicoActa documentoElettronicoActa, UtenteActa utenteActa,boolean isProtocollazioneInUscitaSenzaDocumento, String objectIdClassificazioneEsistente, String objectIdDocumentoEsistente) throws IntegrationException 
 	{
@@ -1311,9 +1368,8 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 		return keyDocActa;
 		
 	}
-
-
-	public List<DocumentoProtocollatoActa> ricercaDocumentoProtocollato(String numProtocollo, UtenteActa utenteActa) throws IntegrationException
+	
+	public List<DocumentoProtocollatoActa> ricercaDocumentoProtocollatoPostSpostaCopia(String numProtocollo, UtenteActa utenteActa, List<String> objectIdDocumentoList) throws IntegrationException
 	{
 		String method = "ricercaDocumentoProtocollato";
 		log.debug(method + ". BEGIN");
@@ -1402,7 +1458,7 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 						
 
 						
-
+						// 20230301 - questo è il master, recuperato sempre (anche se non fa parte dei documenti selezionati dall'utente per sposta/copia)
 						if(documentoProtocollato!=null) {
 							ObjectIdType docProtocollatoObj = documentoProtocollato.getObjectId();
 							if (docProtocollatoObj != null) {
@@ -1412,64 +1468,68 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 								documentoProtocollatoActa.setIdDocumento(docProtocollatoObj.getValue());
 								log.debug(method + ". Running Servizio recuperaIdContentStream...");
 							
-								// se 1 elemento allora doc standard, se >1 è doc multiplo
-								List<ObjectIdType> contentStreamIdList = null;
-								try {
-									contentStreamIdList = acarisRelationshipService.recuperaIdContentStream(repositoryId, principalId, docProtocollatoObj);
-								}catch(IntegrationException e) {
-									log.warn(method + "recupera contentStreamId problem = ", e);
-									throw new IntegrationException(e.getMessage(), new RicercaDocumentoNoDocElettronicoException(""));
-								}
-								if (contentStreamIdList != null)
-								{
-									log.debug(method + "contentStreamId Hash Code = " + contentStreamIdList.get(0).hashCode());
-									log.debug(method + "contentStreamId Value     = " + contentStreamIdList.get(0).getValue());
-					
-								}
-								
-								
-
-
-													
-								// 20200825_LC gestione nome del documento considerando pure doc multiplo
-								if(contentStreamIdList != null && contentStreamIdList.size() > 0) {
-									
-									if (contentStreamIdList.size()==1) {
-										// se size 1 c'è un solo doc fisico
-										log.debug(method + "Running Servizio getContentStream...");
-										AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, contentStreamIdList.get(0), principalId);	
-										documentoProtocollatoActa.setNomeFile(contentStream[0].getFilename());
-									} 
-									else {
-										// altrimenti si tratta di documento multiplo
-										String oggettoDoc = "oggetto non disponibile";
-										for (PropertyType propertyType : documentoProtocollato.getProperties()) {
-											if(propertyType.getQueryName().getPropertyName().equals("oggetto"))
-												oggettoDoc = propertyType.getValue().getContent()[0];
-										}										
-											documentoProtocollatoActa.setNomeFile("Documento multiplo - " + oggettoDoc);	// 20200828_LV metterci l'oggetto dopo un trattino	
-										
-											documentoProtocollatoActa.setFilenamesDocMultiplo(new ArrayList<String>());
-											for (ObjectIdType docFisico : contentStreamIdList) {
-												log.debug(method + "Running Servizio getContentStream...");
-												AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, docFisico, principalId);	
-												
-												documentoProtocollatoActa.getFilenamesDocMultiplo().add(contentStream[0].getFilename());
-											}
-
-									}
-
-								
-								}
-								
-								
 								
 								
 								// 20200711_LC recupera parola chiave e UUID
 								String parolaChiave = acarisObjectService.getParolaChiaveDocumento(repositoryId, principalId, docProtocollatoObj);
 								documentoProtocollatoActa.setParolaChiave(parolaChiave);
 								String uuidDoc = getUUIDDocumentoByObjectIdDocumento(documentoProtocollatoActa.getIdDocumento(), repositoryId, principalId);
-								documentoProtocollatoActa.setUiidDocumento(uuidDoc);
+								documentoProtocollatoActa.setUiidDocumento(uuidDoc);						
+
+								// 20230301 - non serve nome file e content
+								
+								
+//								// se 1 elemento allora doc standard, se >1 è doc multiplo
+//								List<ObjectIdType> contentStreamIdList = null;
+//								try {
+//									contentStreamIdList = acarisRelationshipService.recuperaIdContentStream(repositoryId, principalId, docProtocollatoObj);
+//								}catch(IntegrationException e) {
+//									log.warn(method + "recupera contentStreamId problem = ", e);
+//									throw new IntegrationException(e.getMessage(), new RicercaDocumentoNoDocElettronicoException(""));
+//								}
+//								if (contentStreamIdList != null)
+//								{
+//									log.debug(method + "contentStreamId Hash Code = " + contentStreamIdList.get(0).hashCode());
+//									log.debug(method + "contentStreamId Value     = " + contentStreamIdList.get(0).getValue());
+//					
+//								}
+//								
+//
+//													
+//								// 20200825_LC gestione nome del documento considerando pure doc multiplo
+//								if(contentStreamIdList != null && contentStreamIdList.size() > 0) {
+//									
+//									if (contentStreamIdList.size()==1) {
+//										// se size 1 c'è un solo doc fisico
+//										log.debug(method + "Running Servizio getContentStream...");
+////										AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, contentStreamIdList.get(0), principalId);	
+////										documentoProtocollatoActa.setNomeFile(contentStream[0].getFilename());
+//									} 
+//									else {
+//										// altrimenti si tratta di documento multiplo
+//										String oggettoDoc = "oggetto non disponibile";
+//										for (PropertyType propertyType : documentoProtocollato.getProperties()) {
+//											if(propertyType.getQueryName().getPropertyName().equals("oggetto"))
+//												oggettoDoc = propertyType.getValue().getContent()[0];
+//										}										
+//											documentoProtocollatoActa.setNomeFile("Documento multiplo - " + oggettoDoc);	// 20200828_LV metterci l'oggetto dopo un trattino	
+//										
+//											documentoProtocollatoActa.setFilenamesDocMultiplo(new ArrayList<String>());
+//											
+//											// non recupera i contentStreams
+////											for (ObjectIdType docFisico : contentStreamIdList) {
+////												log.debug(method + "Running Servizio getContentStream...");
+////												AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, docFisico, principalId);	
+////												
+////												documentoProtocollatoActa.getFilenamesDocMultiplo().add(contentStream[0].getFilename());
+////											}
+//
+//									}
+//
+//								
+//								}
+								
+
 								
 							}
 						}
@@ -1493,7 +1553,10 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 		
 					
 						// 20200708_LC Jira CONAM-152 - recupera allegati solo se effettivametne presenti
+						// 20230301 non li processa tutti, ma solo gli allegati che stanno anche nella cnmTAllegato (scelti dall'utente)
 						if (gruppoAllegati!=null & numAllegatiEff>0) {
+							
+							// recupera classificazioni allegati
 							ObjectIdType gruppoAllegatiObj = gruppoAllegati.getObjectId();
 							PagingResponseType classificazioniAllegatiList = acarisNavigationService.recuperaAllChildrens(repositoryId, principalId, gruppoAllegatiObj);
 							ObjectResponseType[] classificazioniAllegati = classificazioniAllegatiList.getObjects();
@@ -1512,73 +1575,76 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 									objectIdClassificazioneAllegato.setValue(idClassificazioneAllegato);
 									documentoProtocollatoActaAllegato.setClassificazioneId(idClassificazioneAllegato);
 									
-									String indiceClassificazioneEstesaAllegato = acarisObjectService.getIndiceClassificazioneEstesa(repositoryId, principalId, idClassificazioneAllegato);
-									documentoProtocollatoActaAllegato.setClassificazioneEstesa(indiceClassificazioneEstesaAllegato);
-									
+									// recupera l'alleagto (solo se tra quelli in lista in input)
 									ObjectResponseType documentoProtocollatoAllegato = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazioneAllegato, false);
-									
-									if(documentoProtocollatoAllegato!=null) {
+									if(documentoProtocollatoAllegato!=null && objectIdDocumentoList.contains(documentoProtocollatoAllegato.getObjectId().getValue())) {
+										
+										String indiceClassificazioneEstesaAllegato = acarisObjectService.getIndiceClassificazioneEstesa(repositoryId, principalId, idClassificazioneAllegato);
+										documentoProtocollatoActaAllegato.setClassificazioneEstesa(indiceClassificazioneEstesaAllegato);
+										
 										ObjectIdType docProtocollatoAllegatoObj = documentoProtocollatoAllegato.getObjectId();
 										if (docProtocollatoAllegatoObj != null) {
 											log.debug(method + ". documentoId Hash Code = " + docProtocollatoAllegatoObj.hashCode());
 											log.debug(method + ". documentoId Value     = " + docProtocollatoAllegatoObj.getValue());						
 								
 											documentoProtocollatoActaAllegato.setIdDocumento(docProtocollatoAllegatoObj.getValue());
-											log.debug(method + ". Running Servizio recuperaIdContentStream...");
-										
-											// se 1 elemento allora doc standard, se >1 è doc multiplo
-											List<ObjectIdType> contentStreamIdList = acarisRelationshipService.recuperaIdContentStream(repositoryId, principalId, docProtocollatoAllegatoObj);
-											if (contentStreamIdList != null)
-											{
-												log.debug(method + "contentStreamId Hash Code = " + contentStreamIdList.get(0).hashCode());
-												log.debug(method + "contentStreamId Value     = " + contentStreamIdList.get(0).getValue());
-								
-											}
-											
-											// 20200825_LC gestione nome del documento considerando pure doc multiplo
-											if(contentStreamIdList != null && contentStreamIdList.size() > 0) {
-												
-												if (contentStreamIdList.size()==1) {
-													// se size 1 c'è un solo doc fisico
-													log.debug(method + "Running Servizio getContentStream...");
-													AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, contentStreamIdList.get(0), principalId);	
-													documentoProtocollatoActaAllegato.setNomeFile(contentStream[0].getFilename());
-												} 
-												else {
-													// altrimenti si tratta di documento multiplo
-													String oggettoDoc = "oggetto non disponibile";
-													for (PropertyType propertyType : documentoProtocollato.getProperties()) {
-														if(propertyType.getQueryName().getPropertyName().equals("oggetto"))
-															oggettoDoc = propertyType.getValue().getContent()[0];
-													}										
-													documentoProtocollatoActaAllegato.setNomeFile("Documento multiplo - " + oggettoDoc);	// 20200828_LV metterci l'oggetto dopo un trattino	
-														
-													documentoProtocollatoActaAllegato.setFilenamesDocMultiplo(new ArrayList<String>());
-														for (ObjectIdType docFisico : contentStreamIdList) {
-															log.debug(method + "Running Servizio getContentStream...");
-															AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, docFisico, principalId);	
-															documentoProtocollatoActaAllegato.getFilenamesDocMultiplo().add(contentStream[0].getFilename());
-														}
-
-												}
-											
-											}
-											
-											
-											
 
 											// 20200711_LC recupera parola chiave
 											String parolaChiave = acarisObjectService.getParolaChiaveDocumento(repositoryId, principalId, docProtocollatoAllegatoObj);
 											documentoProtocollatoActaAllegato.setParolaChiave(parolaChiave);
 											String uuidDoc = getUUIDDocumentoByObjectIdDocumento(documentoProtocollatoActaAllegato.getIdDocumento(), repositoryId, principalId);
 											documentoProtocollatoActaAllegato.setUiidDocumento(uuidDoc);
-
+											
+											
+											// 20230301 - non serve nome file e content
+											
+//											log.debug(method + ". Running Servizio recuperaIdContentStream...");
+//											// se 1 elemento allora doc standard, se >1 è doc multiplo
+//											List<ObjectIdType> contentStreamIdList = acarisRelationshipService.recuperaIdContentStream(repositoryId, principalId, docProtocollatoAllegatoObj);
+//											if (contentStreamIdList != null)
+//											{
+//												log.debug(method + "contentStreamId Hash Code = " + contentStreamIdList.get(0).hashCode());
+//												log.debug(method + "contentStreamId Value     = " + contentStreamIdList.get(0).getValue());
+//								
+//											}
+//											
+//											// 20200825_LC gestione nome del documento considerando pure doc multiplo
+//											if(contentStreamIdList != null && contentStreamIdList.size() > 0) {
+//												
+//												if (contentStreamIdList.size()==1) {
+//													// se size 1 c'è un solo doc fisico
+//													log.debug(method + "Running Servizio getContentStream...");
+//													AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, contentStreamIdList.get(0), principalId);	
+//													documentoProtocollatoActaAllegato.setNomeFile(contentStream[0].getFilename());
+//												} 
+//												else {
+//													// altrimenti si tratta di documento multiplo
+//													String oggettoDoc = "oggetto non disponibile";
+//													for (PropertyType propertyType : documentoProtocollato.getProperties()) {
+//														if(propertyType.getQueryName().getPropertyName().equals("oggetto"))
+//															oggettoDoc = propertyType.getValue().getContent()[0];
+//													}										
+//													documentoProtocollatoActaAllegato.setNomeFile("Documento multiplo - " + oggettoDoc);	// 20200828_LV metterci l'oggetto dopo un trattino	
+//														
+//													documentoProtocollatoActaAllegato.setFilenamesDocMultiplo(new ArrayList<String>());
+//														for (ObjectIdType docFisico : contentStreamIdList) {
+//															log.debug(method + "Running Servizio getContentStream...");
+//															AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, docFisico, principalId);	
+//															documentoProtocollatoActaAllegato.getFilenamesDocMultiplo().add(contentStream[0].getFilename());
+//														}
+//
+//												}
+//											
+//											}
+											
 											
 										}
+										
+									documentoProtocollatoActaList.add(documentoProtocollatoActaAllegato);
+									
 									}
 		
-									
-									documentoProtocollatoActaList.add(documentoProtocollatoActaAllegato);									
+																		
 								
 								
 
@@ -1603,7 +1669,6 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 			}
 
 			// 
-			
 			return documentoProtocollatoActaList;
 		}
 		finally
@@ -1612,10 +1677,255 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 		}
 	}
 
+	//20220321_SB modifica per gestione della paginazione nella ricerca
+	@Cacheable(value="documentoProtocollatoPaged", key="#numProtocollo.toUpperCase() + '_' + #pagina + '_' + #numeroRigheMax")
+	public DocumentiProtocollatiActaPaged ricercaDocumentoProtocollatoPaged(String numProtocollo, UtenteActa utenteActa, int pagina, int numeroRigheMax) throws IntegrationException
+	{
+		String method = "ricercaDocumentoProtocollato";
+		log.debug(method + ". BEGIN");
+		ObjectIdType repositoryId = null;
+		PrincipalIdType  principalId = null;
+		int documentiTotali=0;
+		int documentiRestituiti=0;
+		DocumentiProtocollatiActaPaged documentiProtocollatiActaPaged = new DocumentiProtocollatiActaPaged();
+		List<DocumentoProtocollatoActa> documentoProtocollatoActaList = new ArrayList<DocumentoProtocollatoActa>();
+		ObjectIdType folderId = null;
+		try
+		{
+			log.debug(method + ". Running Servizio recuperaIdRepository...");
+			repositoryId = acarisRepositoryService.recuperaIdRepository(utenteActa.getRepositoryName());
+
+			if (repositoryId != null)
+				log.debug(method + ". repositoryId = " + repositoryId.hashCode());
+
+			log.debug(method + ". Running Servizio recuperaPrincipalId...");
+			principalId = acarisBackOfficeService.recuperaPrincipalId(utenteActa, repositoryId);
+			if (principalId != null)
+				log.debug(method + ". principalId = " + principalId.hashCode());
+			
+			PagingResponseType response = acarisObjectService.getDocumentiTramiteProtocollo(repositoryId, principalId, getTarget("ClassificazioniProtocollateView"), numProtocollo, null);
+			if(response != null && response.getObjectsLength() > 0){
+				
+				for (int i = 0; i < response.getObjectsLength(); i++) {
+					
+					DocumentoProtocollatoActa documentoProtocollatoActa = new DocumentoProtocollatoActa();
+					String idClassificazione = null;
+					String idRegistrazione = null;
+					ObjectIdType objectIdClassificazione = new ObjectIdType();
+					
+					PropertyType[] prop = response.getObjects()[i].getProperties();
+					for (int j = 0; j < prop.length; j++) {
+						PropertyType propertyType = prop[j];
+						log.debug(method + ". -> " + propertyType.getQueryName().getClassName());
+						log.debug(method + ". -> " + propertyType.getQueryName().getPropertyName());	
+						log.debug(method + ". -> " + propertyType.getValue());	
+						if(propertyType.getQueryName().getPropertyName().equalsIgnoreCase("dataProtocollo")){
+							ValueType vt = propertyType.getValue();
+							documentoProtocollatoActa.setDataProtocollo(vt.getContent()[0]);
+						}else if(propertyType.getQueryName().getPropertyName().equalsIgnoreCase("idClassificazione")) {	// 20200707_LC
+							ValueType vt = propertyType.getValue();	// 20200707_LC
+							idClassificazione = vt.getContent()[0];	// 20200707_LC
+						}else if(propertyType.getQueryName().getPropertyName().equalsIgnoreCase("objectId")) {	// 20200707_LC
+							ValueType vt = propertyType.getValue();	// 20200707_LC
+							idRegistrazione = vt.getContent()[0];	// 20200707_LC
+						}
+					}
+					if(StringUtils.isNotBlank(idClassificazione) && StringUtils.isNotBlank(idRegistrazione) ) {
+						log.debug(method + ". idClassificazione = " + idClassificazione);
+						log.debug(method + ". idRegistrazione = " + idRegistrazione);
+						
+						documentoProtocollatoActa.setClassificazioneId(idClassificazione);		// 20200707_LC è questo quello che ci si aspetta
+						documentoProtocollatoActa.setRegistrazioneId(idRegistrazione);		
+						
+						String indiceClassificazioneEstesa = acarisObjectService.getIndiceClassificazioneEstesa(repositoryId, principalId, idClassificazione);	// 20200707_LC
+						documentoProtocollatoActa.setClassificazioneEstesa(indiceClassificazioneEstesa);
+						log.debug(method + ". indiceClassificazioneEstesa = " + indiceClassificazioneEstesa);
+					
+						objectIdClassificazione.setValue(idClassificazione);			
+						
+						ObjectResponseType documentoProtocollato = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazione, false);
+						ObjectResponseType gruppoAllegati = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazione, true);
+						
+						Integer numAllegatiEff = acarisObjectService.getNumeroAllegatiPresenti(repositoryId, principalId, idClassificazione);
+						folderId = acarisNavigationService.recuperaFascicoloProtocollazione(repositoryId, principalId, objectIdClassificazione);
+						
+						documentiTotali++;
+						if (pagina<=1 ) {		
+							documentoProtocollatoActa.setFolderId(folderId.getValue());		
+	
+							if(documentoProtocollato!=null) {
+								ObjectIdType docProtocollatoObj = documentoProtocollato.getObjectId();
+								if (docProtocollatoObj != null) {
+									log.debug(method + ". documentoId Hash Code = " + docProtocollatoObj.hashCode());
+									log.debug(method + ". documentoId Value     = " + docProtocollatoObj.getValue());						
+						
+									documentoProtocollatoActa.setIdDocumento(docProtocollatoObj.getValue());
+									log.debug(method + ". Running Servizio recuperaIdContentStream...");
+								
+									List<ObjectIdType> contentStreamIdList = null;
+									try {
+										contentStreamIdList = acarisRelationshipService.recuperaIdContentStream(repositoryId, principalId, docProtocollatoObj);
+									}catch(IntegrationException e) {
+										log.warn(method + "recupera contentStreamId problem = ", e);
+										throw new IntegrationException(e.getMessage(), new RicercaDocumentoNoDocElettronicoException(""));
+									}
+									if (contentStreamIdList != null)
+									{
+										log.debug(method + "contentStreamId Hash Code = " + contentStreamIdList.get(0).hashCode());
+										log.debug(method + "contentStreamId Value     = " + contentStreamIdList.get(0).getValue());
+									}
+	
+									if(contentStreamIdList != null && contentStreamIdList.size() > 0) {
+										
+										if (contentStreamIdList.size()==1) {
+											log.debug(method + "Running Servizio getContentStream...");
+											AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, contentStreamIdList.get(0), principalId);	
+											documentoProtocollatoActa.setNomeFile(contentStream[0].getFilename());
+										} 
+										else {
+											String oggettoDoc = "oggetto non disponibile";
+											for (PropertyType propertyType : documentoProtocollato.getProperties()) {
+												if(propertyType.getQueryName().getPropertyName().equals("oggetto"))
+													oggettoDoc = propertyType.getValue().getContent()[0];
+											}										
+												documentoProtocollatoActa.setNomeFile("Documento multiplo - " + oggettoDoc);	// 20200828_LV metterci l'oggetto dopo un trattino	
+											
+												documentoProtocollatoActa.setFilenamesDocMultiplo(new ArrayList<String>());
+												for (ObjectIdType docFisico : contentStreamIdList) {
+													log.debug(method + "Running Servizio getContentStream...");
+													AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, docFisico, principalId);	
+													
+													documentoProtocollatoActa.getFilenamesDocMultiplo().add(contentStream[0].getFilename());
+												}
+										}
+									}
+									
+									String parolaChiave = acarisObjectService.getParolaChiaveDocumento(repositoryId, principalId, docProtocollatoObj);
+									documentoProtocollatoActa.setParolaChiave(parolaChiave);
+									String uuidDoc = getUUIDDocumentoByObjectIdDocumento(documentoProtocollatoActa.getIdDocumento(), repositoryId, principalId);
+									documentoProtocollatoActa.setUiidDocumento(uuidDoc);
+								}
+							}
+							documentoProtocollatoActaList.add(documentoProtocollatoActa);
+							documentiRestituiti++;	
+						}
+						
+						{
+						if (gruppoAllegati!=null & numAllegatiEff>0) {
+							
+							documentiTotali=documentiTotali+numAllegatiEff;
+							
+							ObjectIdType gruppoAllegatiObj = gruppoAllegati.getObjectId();
+							PagingResponseType classificazioniAllegatiList = acarisNavigationService.recuperaAllChildrens(repositoryId, principalId, gruppoAllegatiObj);
+							ObjectResponseType[] classificazioniAllegati = classificazioniAllegatiList.getObjects();
+					
+							int startElement=0;
+							if (numeroRigheMax>0) {
+								if(pagina==1) {
+									startElement=(pagina-1)*numeroRigheMax;
+								}else {
+									startElement=(pagina-1)*numeroRigheMax-1;
+								}
+							}
+														
+							for (int j = 0; j < classificazioniAllegati.length; j++) {
+								
+								if (j>=startElement ) {
+									DocumentoProtocollatoActa documentoProtocollatoActaAllegato = new DocumentoProtocollatoActa();
+									documentoProtocollatoActaAllegato.setFolderId(folderId.getValue());	
+
+									String idClassificazioneAllegato = classificazioniAllegati[j].getObjectId().getValue();
+									ObjectIdType objectIdClassificazioneAllegato = new ObjectIdType();
+									objectIdClassificazioneAllegato.setValue(idClassificazioneAllegato);
+									documentoProtocollatoActaAllegato.setClassificazioneId(idClassificazioneAllegato);
+									
+									String indiceClassificazioneEstesaAllegato = acarisObjectService.getIndiceClassificazioneEstesa(repositoryId, principalId, idClassificazioneAllegato);
+									documentoProtocollatoActaAllegato.setClassificazioneEstesa(indiceClassificazioneEstesaAllegato);
+									
+									ObjectResponseType documentoProtocollatoAllegato = acarisNavigationService.recuperaChildren(repositoryId, principalId, objectIdClassificazioneAllegato, false);
+									
+									if(documentoProtocollatoAllegato!=null) {
+										ObjectIdType docProtocollatoAllegatoObj = documentoProtocollatoAllegato.getObjectId();
+										if (docProtocollatoAllegatoObj != null) {
+											log.debug(method + ". documentoId Hash Code = " + docProtocollatoAllegatoObj.hashCode());
+											log.debug(method + ". documentoId Value     = " + docProtocollatoAllegatoObj.getValue());						
+								
+											documentoProtocollatoActaAllegato.setIdDocumento(docProtocollatoAllegatoObj.getValue());
+											log.debug(method + ". Running Servizio recuperaIdContentStream...");
+										
+											List<ObjectIdType> contentStreamIdList = acarisRelationshipService.recuperaIdContentStream(repositoryId, principalId, docProtocollatoAllegatoObj);
+											if (contentStreamIdList != null)
+											{
+												log.debug(method + "contentStreamId Hash Code = " + contentStreamIdList.get(0).hashCode());
+												log.debug(method + "contentStreamId Value     = " + contentStreamIdList.get(0).getValue());
+								
+											}
+											
+											if(contentStreamIdList != null && contentStreamIdList.size() > 0) {
+												
+												if (contentStreamIdList.size()==1) {
+													// se size 1 c'è un solo doc fisico
+													log.debug(method + "Running Servizio getContentStream...");
+													AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, contentStreamIdList.get(0), principalId);	
+													documentoProtocollatoActaAllegato.setNomeFile(contentStream[0].getFilename());
+												} 
+												else {
+													String oggettoDoc = "oggetto non disponibile";
+													for (PropertyType propertyType : documentoProtocollato.getProperties()) {
+														if(propertyType.getQueryName().getPropertyName().equals("oggetto"))
+															oggettoDoc = propertyType.getValue().getContent()[0];
+													}										
+													documentoProtocollatoActaAllegato.setNomeFile("Documento multiplo - " + oggettoDoc);	// 20200828_LV metterci l'oggetto dopo un trattino	
+														
+													documentoProtocollatoActaAllegato.setFilenamesDocMultiplo(new ArrayList<String>());
+														for (ObjectIdType docFisico : contentStreamIdList) {
+															log.debug(method + "Running Servizio getContentStream...");
+															AcarisContentStreamType[] contentStream = acarisObjectService.getContentStream(repositoryId, docFisico, principalId);	
+															documentoProtocollatoActaAllegato.getFilenamesDocMultiplo().add(contentStream[0].getFilename());
+														}
+
+												}
+											
+											}
+											String parolaChiave = acarisObjectService.getParolaChiaveDocumento(repositoryId, principalId, docProtocollatoAllegatoObj);
+											documentoProtocollatoActaAllegato.setParolaChiave(parolaChiave);
+											String uuidDoc = getUUIDDocumentoByObjectIdDocumento(documentoProtocollatoActaAllegato.getIdDocumento(), repositoryId, principalId);
+											documentoProtocollatoActaAllegato.setUiidDocumento(uuidDoc);
+										}
+									}
+									documentoProtocollatoActaList.add(documentoProtocollatoActaAllegato);
+									documentiRestituiti++;
+									if (documentoProtocollatoActaList.size()==numeroRigheMax) {
+										if (numeroRigheMax>0) {
+											break;
+										} 
+									}
+								
+								} 
+							}
+						}
+		     		 }
+					}
+				}
+			}
+
+			documentiProtocollatiActaPaged.setNumeroRigheTotale(documentiTotali);
+			documentiProtocollatiActaPaged.setNumeroRigheRestituite(documentiRestituiti);
+			documentiProtocollatiActaPaged.setDocumentoProtocollatoActa(documentoProtocollatoActaList);
+			documentiProtocollatiActaPaged.setNumeroRigheMax(numeroRigheMax);
+			documentiProtocollatiActaPaged.setPaginaRichiesta(pagina);
+			
+			return documentiProtocollatiActaPaged;
+		}
+		finally
+		{
+			log.debug(method + ". END");
+		}
+	}
 
 	// 20200626_LC
 	@Transactional(propagation=Propagation.REQUIRED)	
-	public KeyDocumentoActa spostaDocumento(DocumentoElettronicoActa documentoElettronicoActa, String numeroProtocollo, UtenteActa utenteActa, String parolaChiaveFolderTemp) throws IntegrationException
+	public KeyDocumentoActa spostaDocumento(DocumentoElettronicoActa documentoElettronicoActa, String numeroProtocollo, UtenteActa utenteActa, String parolaChiaveFolderTemp, boolean offlineRequest) throws IntegrationException, TroppiAllegatiPerSpostamentoException
 	{
 		String method = "spostaDocumento";
 		log.debug(method + ". BEGIN");
@@ -1623,7 +1933,8 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 		PrincipalIdType  principalId = null;
 		String idClassificazione = null;
 		String idFolderToTrace = null;
-		boolean isOfflineRequest = true; // sempre true, se allegati<MAX allora lo fa in modo sincrono
+		//boolean isOfflineRequest = true; // prima sempre true
+		// (XXX)
 		 
 		boolean isNewScrittoDifensivo = parolaChiaveFolderTemp != null ? true : false;
 		 
@@ -1712,7 +2023,13 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 			}
 			
 			
-			ObjectIdType idNuovaClassificazione = acarisObjectService.moveActaDocument(repositoryId, principalId, documentoClassificazioneId, sourceFolderId, destFolderId, isOfflineRequest);
+			ObjectIdType idNuovaClassificazione;
+			try {
+				idNuovaClassificazione = acarisObjectService.moveActaDocument(repositoryId, principalId, documentoClassificazioneId, sourceFolderId, destFolderId, offlineRequest);
+			} catch (TroppiAllegatiPerSpostamentoException e) {
+				// eccezione Acraris SER-137, si ri-invoca il servizio con offlineRequest: true e si produce un elemento da far consumare al batch
+				throw new TroppiAllegatiPerSpostamentoException(e.getMessage(), e.getItsOriginalException());
+			}
 			
 			// 20201123_LC
 			KeyDocumentoActa response = new KeyDocumentoActa(idFolderToTrace, idNuovaClassificazione.getValue());
@@ -1936,11 +2253,10 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 	
 	
 	
-	// 20200728_LC
 
 	// 20200626_LC
 	@Transactional(propagation=Propagation.REQUIRED)	
-	public KeyDocumentoActa copiaDocumento(DocumentoElettronicoActa documentoElettronicoActa, String numeroProtocollo, UtenteActa utenteActa, String parolaChiaveFolderTemp) throws IntegrationException
+	public KeyDocumentoActa copiaDocumento(DocumentoElettronicoActa documentoElettronicoActa, String numeroProtocollo, UtenteActa utenteActa, String parolaChiaveFolderTemp, boolean offlineRequest) throws IntegrationException, TroppiAllegatiPerSpostamentoException
 	{
 		String method = "copiaDocumento";
 		log.debug(method + ". BEGIN");
@@ -1948,7 +2264,8 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 		PrincipalIdType  principalId = null;
 		String idClassificazione = null;
 		String idFolderToTrace = null;
-		boolean isOfflineRequest = true;  // sempre true, se allegati<MAX allora lo fa in modo sincrono (come per sposta documento)
+		//boolean isOfflineRequest = true;  // prima sempre true
+		// (XXX)
 		 
 		boolean isNewScrittoDifensivo = parolaChiaveFolderTemp != null ? true : false;
 		// --
@@ -2040,8 +2357,13 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 				throw new IntegrationException("Folder di partenza e di arrivo coincidenti.");
 			}
 			
-			
-			ObjectIdType idNuovaClassificazione = acarisMultifilingService.aggiungiClassificazione(repositoryId, principalId, documentoClassificazioneId, destFolderId, isOfflineRequest);
+			ObjectIdType idNuovaClassificazione;
+			try {
+				idNuovaClassificazione = acarisMultifilingService.aggiungiClassificazione(repositoryId, principalId, documentoClassificazioneId, destFolderId, offlineRequest);
+			} catch (TroppiAllegatiPerSpostamentoException e) {
+				// eccezione Acraris SER-137, si ri-invoca il servizio con offlineRequest: true e si produce un elemento da far consumare al batch
+				throw new TroppiAllegatiPerSpostamentoException(e.getMessage(), e.getItsOriginalException());
+			}
 			
 			// 20201123_LC
 			KeyDocumentoActa response = new KeyDocumentoActa(idFolderToTrace, idNuovaClassificazione.getValue());

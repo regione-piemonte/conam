@@ -5,6 +5,8 @@
 package it.csi.conam.conambl.integration.repositories;
 
 import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -86,5 +89,13 @@ public interface CnmTPianoRateRepository extends CrudRepository<CnmTPianoRate, I
 			"and spr.id_stato_piano_rate in ?4 and af2.id_field=13  and af2.valore_data between  ?1 and ?2 " + //
 			"and af.valore_number = ?3 ", nativeQuery = true)
 	BigInteger countByDataSentenzaAndIdStatoSentenzaAndIdStatoPianoIn(Date inizio, Date fine, BigDecimal idStatoSentenza, List<Long> idStatoPianos, List<Long> statoOridnanzaVerSog);
+
+	@Query(" select distinct o from "//
+			+ "CnmTPianoRate o join "//
+			+ "o.cnmRAllegatoPianoRates ao join "//
+			+ "ao.cnmTAllegato a join "//
+			+ "a.cnmDStatoAllegato sa "//
+			+ "where sa.idStatoAllegato=?1 and a.dataOraInsert >= ?2")
+	List<CnmTPianoRate> findCnmTPianoRateAndIdStatoAllegato(Long statoAvviaSpostamentoActa, Timestamp timestamp);
 
 }

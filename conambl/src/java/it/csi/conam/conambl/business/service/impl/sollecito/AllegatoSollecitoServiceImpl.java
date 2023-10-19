@@ -38,12 +38,12 @@ import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.integration.entity.CnmCParametro;
+import it.csi.conam.conambl.integration.entity.CnmDStatoAllegato;
 import it.csi.conam.conambl.integration.entity.CnmDStatoSollecito;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRate;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRatePK;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoSollecito;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoSollecitoPK;
-import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbale;
 import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
 import it.csi.conam.conambl.integration.entity.CnmRSollecitoSoggRata;
 import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
@@ -55,6 +55,7 @@ import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.ws.epay.EPayWsInputMapper;
 import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoSollecitoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoPianoRateRepository;
@@ -62,6 +63,7 @@ import it.csi.conam.conambl.integration.repositories.CnmRAllegatoSollecitoReposi
 import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRSollecitoSoggRataRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTSoggettoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTSollecitoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
@@ -127,8 +129,12 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 
 	@Autowired
 	private CommonSoggettoService commonSoggettoService;
-	
+	@Autowired
+	private CnmDStatoAllegatoRepository cnmDStatoAllegatoRepository;
 
+	@Autowired
+	private CnmTAllegatoRepository cnmTAllegatoRepository;
+	
 	private static final Logger logger = Logger.getLogger(AllegatoSollecitoServiceImpl.class);
 
 	@Override
@@ -144,16 +150,18 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 		String nome = "Lettera_sollecito_" + cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione();
 		String nomeFile = verificaNome(nome) + ".pdf";
 
-		CnmTAllegato cnmTAllegato = salvaAllegatoSollecito(cnmTSollecito, file, cnmTUser, nomeFile, TipoAllegato.LETTERA_SOLLECITO, true, true, false);
+		// OB-181 -> passare il dato isMaster a true
+		CnmTAllegato cnmTAllegato = salvaAllegatoSollecito(cnmTSollecito, file, cnmTUser, nomeFile, TipoAllegato.LETTERA_SOLLECITO, true, true, true);
 
-		// aggiorno stato sollecito
+		// aggiorno stato sollecito		
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
-		CnmDStatoSollecito cnmDStatoSollecito = cnmDStatoSollecitoRepository.findOne(Constants.ID_STATO_SOLLECITO_PROTOCOLLATO);
+		CnmDStatoSollecito cnmDStatoSollecito = cnmDStatoSollecitoRepository.findOne(Constants.ID_STATO_SOLLECITO_IN_PROTOCOLLAZIONE);
 		cnmTSollecito.setCnmDStatoSollecito(cnmDStatoSollecito);
 		cnmTSollecito.setCnmTUser1(cnmTUser);
 		cnmTSollecito.setDataOraUpdate(now);
 		cnmTSollecitoRepository.save(cnmTSollecito);
 
+		
 		return cnmTAllegato;
 	}
 	
@@ -172,15 +180,31 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 		String nome = "Lettera_sollecito_rate_" + cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione();
 		String nomeFile = verificaNome(nome) + ".pdf";
 
-		CnmTAllegato cnmTAllegato = salvaAllegatoSollecito(cnmTSollecito, file, cnmTUser, nomeFile, TipoAllegato.LETTERA_SOLLECITO_RATE, true, true, false);
+		// DD OB-181 -> passare il dato isMaster a true
+		CnmTAllegato cnmTAllegato = salvaAllegatoSollecito(cnmTSollecito, file, cnmTUser, nomeFile, TipoAllegato.LETTERA_SOLLECITO_RATE, true, true, true);
 
 		// aggiorno stato sollecito
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
-		CnmDStatoSollecito cnmDStatoSollecito = cnmDStatoSollecitoRepository.findOne(Constants.ID_STATO_SOLLECITO_PROTOCOLLATO);
+		CnmDStatoSollecito cnmDStatoSollecito = cnmDStatoSollecitoRepository.findOne(Constants.ID_STATO_SOLLECITO_IN_PROTOCOLLAZIONE);
 		cnmTSollecito.setCnmDStatoSollecito(cnmDStatoSollecito);
 		cnmTSollecito.setCnmTUser1(cnmTUser);
 		cnmTSollecito.setDataOraUpdate(now);
 		cnmTSollecitoRepository.save(cnmTSollecito);
+		
+		// protocollolato il master metto i documenti in fase di spostamento su acta
+//		List<CnmRAllegatoPianoRate> cnmRAllegatoPianoRateList = cnmRAllegatoPianoRateRepository.findByCnmTPianoRate(cnmTPianoRate);
+//		List<CnmTAllegato> cnmTAllegatoList = new ArrayList<>();
+//		CnmDStatoSollecito cnmDStatoAllegato = cnmDStatoSollecitoRepository.findOne(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA);
+//		for (CnmRAllegatoPianoRate cnmRAllegatoPianoRate :cnmRAllegatoPianoRateList) {
+//			CnmTAllegato cnmTAllegatoT = cnmRAllegatoPianoRate.getCnmTAllegato();
+//			boolean letteraOrdinanza = cnmTAllegatoT.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_SOLLECITO_RATE.getId();
+//			boolean statoDaProtocollareInIstanteSuccessivo = cnmTAllegatoT.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO;
+//			if (!letteraOrdinanza && statoDaProtocollareInIstanteSuccessivo) {
+//				cnmTAllegatoT.setDataOraUpdate(utilsDate.asTimeStamp(LocalDateTime.now()));
+//				cnmTAllegatoT.setCnmDStatoAllegato(cnmDStatoAllegato);
+//				cnmTAllegatoList.add(cnmTAllegatoT);
+//			}
+//		}
 
 		return cnmTAllegato;
 	}
@@ -250,7 +274,7 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 
 		String tipoActa = null;
 		if (tipoAllegato.getId() == TipoAllegato.LETTERA_SOLLECITO.getId() || tipoAllegato.getId() == TipoAllegato.LETTERA_SOLLECITO_RATE.getId()) {
-			tipoActa = StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_USCITA_SENZA_ALLEGATI_GENERERATI;
+			tipoActa = StadocServiceFacade.TIPOLOGIA_DOC_ACTA_MASTER_USCITA_CON_ALLEGATI;
 		}
 
 		String folder = null;
@@ -273,8 +297,25 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 			cnmTSoggettoList = cnmTSoggettoRepository.findByCnmRVerbaleSoggettosIn(cnmRVerbaleSoggettoList);
 
 		}
+		
+		// ? OB-181 Aggiungere anche LETTERA_SOLLECITO e LETTERA_SOLLECITO_RATE poiche dovranno essere gestite sul batch, da protocollare con bollettino
+		if (tipoAllegato.getId() == TipoAllegato.LETTERA_SOLLECITO.getId() || tipoAllegato.getId() == TipoAllegato.LETTERA_SOLLECITO_RATE.getId()) {
+			tipoProtocolloAllegato = TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE;
+		} else if (tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO_RATE.getId() || tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO.getId()) {
+			tipoProtocolloAllegato = TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO;
+		}
+		
 		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
 				isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList);
+		
+		if (tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO.getId() || 
+				tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO_RATE.getId()) {
+			// imposto lo stato del bollettino a STATO_AVVIA_SPOSTAMENTO_ACTA, in modo che venga preso in cariso dallo schedulatore
+			CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA);
+			cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegato);
+			cnmTAllegatoRepository.save(cnmTAllegato);
+		}
+		
 
 		// aggiungo alla tabella
 		CnmRAllegatoSollecitoPK cnmRAllegatoSollecitoPK = new CnmRAllegatoSollecitoPK();

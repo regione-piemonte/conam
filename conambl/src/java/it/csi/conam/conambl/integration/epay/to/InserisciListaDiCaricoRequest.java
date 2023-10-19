@@ -2,27 +2,22 @@
  * InserisciListaDiCaricoRequest.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ * by the Apache Axis 1.4 Nov 13, 2013 (09:13:21 GMT) WSDL2Java emitter.
  */
 
 package it.csi.conam.conambl.integration.epay.to;
 
 public class InserisciListaDiCaricoRequest  implements java.io.Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    private TestataListaCarico testata;
 
-	private it.csi.conam.conambl.integration.epay.to.TestataListaCarico testata;
-
-    private it.csi.conam.conambl.integration.epay.to.ListaDiCarico listaDiCarico;
+    private ListaDiCarico listaDiCarico;
 
     public InserisciListaDiCaricoRequest() {
     }
 
     public InserisciListaDiCaricoRequest(
-           it.csi.conam.conambl.integration.epay.to.TestataListaCarico testata,
-           it.csi.conam.conambl.integration.epay.to.ListaDiCarico listaDiCarico) {
+           TestataListaCarico testata,
+           ListaDiCarico listaDiCarico) {
            this.testata = testata;
            this.listaDiCarico = listaDiCarico;
     }
@@ -33,7 +28,7 @@ public class InserisciListaDiCaricoRequest  implements java.io.Serializable {
      * 
      * @return testata
      */
-    public it.csi.conam.conambl.integration.epay.to.TestataListaCarico getTestata() {
+    public TestataListaCarico getTestata() {
         return testata;
     }
 
@@ -43,7 +38,7 @@ public class InserisciListaDiCaricoRequest  implements java.io.Serializable {
      * 
      * @param testata
      */
-    public void setTestata(it.csi.conam.conambl.integration.epay.to.TestataListaCarico testata) {
+    public void setTestata(TestataListaCarico testata) {
         this.testata = testata;
     }
 
@@ -53,7 +48,7 @@ public class InserisciListaDiCaricoRequest  implements java.io.Serializable {
      * 
      * @return listaDiCarico
      */
-    public it.csi.conam.conambl.integration.epay.to.ListaDiCarico getListaDiCarico() {
+    public ListaDiCarico getListaDiCarico() {
         return listaDiCarico;
     }
 
@@ -63,7 +58,7 @@ public class InserisciListaDiCaricoRequest  implements java.io.Serializable {
      * 
      * @param listaDiCarico
      */
-    public void setListaDiCarico(it.csi.conam.conambl.integration.epay.to.ListaDiCarico listaDiCarico) {
+    public void setListaDiCarico(ListaDiCarico listaDiCarico) {
         this.listaDiCarico = listaDiCarico;
     }
 

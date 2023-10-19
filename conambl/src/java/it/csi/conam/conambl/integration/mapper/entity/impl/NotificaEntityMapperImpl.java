@@ -8,6 +8,7 @@ import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.integration.entity.CnmTNotifica;
 import it.csi.conam.conambl.integration.mapper.entity.ModalitaNotificaEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.NotificaEntityMapper;
+import it.csi.conam.conambl.integration.repositories.CnmDCausaleRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDModalitaNotificaRepository;
 import it.csi.conam.conambl.vo.notifica.NotificaVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,9 @@ public class NotificaEntityMapperImpl implements NotificaEntityMapper {
 	private CnmDModalitaNotificaRepository cnmDModalitaNotificaRepository;
 	@Autowired
 	private ModalitaNotificaEntityMapper modalitaNotificaEntityMapper;
-
+	@Autowired 
+	private CnmDCausaleRepository cnmDCausaleRepository;
+	
 	@Override
 	public NotificaVO mapEntityToVO(CnmTNotifica dto) {
 		NotificaVO notificaVO = new NotificaVO();
@@ -45,6 +48,12 @@ public class NotificaEntityMapperImpl implements NotificaEntityMapper {
 		CnmTNotifica.setNumeroRaccomandata(notifica.getNumeroRaccomandata());
 		if (notifica.getModalita() != null && notifica.getModalita().getId() != null)
 			CnmTNotifica.setCnmDModalitaNotifica(cnmDModalitaNotificaRepository.findOne(notifica.getModalita().getId()));
+		if(notifica.getCausale()!=null) {			
+			CnmTNotifica.setCnmDCausale(cnmDCausaleRepository.findOne(notifica.getCausale().getId()));		
+		}
+		if(notifica.getNumeroAccertamento()!=null)		CnmTNotifica.setNumeroAccertamento(notifica.getNumeroAccertamento());
+		if(notifica.getAnnoAccertamento()!=null)		CnmTNotifica.setAnnoAccertamento(java.math.BigInteger.valueOf((notifica.getAnnoAccertamento())));
+		
 		return CnmTNotifica;
 	}
 

@@ -74,6 +74,21 @@ public class CnmTNotifica implements Serializable {
 	@ManyToMany(mappedBy="cnmTNotificas")
 	private List<CnmTSollecito> cnmTSollecitos;
 
+
+	// 20230214 PP - nuovi campi per modifica integrazione PPAY
+	// bi-directional many-to-one association to cnmDCausale
+	@ManyToOne
+	@JoinColumn(name = "id_causale")
+	private CnmDCausale cnmDCausale;
+	
+	// 20230214 PP - nuovi campi per modifica integrazione PPAY
+	@Column(name = "numero_accertamento")
+	private String numeroAccertamento;
+
+	// 20230214 PP - nuovi campi per modifica integrazione PPAY
+	@Column(name = "anno_accertamento")
+	private java.math.BigInteger annoAccertamento;
+
 	public CnmTNotifica() {
 	}
 
@@ -180,5 +195,30 @@ public class CnmTNotifica implements Serializable {
 	public void setCnmTSollecitos(List<CnmTSollecito> cnmTSollecitos) {
 		this.cnmTSollecitos = cnmTSollecitos;
 	}
+	
+	public CnmDCausale getCnmDCausale() {
+		return cnmDCausale;
+	}
+
+	public void setCnmDCausale(CnmDCausale cnmDCausale) {
+		this.cnmDCausale = cnmDCausale;
+	}
+
+	public String getNumeroAccertamento() {
+		return numeroAccertamento;
+	}
+
+	public void setNumeroAccertamento(String numeroAccertamento) {
+		this.numeroAccertamento = numeroAccertamento;
+	}
+
+	public java.math.BigInteger getAnnoAccertamento() {
+		return annoAccertamento;
+	}
+
+	public void setAnnoAccertamento(java.math.BigInteger annoAccertamento) {
+		this.annoAccertamento = annoAccertamento;
+	}
+
 
 }

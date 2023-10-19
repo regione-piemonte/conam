@@ -127,7 +127,11 @@ public class SoggettoRiscossioneEntityMapperImpl implements SoggettoRiscossioneE
 		} else if (tipo.equals("N") && cnmTOrdinanza != null) {
 			List<CnmTNotifica> cnmTNotifica = cnmTNotificaRepository.findByCnmTOrdinanzas(cnmTOrdinanza);
 			if (cnmTNotifica != null && cnmTNotifica.size() > 0)
-				importo = cnmTNotifica.get(0).getImportoSpeseNotifica();
+				// 20230519 PP - CR abb 167 (issue 5)
+				// Importo spese notifica diventa opzionale
+				if(cnmTNotifica.get(0).getImportoSpeseNotifica()!=null) {
+					importo = cnmTNotifica.get(0).getImportoSpeseNotifica();
+				}
 		} else if (tipo.equals("L")) {
 			List<CnmTAllegatoField> cnmTAllegato = cnmTAllegatoFieldRepository.findByIdOrdinanzaVerbSog(t.getIdOrdinanzaVerbSog());
 			importo = cnmTAllegato != null && cnmTAllegato.size() > 0 ? cnmTAllegato.get(0).getValoreNumber() : new BigDecimal(0);

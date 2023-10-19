@@ -61,4 +61,6 @@ public interface VerbaleService {
 	/*LUCIO 2021/04/21 - FINE Gestione casi di recidività*/
 
 	CnmTVerbale salvaNumeroProtocollo(Integer idVerbale, String numeroProtocollo, CnmTUser cnmTUser);
+
+	CnmTVerbale salvaCnmTVerbale(CnmTVerbale cnmTVerbale);
 }

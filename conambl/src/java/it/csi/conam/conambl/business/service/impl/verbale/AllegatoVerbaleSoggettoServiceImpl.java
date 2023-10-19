@@ -26,7 +26,6 @@ import it.csi.conam.conambl.business.service.util.UtilsDoqui;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
 import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.TipoProtocolloAllegato;
-import it.csi.conam.conambl.integration.doqui.repositories.CnmDTipoDocumentoRepository;
 import it.csi.conam.conambl.integration.entity.CnmDTipoAllegato;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbSog;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbSogPK;
@@ -143,7 +142,7 @@ public class AllegatoVerbaleSoggettoServiceImpl implements AllegatoVerbaleSogget
 
 				if (allegatos != null && allegatos.size() == 0) {
 					List<CnmTSoggetto> cnmTSoggettoList = cnmTSoggettoRepository.findByCnmRVerbaleSoggettosIn(cnmRVerbaleSoggettoList);
-					allegatos.add(salvaAllegatoVerbaleSoggetto(cnmRVerbaleSoggetto, file, cnmTUser, "Verbale_audizione.pdf", TipoAllegato.VERBALE_AUDIZIONE, false, false, false, cnmTSoggettoList));
+					allegatos.add(salvaAllegatoVerbaleSoggetto(cnmRVerbaleSoggetto, file, cnmTUser, "Verbale_audizione.pdf", TipoAllegato.VERBALE_AUDIZIONE, false, true, false, cnmTSoggettoList));
 				} else
 					salvaAllegatoVerbaleSoggetto(cnmRVerbaleSoggetto, allegatos.get(0), cnmTUser);
 

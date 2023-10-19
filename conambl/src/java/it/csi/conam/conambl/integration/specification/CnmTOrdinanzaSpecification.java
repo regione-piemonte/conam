@@ -77,7 +77,8 @@ public class CnmTOrdinanzaSpecification {
 					if (StringUtils.isNotEmpty(parametriVerbale.getNumeroVerbale())) {
 						Subquery<CnmROrdinanzaVerbSog> subqueryROrdinanzaVerbaleSoggetto = query.subquery(CnmROrdinanzaVerbSog.class);
 						Root<CnmROrdinanzaVerbSog> rootsubqueryROrdinanzaVerbaleSoggetto = subqueryROrdinanzaVerbaleSoggetto.from(CnmROrdinanzaVerbSog.class);
-						Predicate predicate = builder.equal(cnmRVerbaleJoin.get("numVerbale"), parametriVerbale.getNumeroVerbale().toUpperCase());
+//						Predicate predicate = builder.equal(cnmRVerbaleJoin.get("numVerbale"), parametriVerbale.getNumeroVerbale().toUpperCase());
+						Predicate predicate = builder.like(cnmRVerbaleJoin.get("numVerbale"), "%"+parametriVerbale.getNumeroVerbale().toUpperCase()+"%");
 						subqueryROrdinanzaVerbaleSoggetto.select(rootsubqueryROrdinanzaVerbaleSoggetto.get("cnmTOrdinanza")).where(predicate).distinct(true);
 						predicates.add(root.in(subqueryROrdinanzaVerbaleSoggetto));
 					}

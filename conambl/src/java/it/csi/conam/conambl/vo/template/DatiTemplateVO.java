@@ -61,11 +61,15 @@ public class DatiTemplateVO extends ParentVO {
 	private String sedeEnte;
 	private String infoOrganoAccertatore;
 	
-	
-	
-	
-	
+	// 20230110_PP
+	private String testoLibero;	
+	private String email;	
+	private String emailOrgano;	
+	private String intestazioneConoscenza;
 
+	// 20230605 PP - E9
+	private String sedeEnteTesto;
+	
 	public BigDecimal getImportoTotale() {
 		return importoTotale;
 	}
@@ -274,9 +278,44 @@ public class DatiTemplateVO extends ParentVO {
 		this.salutiLettera = salutiLettera;
 	}
 
-	
-	
-	
-	
+	public String getTestoLibero() {
+		return testoLibero;
+	}
+
+	public void setTestoLibero(String testoLibero) {
+		this.testoLibero = testoLibero;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getEmailOrgano() {
+		return emailOrgano;
+	}
+
+	public void setEmailOrgano(String emailOrgano) {
+		this.emailOrgano = emailOrgano;
+	}
+
+	public String getIntestazioneConoscenza() {
+		return intestazioneConoscenza;
+	}
+
+	public void setIntestazioneConoscenza(String intestazioneConoscenza) {
+		this.intestazioneConoscenza = intestazioneConoscenza;
+	}
+
+	public String getSedeEnteTesto() {
+		return sedeEnteTesto;
+	}
+
+	public void setSedeEnteTesto(String sedeEnteTesto) {
+		this.sedeEnteTesto = sedeEnteTesto;
+	}
 	
 }

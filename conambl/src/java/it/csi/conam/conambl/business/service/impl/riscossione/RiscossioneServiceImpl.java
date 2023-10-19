@@ -565,7 +565,11 @@ public class RiscossioneServiceImpl implements RiscossioneService {
 			if (notifiche != null && notifiche.size() == 1) {
 				dataDecorrenzaInteressi = utilsDate.add30DaysToDate(notifiche.get(0).getDataNotifica());
 				s.setDataDecorrenzaInteressi(utilsDate.asLocalDate(dataDecorrenzaInteressi));
-				s.setImportoSpeseNotifica(notifiche.get(0).getImportoSpeseNotifica());
+				// 20230519 PP - CR abb 167 (issue 5)
+				// Importo spese notifica diventa opzionale
+				if(notifiche.get(0).getImportoSpeseNotifica()!=null) {
+					s.setImportoSpeseNotifica(notifiche.get(0).getImportoSpeseNotifica());
+				}
 			}
 			if (cnmTRiscossione.getImportoSanzione() != null)
 				s.setImportoSanzione(cnmTRiscossione.getImportoSanzione());

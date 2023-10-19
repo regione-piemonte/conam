@@ -28,13 +28,12 @@ public class RequestSpostaDocumento implements java.io.Serializable {
 
 	private String numeroProtocollo;
 
-	private String idVerbale;
+	private Integer idVerbale;
 
 	private Soggetto soggetto;
 
 	// 20210506_LC
     private String parolaChiaveFolderTemp;
-    
     
     
 
@@ -47,7 +46,7 @@ public class RequestSpostaDocumento implements java.io.Serializable {
 
 
 	public RequestSpostaDocumento(String codiceFruitore, Documento documento, String folder, Metadati metadati,
-			String rootActa, String soggettoActa, String tipoDocumento, String numeroProtocollo, String idVerbale,
+			String rootActa, String soggettoActa, String tipoDocumento, String numeroProtocollo, Integer idVerbale,
 			Soggetto soggetto, String parolaChiaveFolderTemp) {
 		super();
 		this.codiceFruitore = codiceFruitore;
@@ -177,13 +176,13 @@ public class RequestSpostaDocumento implements java.io.Serializable {
 
 
 
-	public String getIdVerbale() {
+	public Integer getIdVerbale() {
 		return idVerbale;
 	}
 
 
 
-	public void setIdVerbale(String idVerbale) {
+	public void setIdVerbale(Integer idVerbale) {
 		this.idVerbale = idVerbale;
 	}
 
@@ -204,10 +203,6 @@ public class RequestSpostaDocumento implements java.io.Serializable {
 		this.soggetto = soggetto;
 	}
 
-
-
-	
-	
 	
 
 
@@ -383,7 +378,7 @@ public class RequestSpostaDocumento implements java.io.Serializable {
 		elemField = new org.apache.axis.description.ElementDesc();
 		elemField.setFieldName("idVerbale");
 		elemField.setXmlName(new javax.xml.namespace.QName("", "idVerbale"));
-		elemField.setXmlType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "string"));
+		elemField.setXmlType(new javax.xml.namespace.QName("http://schemas.xmlsoap.org/soap/encoding/", "int"));
 		elemField.setNillable(true);
 		typeDesc.addFieldDesc(elemField);
 		

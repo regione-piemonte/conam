@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.11.0.final utlizzo versione della libreria JasperReports6.11.0-0c4056ccaa4d25a5a8c45672d2f764ea3498bebb  -->
+<!-- Created with Jaspersoft Studio version 7.9.0.final utlizzo versione della libreria JasperReports6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Template-03-lettera-accompagnamento" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="40" bottomMargin="20" uuid="3a198f7c-26e6-4466-8e16-f6ebefcfa2ac">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -34,6 +34,10 @@
 	<parameter name="funzionario" class="java.lang.String"/>
 	<parameter name="intestazione" class="java.lang.String"/>
 	<parameter name="idMailSettoreTributi" class="java.lang.String"/>
+	<parameter name="email" class="java.lang.String"/>
+	<parameter name="emailOrgano" class="java.lang.String"/>
+	<parameter name="intestazioneConoscenza" class="java.lang.String"/>
+	<parameter name="testoLibero" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[select 1 from dual]]>
 	</queryString>
@@ -70,7 +74,7 @@
 		</band>
 	</title>
 	<detail>
-		<band height="180" splitType="Stretch">
+		<band height="155" splitType="Stretch">
 			<textField>
 				<reportElement positionType="Float" x="30" y="0" width="50" height="20" uuid="0bb26de6-eef8-4a12-bfad-6e8ca3fcc2a3"/>
 				<textElement>
@@ -109,29 +113,29 @@
 				<textFieldExpression><![CDATA[$P{intestazione}]]></textFieldExpression>
 			</textField>
 			<componentElement>
-				<reportElement positionType="Float" x="340" y="80" width="185" height="80" uuid="a5fb35b3-d2ac-4e6e-a86f-f82abbebb81c">
+				<reportElement positionType="Float" x="340" y="80" width="185" height="70" uuid="a5fb35b3-d2ac-4e6e-a86f-f82abbebb81c">
 					<property name="net.sf.jasperreports.export.headertoolbar.table.name" value="Soggetti"/>
 				</reportElement>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="ListaSoggettiDataset" uuid="183267fd-0642-4bbb-9eac-b45c722be1fc">
 						<dataSourceExpression><![CDATA[$P{listaSoggetti}]]></dataSourceExpression>
 					</datasetRun>
-					<jr:listContents height="80" width="185">
-						<textField  isBlankWhenNull="true">
+					<jr:listContents height="70" width="185">
+						<textField isBlankWhenNull="true">
 							<reportElement positionType="Float" x="0" y="0" width="185" height="20" uuid="6025da37-27dc-456c-8cee-7b52b9a6d2a3"/>
 							<textElement>
 								<font fontName="TimeNewRomanCustom"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{personaFisica}? $F{nome} + " " + $F{cognome}+",": $F{ragioneSociale}+","]]></textFieldExpression>
 						</textField>
-						<textField  isBlankWhenNull="true">
+						<textField isBlankWhenNull="true">
 							<reportElement positionType="Float" x="0" y="20" width="185" height="20" isRemoveLineWhenBlank="true" uuid="3c671520-b719-49eb-a26d-0cf9ad9680b2"/>
 							<textElement>
 								<font fontName="TimeNewRomanCustom"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{indirizzoResidenza}!=null? $F{indirizzoResidenza} +" n." + $F{civicoResidenza} :""]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$F{indirizzoResidenza}!=null? $F{indirizzoResidenza} +", n." + $F{civicoResidenza} :""]]></textFieldExpression>
 						</textField>
-						<textField  isBlankWhenNull="true">
+						<textField isBlankWhenNull="true">
 							<reportElement positionType="Float" x="0" y="40" width="185" height="20" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="c730dd52-4e35-4e32-acab-d18c93b71f4f"/>
 							<textElement>
 								<font fontName="TimeNewRomanCustom"/>
@@ -143,88 +147,109 @@
 			</componentElement>
 		</band>
 		<band height="100">
-			<textField >
-				<reportElement positionType="Float" x="30" y="0" width="495" height="30" uuid="101771ac-99a1-492b-9062-620c2c01b179"/>
+			<textField>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="30" y="40" width="495" height="30" uuid="101771ac-99a1-492b-9062-620c2c01b179"/>
 				<textElement textAlignment="Justified">
 					<font fontName="TimeNewRomanCustom"/>
 				</textElement>
 				<textFieldExpression><![CDATA["OGGETTO: " + $P{oggetto}]]></textFieldExpression>
 			</textField>
-			<textField >
-				<reportElement positionType="Float" x="30" y="60" width="495" height="30" uuid="9e02428e-5337-4b0f-b980-58e59dbad92b"/>
+			<textField>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="30" y="70" width="495" height="30" uuid="9e02428e-5337-4b0f-b980-58e59dbad92b"/>
 				<textElement textAlignment="Justified">
 					<font fontName="TimeNewRomanCustom"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Ai sensi dell''art. " + $P{riferimentoNormativo} + " si trasmette in allegato copia conforme del provvedimento relativo all''oggetto."]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Ai sensi dell'art. " + $P{riferimentoNormativo} + " si trasmette in allegato copia conforme del provvedimento relativo all'oggetto."]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="30" y="30" width="495" height="30" uuid="a92b4490-11c3-410c-9046-ebb50ba80ff7"/>
+			<textField>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="260" y="20" width="70" height="20" uuid="1d8b92ec-2e2f-45d3-97c7-93914cb916f3"/>
+				<textElement textAlignment="Right">
+					<font fontName="TimeNewRomanCustom" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{intestazioneConoscenza}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="340" y="0" width="185" height="20" uuid="06ce73b2-b71c-4cb1-9025-8c66d2ffe747"/>
 				<textElement>
 					<font fontName="TimeNewRomanCustom"/>
 				</textElement>
-				<text><![CDATA[]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$P{email}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="340" y="20" width="185" height="20" uuid="1af03088-785f-4c66-aedb-e7b491153473"/>
+				<textElement>
+					<font fontName="TimeNewRomanCustom"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{emailOrgano}]]></textFieldExpression>
+			</textField>
 		</band>
 		<band height="225">
 			<staticText>
-				<reportElement positionType="Float" x="30" y="0" width="100" height="30" uuid="caeb6249-cdbf-4342-8fab-8638137f4b75"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="30" y="40" width="100" height="30" uuid="caeb6249-cdbf-4342-8fab-8638137f4b75"/>
 				<textElement>
 					<font fontName="TimeNewRomanCustom"/>
 				</textElement>
 				<text><![CDATA[Distinti saluti.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement positionType="Float" x="340" y="80" width="185" height="20" uuid="4774522c-21b1-47ae-a8a7-fa61e01a2a39"/>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="340" y="80" width="185" height="20" uuid="4774522c-21b1-47ae-a8a7-fa61e01a2a39"/>
 				<textElement>
 					<font fontName="TimeNewRomanCustom"/>
 				</textElement>
 				<text><![CDATA[Il Dirigente del Settore]]></text>
 			</staticText>
-			<textField >
-				<reportElement positionType="Float" x="340" y="100" width="185" height="50" uuid="433c68fe-8fa7-446f-aa66-e4947473f892"/>
+			<textField>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="340" y="100" width="185" height="50" uuid="433c68fe-8fa7-446f-aa66-e4947473f892"/>
 				<textElement textAlignment="Justified">
 					<font fontName="TimeNewRomanCustom"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{dirigente}]]></textFieldExpression>
 			</textField>
 			<frame>
-				<reportElement x="30" y="143" width="200" height="75" uuid="f20b2825-fab6-4298-9d35-9d7336a357ad"/>
+				<reportElement stretchType="RelativeToTallestObject" x="30" y="143" width="200" height="75" uuid="f20b2825-fab6-4298-9d35-9d7336a357ad"/>
 				<textField>
-					<reportElement positionType="Float" x="0" y="-7" width="185" height="50" uuid="433c68fe-8fa7-446f-aa66-e4947473f882"/>
+					<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="-7" width="185" height="50" uuid="433c68fe-8fa7-446f-aa66-e4947473f882"/>
 					<textElement textAlignment="Justified">
 						<font fontName="TimeNewRomanCustom"/>
 					</textElement>
 					<textFieldExpression><![CDATA["/ " + $P{funzionario}]]></textFieldExpression>
-				</textField>				
+				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="0" y="23" width="200" height="15" uuid="a301969c-67c4-4db0-a59f-d8751e982514"/>
+					<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="23" width="200" height="15" uuid="a301969c-67c4-4db0-a59f-d8751e982514"/>
 					<textElement>
 						<font fontName="TimeNewRomanCustom" size="8" isItalic="true"/>
 					</textElement>
 					<text><![CDATA[Corso Regina Margherita, 153 bis]]></text>
 				</staticText>
 				<staticText>
-					<reportElement positionType="Float" x="0" y="38" width="200" height="15" uuid="74f9ca10-b486-4e15-b902-726b2b33472c"/>
+					<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="38" width="200" height="15" uuid="74f9ca10-b486-4e15-b902-726b2b33472c"/>
 					<textElement>
 						<font fontName="TimeNewRomanCustom" size="8" isItalic="true"/>
 					</textElement>
 					<text><![CDATA[10122 Torino]]></text>
 				</staticText>
 				<staticText>
-					<reportElement positionType="Float" x="0" y="53" width="200" height="15" uuid="030c93c1-8928-42c9-9266-505def22cefb"/>
+					<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="53" width="200" height="15" uuid="030c93c1-8928-42c9-9266-505def22cefb"/>
 					<textElement>
 						<font fontName="TimeNewRomanCustom" size="8" isItalic="true"/>
 					</textElement>
 					<text><![CDATA[Tel: 011 4321288]]></text>
 				</staticText>
 				<staticText>
-					<reportElement positionType="Float" x="0" y="68" width="200" height="15" uuid="fd1a91ec-84cb-4e57-af13-df5a435ff52a"/>
+					<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="68" width="200" height="15" uuid="fd1a91ec-84cb-4e57-af13-df5a435ff52a"/>
 					<textElement>
 						<font fontName="TimeNewRomanCustom" size="8" isItalic="true"/>
 					</textElement>
 					<text><![CDATA[Fax: 011 4325386]]></text>
 				</staticText>
 			</frame>
+			<textField>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="30" y="0" width="495" height="30" uuid="b61a7c86-e420-44eb-b752-b6aece1233c3"/>
+				<textElement textAlignment="Justified">
+					<font fontName="TimeNewRomanCustom"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{testoLibero}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>

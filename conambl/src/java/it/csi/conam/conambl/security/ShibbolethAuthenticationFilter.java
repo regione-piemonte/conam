@@ -31,7 +31,7 @@ public class ShibbolethAuthenticationFilter extends RequestHeaderAuthenticationF
 		String token = request.getHeader(this.shibbIdentity);
 		if (token == null && "enabled".equalsIgnoreCase(shibbTestMode)) {
 			token = TokenMock.DEMO20;
-//			token = "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/ACTALIS_EU/20210910101800/16/MWClpvfpR2ccfJpkqqGQlg==";
+//			token = "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/IPA/20230112174325/2/mEwUilVb05HxQQzJr3i/Sg==";
 		}
 		logger.info("[ShibbolethAuthenticationFilter::getPreAuthenticatedPrincipal] <" + request.getRequestURI() + "> (token::" + token + ")");
 		principal.setIdentity(token);

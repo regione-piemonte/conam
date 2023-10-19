@@ -4,12 +4,26 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.entity;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  * The persistent class for the cnm_t_ordinanza database table.
@@ -111,7 +125,23 @@ public class CnmTOrdinanza implements Serializable {
 	@Column(name="data_fine_validita")
 	private Date dataFineValidita;
 	/*LUCIO - 2021/04/19 - FINE Modulare le scadenze di pagamento (Scenario B)*/
+	
 
+	// 20230214 PP - nuovi campi per modifica integrazione PPAY
+	// bi-directional many-to-one association to cnmDCausale
+	@ManyToOne
+	@JoinColumn(name = "id_causale")
+	private CnmDCausale cnmDCausale;
+		
+	// 20230214 PP - nuovi campi per modifica integrazione PPAY
+	@Column(name = "numero_accertamento")
+	private String numeroAccertamento;
+
+	// 20230214 PP - nuovi campi per modifica integrazione PPAY
+	@Column(name = "anno_accertamento")
+	private java.math.BigInteger annoAccertamento;
+
+	
 	public CnmTOrdinanza() {
 	}
 
@@ -333,5 +363,30 @@ public class CnmTOrdinanza implements Serializable {
 	public void setDataFineValidita(Date dataFineValidita) {
 		this.dataFineValidita = dataFineValidita;
 	}
+
+	public CnmDCausale getCnmDCausale() {
+		return cnmDCausale;
+	}
+
+	public void setCnmDCausale(CnmDCausale cnmDCausale) {
+		this.cnmDCausale = cnmDCausale;
+	}
+
+	public String getNumeroAccertamento() {
+		return numeroAccertamento;
+	}
+
+	public void setNumeroAccertamento(String numeroAccertamento) {
+		this.numeroAccertamento = numeroAccertamento;
+	}
+
+	public java.math.BigInteger getAnnoAccertamento() {
+		return annoAccertamento;
+	}
+
+	public void setAnnoAccertamento(java.math.BigInteger annoAccertamento) {
+		this.annoAccertamento = annoAccertamento;
+	}
+
 	
 }

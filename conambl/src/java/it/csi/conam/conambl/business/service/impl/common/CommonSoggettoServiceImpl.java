@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -82,10 +83,12 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 				return soggettoList.get(0);
 			else {
 				for (SoggettoVO vo : soggettoList) {
-					if (!isPersonaFisica && !vo.getPersonaFisica()) {
-						return vo;
-					} else if (isPersonaFisica && vo.getPersonaFisica()) {
-						return vo;
+					if(vo != null) {
+						if (!isPersonaFisica && (vo.getPersonaFisica() == null || !vo.getPersonaFisica())) {
+							return vo;
+						} else if (isPersonaFisica && (vo.getPersonaFisica() != null && vo.getPersonaFisica())) {
+							return vo;
+						}
 					}
 				}
 			}
@@ -158,6 +161,73 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 		return cnmTSoggetto;
 	}
 
+	// 20220921 PP - Fix jira CONAM-223
+	@Override
+	public List<CnmTSoggetto> getSoggettiFromDb(MinSoggettoVO minSoggettoVO, boolean isRicerca) {
+		List<CnmTSoggetto> cnmTSoggettos = new ArrayList<CnmTSoggetto>();
+		boolean isPersonaFisica = isRicercaPersonaFisica(minSoggettoVO);
+		boolean isRicercaCodFiscale = isRicercaCodiceFiscale(minSoggettoVO);
+		boolean isRicercaCodFiscaleOrPiva = isRicercaCodFiscaleOrPiva(minSoggettoVO);
+		if (isPersonaFisica) {
+			if (isRicercaCodFiscale) {
+				cnmTSoggettos.add(cnmTSoggettoRepository.findOne(
+					CnmTSoggettoSpecification.findSoggettoFisicoByCodFiscaleOrModuloRicerca(
+						minSoggettoVO.getCodiceFiscale(),
+						null,
+						null,
+						null,
+						null,
+						null,
+						null
+					))
+				);
+			} else {
+				List<CnmTSoggetto> soggettoList = cnmTSoggettoRepository.findAll(
+					CnmTSoggettoSpecification.findSoggettoFisicoByCodFiscaleOrModuloRicerca(
+						null, //
+						minSoggettoVO.getCognome(), //
+						minSoggettoVO.getNome(), //
+						minSoggettoVO.getComuneNascita() != null ? minSoggettoVO.getComuneNascita().getId() : null, //
+						minSoggettoVO.getSesso(), //
+						utilsDate.asDate(minSoggettoVO.getDataNascita()), //
+						minSoggettoVO.getNazioneNascita() != null ? minSoggettoVO.getNazioneNascita().getId() : null //
+					)
+				);
+				if(soggettoList != null && soggettoList.size()>0) {
+					cnmTSoggettos = soggettoList;
+				}
+			}
+		} else {
+			if (isRicercaCodFiscaleOrPiva) {
+				cnmTSoggettos.add(
+					cnmTSoggettoRepository.findOne(
+						CnmTSoggettoSpecification.findSocietaByCodFiscaleOrPivaOrRagioneSociale(
+							minSoggettoVO.getCodiceFiscale(),
+							minSoggettoVO.getPartitaIva(),
+							null,
+							isRicerca
+								)
+						)
+					);
+			} else {
+				
+				List<CnmTSoggetto> soggettoList = cnmTSoggettoRepository.findAll(
+					CnmTSoggettoSpecification.findSocietaByCodFiscaleOrPivaOrRagioneSociale(
+						null,
+						null,
+						minSoggettoVO.getRagioneSociale(),
+						isRicerca
+					)
+				);
+				if(soggettoList != null && soggettoList.size()>0) {
+					cnmTSoggettos = soggettoList;
+				}
+			}
+		}
+		return cnmTSoggettos;
+	}
+
+	
 	@Override
 	public CnmTSoggetto updateSoggettoDBWithIdStas(CnmTSoggetto cnmTSoggetto, CnmTUser cnmTUser, SoggettoVO sogDb, SoggettoVO sogStas, SoggettoVO soggetto) {
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());

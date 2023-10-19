@@ -624,4 +624,30 @@
 			</target>
 	
 
+	<target name="ppay_wsdl2java" description="generazione stub axis 1.4">
+			<echo message="url.wsdl= ${ppay.wsdl}" />
+			
+					
+			<taskdef resource="axis-tasks.properties" classpathref="library.ref"/>
+				
+			<mkdir dir="${build}/client"/>
+			<mkdir dir="${build}/client/classes"/>
+				
+			<echo message="wsdl2java" />
+				
+			<axis-wsdl2java
+			  	output="${build}/client"
+			  	verbose="true"
+			  	url="${ppay.wsdl}">
+				<mapping
+				 	namespace="${namespace}"
+				    package="${package}" />
+			</axis-wsdl2java>
+				
+				
+
+				
+			</target>
+	
+
 </project>

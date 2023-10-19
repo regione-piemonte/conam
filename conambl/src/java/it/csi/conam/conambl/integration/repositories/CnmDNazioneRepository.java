@@ -23,6 +23,7 @@ public interface CnmDNazioneRepository extends CrudRepository<CnmDNazione, Long>
 	@Query("Select u from CnmDNazione u where u.denomNazione=?1")
 	CnmDNazione findByDenomNazione(String denomNazione);
 
+	@Query("Select u from CnmDNazione u where u.codIstatNazione=?1 and ((u.fineValidita is null or u.fineValidita>NOW()) and (u.inizioValidita is null or u.inizioValidita<=NOW()))")
 	CnmDNazione findByCodIstatNazione(String codIstatNazione);
 
 	CnmDNazione findByIdNazione(Long idNazione);

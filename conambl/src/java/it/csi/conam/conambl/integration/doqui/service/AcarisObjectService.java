@@ -7,7 +7,12 @@ package it.csi.conam.conambl.integration.doqui.service;
 import it.csi.conam.conambl.integration.doqui.bean.DocumentoActa;
 import it.csi.conam.conambl.integration.doqui.bean.UtenteActa;
 import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
-import it.doqui.acta.actasrv.dto.acaris.type.common.*;
+import it.csi.conam.conambl.integration.doqui.exception.TroppiAllegatiPerSpostamentoException;
+import it.doqui.acta.actasrv.dto.acaris.type.common.AcarisContentStreamType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.ObjectIdType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PagingResponseType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PrincipalIdType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.QueryableObjectType;
 import it.doqui.acta.actasrv.dto.acaris.type.management.VitalRecordCodeType;
 
 
@@ -72,7 +77,8 @@ public interface AcarisObjectService {
 	
 	
 	// 20200618_LC
-	public ObjectIdType moveActaDocument(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType associativeObjectId, ObjectIdType sourceFolderId, ObjectIdType destinationFolderId, boolean isConAllegatiOrProtocollato) throws IntegrationException;
+	public ObjectIdType moveActaDocument(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType associativeObjectId, ObjectIdType sourceFolderId, ObjectIdType destinationFolderId, boolean isConAllegatiOrProtocollato) throws IntegrationException, TroppiAllegatiPerSpostamentoException;
+
 	
 	public PagingResponseType getDocumentiTramiteProtocollo(ObjectIdType repositoryId, PrincipalIdType principalId, QueryableObjectType target, String numProtocollo, ObjectIdType parentNodeId) throws IntegrationException;
 	
@@ -92,5 +98,8 @@ public interface AcarisObjectService {
 
 	// 20211019_LC
 	public Integer getNumeroAllegatiPresenti(ObjectIdType repositoryId, PrincipalIdType principalId, String objectIdClassificazione) throws  IntegrationException;
+
+	public ObjectIdType recuperaInfoMoveDocumentOfflineView(String objectIdRichiestaPrenotazione,
+			ObjectIdType repositoryId, PrincipalIdType principalId)  throws  IntegrationException;
 	
 }

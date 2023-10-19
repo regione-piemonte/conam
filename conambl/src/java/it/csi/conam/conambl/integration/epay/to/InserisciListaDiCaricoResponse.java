@@ -2,24 +2,20 @@
  * InserisciListaDiCaricoResponse.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ * by the Apache Axis 1.4 Nov 13, 2013 (09:13:21 GMT) WSDL2Java emitter.
  */
 
 package it.csi.conam.conambl.integration.epay.to;
 
-public class InserisciListaDiCaricoResponse  extends it.csi.conam.conambl.integration.epay.to.ResponseType  implements java.io.Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -8764057054743090857L;
-	private it.csi.conam.conambl.integration.epay.to.EsitoInserimentoType esitoInserimento;
+public class InserisciListaDiCaricoResponse  extends ResponseType  implements java.io.Serializable {
+    private EsitoInserimentoType esitoInserimento;
 
     public InserisciListaDiCaricoResponse() {
     }
 
     public InserisciListaDiCaricoResponse(
-           it.csi.conam.conambl.integration.epay.to.ResultType result,
-           it.csi.conam.conambl.integration.epay.to.EsitoInserimentoType esitoInserimento) {
+           ResultType result,
+           EsitoInserimentoType esitoInserimento) {
         super(
             result);
         this.esitoInserimento = esitoInserimento;
@@ -31,7 +27,7 @@ public class InserisciListaDiCaricoResponse  extends it.csi.conam.conambl.integr
      * 
      * @return esitoInserimento
      */
-    public it.csi.conam.conambl.integration.epay.to.EsitoInserimentoType getEsitoInserimento() {
+    public EsitoInserimentoType getEsitoInserimento() {
         return esitoInserimento;
     }
 
@@ -41,15 +37,15 @@ public class InserisciListaDiCaricoResponse  extends it.csi.conam.conambl.integr
      * 
      * @param esitoInserimento
      */
-    public void setEsitoInserimento(it.csi.conam.conambl.integration.epay.to.EsitoInserimentoType esitoInserimento) {
+    public void setEsitoInserimento(EsitoInserimentoType esitoInserimento) {
         this.esitoInserimento = esitoInserimento;
     }
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (obj == null) return false;
         if (!(obj instanceof InserisciListaDiCaricoResponse)) return false;
         InserisciListaDiCaricoResponse other = (InserisciListaDiCaricoResponse) obj;
+        if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
             return (__equalsCalc == obj);

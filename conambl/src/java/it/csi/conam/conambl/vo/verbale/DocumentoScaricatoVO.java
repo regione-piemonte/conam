@@ -46,7 +46,7 @@ public class DocumentoScaricatoVO extends ParentVO {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("DocumentoScaricatoVO [file=");
-		builder.append(Arrays.toString(file));
+		builder.append("***");
 		builder.append(", nomeFile=");
 		builder.append(nomeFile);
 		builder.append(", objectIdDocumentoFisico=");

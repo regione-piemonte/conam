@@ -77,9 +77,13 @@ public class AllegatoResource extends SpringSupportedResource {
 	
 	@GET
 	@Path("/ricercaProtocolloSuACTA")
-	public Response ricercaProtocolloSuACTA(@Valid @QueryParam("protocollo") @NotNull(message = "RESCON20") String numProtocollo, @QueryParam("idVerbale") Integer idVerbale, @QueryParam("flagPregresso") Boolean flagPregresso) {
+	public Response ricercaProtocolloSuACTA(
+		@Valid @QueryParam("protocollo") @NotNull(message = "RESCON20") String numProtocollo, @QueryParam("idVerbale") Integer idVerbale, 
+		@QueryParam("flagPregresso") Boolean flagPregresso, @QueryParam("pageRequest") Integer pageRequest, @QueryParam("maxLineRequest") Integer maxLineRequest) {
 		// 20200903_LC gestione pregresso
-		RicercaProtocolloSuActaResponse response = allegatoDispatcher.ricercaProtocolloSuACTA(numProtocollo, idVerbale, flagPregresso);
+		//20220321_SB modifica per gestione della paginazione nella ricerca
+		RicercaProtocolloSuActaResponse response = 
+			allegatoDispatcher.ricercaProtocolloSuACTA(numProtocollo, idVerbale, flagPregresso, pageRequest, maxLineRequest);
 		return Response.ok(response).build();
 	}
 

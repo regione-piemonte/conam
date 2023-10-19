@@ -13,8 +13,10 @@ import it.csi.conam.conambl.integration.mapper.entity.AccontoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.OrdinanzaEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.StatoOrdinanzaMapper;
 import it.csi.conam.conambl.integration.mapper.entity.TipoOrdinanzaMapper;
+import it.csi.conam.conambl.integration.repositories.CnmDCausaleRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdinanzaRepository;
 import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaFiglioRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTAccontoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTNotificaRepository;
 import it.csi.conam.conambl.util.UtilsTipoAllegato;
@@ -36,6 +38,9 @@ public class OrdinanzaEntityMapperImpl implements OrdinanzaEntityMapper {
 
 	@Autowired
 	private CnmTNotificaRepository cnmTNotificaRepository;
+	
+	@Autowired 
+	private CnmDCausaleRepository cnmDCausaleRepository;
 	
 	/*LUCIO - 2021/04/19 - Gestione pagamenti definiti in autonomia (Scenario 8)*/
 	private class ValoriOrdinanzaHelper{
@@ -74,7 +79,11 @@ public class OrdinanzaEntityMapperImpl implements OrdinanzaEntityMapper {
 			if (speseNotifica == null) {
 				speseNotifica = BigDecimal.ZERO;
 				for (CnmTNotifica notifica: cnmTNotificaList) {
-					speseNotifica = speseNotifica.add(notifica.getImportoSpeseNotifica());
+					// 20230519 PP - CR abb 167 (issue 5)
+					// Importo spese notifica diventa opzionale
+					if(notifica.getImportoSpeseNotifica()!=null) {
+						speseNotifica = speseNotifica.add(notifica.getImportoSpeseNotifica());
+					}
 				}
 			}
 			return speseNotifica;
@@ -129,6 +138,9 @@ public class OrdinanzaEntityMapperImpl implements OrdinanzaEntityMapper {
 	@Autowired
 	private AccontoEntityMapper accontoEntityMapper;
 	
+	@Autowired
+	private CnmROrdinanzaVerbSogRepository cnmROrdinanzaVerbSogRepository;
+	
 	@Override
 	public MinOrdinanzaVO mapEntityToVO(CnmTOrdinanza dto){
 		return mapEntityToVOLocal(dto);
@@ -182,6 +194,14 @@ public class OrdinanzaEntityMapperImpl implements OrdinanzaEntityMapper {
 			ordinanzaVO.setNumeroProtocollo(cnmTAllegato.getNumeroProtocollo());
 			ordinanzaVO.setDataProtocollo(utilsDate.asLocalDateTime(cnmTAllegato.getDataOraProtocollo()));
 		}
+		
+		List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmTOrdinanza(dto);
+		if (cnmROrdinanzaVerbSogList != null && !cnmROrdinanzaVerbSogList.isEmpty() &&
+				cnmROrdinanzaVerbSogList.get(0).getCnmRVerbaleSoggetto() != null && 
+				cnmROrdinanzaVerbSogList.get(0).getCnmRVerbaleSoggetto().getCnmTVerbale() != null) {
+			String numVerbale = cnmROrdinanzaVerbSogList.get(0).getCnmRVerbaleSoggetto().getCnmTVerbale().getNumVerbale();
+			ordinanzaVO.setNumVerbale(numVerbale);
+		}
 
 		return ordinanzaVO;
 	}
@@ -218,6 +238,11 @@ public class OrdinanzaEntityMapperImpl implements OrdinanzaEntityMapper {
 		cnmTOrdinanza.setNumDeterminazione(ordinanza.getNumDeterminazione().toUpperCase());
 		cnmTOrdinanza.setDataScadenzaOrdinanza(utilsDate.asDate(ordinanza.getDataScadenza()));
 		cnmTOrdinanza.setDataFineValidita(utilsDate.asDate(ordinanza.getDataFineValidita()));
+		if(ordinanza.getCausale()!=null) {			
+			cnmTOrdinanza.setCnmDCausale(cnmDCausaleRepository.findOne(ordinanza.getCausale().getId()));		
+		}
+		if(ordinanza.getNumeroAccertamento()!=null)	cnmTOrdinanza.setNumeroAccertamento(ordinanza.getNumeroAccertamento());
+		if(ordinanza.getAnnoAccertamento()!=null)	cnmTOrdinanza.setAnnoAccertamento(java.math.BigInteger.valueOf((ordinanza.getAnnoAccertamento())));
 		
 		return cnmTOrdinanza;
 	}

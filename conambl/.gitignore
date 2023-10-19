@@ -1,0 +1,8 @@
+/lib/
+/build/
+/.classpath
+/.project
+/dist/
+/bin/
+/.settings/
+*.mf

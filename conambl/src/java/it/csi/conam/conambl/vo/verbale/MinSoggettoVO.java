@@ -73,13 +73,13 @@ public class MinSoggettoVO extends ParentVO {
 	}
 
 	public MinSoggettoVO(SoggettoRequest sog) {
-		this.cognome = sog.getCognome();
-		this.nome = sog.getNome();
+		this.cognome = sog.getCognome()!=null?sog.getCognome().toUpperCase():null;
+		this.nome = sog.getNome()!=null?sog.getNome().toUpperCase():null;
 		this.personaFisica = sog.getPersonaFisica();
 		if (sog.getPersonaFisica() != null && sog.getPersonaFisica())
-			this.codiceFiscale = sog.getCodiceFiscale();
+			this.codiceFiscale = sog.getCodiceFiscale()!=null?sog.getCodiceFiscale().toUpperCase():null;
 		else
-			this.codiceFiscale = sog.getCodiceFiscalePersGiuridica();
+			this.codiceFiscale = sog.getCodiceFiscalePersGiuridica()!=null?sog.getCodiceFiscalePersGiuridica().toUpperCase():null;
 		this.ragioneSociale = sog.getRagioneSociale();
 		this.partitaIva = sog.getPartitaIva();
 		this.dataNascita = sog.getDataNascita();

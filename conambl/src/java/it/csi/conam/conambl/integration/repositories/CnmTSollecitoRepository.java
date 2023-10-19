@@ -4,14 +4,18 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.repositories;
 
+import java.sql.Timestamp;
+import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
 import it.csi.conam.conambl.integration.entity.CnmDStatoSollecito;
 import it.csi.conam.conambl.integration.entity.CnmDTipoSollecito;
 import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
 import it.csi.conam.conambl.integration.entity.CnmTSollecito;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface CnmTSollecitoRepository extends CrudRepository<CnmTSollecito, Integer> {
@@ -33,5 +37,13 @@ public interface CnmTSollecitoRepository extends CrudRepository<CnmTSollecito, I
 	List<CnmTSollecito> findByCnmROrdinanzaVerbSogInAndCnmDStatoSollecitoNotInAndCnmDTipoSollecito(List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogs, List<CnmDStatoSollecito> cnmDStatoSollecitos, CnmDTipoSollecito cnmDTipoSollecito);
 	List<CnmTSollecito> findByCnmROrdinanzaVerbSogAndCnmDStatoSollecitoNotInAndCnmDTipoSollecito(CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog, List<CnmDStatoSollecito> cnmDStatoSollecitos, CnmDTipoSollecito cnmDTipoSollecito);
 	List<CnmTSollecito> findByCnmROrdinanzaVerbSogInAndCnmDTipoSollecito(List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSog, CnmDTipoSollecito cnmDTipoSollecito);
+
+	@Query(" select distinct o from "//
+			+ "CnmTSollecito o join "//
+			+ "o.cnmRAllegatoSollecitos ao join "//
+			+ "ao.cnmTAllegato a join "//
+			+ "a.cnmDStatoAllegato sa "//
+			+ "where sa.idStatoAllegato=?1 and a.dataOraInsert >= ?2")
+	List<CnmTSollecito> findCnmTSollecitoAndIdStatoAllegato(Long statoAvviaSpostamentoActa, Timestamp timestamp);
 	
 }

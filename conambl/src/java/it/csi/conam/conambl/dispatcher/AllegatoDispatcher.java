@@ -32,8 +32,10 @@ public interface AllegatoDispatcher {
 	List<SelectVO> getDecodificaSelectSoggettiAllegato(Integer idverbale);
 	
 	// 20200903_LC gestione pregresso (nuova resposne)
+	//20220321_SB modifica per gestione della paginazione nella ricerca
 	@PreAuthorize(value = AuthorizationRoles.UTENTE)
-	RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, Integer idVerbale, Boolean flagPregresso);
+	RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(
+		String numProtocollo, Integer idVerbale, Boolean flagPregresso, Integer pageRequest, Integer maxLineRequest);
 
 	// 20200717_LC
 	@PreAuthorize(value = AuthorizationRoles.UTENTE)

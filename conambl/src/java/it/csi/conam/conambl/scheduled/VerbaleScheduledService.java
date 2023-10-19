@@ -13,4 +13,8 @@ public interface VerbaleScheduledService {
 
 	void sendAllegatiInCodaToActa();
 
+	void checkSpostamento();
+
+	void manageSpostamento();
+
 }

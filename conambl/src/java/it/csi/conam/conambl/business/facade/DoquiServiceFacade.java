@@ -8,6 +8,7 @@ import it.csi.conam.conambl.common.annotation.LoggingType;
 import it.csi.conam.conambl.common.annotation.NoLogging;
 import it.csi.conam.conambl.integration.beans.*;
 import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
 import it.csi.conam.conambl.vo.verbale.DocumentoProtocollatoVO;
 
 import java.util.Date;
@@ -48,7 +49,8 @@ public interface DoquiServiceFacade {
 	
 	ResponseArchiviaDocumento archiviaDocumentoFisico(byte[] file, String nomeFile, String folder, String rootActa, int numeroAllegati, String idEntitaFruitore, long tipoDocumento, boolean isMaster, String idIndex, String soggettoActa);
 	
-	List<DocumentoProtocollatoVO> ricercaProtocolloSuACTA(String numProtocollo);
+	//20220321_SB modifica per gestione della paginazione nella ricerca
+	RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, int pagina, int numeroRigheMax);
 
 	// 20200706_LC 
 	ResponseSpostaDocumento spostaDocumentoProtocollato(String folder, String nomeFile, String idEntitaFruitore,  boolean isMaster, boolean isProtocollazioneInUscita,

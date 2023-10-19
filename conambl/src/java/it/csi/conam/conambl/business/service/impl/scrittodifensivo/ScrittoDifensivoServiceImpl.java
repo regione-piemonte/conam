@@ -79,9 +79,6 @@ public class ScrittoDifensivoServiceImpl implements ScrittoDifensivoService {
 	private CnmDMessaggioRepository cnmDMessaggioRepository;
 	
 	
-	
-	
-	
 	@Override
 	public SalvaScrittoDifensivoResponse salvaScrittoDifensivo(List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
 		
@@ -241,13 +238,15 @@ public class ScrittoDifensivoServiceImpl implements ScrittoDifensivoService {
 						
 				}
 		
+				// 2023/02/25 PP - faro' l'update nel batch a spostamento completato
+				
 				// aggiorna allegato dopo (eventuale) sposytamento
-				cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
-				cnmTAllegato.setObjectidSpostamentoActa(null);
-				cnmTAllegato.setIdActa(idDocumentoConam);
-				cnmTAllegato.setDataOraUpdate(now);					
-				cnmTAllegato.setCnmTUser1(cnmTUser);	
-				cnmTAllegatoRepository.save(cnmTAllegato);
+//				cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO));
+//				cnmTAllegato.setObjectidSpostamentoActa(null);
+//				cnmTAllegato.setIdActa(idDocumentoConam);
+//				cnmTAllegato.setDataOraUpdate(now);					
+//				cnmTAllegato.setCnmTUser1(cnmTUser);	
+//				cnmTAllegatoRepository.save(cnmTAllegato);
 
 				
 				

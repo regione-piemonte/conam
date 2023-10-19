@@ -5,9 +5,11 @@
 package it.csi.conam.conambl.business.facade.impl;
 
 import it.csi.conam.conambl.business.facade.EPayServiceFacade;
+import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.config.Config;
 import it.csi.conam.conambl.common.exception.RemoteWebServiceException;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.epay.to.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -26,6 +28,9 @@ public class EPayServiceFacadeImpl implements EPayServiceFacade, InitializingBea
 	@Autowired
 	private Config config;
 
+	@Autowired
+	private UtilsCnmCProprietaService utilsCnmCProprietaService;
+	
 	private static final Logger logger = Logger.getLogger(EPayServiceFacadeImpl.class);
 
 	private Enti2EPaywsoServiceSOAPStub binding;
@@ -35,7 +40,13 @@ public class EPayServiceFacadeImpl implements EPayServiceFacade, InitializingBea
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Enti2EPaywsoService_ServiceLocator locator = new Enti2EPaywsoService_ServiceLocator();
-		locator.setEnti2EPaywsoServiceSOAPEndpointAddress(config.getEpayServiceEndpointUrl());
+		boolean isSecured = Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.EPAY_WSSECURED));
+		if(isSecured) {
+			locator.setEnti2EPaywsoServiceSOAPEndpointAddress(utilsCnmCProprietaService.getProprieta(PropKey.EPAY_ENDPOINT_SECURED));
+		}else {
+			locator.setEnti2EPaywsoServiceSOAPEndpointAddress(utilsCnmCProprietaService.getProprieta(PropKey.EPAY_ENDPOINT));
+		}
+//		locator.setEnti2EPaywsoServiceSOAPEndpointAddress(config.getEpayServiceEndpointUrl());
 		binding = (Enti2EPaywsoServiceSOAPStub) locator.getEnti2EPaywsoServiceSOAP();
 	}
 
@@ -43,7 +54,15 @@ public class EPayServiceFacadeImpl implements EPayServiceFacade, InitializingBea
 	public void inserisciListaDiCarico(InserisciListaDiCaricoRequest inserisciListaDiCaricoRequest) {
 		ResponseType response;
 		try {
-			response = binding.inserisciListaDiCarico(inserisciListaDiCaricoRequest);
+
+			boolean isSecured = Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.EPAY_WSSECURED));
+			if(isSecured) {				
+				String wsUser= utilsCnmCProprietaService.getProprieta(PropKey.EPAY_WSUSER);
+				String wsPWD= utilsCnmCProprietaService.getProprieta(PropKey.EPAY_WSPASS);
+				response = binding.inserisciListaDiCarico(inserisciListaDiCaricoRequest, wsUser, wsPWD);
+			} else {
+				response = binding.inserisciListaDiCarico(inserisciListaDiCaricoRequest);				
+			}
 		} catch (RemoteException e) {
 			throw new RemoteWebServiceException(ErrorCode.PIEMONTE_PAY_LISTA_CARICO_NON_DISPONIBILE);
 		}

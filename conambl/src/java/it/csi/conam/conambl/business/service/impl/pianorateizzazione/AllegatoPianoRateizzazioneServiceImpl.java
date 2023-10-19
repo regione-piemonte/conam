@@ -98,7 +98,13 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 
 	@Autowired
 	private CommonSoggettoService commonSoggettoService;
+	
+	@Autowired
+	private CnmDStatoAllegatoRepository cnmDStatoAllegatoRepository;
 
+	@Autowired
+	private CnmTAllegatoRepository cnmTAllegatoRepository;
+	
 	@Override
 	@Transactional
 	public void inviaRichiestaBollettiniByIdPiano(Integer idPiano) {
@@ -268,11 +274,27 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 		String nome = "Lettera_piano_rateizzazione_" + soggRateList.get(0).getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione();
 		String nomeLetteraPiano = verificaNome(nome) + ".pdf";
 
-		CnmTAllegato cnmTAllegato = salvaAllegatoPiano(cnmTPianoRate, file, cnmTUser, nomeLetteraPiano, TipoAllegato.LETTERA_RATEIZZAZIONE, true, true, false);
+		// OB 181 isMAster a true
+		CnmTAllegato cnmTAllegato = salvaAllegatoPiano(cnmTPianoRate, file, cnmTUser, nomeLetteraPiano, TipoAllegato.LETTERA_RATEIZZAZIONE, true, true, true);
 
-		CnmDStatoPianoRate cnmDStatoPianoRate = cnmDStatoPianoRateRepository.findOne(Constants.ID_STATO_PIANO_PROTOCOLLATO);
+		CnmDStatoPianoRate cnmDStatoPianoRate = cnmDStatoPianoRateRepository.findOne(Constants.ID_STATO_PIANO_IN_DEFINIZIONE);
 		cnmTPianoRate.setCnmDStatoPianoRate(cnmDStatoPianoRate);
 		cnmTPianoRateRepository.save(cnmTPianoRate);
+		
+		// protocollolato il master metto i documenti in fase di spostamento su acta
+		List<CnmRAllegatoPianoRate> cnmRAllegatoPianoRateList = cnmRAllegatoPianoRateRepository.findByCnmTPianoRate(cnmTPianoRate);
+		List<CnmTAllegato> cnmTAllegatoList = new ArrayList<>();
+		CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA);
+		for (CnmRAllegatoPianoRate cnmRAllegatoPianoRate :cnmRAllegatoPianoRateList) {
+			CnmTAllegato cnmTAllegatoT = cnmRAllegatoPianoRate.getCnmTAllegato();
+			boolean letteraOrdinanza = cnmTAllegatoT.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_RATEIZZAZIONE.getId();
+			boolean statoDaProtocollareInIstanteSuccessivo = cnmTAllegatoT.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO;
+			if (!letteraOrdinanza && statoDaProtocollareInIstanteSuccessivo) {
+				cnmTAllegatoT.setDataOraUpdate(utilsDate.asTimeStamp(LocalDateTime.now()));
+				cnmTAllegatoT.setCnmDStatoAllegato(cnmDStatoAllegato);
+				cnmTAllegatoList.add(cnmTAllegatoT);
+			}
+		}
 
 		return cnmTAllegato;
 	}
@@ -291,7 +313,9 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 		String tipoActa = null;
 
 		if (tipoAllegato.getId() == TipoAllegato.LETTERA_RATEIZZAZIONE.getId()) {
-			tipoActa = StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_USCITA_SENZA_ALLEGATI_GENERERATI;
+			//OB 181
+//			tipoActa = StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_USCITA_SENZA_ALLEGATI_GENERERATI;
+			tipoActa = StadocServiceFacade.TIPOLOGIA_DOC_ACTA_MASTER_USCITA_CON_ALLEGATI;
 		}
 
 		String folder = null;
@@ -300,6 +324,7 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 		String soggettoActa = null;
 		String rootActa = null;
 		List<CnmTSoggetto> cnmTSoggettoList = null;
+		CnmTAllegato cnmTAllegato = null;
 		if (protocolla) {
 			folder = utilsDoqui.createOrGetfolder(cnmTPianoRate);
 			idEntitaFruitore = utilsDoqui.createIdEntitaFruitore(cnmTPianoRate, cnmDTipoAllegatoRepository.findOne(tipoAllegato.getId()));
@@ -312,10 +337,32 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 			List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findByCnmROrdinanzaVerbSogsIn(cnmROrdinanzaVerbSogList);
 			cnmTSoggettoList = cnmTSoggettoRepository.findByCnmRVerbaleSoggettosIn(cnmRVerbaleSoggettoList);
 
+		
+			// TODO OB-181
+			if (tipoAllegato.getId() == TipoAllegato.LETTERA_RATEIZZAZIONE.getId() ||
+					tipoAllegato.getId() == TipoAllegato.LETTERA_SOLLECITO_RATE.getId()) {
+				tipoProtocolloAllegato = TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE;
+			} else if (tipoAllegato.getId() == TipoAllegato.BOLLETTINI_RATEIZZAZIONE.getId()||
+					tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO_RATE.getId()) {
+				tipoProtocolloAllegato = TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO;
+			} 
+		
+		
+			cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
+					isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList);
+		} else {
+			cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
+					isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, null);
+			
+			if (tipoAllegato.getId() == TipoAllegato.BOLLETTINI_RATEIZZAZIONE.getId()||
+					tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO_RATE.getId()) {
+				// imposto lo stato del bollettino a STATO_AVVIA_SPOSTAMENTO_ACTA, in modo che venga preso in cariso dallo schedulatore
+				CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA);
+				cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegato);
+				cnmTAllegatoRepository.save(cnmTAllegato);
+			}
 		}
-		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
-				isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList);
-
+		
 		// aggiungo alla tabella
 		CnmRAllegatoPianoRatePK cnmRAllegatoPianoRatePK = new CnmRAllegatoPianoRatePK();
 		cnmRAllegatoPianoRatePK.setIdAllegato(cnmTAllegato.getIdAllegato());

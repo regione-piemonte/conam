@@ -4,11 +4,25 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.ordinanza;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
+
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
-import it.csi.conam.conambl.business.service.messaggio.MessaggioService;
 import it.csi.conam.conambl.business.service.notifica.NotificaService;
 import it.csi.conam.conambl.business.service.ordinanza.OrdinanzaService;
 import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
@@ -20,9 +34,50 @@ import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmDCausale;
+import it.csi.conam.conambl.integration.entity.CnmDStatoPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmDStatoRata;
+import it.csi.conam.conambl.integration.entity.CnmDStatoSollecito;
+import it.csi.conam.conambl.integration.entity.CnmDStatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmDTipoOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdinanzaPK;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaFiglio;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaFiglioPK;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRSoggRata;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmSStatoOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmTAcconto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTAllegatoField;
+import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmTSollecito;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.mapper.entity.OrdinanzaEntityMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmDCausaleRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoOrdVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoPianoRateRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoVerbaleRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDTipoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaFiglioRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRSoggRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmSStatoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoFieldRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTVerbaleRepository;
 import it.csi.conam.conambl.request.ordinanza.SalvaOrdinanzaAnnullamentoRequest;
 import it.csi.conam.conambl.request.ordinanza.SalvaOrdinanzaRequest;
 import it.csi.conam.conambl.request.ordinanza.SoggettoOrdinanzaRequest;
@@ -32,22 +87,11 @@ import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.UploadUtils;
 import it.csi.conam.conambl.util.UtilsFieldAllegato;
 import it.csi.conam.conambl.util.UtilsTipoAllegato;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.notifica.NotificaVO;
 import it.csi.conam.conambl.vo.ordinanza.MinOrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.OrdinanzaVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class OrdinanzaServiceImpl implements OrdinanzaService {
@@ -110,6 +154,9 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 
 	@Autowired
 	private CnmROrdinanzaFiglioRepository cnmROrdinanzaFiglioRepository;
+
+	@Autowired
+	private CnmDCausaleRepository cnmDCausaleRepository;
 
 	@Override
 	public void testIfOrdinanzaPagata(Integer idOrdinanza, UserDetails userDetails) {
@@ -175,7 +222,16 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		List<SoggettoOrdinanzaRequest> soggetti = request.getSoggetti();
 		NotificaVO notifica = request.getNotifica();
 		
-
+		//  TEST VALUE - TO REMOVE
+//		List<SelectVO> causales = getCausaleSelect();
+//		ordinanza.setCausale(causales.get(0));
+//		ordinanza.setAnnoAccertamento(2023L);
+//		ordinanza.setNumeroAccertamento("AAAAA1");
+//		
+//		notifica.setCausale(causales.get(1));
+//		notifica.setAnnoAccertamento(2023L);
+//		notifica.setNumeroAccertamento("AAAAA2");
+		
 		// controlli di sicurezza
 		if (soggetti == null)
 			throw new IllegalArgumentException("soggetti=null");
@@ -203,12 +259,13 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		CnmTVerbale cnmTVerbale = cnmRVerbaleSoggettoList.get(0).getCnmTVerbale();
 
 		List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggettoIn(cnmRVerbaleSoggettoList);
-		if (cnmROrdinanzaVerbSogList != null && !cnmROrdinanzaVerbSogList.isEmpty())
-			throw new SecurityException("ordinanza gia esistente per i soggetti passati in input");
+		/*if (cnmROrdinanzaVerbSogList != null && !cnmROrdinanzaVerbSogList.isEmpty())
+			throw new SecurityException("ordinanza gia esistente per i soggetti passati in input");*/
 
 		if (ordinanza.getNumDeterminazione() == null)
 			throw new IllegalArgumentException("numero determinazione non valorizzato");
-
+		
+		
 		CnmTOrdinanza cnmTOrdinanza = cnmTOrdinanzaRepository.findByNumDeterminazione(ordinanza.getNumDeterminazione().toUpperCase());
 		if (cnmTOrdinanza != null)
 			throw new BusinessException(ErrorCode.INSERIMENTO_ORDINANZA_NUMERO_DETERMINAZIONE_ESISTENTE);
@@ -220,6 +277,46 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 
 		// non sarà mai ordinanza annullamento (api apposita)
 		if (idTipoAllegato.equals(TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO.getId())) {
+			
+			// 20230214 PP - nuovi campi per modifica integrazione PPAY
+			if (ordinanza.getCausale() == null)
+				throw new IllegalArgumentException("causale ordinanza non valorizzata");
+
+			if (ordinanza.getNumeroAccertamento() == null)
+				throw new IllegalArgumentException("numero accertamento ordinanza non valorizzato");
+
+			if (ordinanza.getAnnoAccertamento() == null)
+				throw new IllegalArgumentException("anno accertamento ordinanza non valorizzato");
+			
+			
+			
+			if(notifica!= null) {
+				
+				// TODO - da eliminare
+//				System.out.println("diff importo=" + notifica.getImportoSpeseNotifica().compareTo(new BigDecimal(0L)));
+				
+				// 20230519 PP - CR abb 167 (issue 5)
+				// controllo per chrome, dove si può inserire un importo negativo
+				if(notifica.getImportoSpeseNotifica().compareTo(new BigDecimal(0L))<0) {
+					throw new BusinessException(ErrorCode.INSERIMENTO_ORDINANZA_NOTIFICA_DATI_MANCANTI_IMP_NEG);
+				}
+				
+				// resi opzionali i dati Importo spese notifica - Causale - Numero accertamento - Anno accertamento. Se solo uno di questi è valorizzato, sono necessari anche gli altri dati
+				if ((notifica.getCausale() != null || notifica.getNumeroAccertamento() != null || notifica.getAnnoAccertamento() != null || (notifica.getImportoSpeseNotifica() != null && notifica.getImportoSpeseNotifica().compareTo(new BigDecimal(0L))>0))
+						&&(notifica.getCausale() == null || notifica.getNumeroAccertamento() == null || notifica.getAnnoAccertamento() == null || (notifica.getImportoSpeseNotifica() == null || notifica.getImportoSpeseNotifica().compareTo(new BigDecimal(0L))==0))) {
+					throw new BusinessException(ErrorCode.INSERIMENTO_ORDINANZA_NOTIFICA_DATI_MANCANTI);
+				}
+//				
+//				if (notifica.getCausale() == null)
+//					throw new IllegalArgumentException("causale notifica non valorizzata");
+//
+//				if (notifica.getNumeroAccertamento() == null)
+//					throw new IllegalArgumentException("numero accertamento notifica non valorizzato");
+//
+//				if (notifica.getAnnoAccertamento() == null)
+//					throw new IllegalArgumentException("anno accertamento notifica non valorizzato");
+			}			
+			
 			idTipoOrdinanza = Constants.ID_TIPO_ORDINANZA_INGIUNZIONE;
 			idTipoOrdinanzaSoggettoDefault = Constants.ID_STATO_ORDINANZA_SOGGETTO_INGIUNZIONE;
 		} else if (idTipoAllegato.equals(TipoAllegato.ORDINANZA_ARCHIVIAZIONE.getId())) {
@@ -251,7 +348,7 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 			null,
 			null,
 			false,
-			false,
+			true,
 			null,
 			null,
 			0,
@@ -289,9 +386,17 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		}
 
 		// se tutti i soggetti hanno ordinanza aggiorna stato verbale
+		//ob-181 modifica aggiornamento stato verbale se almeno un ordinanza per soggetto
 		cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findByCnmTVerbale(cnmTVerbale);
-		cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggettoIn(cnmRVerbaleSoggettoList);
-		if (cnmRVerbaleSoggettoList.size() == cnmROrdinanzaVerbSogList.size()) {
+		//cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggettoIn(cnmRVerbaleSoggettoList);
+		int numROrdinanzaVerbSog = 0;
+		for(CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmRVerbaleSoggettoList) {
+			if(cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggetto(cnmRVerbaleSoggetto).size() <= 0) {
+				break;
+			}
+			numROrdinanzaVerbSog++;
+		}
+		if (cnmRVerbaleSoggettoList.size() == numROrdinanzaVerbSog) {
 			storicizzazioneVerbaleService.storicizzaStatoVerbale(cnmTVerbale, cnmTUser);
 			CnmDStatoVerbale cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ORDINANZA);
 			cnmTVerbale.setCnmDStatoVerbale(cnmDStatoVerbale);
@@ -470,7 +575,7 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		
 		// salva allegato ordinanzaAnnullamento
 		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO,
-				null, null, false, false, null, null, 0, null, null, null);
+				null, null, false, true, null, null, 0, null, null, null);
 
 		
 		
@@ -579,6 +684,25 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		
 
 		return cnmTOrdinanza.getIdOrdinanza();
+	}
+
+	@Override
+	public List<SelectVO> getCausaleSelect() {
+		List<SelectVO> causale = new ArrayList<SelectVO>();
+
+		Iterable<CnmDCausale> cnmDCausaleRepositoryList = cnmDCausaleRepository.findAll();
+		for (Iterator<CnmDCausale> it = cnmDCausaleRepositoryList.iterator(); it.hasNext();) {
+			
+			CnmDCausale tmp = it.next();
+			if(tmp.getFineValidita()==null || 
+					(tmp.getFineValidita()!= null && tmp.getFineValidita().after(new Date()))) {
+				SelectVO s = new SelectVO();
+				s.setDenominazione(tmp.getDescCausale());
+				s.setId(tmp.getIdCausale());
+				causale.add(s);
+			}
+		}
+		return causale;
 	}
 	
 }

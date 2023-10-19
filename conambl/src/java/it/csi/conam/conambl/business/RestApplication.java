@@ -43,6 +43,7 @@ public class RestApplication extends Application {
 		singletons.add(new SollecitoPregressiResource());
 		singletons.add(new PianoRateizzazionePregressiResource());
 		singletons.add(new ScrittoDifensivoResource());
+		singletons.add(new TestResource());
 		
 		for (Object c : singletons) {
 			if (c instanceof SpringSupportedResource) {

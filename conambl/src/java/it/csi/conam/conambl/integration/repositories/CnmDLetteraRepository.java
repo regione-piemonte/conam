@@ -37,4 +37,7 @@ public interface CnmDLetteraRepository extends CrudRepository<CnmDLettera, Integ
 
 	@Query("Select u from CnmDLettera u where u.cnmDComma in ?1  and (u.eliminato is null or u.eliminato=false)")
 	List<CnmDLettera> findByCnmDCommaInAndNotEliminato(List<CnmDComma> comma);
+
+	@Query("Select u from CnmDLettera u where u.cnmDComma=?1 and u.lettera=?2  and u.eliminato=true)")
+	CnmDLettera findByCnmDCommaAndLetteraAndEliminato(CnmDComma cnmDCommaDB, String denominazione);
 }

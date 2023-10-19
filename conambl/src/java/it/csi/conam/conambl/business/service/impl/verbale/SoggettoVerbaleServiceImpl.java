@@ -6,6 +6,7 @@ package it.csi.conam.conambl.business.service.impl.verbale;
 
 import it.csi.conam.conambl.business.facade.StasServFacade;
 import it.csi.conam.conambl.business.service.common.CommonSoggettoService;
+import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
 import it.csi.conam.conambl.business.service.verbale.SoggettoVerbaleService;
@@ -17,11 +18,13 @@ import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.mapper.entity.*;
 import it.csi.conam.conambl.integration.mapper.ws.stas.AnagraficaWsOutputMapper;
 import it.csi.conam.conambl.integration.repositories.*;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.StringConamUtils;
+import it.csi.conam.conambl.vo.ordinanza.MinOrdinanzaVO;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.RuoloSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoPregressiVO;
@@ -103,6 +106,12 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 	@Autowired
 	private ComuneEntityMapper comuneEntityMapper;
 
+	@Autowired
+	private UtilsCnmCProprietaService utilsCnmCProprietaService;
+	
+	@Autowired
+	private OrdinanzaEntityMapper ordinanzaEntityMapper;
+	
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public SoggettoVO salvaSoggetto(Integer id, SoggettoVO soggetto, UserDetails userDetails) {
@@ -462,7 +471,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 //		cnmTResidenzaRepository.save(cnmTResidenza);
 		
 		// 20210611_LC Jira 147 replica flusso non pregresso
-		CnmTResidenza cnmTResidenza = cnmTResidenzaRepository.findByCnmTSoggetto(cnmTSoggetto);
+		CnmTResidenza cnmTResidenza = cnmTResidenzaRepository.findByCnmTSoggettoAndIdVerbale(cnmTSoggetto, id);
 		if (cnmTResidenza == null) {
 			cnmTResidenza = new CnmTResidenza();
 			cnmTResidenza.setCnmTUser2(cnmTUser);
@@ -540,6 +549,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 	public List<SoggettoVO> getSoggettiByIdVerbale(Integer id, UserDetails userDetails, Boolean includiControlloUtenteProprietario) {
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
 
+		includiControlloUtenteProprietario = includiControlloUtenteProprietario && Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED));
+		
 		if (includiControlloUtenteProprietario == null)
 			throw new IllegalArgumentException("includiControlloUtenteProprietario is null");
 
@@ -566,6 +577,17 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			sog.setIdSoggettoOrdinanza(ord != null ? ord.getIdOrdinanzaVerbSog() : null);
 			sog.setVerbaleAudizioneCreato(allegatoVerbaleSoggettoService.isAllegatoVerbaleSoggettoCreato(c, TipoAllegato.VERBALE_AUDIZIONE));
 			sog.setIdAllegatoVerbaleAudizione(allegatoVerbaleSoggettoService.getIdVerbaleAudizione(c, TipoAllegato.VERBALE_AUDIZIONE));
+			
+			List<MinOrdinanzaVO> listaOrdinanze = new ArrayList<MinOrdinanzaVO>();
+			for(CnmROrdinanzaVerbSog ordinanza : ords) {
+				CnmTOrdinanza cnmTOrdinanza = ordinanza.getCnmTOrdinanza();
+				MinOrdinanzaVO minOrdinanzaVO = ordinanzaEntityMapper.mapEntityToVO(cnmTOrdinanza);
+				minOrdinanzaVO.getTipo().setId(ordinanza.getCnmDStatoOrdVerbSog().getIdStatoOrdVerbSog());
+				minOrdinanzaVO.getTipo().setDenominazione(ordinanza.getCnmDStatoOrdVerbSog().getDescStatoOrdVerbSog());
+				listaOrdinanze.add(minOrdinanzaVO);
+			}
+			sog.setListaOrdinanze(listaOrdinanze);
+			
 			soggettoVOList.add(sog);
 		}
 
@@ -576,7 +598,9 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 	@Override
 	public List<SoggettoVO> getSoggettiByIdVerbalePregressi(Integer id, UserDetails userDetails, Boolean includiControlloUtenteProprietario) {
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
-
+		
+		includiControlloUtenteProprietario = includiControlloUtenteProprietario && Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED));
+		
 		if (includiControlloUtenteProprietario == null)
 			throw new IllegalArgumentException("includiControlloUtenteProprietario is null");
 
@@ -612,6 +636,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 	public List<SoggettoVO> getSoggettiByIdVerbaleConvocazione(Integer id, UserDetails userDetails, Boolean includiControlloUtenteProprietario) {
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
 
+		includiControlloUtenteProprietario = includiControlloUtenteProprietario && Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED));
+		
 		if (includiControlloUtenteProprietario == null)
 			throw new IllegalArgumentException("includiControlloUtenteProprietario is null");
 
@@ -718,6 +744,12 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		}
 		
 
+		// 20200921 - PP - Elimino sul soggetto la residenza salvata per il verbale
+		// 20210226_LC Jira 121 - idVerbale
+		CnmTResidenza residenza = cnmTResidenzaRepository.findByCnmTSoggettoAndIdVerbale(cnmTSoggetto, cnmRVerbaleSoggetto.getCnmTVerbale().getIdVerbale());
+		if(residenza != null) {
+			cnmTResidenzaRepository.delete(residenza);
+		}
 		
 		cnmRVerbaleSoggettoRepository.delete(cnmRVerbaleSoggetto);
 
@@ -737,12 +769,6 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			}
 		}
 		
-		// 20200921 - PP - Elimino sul soggetto la residenza salvata per il verbale
-		// 20210226_LC Jira 121 - idVerbale
-		CnmTResidenza residenza = cnmTResidenzaRepository.findByCnmTSoggettoAndIdVerbale(cnmTSoggetto, cnmRVerbaleSoggetto.getCnmTVerbale().getIdVerbale());
-		if(residenza != null) {
-			cnmTResidenzaRepository.delete(residenza);
-		}
 	}
 
 	@Override

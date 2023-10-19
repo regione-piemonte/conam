@@ -4,8 +4,10 @@
  ******************************************************************************/
 package it.csi.conam.conambl.dispatcher.impl;
 
+import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.verbale.*;
 import it.csi.conam.conambl.dispatcher.VerbaleDispatcher;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
 import it.csi.conam.conambl.request.verbale.RicercaVerbaleRequest;
 import it.csi.conam.conambl.request.verbale.SalvaAzioneRequest;
@@ -50,6 +52,9 @@ public class VerbaleDispatcherImpl implements VerbaleDispatcher {
 	@Autowired
 	private AzioneVerbaleService azioneVerbaleService;
 
+	@Autowired
+	private UtilsCnmCProprietaService utilsCnmCProprietaService;
+	
 	@Override
 	public Integer salvaVerbale(VerbaleVO verbale, UserDetails userDetails) {
 		return verbaleService.salvaVerbale(verbale, userDetails);
@@ -57,7 +62,7 @@ public class VerbaleDispatcherImpl implements VerbaleDispatcher {
 
 	@Override
 	public VerbaleVO getVerbaleById(Integer id, UserDetails userDetails, boolean includeEliminati) {
-		return verbaleService.getVerbaleById(id, userDetails, includeEliminati, true, true);
+		return verbaleService.getVerbaleById(id, userDetails, includeEliminati, Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)), true);
 	}
 
 	@Override

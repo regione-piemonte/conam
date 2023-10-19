@@ -20,6 +20,7 @@ import com.google.common.collect.FluentIterable;
 
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
+import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleService;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
@@ -48,6 +49,7 @@ import it.csi.conam.conambl.integration.entity.CnmRVerbaleIllecito;
 import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.mapper.entity.IstruttoreEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.StatoVerbaleEntityMapper;
 import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
@@ -136,6 +138,8 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 	
 	private static Logger logger = Logger.getLogger(AzioneVerbalePregressiService.class);
 
+	@Autowired
+	private UtilsCnmCProprietaService utilsCnmCProprietaService;
 	
 	@Override
 	public StatiVerbaleResponse getStatiVerbalePregresso(Integer id, UserDetails userDetails, Boolean includiControlloUtenteProprietario) {
@@ -144,10 +148,22 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		if (includiControlloUtenteProprietario == null)
 			throw new IllegalArgumentException("includiControlloUtenteProprietario is null");
 		
+		
 		//mi predispongo a restituire una lista, anche se al momento lo stato avanzabile sara' al massimo 1
 		List<StatoVerbaleVO> statiVerbale = new ArrayList<>();
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
 
+		StatiVerbaleResponse response = new StatiVerbaleResponse();
+		
+		// verifico se sono in uno stato transitorio
+		if(Constants.STATO_VERBALE_IN_ACQUISIZIONE == cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()
+				|| Constants.STATO_VERBALE_IN_ACQUISIZIONE_CON_PAGAMENTO == cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()
+				|| Constants.STATO_VERBALE_IN_ACQUISIZIONE_CON_SCRITTI_DIFENSIVI == cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()
+				|| Constants.STATO_VERBALE_IN_ARCHIVIATO_IN_AUTOTUTELA == cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()) {
+			response.setStati(statiVerbale);
+			return response;
+		}
+		
 		if(Constants.STATO_PREGRESSO_IN_LAVORAZIONE != cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso()) {
 			throw new BusinessException(ErrorCode.STATO_VERBALE_INCOMPATIBILE);
 		}
@@ -160,7 +176,6 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		statoVerbaleFineLavorazionePregresso.setDenominazione(cnmDStatoPregressoRepository.findOne(Constants.STATO_PREGRESSO_LAVORATO).getDescStatoPregresso());
 		statoVerbaleFineLavorazionePregresso.setId(Constants.STATO_VERBALE_FINE_PREGRESSO);
 		
-		StatiVerbaleResponse response = new StatiVerbaleResponse();
 		CnmDMessaggio cnmDMessaggio = cnmDMessaggioRepository.findByCodMessaggio(ErrorCode.CONFIRM_SALVA_STATO_FASCICOLO_PREGRESSO);
 		if(cnmDMessaggio!=null) {
 			MessageVO messaggio = new MessageVO(String.format(cnmDMessaggio.getDescMessaggio(), cnmTVerbale.getNumVerbale(), cnmTVerbale.getCnmDStatoVerbale().getDescStatoVerbale(), Constants.PLACEHOLDER_MSG_NUOVO_STATO), cnmDMessaggio.getCnmDTipoMessaggio().getDescTipoMessaggio());
@@ -313,8 +328,10 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		CnmRFunzionarioIstruttore istr = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
 		if (istr != null)
 			idUserAssegnato = istr.getCnmTUser().getIdUser();
-		if (!controllaPermessiAzione(idStatoVerbale, idProprietarioVerbale, idUserConnesso, idUserAssegnato))
-			return null;
+		if(Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) {
+			if (!controllaPermessiAzione(idStatoVerbale, idProprietarioVerbale, idUserConnesso, idUserAssegnato))
+				return null;
+		}
 		boolean aggiungiAttesaPagamento = false;
 		boolean conScritti = false;
 		Long idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI, idAllegatoList,
@@ -424,16 +441,20 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		boolean assegnaEnable;
 		boolean terminaLavorazionePregresso = false;
 		if (AzioneVerbalePregressi.ACQUISISCI.getId().equals(azioneVerbale.getId())) {
-			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO);
+//			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO);
+			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_IN_ACQUISIZIONE);			
 			assegnaEnable = AzioneVerbalePregressi.ACQUISISCI.isListaIstruttori();
 		} else if (AzioneVerbalePregressi.ACQUISISCI_CON_PAGAMENTO.getId().equals(azioneVerbale.getId())) {
-			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
+//			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
+			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_IN_ACQUISIZIONE_CON_PAGAMENTO);
 			assegnaEnable = AzioneVerbalePregressi.ACQUISISCI_CON_PAGAMENTO.isListaIstruttori();
 		} else if (AzioneVerbalePregressi.ACQUISISCI_CON_SCRITTI.getId().equals(azioneVerbale.getId())) {
-			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI);
+//			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI);
+			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_IN_ACQUISIZIONE_CON_SCRITTI_DIFENSIVI);
 			assegnaEnable = AzioneVerbalePregressi.ACQUISISCI_CON_SCRITTI.isListaIstruttori();
 		} else if (AzioneVerbalePregressi.ARCHIVIATO_IN_AUTOTUTELA.getId().equals(azioneVerbale.getId())) {
-			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ARCHIVIATO_IN_AUTOTUTELA);
+//			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_ARCHIVIATO_IN_AUTOTUTELA);
+			cnmDStatoVerbale = cnmDStatoVerbaleRepository.findOne(Constants.STATO_VERBALE_IN_ARCHIVIATO_IN_AUTOTUTELA);
 			assegnaEnable = AzioneVerbalePregressi.ARCHIVIATO_IN_AUTOTUTELA.isListaIstruttori();
 		} else if (AzioneVerbalePregressi.TERMINE_RECUPERO_PREGRESSO.getId().equals(azioneVerbale.getId())) {
 			//queso stato non sta sulla cnmDStatoVerbale
@@ -514,7 +535,9 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			logger.info("Assegno il funzionario istruttore con id="+idFunzionario);
 			Boolean notUguale = Boolean.FALSE;
 			CnmRFunzionarioIstruttore cnmRFunzionarioIstruttore = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
-			if (cnmRFunzionarioIstruttore != null && cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() != userDetails.getIdUser()) {
+			if (cnmRFunzionarioIstruttore != null && 
+					cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() != userDetails.getIdUser() && 
+					Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) {
 				cnmRFunzionarioIstruttore.setFineAssegnazione(new Date());
 				cnmRFunzionarioIstruttoreRepository.save(cnmRFunzionarioIstruttore);
 				notUguale = Boolean.TRUE;
@@ -580,24 +603,29 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			if ((Constants.STATO_VERBALE_INCOMPLETO != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale()
 					&& Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO != cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale())) {
 				CnmRFunzionarioIstruttore cnmRFunzionarioIstruttore = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
-				if (cnmRFunzionarioIstruttore != null && cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() == userDetails.getIdUser() && tipologiaAllegabili != null
+				if (cnmRFunzionarioIstruttore != null && 
+						(cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() == userDetails.getIdUser() || !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)))&& 
+						tipologiaAllegabili != null
 						&& !tipologiaAllegabili.isEmpty())
 					isAllegatiEnable = Boolean.TRUE;
+				else if(cnmRFunzionarioIstruttore == null && !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) {
+						isAllegatiEnable = Boolean.TRUE;
+					}
 			} else {
-				if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() && cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser())
+				if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() && (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() || !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))))
 					isAllegatiEnable = Boolean.TRUE;
 			}
 		} else if (appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_ACCERTATORE) || appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_AMMINISTRATIVO)) {
-			if (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() && cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != Constants.STATO_PREGRESSO_NON_PRESENTE)
+			if ((cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() || !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) && cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != Constants.STATO_PREGRESSO_NON_PRESENTE)
 				isAllegatiEnable = Boolean.TRUE;
 		} else
 			throw new SecurityException("Ruolo non riconosciuto dal sistema");
 
-		Boolean modificaVerbaleEnable = (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO ) && cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()
+		Boolean modificaVerbaleEnable = (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO ) && (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() || !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)))
 				? Boolean.TRUE
 				: Boolean.FALSE;
 		Boolean isEliminaAllegatoEnable = (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO )
-				&& cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() ? Boolean.TRUE : Boolean.FALSE;
+				&& (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() || !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)))? Boolean.TRUE : Boolean.FALSE;
 
 		// restituisco isRiepilogoOrdinanzaEnable a true solo se sul verbale esiste almeno un allegato di tipo ORDINANZA
 		Boolean isRiepilogoOrdinanzaEnable = false;

@@ -2,23 +2,19 @@
  * ElencoPosizioniDaAggiornareType.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ * by the Apache Axis 1.4 Nov 13, 2013 (09:13:21 GMT) WSDL2Java emitter.
  */
 
 package it.csi.conam.conambl.integration.epay.to;
 
 public class ElencoPosizioniDaAggiornareType  implements java.io.Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -919352322638253120L;
-	private it.csi.conam.conambl.integration.epay.to.PosizioneDaAggiornareType[] posizioniDaAggiornare;
+    private PosizioneDaAggiornareType[] posizioniDaAggiornare;
 
     public ElencoPosizioniDaAggiornareType() {
     }
 
     public ElencoPosizioniDaAggiornareType(
-           it.csi.conam.conambl.integration.epay.to.PosizioneDaAggiornareType[] posizioniDaAggiornare) {
+           PosizioneDaAggiornareType[] posizioniDaAggiornare) {
            this.posizioniDaAggiornare = posizioniDaAggiornare;
     }
 
@@ -28,7 +24,7 @@ public class ElencoPosizioniDaAggiornareType  implements java.io.Serializable {
      * 
      * @return posizioniDaAggiornare
      */
-    public it.csi.conam.conambl.integration.epay.to.PosizioneDaAggiornareType[] getPosizioniDaAggiornare() {
+    public PosizioneDaAggiornareType[] getPosizioniDaAggiornare() {
         return posizioniDaAggiornare;
     }
 
@@ -38,15 +34,15 @@ public class ElencoPosizioniDaAggiornareType  implements java.io.Serializable {
      * 
      * @param posizioniDaAggiornare
      */
-    public void setPosizioniDaAggiornare(it.csi.conam.conambl.integration.epay.to.PosizioneDaAggiornareType[] posizioniDaAggiornare) {
+    public void setPosizioniDaAggiornare(PosizioneDaAggiornareType[] posizioniDaAggiornare) {
         this.posizioniDaAggiornare = posizioniDaAggiornare;
     }
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (obj == null) return false;
         if (!(obj instanceof ElencoPosizioniDaAggiornareType)) return false;
         ElencoPosizioniDaAggiornareType other = (ElencoPosizioniDaAggiornareType) obj;
+        if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
             return (__equalsCalc == obj);

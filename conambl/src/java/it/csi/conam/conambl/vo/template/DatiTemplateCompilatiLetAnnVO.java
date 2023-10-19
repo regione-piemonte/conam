@@ -26,6 +26,8 @@ public class DatiTemplateCompilatiLetAnnVO extends ParentVO {
 	private String sedeEnteRiga1;
 	private String sedeEnteRiga2;
 	private String sedeEnteRiga3;
+	private String sedeEnteRiga4;
+	private String sedeEnteRiga5;
 	
 	// 20210401_LC a livello superiore (DatiCOmpilatiVO)
 //	private String indirizzoOrganoAccertatoreRiga1;
@@ -105,6 +107,18 @@ public class DatiTemplateCompilatiLetAnnVO extends ParentVO {
 	}
 	public void setSalutiLettera(String salutiLettera) {
 		this.salutiLettera = salutiLettera;
+	}
+	public String getSedeEnteRiga4() {
+		return sedeEnteRiga4;
+	}
+	public void setSedeEnteRiga4(String sedeEnteRiga4) {
+		this.sedeEnteRiga4 = sedeEnteRiga4;
+	}
+	public String getSedeEnteRiga5() {
+		return sedeEnteRiga5;
+	}
+	public void setSedeEnteRiga5(String sedeEnteRiga5) {
+		this.sedeEnteRiga5 = sedeEnteRiga5;
 	}
 
 	

@@ -2,22 +2,21 @@
  * PosizioneDaInserireType.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ * by the Apache Axis 1.4 Nov 13, 2013 (09:13:21 GMT) WSDL2Java emitter.
  */
 
 package it.csi.conam.conambl.integration.epay.to;
 
 public class PosizioneDaInserireType  implements java.io.Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -719644676081490044L;
-
-	private java.lang.String idPosizioneDebitoria;
+    private java.lang.String idPosizioneDebitoria;
 
     private java.math.BigInteger annoRiferimento;
 
     private java.math.BigDecimal importoTotale;
+
+    private java.math.BigDecimal importoPrincipale;
+
+    private java.math.BigDecimal importoSecondarioAltroEnte;
 
     private java.util.Date dataScadenza;
 
@@ -29,11 +28,15 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
 
     private java.lang.String descrizioneRata;
 
-    private it.csi.conam.conambl.integration.epay.to.ComponenteImportoType[] componentiImporto;
+    private ComponenteImportoType[] componentiImporto;
 
-    private it.csi.conam.conambl.integration.epay.to.SoggettoType soggettoPagatore;
+    private RiferimentoType[] riferimentiPagamento;
+
+    private SoggettoType soggettoPagatore;
 
     private java.lang.String notePerIlPagatore;
+
+    private PosizioneDaInserireTypeComponentiImportoSecondario componentiImportoSecondario;
 
     public PosizioneDaInserireType() {
     }
@@ -42,25 +45,33 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
            java.lang.String idPosizioneDebitoria,
            java.math.BigInteger annoRiferimento,
            java.math.BigDecimal importoTotale,
+           java.math.BigDecimal importoPrincipale,
+           java.math.BigDecimal importoSecondarioAltroEnte,
            java.util.Date dataScadenza,
            java.util.Date dataInizioValidita,
            java.util.Date dataFineValidita,
            java.lang.String descrizioneCausaleVersamento,
            java.lang.String descrizioneRata,
-           it.csi.conam.conambl.integration.epay.to.ComponenteImportoType[] componentiImporto,
-           it.csi.conam.conambl.integration.epay.to.SoggettoType soggettoPagatore,
-           java.lang.String notePerIlPagatore) {
+           ComponenteImportoType[] componentiImporto,
+           RiferimentoType[] riferimentiPagamento,
+           SoggettoType soggettoPagatore,
+           java.lang.String notePerIlPagatore,
+           PosizioneDaInserireTypeComponentiImportoSecondario componentiImportoSecondario) {
            this.idPosizioneDebitoria = idPosizioneDebitoria;
            this.annoRiferimento = annoRiferimento;
            this.importoTotale = importoTotale;
+           this.importoPrincipale = importoPrincipale;
+           this.importoSecondarioAltroEnte = importoSecondarioAltroEnte;
            this.dataScadenza = dataScadenza;
            this.dataInizioValidita = dataInizioValidita;
            this.dataFineValidita = dataFineValidita;
            this.descrizioneCausaleVersamento = descrizioneCausaleVersamento;
            this.descrizioneRata = descrizioneRata;
            this.componentiImporto = componentiImporto;
+           this.riferimentiPagamento = riferimentiPagamento;
            this.soggettoPagatore = soggettoPagatore;
            this.notePerIlPagatore = notePerIlPagatore;
+           this.componentiImportoSecondario = componentiImportoSecondario;
     }
 
 
@@ -121,6 +132,46 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
      */
     public void setImportoTotale(java.math.BigDecimal importoTotale) {
         this.importoTotale = importoTotale;
+    }
+
+
+    /**
+     * Gets the importoPrincipale value for this PosizioneDaInserireType.
+     * 
+     * @return importoPrincipale
+     */
+    public java.math.BigDecimal getImportoPrincipale() {
+        return importoPrincipale;
+    }
+
+
+    /**
+     * Sets the importoPrincipale value for this PosizioneDaInserireType.
+     * 
+     * @param importoPrincipale
+     */
+    public void setImportoPrincipale(java.math.BigDecimal importoPrincipale) {
+        this.importoPrincipale = importoPrincipale;
+    }
+
+
+    /**
+     * Gets the importoSecondarioAltroEnte value for this PosizioneDaInserireType.
+     * 
+     * @return importoSecondarioAltroEnte
+     */
+    public java.math.BigDecimal getImportoSecondarioAltroEnte() {
+        return importoSecondarioAltroEnte;
+    }
+
+
+    /**
+     * Sets the importoSecondarioAltroEnte value for this PosizioneDaInserireType.
+     * 
+     * @param importoSecondarioAltroEnte
+     */
+    public void setImportoSecondarioAltroEnte(java.math.BigDecimal importoSecondarioAltroEnte) {
+        this.importoSecondarioAltroEnte = importoSecondarioAltroEnte;
     }
 
 
@@ -229,7 +280,7 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
      * 
      * @return componentiImporto
      */
-    public it.csi.conam.conambl.integration.epay.to.ComponenteImportoType[] getComponentiImporto() {
+    public ComponenteImportoType[] getComponentiImporto() {
         return componentiImporto;
     }
 
@@ -239,8 +290,28 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
      * 
      * @param componentiImporto
      */
-    public void setComponentiImporto(it.csi.conam.conambl.integration.epay.to.ComponenteImportoType[] componentiImporto) {
+    public void setComponentiImporto(ComponenteImportoType[] componentiImporto) {
         this.componentiImporto = componentiImporto;
+    }
+
+
+    /**
+     * Gets the riferimentiPagamento value for this PosizioneDaInserireType.
+     * 
+     * @return riferimentiPagamento
+     */
+    public RiferimentoType[] getRiferimentiPagamento() {
+        return riferimentiPagamento;
+    }
+
+
+    /**
+     * Sets the riferimentiPagamento value for this PosizioneDaInserireType.
+     * 
+     * @param riferimentiPagamento
+     */
+    public void setRiferimentiPagamento(RiferimentoType[] riferimentiPagamento) {
+        this.riferimentiPagamento = riferimentiPagamento;
     }
 
 
@@ -249,7 +320,7 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
      * 
      * @return soggettoPagatore
      */
-    public it.csi.conam.conambl.integration.epay.to.SoggettoType getSoggettoPagatore() {
+    public SoggettoType getSoggettoPagatore() {
         return soggettoPagatore;
     }
 
@@ -259,7 +330,7 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
      * 
      * @param soggettoPagatore
      */
-    public void setSoggettoPagatore(it.csi.conam.conambl.integration.epay.to.SoggettoType soggettoPagatore) {
+    public void setSoggettoPagatore(SoggettoType soggettoPagatore) {
         this.soggettoPagatore = soggettoPagatore;
     }
 
@@ -283,11 +354,31 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
         this.notePerIlPagatore = notePerIlPagatore;
     }
 
+
+    /**
+     * Gets the componentiImportoSecondario value for this PosizioneDaInserireType.
+     * 
+     * @return componentiImportoSecondario
+     */
+    public PosizioneDaInserireTypeComponentiImportoSecondario getComponentiImportoSecondario() {
+        return componentiImportoSecondario;
+    }
+
+
+    /**
+     * Sets the componentiImportoSecondario value for this PosizioneDaInserireType.
+     * 
+     * @param componentiImportoSecondario
+     */
+    public void setComponentiImportoSecondario(PosizioneDaInserireTypeComponentiImportoSecondario componentiImportoSecondario) {
+        this.componentiImportoSecondario = componentiImportoSecondario;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (obj == null) return false;
         if (!(obj instanceof PosizioneDaInserireType)) return false;
         PosizioneDaInserireType other = (PosizioneDaInserireType) obj;
+        if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
             return (__equalsCalc == obj);
@@ -304,6 +395,12 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
             ((this.importoTotale==null && other.getImportoTotale()==null) || 
              (this.importoTotale!=null &&
               this.importoTotale.equals(other.getImportoTotale()))) &&
+            ((this.importoPrincipale==null && other.getImportoPrincipale()==null) || 
+             (this.importoPrincipale!=null &&
+              this.importoPrincipale.equals(other.getImportoPrincipale()))) &&
+            ((this.importoSecondarioAltroEnte==null && other.getImportoSecondarioAltroEnte()==null) || 
+             (this.importoSecondarioAltroEnte!=null &&
+              this.importoSecondarioAltroEnte.equals(other.getImportoSecondarioAltroEnte()))) &&
             ((this.dataScadenza==null && other.getDataScadenza()==null) || 
              (this.dataScadenza!=null &&
               this.dataScadenza.equals(other.getDataScadenza()))) &&
@@ -322,12 +419,18 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
             ((this.componentiImporto==null && other.getComponentiImporto()==null) || 
              (this.componentiImporto!=null &&
               java.util.Arrays.equals(this.componentiImporto, other.getComponentiImporto()))) &&
+            ((this.riferimentiPagamento==null && other.getRiferimentiPagamento()==null) || 
+             (this.riferimentiPagamento!=null &&
+              java.util.Arrays.equals(this.riferimentiPagamento, other.getRiferimentiPagamento()))) &&
             ((this.soggettoPagatore==null && other.getSoggettoPagatore()==null) || 
              (this.soggettoPagatore!=null &&
               this.soggettoPagatore.equals(other.getSoggettoPagatore()))) &&
             ((this.notePerIlPagatore==null && other.getNotePerIlPagatore()==null) || 
              (this.notePerIlPagatore!=null &&
-              this.notePerIlPagatore.equals(other.getNotePerIlPagatore())));
+              this.notePerIlPagatore.equals(other.getNotePerIlPagatore()))) &&
+            ((this.componentiImportoSecondario==null && other.getComponentiImportoSecondario()==null) || 
+             (this.componentiImportoSecondario!=null &&
+              this.componentiImportoSecondario.equals(other.getComponentiImportoSecondario())));
         __equalsCalc = null;
         return _equals;
     }
@@ -347,6 +450,12 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
         }
         if (getImportoTotale() != null) {
             _hashCode += getImportoTotale().hashCode();
+        }
+        if (getImportoPrincipale() != null) {
+            _hashCode += getImportoPrincipale().hashCode();
+        }
+        if (getImportoSecondarioAltroEnte() != null) {
+            _hashCode += getImportoSecondarioAltroEnte().hashCode();
         }
         if (getDataScadenza() != null) {
             _hashCode += getDataScadenza().hashCode();
@@ -374,11 +483,25 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
                 }
             }
         }
+        if (getRiferimentiPagamento() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getRiferimentiPagamento());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getRiferimentiPagamento(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
         if (getSoggettoPagatore() != null) {
             _hashCode += getSoggettoPagatore().hashCode();
         }
         if (getNotePerIlPagatore() != null) {
             _hashCode += getNotePerIlPagatore().hashCode();
+        }
+        if (getComponentiImportoSecondario() != null) {
+            _hashCode += getComponentiImportoSecondario().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -407,6 +530,20 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
         elemField.setFieldName("importoTotale");
         elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "ImportoTotale"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "decimal"));
+        elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("importoPrincipale");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "ImportoPrincipale"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "decimal"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("importoSecondarioAltroEnte");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "ImportoSecondarioAltroEnte"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "decimal"));
+        elemField.setMinOccurs(0);
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
@@ -452,6 +589,14 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
         elemField.setItemQName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "ComponenteImporto"));
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("riferimentiPagamento");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "RiferimentiPagamento"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "RiferimentoType"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(false);
+        elemField.setItemQName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "Riferimento"));
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("soggettoPagatore");
         elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "SoggettoPagatore"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/types", "SoggettoType"));
@@ -461,6 +606,13 @@ public class PosizioneDaInserireType  implements java.io.Serializable {
         elemField.setFieldName("notePerIlPagatore");
         elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "NotePerIlPagatore"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("componentiImportoSecondario");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "ComponentiImportoSecondario"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", ">PosizioneDaInserireType>ComponentiImportoSecondario"));
         elemField.setMinOccurs(0);
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);

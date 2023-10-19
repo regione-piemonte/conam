@@ -23,6 +23,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
+import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleService;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
@@ -48,6 +49,7 @@ import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTAllegato;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.mapper.entity.IstruttoreEntityMapper;
 import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoVerbaleRepository;
@@ -126,6 +128,9 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 
 	@Autowired
 	private CnmTAllegatoFieldRepository cnmTAllegatoFieldRepository;
+
+	@Autowired
+	private UtilsCnmCProprietaService utilsCnmCProprietaService;
 	
 	@Override
 	public List<IstruttoreVO> getIstruttoreByVerbale(Integer idVerbale, UserDetails userDetails) {
@@ -176,7 +181,7 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 		utente.setCognome(cnmTUser.getCognome());
 		utente.setId(cnmTUser.getIdUser());
 
-		if (cnmTUser.getCnmDRuolo().getIdRuolo() == Long.parseLong(Constants.RUOLO_UTENTE_ISTRUTTORE) && cnmTUser.getIdUser() == cnmTVerbale.getCnmTUser2().getIdUser())
+		if (cnmTUser.getCnmDRuolo().getIdRuolo() == Long.parseLong(Constants.RUOLO_UTENTE_ISTRUTTORE) && (cnmTUser.getIdUser() == cnmTVerbale.getCnmTUser2().getIdUser()|| !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))))
 			utente.setIsIstruttore(1);
 		else
 			utente.setIsIstruttore(0);
@@ -205,25 +210,27 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 					&& idStatoVerbale != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO 
 					&& idStatoVerbale != Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO) {
 				CnmRFunzionarioIstruttore cnmRFunzionarioIstruttore = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
-				if (cnmRFunzionarioIstruttore != null && cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() == userDetails.getIdUser() && tipologiaAllegabili != null
+				if (cnmRFunzionarioIstruttore != null && 
+						(cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() == userDetails.getIdUser() || !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)))&& 
+						tipologiaAllegabili != null
 						&& !tipologiaAllegabili.isEmpty())
 					isAllegatiEnable = Boolean.TRUE;
 			} else {
-				if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() && cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser())
+				if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() && (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()|| !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))))
 					isAllegatiEnable = Boolean.TRUE;
 			}
 		} else if (appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_ACCERTATORE) || appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_AMMINISTRATIVO)) {
-			if (idStatoVerbale == Constants.STATO_VERBALE_INCOMPLETO && cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser())
+			if (idStatoVerbale == Constants.STATO_VERBALE_INCOMPLETO && (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()|| !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))))
 				isAllegatiEnable = Boolean.TRUE;
 		} else
 			throw new SecurityException("Ruolo non riconosciuto dal sistema");
 
 		Boolean modificaVerbaleEnable = (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO)
-				&& cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()
+				&& (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()|| !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)))
 				? Boolean.TRUE
 				: Boolean.FALSE;
 		Boolean isEliminaAllegatoEnable = (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO)
-				&& cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() ? Boolean.TRUE : Boolean.FALSE;
+				&& (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()|| !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) ? Boolean.TRUE : Boolean.FALSE;
 
 		// 20210911 PP - jira 174
 		Long statoAvanzabile =  getStatoAvanzabileByCnmTVerbale(cnmTVerbale, userDetails);
@@ -397,9 +404,14 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 //				) {
 			if (cnmTVerbale.getNumeroProtocollo() == null) {
 				if (!cnmRAllegatoVerbaleList.isEmpty()) {
-					ResponseProtocollaDocumento response = commonAllegatoService.avviaProtocollazione(cnmRAllegatoVerbaleList, cnmTUser);
-					cnmTVerbale.setNumeroProtocollo(response.getProtocollo());
-					cnmTVerbale.setDataOraProtocollo(now);
+					try {
+						ResponseProtocollaDocumento response = commonAllegatoService.avviaProtocollazione(cnmRAllegatoVerbaleList, cnmTUser);
+						cnmTVerbale.setNumeroProtocollo(response.getProtocollo());
+						cnmTVerbale.setDataOraProtocollo(now);
+					}catch(Throwable t) {
+						// TODO da eliminare
+						t.printStackTrace();
+					}
 				}
 			}
 //		}
@@ -411,7 +423,9 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 		if (assegnaEnable) {
 			Boolean notUguale = Boolean.FALSE;
 			CnmRFunzionarioIstruttore cnmRFunzionarioIstruttore = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
-			if (cnmRFunzionarioIstruttore != null && cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() != userDetails.getIdUser()) {
+			if (cnmRFunzionarioIstruttore != null && 
+					cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() != userDetails.getIdUser() &&
+					Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) {
 				cnmRFunzionarioIstruttore.setFineAssegnazione(new Date());
 				cnmRFunzionarioIstruttoreRepository.save(cnmRFunzionarioIstruttore);
 				notUguale = Boolean.TRUE;
@@ -461,6 +475,11 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 		CnmRFunzionarioIstruttore istr = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
 		if (istr != null)
 			idUserAssegnato = istr.getCnmTUser().getIdUser();
+		
+		if(!Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) {
+			idProprietarioVerbale = idUserConnesso;
+		}
+		
 		if(idStatoVerbale != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO) {
 			if (!controllaPermessiAzione(idStatoVerbale, idProprietarioVerbale, idUserConnesso, idUserAssegnato))
 				return null;
@@ -690,12 +709,15 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 		if (appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_ISTRUTTORE)) {
 			CnmRFunzionarioIstruttore cnmRFunzionarioIstruttore = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
 			if (cnmRFunzionarioIstruttore != null) {
-				if (cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() == userDetails.getIdUser() && tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty())
+				if ((cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() == userDetails.getIdUser() || !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) && 
+						tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty())
 					isAllegatiEnable = Boolean.TRUE;
-			} else if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() && cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser())
+			} else if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() 
+					&& (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()|| !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))))
 				isAllegatiEnable = Boolean.TRUE;
 		} else if (appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_AMMINISTRATIVO)) {
-			if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() && cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser())
+			if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() 
+					&& (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser()|| !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))))
 				isAllegatiEnable = Boolean.TRUE;
 		} else
 			throw new SecurityException("Ruolo non abilitato ad accedere a questo servizio");

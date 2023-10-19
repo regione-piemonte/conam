@@ -2,27 +2,22 @@
  * AggiornaPosizioniDebitorieRequest.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ * by the Apache Axis 1.4 Nov 13, 2013 (09:13:21 GMT) WSDL2Java emitter.
  */
 
 package it.csi.conam.conambl.integration.epay.to;
 
 public class AggiornaPosizioniDebitorieRequest  implements java.io.Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    private TestataAggiornaPosizioniDebitorie testata;
 
-	private it.csi.conam.conambl.integration.epay.to.TestataAggiornaPosizioniDebitorie testata;
-
-    private it.csi.conam.conambl.integration.epay.to.ElencoPosizioniDaAggiornareType elencoPosizioniDaAggiornare;
+    private ElencoPosizioniDaAggiornareType elencoPosizioniDaAggiornare;
 
     public AggiornaPosizioniDebitorieRequest() {
     }
 
     public AggiornaPosizioniDebitorieRequest(
-           it.csi.conam.conambl.integration.epay.to.TestataAggiornaPosizioniDebitorie testata,
-           it.csi.conam.conambl.integration.epay.to.ElencoPosizioniDaAggiornareType elencoPosizioniDaAggiornare) {
+           TestataAggiornaPosizioniDebitorie testata,
+           ElencoPosizioniDaAggiornareType elencoPosizioniDaAggiornare) {
            this.testata = testata;
            this.elencoPosizioniDaAggiornare = elencoPosizioniDaAggiornare;
     }
@@ -33,7 +28,7 @@ public class AggiornaPosizioniDebitorieRequest  implements java.io.Serializable 
      * 
      * @return testata
      */
-    public it.csi.conam.conambl.integration.epay.to.TestataAggiornaPosizioniDebitorie getTestata() {
+    public TestataAggiornaPosizioniDebitorie getTestata() {
         return testata;
     }
 
@@ -43,7 +38,7 @@ public class AggiornaPosizioniDebitorieRequest  implements java.io.Serializable 
      * 
      * @param testata
      */
-    public void setTestata(it.csi.conam.conambl.integration.epay.to.TestataAggiornaPosizioniDebitorie testata) {
+    public void setTestata(TestataAggiornaPosizioniDebitorie testata) {
         this.testata = testata;
     }
 
@@ -53,7 +48,7 @@ public class AggiornaPosizioniDebitorieRequest  implements java.io.Serializable 
      * 
      * @return elencoPosizioniDaAggiornare
      */
-    public it.csi.conam.conambl.integration.epay.to.ElencoPosizioniDaAggiornareType getElencoPosizioniDaAggiornare() {
+    public ElencoPosizioniDaAggiornareType getElencoPosizioniDaAggiornare() {
         return elencoPosizioniDaAggiornare;
     }
 
@@ -63,15 +58,15 @@ public class AggiornaPosizioniDebitorieRequest  implements java.io.Serializable 
      * 
      * @param elencoPosizioniDaAggiornare
      */
-    public void setElencoPosizioniDaAggiornare(it.csi.conam.conambl.integration.epay.to.ElencoPosizioniDaAggiornareType elencoPosizioniDaAggiornare) {
+    public void setElencoPosizioniDaAggiornare(ElencoPosizioniDaAggiornareType elencoPosizioniDaAggiornare) {
         this.elencoPosizioniDaAggiornare = elencoPosizioniDaAggiornare;
     }
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (obj == null) return false;
         if (!(obj instanceof AggiornaPosizioniDebitorieRequest)) return false;
         AggiornaPosizioniDebitorieRequest other = (AggiornaPosizioniDebitorieRequest) obj;
+        if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
             return (__equalsCalc == obj);

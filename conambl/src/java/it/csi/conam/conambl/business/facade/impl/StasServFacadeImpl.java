@@ -48,7 +48,9 @@ public class StasServFacadeImpl implements StasServFacade {
 	public Anagrafica[] ricercaSoggettoCF(String cf, String token) {
 		try {
 			return serviziTauITF.ricercaSoggettoCF(cf, token);
-//			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00A11B000J/Csi Piemonte/Demo 21/IPA/20201113113025/2/V6tDIGFKORVDrBW+NOWURg==");
+//			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/ACTALIS_EU/20230622162039/16/emICn3CxBP/m0i/mfSsqBA==");
+//			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/ACTALIS_EU/20230731155058/16/0xL+bNm2ApHmi+dMgDSPcA==");
+//			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/IPA/20230112174325/2/mEwUilVb05HxQQzJr3i/Sg==");
 //			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00B77B000F/Csi Piemonte/Demo 20/IPA/20210311120727/2/Ev+zD2iSWVJZXUhr0ImBDw==");
 
 

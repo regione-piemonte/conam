@@ -4,6 +4,15 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.facade.impl;
 
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import it.csi.conam.conambl.business.facade.DoquiServiceFacade;
 import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDoqui;
@@ -11,7 +20,26 @@ import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.exception.RemoteWebServiceException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
-import it.csi.conam.conambl.integration.beans.*;
+import it.csi.conam.conambl.integration.beans.Documento;
+import it.csi.conam.conambl.integration.beans.Metadati;
+import it.csi.conam.conambl.integration.beans.MetadatiAllegato;
+import it.csi.conam.conambl.integration.beans.RequestAggiungiAllegato;
+import it.csi.conam.conambl.integration.beans.RequestArchiviaDocumentoFisico;
+import it.csi.conam.conambl.integration.beans.RequestEliminaDocumento;
+import it.csi.conam.conambl.integration.beans.RequestProtocollaDocumentoFisico;
+import it.csi.conam.conambl.integration.beans.RequestRicercaAllegato;
+import it.csi.conam.conambl.integration.beans.RequestRicercaDocumento;
+import it.csi.conam.conambl.integration.beans.RequestSalvaDocumento;
+import it.csi.conam.conambl.integration.beans.RequestSpostaDocumento;
+import it.csi.conam.conambl.integration.beans.ResponseAggiungiAllegato;
+import it.csi.conam.conambl.integration.beans.ResponseArchiviaDocumento;
+import it.csi.conam.conambl.integration.beans.ResponseEliminaDocumento;
+import it.csi.conam.conambl.integration.beans.ResponseProtocollaDocumento;
+import it.csi.conam.conambl.integration.beans.ResponseRicercaAllegato;
+import it.csi.conam.conambl.integration.beans.ResponseRicercaDocumentoMultiplo;
+import it.csi.conam.conambl.integration.beans.ResponseSalvaDocumento;
+import it.csi.conam.conambl.integration.beans.ResponseSpostaDocumento;
+import it.csi.conam.conambl.integration.beans.Soggetto;
 import it.csi.conam.conambl.integration.doqui.DoquiConstants;
 import it.csi.conam.conambl.integration.doqui.exception.AggiungiAllegatoException;
 import it.csi.conam.conambl.integration.doqui.exception.ArchiviaDocumentoException;
@@ -20,23 +48,26 @@ import it.csi.conam.conambl.integration.doqui.exception.ProtocollaDocumentoExcep
 import it.csi.conam.conambl.integration.doqui.exception.RicercaAllegatoException;
 import it.csi.conam.conambl.integration.doqui.exception.RicercaDocumentoException;
 import it.csi.conam.conambl.integration.doqui.exception.SalvaDocumentoException;
-import it.csi.conam.conambl.integration.doqui.exception.*;
-import it.csi.conam.conambl.integration.doqui.helper.*;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.doqui.exception.SpostaDocumentoException;
+import it.csi.conam.conambl.integration.doqui.helper.ManageAggiungiAllegatoHelper;
+import it.csi.conam.conambl.integration.doqui.helper.ManageArchiviaDocumentoHelper;
+import it.csi.conam.conambl.integration.doqui.helper.ManageDocumentoHelper;
+import it.csi.conam.conambl.integration.doqui.helper.ManageProtocollaDocumentoHelper;
+import it.csi.conam.conambl.integration.doqui.helper.ManageRicercaDocumentoHelper;
+import it.csi.conam.conambl.integration.doqui.helper.ManageSpostaDocumentoHelper;
+import it.csi.conam.conambl.integration.entity.CnmCParametro;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
+import it.csi.conam.conambl.integration.entity.CnmDTipoAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
+import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.DocumentUtils;
 import it.csi.conam.conambl.vo.verbale.DocumentoProtocollatoVO;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingBean {
@@ -72,7 +103,8 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 	// 20200706_LC
 	@Autowired
 	private ManageSpostaDocumentoHelper manageSpostaDocumentoHelper;
-		
+	
+
 //	private StadocStadocSoapBindingStub binding;
 
 	public static final String TOPOLOGIA_SOGGETTO_MITTENTE = "MITTENTE";
@@ -245,6 +277,10 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		// 20200731_LC 
 		// request.setCollocazioneCartacea("");
 		
+		// 20230227 - issue 2 - gestione tipo registrazione
+		// se il tipoDocActa è %InUscita%, nell'if qui sopra setta sempre la tipologia destinatario (ok) -> il tipoDocActa con cui si invoca questo metodo è sempre InIngresso
+
+		
 		//JIRA - gestione metadati
 		//--------------------------------------------------------------------------
 		request.setCollocazioneCartacea(DoquiConstants.COLLOCAZIONE_CARTACEA);
@@ -405,8 +441,10 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 			} else if (tipoDocumento == TipoAllegato.DISPOSIZIONE_DEL_GIUDICE.getId()) {
 				request.setMittentiEsterni(TOPOLOGIA_SOGGETTO_GIUDICE);
 			}
-
-		} else if (tipoDocActa != null && tipoDocActa.equals(TIPOLOGIA_DOC_ACTA_MASTER_USCITA_CON_ALLEGATI)) {
+		} if (tipoDocActa != null && tipoDocActa.equals(TIPOLOGIA_DOC_ACTA_MASTER_INGRESSO_CON_ALLEGATI)) {
+			if(cnmTSoggettoList!=null && cnmTSoggettoList.size()>0) setSoggetto(cnmTSoggettoList, request);
+		}else if (tipoDocActa != null && tipoDocActa.equals(TIPOLOGIA_DOC_ACTA_MASTER_USCITA_CON_ALLEGATI)) {
+		
 			setSoggetto(cnmTSoggettoList, request);
 			setDestinazione(cnmTSoggettoList, request);
 			request.setAutoreGiuridico(AUTORE_REGIONE_PIEMONTE);
@@ -440,6 +478,9 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		// 20200731_LC 
 		// request.setCollocazioneCartacea("");
 		
+		// 20230227 - issue 2 - gestione tipo registrazione
+		// se il tipoDocActa è %InUscita%, nell'if qui sopra setta sempre la tipologia destinatario (ok) -> il tipoDocActa con cui si invoca questo metodo è sempre InIngresso
+		
 		//JIRA - gestione metadati
 		//--------------------------------------------------------------------------
 		request.setCollocazioneCartacea(DoquiConstants.COLLOCAZIONE_CARTACEA);
@@ -461,6 +502,35 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		}
 	}
 
+
+	private void setSoggetto(List<CnmTSoggetto> cnmTSoggettoList, RequestAggiungiAllegato request) {
+		if (cnmTSoggettoList == null || cnmTSoggettoList.size() == 0)
+			throw new IllegalArgumentException("cnmTSoggettoList non valido");
+
+		String denominazione = null;
+		boolean prima = true;
+		for (CnmTSoggetto sog : cnmTSoggettoList) {
+			if (StringUtils.isNotBlank(sog.getCodiceFiscale())) {
+				if (prima) {
+					denominazione = sog.getNome() + " " + sog.getCognome();
+					prima = false;
+				} else
+					denominazione = denominazione + ", " + sog.getNome() + " " + sog.getCognome();
+			} else if (StringUtils.isNotBlank(sog.getPartitaIva()) || StringUtils.isNotBlank(sog.getCodiceFiscaleGiuridico())) {
+				if (prima) {
+					denominazione = sog.getRagioneSociale();
+					prima = false;
+				} else
+					denominazione = denominazione + ", " + sog.getRagioneSociale();
+			}
+			if(request.getSoggetto()==null)request.setSoggetto(new Soggetto());
+			request.getSoggetto().setTipologia(TOPOLOGIA_SOGGETTO_DESTINATARIO);
+			request.getSoggetto().setCognome(null);
+			request.getSoggetto().setNome(null);
+			request.getSoggetto().setDenominazione(denominazione);
+		}
+
+	}
 	
 	private void setSoggetto(List<CnmTSoggetto> cnmTSoggettoList, RequestProtocollaDocumentoFisico request) {
 		if (cnmTSoggettoList == null || cnmTSoggettoList.size() == 0)
@@ -482,7 +552,7 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 				} else
 					denominazione = denominazione + ", " + sog.getRagioneSociale();
 			}
-
+			if(request.getSoggetto()==null) request.setSoggetto(new Soggetto());
 			request.getSoggetto().setTipologia(TOPOLOGIA_SOGGETTO_DESTINATARIO);
 			request.getSoggetto().setCognome(null);
 			request.getSoggetto().setNome(null);
@@ -904,13 +974,14 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		return respose;
 	}
 	
+	//20220321_SB modifica per gestione della paginazione nella ricerca
 	@Override
-	public List<DocumentoProtocollatoVO> ricercaProtocolloSuACTA(String numProtocollo) {
+	public RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, int pagina, int numeroRigheMax) {
 		if (StringUtils.isBlank(numProtocollo))
 			throw new IllegalArgumentException("numProtocollo non valido");
 
 		try {
-			return manageRicercaDocumentoHelper.ricercaDocumentoProtocollato(numProtocollo, DoquiConstants.CODICE_FRUITORE);
+			return manageRicercaDocumentoHelper.ricercaDocumentoProtocollatoPaged(numProtocollo, DoquiConstants.CODICE_FRUITORE, pagina, numeroRigheMax);
 		} catch (RicercaDocumentoException e) {
 			logger.error("RicercaDocumento Exception:", e);
 			if(e.getNestedExcClassName().equalsIgnoreCase("RicercaDocumentoNoDocElettronicoException")) {
@@ -992,7 +1063,7 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		request.setMetadati(metadati);
 		
 		// 20200708_LC id verbale
-		request.setIdVerbale(String.valueOf(idVerbale));
+		request.setIdVerbale(idVerbale);
 
 		// **********DOCUMENTO
 		Documento documento = new Documento();
@@ -1034,11 +1105,12 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		// 20210506_LC gestione folder temp per scritti difensivi (altro metodo)
 		request.setParolaChiaveFolderTemp(null);
 		
-		
 		logger.info("[spostaDocumentoProtocollato] -> " + "tipoDocumento :: " + tipoDocumento + "- REQUEST :: " + request);
 
 		try {
-			return manageSpostaDocumentoHelper.spostaDocumento(request);
+			ResponseSpostaDocumento result = manageSpostaDocumentoHelper.spostaDocumento(request);
+			return result;
+			
 		} catch (SpostaDocumentoException e) {
 			logger.error("Sposta Documento Exception:", e);
 			throw new RemoteWebServiceException(ErrorCode.DOQUI_SPOSTA_DOCUMENTO_NON_DISPONIBILE);
@@ -1171,7 +1243,7 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		request.setMetadati(metadati);
 		
 		// 20200708_LC id verbale
-		request.setIdVerbale(String.valueOf(idVerbale));
+		request.setIdVerbale(idVerbale);
 
 		// **********DOCUMENTO
 		Documento documento = new Documento();
@@ -1212,11 +1284,11 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		// 20210506_LC gestione folder temp per scritti difensivi (altro metodo)
 		request.setParolaChiaveFolderTemp(null);
 		
-		
 		logger.info("[copiaDocumentoProtocollato] -> " + "tipoDocumento :: " + tipoDocumento + "- REQUEST :: " + request);
 
 		try {
-			return manageSpostaDocumentoHelper.copiaDocumento(request);
+			ResponseSpostaDocumento result = manageSpostaDocumentoHelper.copiaDocumento(request);
+			return result;
 		} catch (SpostaDocumentoException e) {
 			logger.error("Sposta Documento Exception:", e);
 			throw new RemoteWebServiceException(ErrorCode.DOQUI_COPIA_DOCUMENTO_NON_DISPONIBILE);
@@ -1350,7 +1422,6 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		// lotto2scenario1 gestione folder temp per scritti difensivi
 		request.setParolaChiaveFolderTemp(folder);
 		
-		
 		logger.info("[spostaDocumentoProtocollato] -> " + "tipoDocumento :: " + tipoDocumento + "- REQUEST :: " + request);
 
 		try {
@@ -1463,7 +1534,6 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 
 		// lotto2scenario1 gestione folder temp per scritti difensivi
 		request.setParolaChiaveFolderTemp(folder);
-		
 		
 		logger.info("[copiaDocumentoProtocollato] -> " + "tipoDocumento :: " + tipoDocumento + "- REQUEST :: " + request);
 

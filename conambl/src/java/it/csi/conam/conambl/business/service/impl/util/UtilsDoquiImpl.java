@@ -132,7 +132,8 @@ public class UtilsDoquiImpl implements UtilsDoqui {
 			throw new IllegalArgumentException("cnmDTipoAllegato=null");
 		if (cnmTVerbale == null)
 			throw new IllegalArgumentException("cnmTVerbale=null");
-		return cnmTVerbale.getIdVerbale() + " - " + cnmDTipoAllegato.getDescTipoAllegato();
+		// 20230515 PP - fix issue 12
+		return cnmDTipoAllegato.getDescTipoAllegato();
 	}
 
 	@Override

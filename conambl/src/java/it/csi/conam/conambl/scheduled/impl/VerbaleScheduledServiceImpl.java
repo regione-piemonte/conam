@@ -6,12 +6,15 @@ package it.csi.conam.conambl.scheduled.impl;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -26,25 +29,38 @@ import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.util.UtilsDoqui;
 import it.csi.conam.conambl.business.service.util.UtilsTraceCsiLogAuditService;
+import it.csi.conam.conambl.business.service.verbale.VerbaleService;
 import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.common.TipoAllegato;
+import it.csi.conam.conambl.integration.beans.RequestSpostaDocumento;
 import it.csi.conam.conambl.integration.beans.ResponseAggiungiAllegato;
 import it.csi.conam.conambl.integration.beans.ResponseProtocollaDocumento;
+import it.csi.conam.conambl.integration.beans.ResponseSpostaDocumento;
 import it.csi.conam.conambl.integration.doqui.DoquiConstants;
+import it.csi.conam.conambl.integration.doqui.bean.DocumentoElettronicoActa;
+import it.csi.conam.conambl.integration.doqui.bean.SoggettoActa;
+import it.csi.conam.conambl.integration.doqui.bean.UtenteActa;
+import it.csi.conam.conambl.integration.doqui.entity.CnmDTipoFornitore;
 import it.csi.conam.conambl.integration.doqui.entity.CnmTDocumento;
+import it.csi.conam.conambl.integration.doqui.entity.CnmTFruitore;
+import it.csi.conam.conambl.integration.doqui.entity.CnmTSpostamentoActa;
+import it.csi.conam.conambl.integration.doqui.exception.FruitoreException;
+import it.csi.conam.conambl.integration.doqui.exception.RicercaDocumentoException;
+import it.csi.conam.conambl.integration.doqui.helper.ManageRicercaDocumentoHelper;
+import it.csi.conam.conambl.integration.doqui.helper.ManageSpostaDocumentoHelper;
+import it.csi.conam.conambl.integration.doqui.repositories.CnmDTipoFornitoreRepository;
 import it.csi.conam.conambl.integration.doqui.repositories.CnmTDocumentoRepository;
+import it.csi.conam.conambl.integration.doqui.repositories.CnmTSpostamentoActaRepository;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.entity.CnmDStatoAllegato;
-import it.csi.conam.conambl.integration.entity.CnmDStatoManuale;
+import it.csi.conam.conambl.integration.entity.CnmDStatoVerbale;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbale;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbalePK;
 import it.csi.conam.conambl.integration.entity.CnmTAllegato;
-import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.entity.CsiLogAudit.TraceOperation;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
-import it.csi.conam.conambl.integration.repositories.CnmDStatoManualeRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoVerbaleRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbaleRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
@@ -101,6 +117,18 @@ public class VerbaleScheduledServiceImpl implements VerbaleScheduledService {
 
 	@Autowired
 	private CnmTDocumentoRepository cnmTDocumentoRepository;
+
+	@Autowired 
+	private CnmTSpostamentoActaRepository cnmTSpostamentoActaRepository;
+
+	@Autowired
+	private ManageRicercaDocumentoHelper manageRicercaDocumentoHelper;
+
+	@Autowired
+	private ManageSpostaDocumentoHelper manageSpostaDocumentoHelper;
+
+	@Autowired
+	private CnmDTipoFornitoreRepository 		cnmDTipoFornitoreRepository;
 
 	
 	private boolean isDoquiDirect() {
@@ -366,7 +394,7 @@ public class VerbaleScheduledServiceImpl implements VerbaleScheduledService {
 			
 			// 20210805 PP - proseguo con la protocollazione del master del verbale
 			CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(DoquiConstants.USER_SCHEDULED_TASK);
-			ResponseProtocollaDocumento responseProtocollaEsistente = commonAllegatoService.avviaProtocollazioneDocumentoEsistente(cnmTAllegatoMaster, cnmTUser);
+			ResponseProtocollaDocumento responseProtocollaEsistente = commonAllegatoService.avviaProtocollazioneDocumentoEsistente(cnmTAllegatoMaster, cnmTUser, null, false);
 			
 			// aggiorna num potocollo su tutti gli allegati e relativi cnmDocumento
 			String numProtocollo = responseProtocollaEsistente.getProtocollo();
@@ -476,7 +504,7 @@ public class VerbaleScheduledServiceImpl implements VerbaleScheduledService {
 					// si fa la protocollazione
 					if (protocollazioneDaAvviare(allegati, cnmTAllegatoMaster)) {				
 						CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(DoquiConstants.USER_SCHEDULED_TASK);
-						ResponseProtocollaDocumento responseProtocollaEsistente = commonAllegatoService.avviaProtocollazioneDocumentoEsistente(cnmTAllegatoMaster, cnmTUser);
+						ResponseProtocollaDocumento responseProtocollaEsistente = commonAllegatoService.avviaProtocollazioneDocumentoEsistente(cnmTAllegatoMaster, cnmTUser, null, true);
 						
 						// aggiorna num potocollo su tutti gli allegati e relativi cnmDocumento
 						String numProtocollo = responseProtocollaEsistente.getProtocollo();
@@ -542,6 +570,176 @@ public class VerbaleScheduledServiceImpl implements VerbaleScheduledService {
 		}
 		
 		return true;
+	}
+
+	
+
+	@Override
+	public void manageSpostamento() {
+		CnmTFruitore cnmTFruitore = null;
+		CnmDTipoFornitore cnmDTipoFornitore = null;
+		UtenteActa utenteActa = null;
+		
+		List<CnmTSpostamentoActa> cnmSpostamentoActaList = cnmTSpostamentoActaRepository.findByStatoIn(Arrays.asList(CnmTSpostamentoActa.STATO_ERRORE, CnmTSpostamentoActa.STATO_RICHIESTA_RICEVUTA));
+		
+		if (cnmSpostamentoActaList!=null && cnmSpostamentoActaList.size()>0) {
+
+			try {
+				cnmTFruitore = manageSpostaDocumentoHelper.getFruitore();
+			} catch (FruitoreException e) {
+				logger.error("Errore nel reperimento del cnmTFruitore", e);
+				return;
+			}
+
+			cnmDTipoFornitore = cnmDTipoFornitoreRepository.findOne(DoquiConstants.FORNITORE_ACTA);
+			
+			utenteActa = new UtenteActa();
+			utenteActa.setCodiceFiscale(cnmTFruitore.getCfActa());
+			utenteActa.setIdAoo(new Integer(cnmTFruitore.getIdAooActa()));
+			utenteActa.setIdNodo(new Integer(cnmTFruitore.getIdNodoActa()));
+			utenteActa.setIdStruttura(new Integer(cnmTFruitore.getIdStrutturaActa()));
+			utenteActa.setApplicationKeyActa(cnmDTipoFornitore.getApplicationKey());
+			utenteActa.setRepositoryName(cnmDTipoFornitore.getRepository());
+			utenteActa.setDescEnte(cnmDTipoFornitore.getCodEnte());
+		}
+		CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(DoquiConstants.USER_SCHEDULED_TASK);
+		for(CnmTSpostamentoActa cnmSpostamentoActa :cnmSpostamentoActaList ) {
+			
+			logger.info("Eseguo manageSpostamento per cnmSpostamentoActa:" + cnmSpostamentoActa);
+
+			// setta stato intermedio
+			cnmSpostamentoActa.setStato(CnmTSpostamentoActa.STATO_INVIO_RICHIESTA);
+			cnmTSpostamentoActaRepository.save(cnmSpostamentoActa);
+			
+			boolean operazioneCopia = cnmSpostamentoActa.getOperazione().equals(CnmTSpostamentoActa.OPERAZIONE_COPIA);
+			
+			try {				
+
+				CnmTVerbale verbale = cnmTVerbaleRepository.findByIdVerbale(cnmSpostamentoActa.getIdVerbale());
+				CnmTDocumento cnmTDocumentoMaster = cnmTDocumentoRepository.findOne(cnmSpostamentoActa.getIdDocumentoMaster());
+				String root = utilsDoqui.getRootActa(verbale);
+				utenteActa.setRootActa(root!=null?root:cnmTDocumentoMaster.getCnmDTipoDocumento().getRoot());
+				
+				utenteActa.setIdvitalrecordcodetype(cnmTDocumentoMaster.getCnmDTipoDocumento().getIdVitalRecordCodeType());
+				utenteActa.setIdStatoDiEfficacia(cnmTDocumentoMaster.getCnmDTipoDocumento().getIdStatoEfficacia());
+				
+				DocumentoElettronicoActa documentoElettronicoActa = new DocumentoElettronicoActa();
+				documentoElettronicoActa.setIdDocumento(cnmTDocumentoMaster.getIdentificativoArchiviazione());
+				documentoElettronicoActa.setFolder(cnmSpostamentoActa.getFolder());
+				documentoElettronicoActa.setTipoStrutturaRoot(cnmTDocumentoMaster.getCnmDTipoDocumento().getCnmDStrutturaActaRoot().getIdStrutturaActa());		// 20200630_LC
+				documentoElettronicoActa.setTipoStrutturaFolder(cnmTDocumentoMaster.getCnmDTipoDocumento().getCnmDStrutturaActaFolder().getIdStrutturaActa());	
+				
+				String soggettoActaFruitore = utilsDoqui.getSoggettoActa(verbale);
+				
+				// 20200730_LC
+				if(StringUtils.isNotEmpty(soggettoActaFruitore))
+					documentoElettronicoActa.setFruitore(soggettoActaFruitore);
+				else
+					documentoElettronicoActa.setFruitore(cnmTFruitore.getDescrFruitore());
+				
+				SoggettoActa soggettoActa = new SoggettoActa();
+				
+				soggettoActa.setMittente(true);
+				documentoElettronicoActa.setAutore("CONAM");
+				//TODO Da verificare la denominazione
+				utenteActa.setDescFormaDocumentaria(cnmTDocumentoMaster.getCnmDTipoDocumento().getDescFormadocEntrata());
+				
+				utenteActa.setDescEnte(cnmDTipoFornitore.getCodEnte());
+				soggettoActa.setCognome("CONAM");
+				soggettoActa.setNome("CONAM");
+				documentoElettronicoActa.setSoggettoActa(soggettoActa);
+
+				CnmTVerbale cnmTVerbale = cnmTVerbaleRepository.findByIdVerbale(cnmSpostamentoActa.getIdVerbale());
+				
+				ResponseSpostaDocumento response = new ResponseSpostaDocumento();
+				if(operazioneCopia) {
+					manageSpostaDocumentoHelper.manageCopia(response, documentoElettronicoActa, cnmSpostamentoActa, utenteActa, cnmSpostamentoActa.getParolaChiaveTemp(), cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() > 1);
+				}else {
+					manageSpostaDocumentoHelper.manageSposta(response, documentoElettronicoActa, cnmSpostamentoActa, utenteActa, cnmSpostamentoActa.getParolaChiaveTemp(), cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() > 1);
+				}
+				manageSpostaDocumentoHelper.checkUpdateStatusVerbale(cnmSpostamentoActa, cnmTUser);
+				
+			} catch (Exception e) {
+				logger.error("Errore in elaborazione manageSpostamento:" + cnmSpostamentoActa, e);
+				cnmSpostamentoActa.setStato(CnmTSpostamentoActa.STATO_ERRORE);
+				cnmSpostamentoActa.setInfo(e.getMessage());
+				cnmTSpostamentoActaRepository.save(cnmSpostamentoActa);
+			}
+		}
+		
+	}
+	
+	@Override
+	public void checkSpostamento() {
+		
+		CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(DoquiConstants.USER_SCHEDULED_TASK);
+		
+		List<CnmTSpostamentoActa> cnmSpostamentoActaList = cnmTSpostamentoActaRepository.findByStato(CnmTSpostamentoActa.STATO_IN_CORSO);
+
+		for(CnmTSpostamentoActa cnmSpostamentoActa :cnmSpostamentoActaList ) {
+			
+			// setta stato intermedio
+			cnmSpostamentoActa.setStato(CnmTSpostamentoActa.STATO_AGGIORNAMENTO_DATI);
+			cnmTSpostamentoActaRepository.save(cnmSpostamentoActa);
+
+			logger.info("Eseguo check per cnmSpostamentoActa:" + cnmSpostamentoActa);
+
+			boolean operazioneCopia = cnmSpostamentoActa.getOperazione().equals(CnmTSpostamentoActa.OPERAZIONE_COPIA);
+			
+			// master dle protocollo spostato (gia creato su db)
+			CnmTDocumento cnmTDocumentoMaster = cnmTDocumentoRepository.findOne(cnmSpostamentoActa.getIdDocumentoMaster());
+			
+			try {
+				
+				// torna lo stato dell'operazione (descStato)
+				String moveResult = manageRicercaDocumentoHelper.recuperaInfoMoveDocument(cnmSpostamentoActa.getPrenotazioneId());
+				
+				if(moveResult != null && moveResult.equals("OK")) {
+					
+					CnmTVerbale cnmTVerbale = cnmTVerbaleRepository.findByIdVerbale(cnmSpostamentoActa.getIdVerbale());
+					
+					ResponseSpostaDocumento response = new ResponseSpostaDocumento();
+					response.setObjectIdDocumentoToTraceList(new ArrayList<String>());
+					manageSpostaDocumentoHelper.updateInfoPostSpostaCopia(cnmSpostamentoActa, response, operazioneCopia);
+					manageSpostaDocumentoHelper.tracciaSuCsiLogAudit(operazioneCopia, cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() > 1, response.getObjectIdDocumentoToTraceList());
+					logger.info("Operazione terminata; chiamata a servizi acaris per aggiornamento info su DB");	
+					cnmSpostamentoActa.setStato(CnmTSpostamentoActa.STATO_EVASO);
+					cnmSpostamentoActa.setDataOraEnd(utilsDate.asTimeStamp(LocalDateTime.now()));
+					cnmSpostamentoActa.setInfo("Operazione " + cnmSpostamentoActa.getOperazione().toLowerCase() + " effettuata e dati aggiornati");
+					cnmTSpostamentoActaRepository.save(cnmSpostamentoActa);
+					
+					manageSpostaDocumentoHelper.checkUpdateStatusVerbale(cnmSpostamentoActa, cnmTUser);
+					
+				} else {					
+					logger.info("Operazione non ancora terminata");					
+					cnmSpostamentoActa.setStato(CnmTSpostamentoActa.STATO_IN_CORSO);
+					cnmSpostamentoActa.setInfo("Richiesta " + cnmSpostamentoActa.getOperazione().toLowerCase() + " inviata");
+					cnmTSpostamentoActaRepository.save(cnmSpostamentoActa);
+
+				}
+			} catch (RicercaDocumentoException e1) {
+				logger.warn("Problema in ricerca protocollo per cnmSpostamentoActa:" + cnmSpostamentoActa, e1);
+				cnmSpostamentoActa.setStato(CnmTSpostamentoActa.STATO_IN_CORSO);
+				cnmSpostamentoActa.setInfo(e1.getMessage());
+				cnmTSpostamentoActaRepository.save(cnmSpostamentoActa);
+			} catch (Exception e) {
+				logger.error("Errore in elaborazione cnmSpostamentoActa:" + cnmSpostamentoActa, e);
+				cnmSpostamentoActa.setStato(CnmTSpostamentoActa.STATO_IN_CORSO);
+				cnmSpostamentoActa.setInfo("Errore in elaborazione cnmSpostamentoActa");
+				cnmTSpostamentoActaRepository.save(cnmSpostamentoActa);
+			}
+		}
+		
+	}
+
+
+	private RequestSpostaDocumento buildRequestForUpdateInfo(CnmTSpostamentoActa cnmSpostamentoActa) {
+		RequestSpostaDocumento req = new RequestSpostaDocumento();
+		req.setIdVerbale(cnmSpostamentoActa.getIdVerbale());
+		req.setNumeroProtocollo(cnmSpostamentoActa.getNumeroProtocollo());
+		req.setCodiceFruitore(DoquiConstants.CODICE_FRUITORE);
+		req.setFolder(cnmSpostamentoActa.getFolder());
+		return req;
 	}
 	
 	

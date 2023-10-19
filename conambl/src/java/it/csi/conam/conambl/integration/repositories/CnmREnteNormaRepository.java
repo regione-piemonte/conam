@@ -58,7 +58,7 @@ public interface CnmREnteNormaRepository extends JpaRepository<CnmREnteNorma, In
 //	CnmREnteNorma findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(CnmDNorma cnmDNorma, CnmDEnte cnmDEnte);
 
 	@Query("Select u from CnmREnteNorma u where u.cnmDNorma=?1 and u.cnmDEnte=?2 and ((u.fineValidita is null or u.fineValidita>?3) and (u.inizioValidita is null or u.inizioValidita<=?3))  and (u.eliminato is null or u.eliminato=false)")
-	CnmREnteNorma findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(CnmDNorma cnmDNorma, CnmDEnte cnmDEnte, Date dataAccertamento);
+	List<CnmREnteNorma> findByCnmDNormaAndCnmDEnteFineValiditaAndNotEliminato(CnmDNorma cnmDNorma, CnmDEnte cnmDEnte, Date dataAccertamento);
 
 	@Query("Select u from CnmREnteNorma u where u.cnmDNorma=?1 and u.cnmDEnte=?2 and (u.inizioValidita is null or u.inizioValidita<?3))  and (u.eliminato is null or u.eliminato=false)")
 	CnmREnteNorma findByCnmDNormaAndCnmDEntePregressoAndNotEliminato(CnmDNorma cnmDNorma, CnmDEnte cnmDEnte, Date dataDiscriminantePregresso);

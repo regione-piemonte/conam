@@ -11,6 +11,7 @@ import com.google.common.collect.Iterables;
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.ordinanza.AllegatoOrdinanzaService;
+import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.util.UtilsDoqui;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleService;
@@ -23,6 +24,7 @@ import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.mapper.entity.AllegatoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.TipoAllegatoEntityMapper;
 import it.csi.conam.conambl.integration.repositories.*;
@@ -112,6 +114,9 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 	private CnmRAllegatoPianoRateRepository cnmAllegatoPianoRateRepository;
 	@Autowired
 	private CnmTAllegatoFieldRepository cnmTAllegatoFieldRepository;
+
+	@Autowired
+	private UtilsCnmCProprietaService utilsCnmCProprietaService;
 	
 	@Override
 	public RiepilogoAllegatoVO getAllegatiByIdVerbale(Integer id, UserDetails userDetails, boolean includiControlloUtenteProprietarioIstruttoreAssegnato, boolean verbaleAudizione) {
@@ -132,14 +137,16 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 			if (appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_ISTRUTTORE)) {
 				if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO) {
 					CnmRFunzionarioIstruttore cnmRFunzionarioIstruttore = cnmRFunzionarioIstruttoreRepository.findByCnmTVerbaleAndDataAssegnazione(cnmTVerbale);
-					if (cnmRFunzionarioIstruttore != null && cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() != userDetails.getIdUser())
+					if (cnmRFunzionarioIstruttore != null && 
+							cnmRFunzionarioIstruttore.getCnmTUser().getIdUser() != userDetails.getIdUser() && 
+							Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)))
 						throw new BusinessException(ErrorCode.UTENTE_NOACCESS_VERBALE);
-				} else if (cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser())
+				} else if (cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser() && Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)))
 					throw new BusinessException(ErrorCode.UTENTE_NOACCESS_VERBALE);
 			} else if (appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_ACCERTATORE) || appGrantedAuthority.getCodice().equals(Constants.RUOLO_UTENTE_AMMINISTRATIVO)) {
 				if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO)
 					throw new BusinessException(ErrorCode.UTENTE_NOACCESS_VERBALE);
-				else if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO && cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser())
+				else if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_INCOMPLETO && cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser() && Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED)))
 					throw new BusinessException(ErrorCode.UTENTE_NOACCESS_VERBALE);
 			} else
 				throw new SecurityException("Ruolo non riconosciuto dal sistema");
@@ -574,7 +581,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 					s += "IMPORTO PAGATO: " + string + " ";
 				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_STRING) {
 					if(all.getStringValue()!=null)
-						s += "CONTO CORRENTE VERSAMENTO: " + all.getStringValue().toString() + " ";
+						s += "TIPOLOGIA PAGAMENTO: " + all.getStringValue().toString() + " ";
 				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_DATA_ORA) {
 					if(all.getDateValue()!=null)
 						s += all.getDateTimeValue().toString() + " ";
@@ -587,9 +594,9 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 				}
 			}
 
-			byteFile = s.getBytes();
 			CnmTVerbale cnmTVerbale = cnmTVerbaleRepository.findByIdVerbale(idVerbale);
 			if (idTipoAllegato != TipoAllegato.RELATA_NOTIFICA.getId()) {
+				byteFile = s.getBytes();
 				fileName = "Promemoria_pagamento_verbale_" + verificaNome(cnmTVerbale.getNumVerbale()) + ".txt";
 				nofile = true;
 			}
@@ -626,11 +633,14 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		// controllo regole allegati verbale
 		controllaRegoleFieldAllegatiVerbale(cnmTVerbale, idTipoAllegato, configAllegato);
 
+		// 20230227 - gestione tipo registrazione
+		boolean protocollazioneUscita = Constants.ALLEGATI_REGISTRAZIONE_IN_USCITA.contains(idTipoAllegato);
+		
 		long idStatoVerbale = cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale();
 		CnmTAllegato cnmTAllegato;
 		if (nofile) {
-			cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.NON_PROTOCOLLARE, null, null, false, false, null,
-					null, 0, null, null, null);
+			cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.NON_PROTOCOLLARE, 
+					null, null, false, protocollazioneUscita, null, null, 0, null, null, null);
 		} else if (idStatoVerbale == Constants.STATO_VERBALE_INCOMPLETO) {
 			
 			// 2020-06-15 PP - INIZIO
@@ -639,8 +649,8 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 //			String soggettoActa = "DEFAULT_SUBJECT";// = utilsStadoc.getSoggettoActa(cnmTVerbale);
 			String rootActa = utilsDoqui.getRootActa(cnmTVerbale);
 
-				cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO, folder, idEntitaFruitore,
-					false, false, null, rootActa, 0, null, null, null);
+				cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO, 
+						folder, idEntitaFruitore, false, protocollazioneUscita, null, rootActa, 0, null, null, null);
 			// 2020-06-15 PP - FINE
 			
 			
@@ -664,7 +674,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 			List<CnmTSoggetto> cnmTSoggettoList = cnmTSoggettoRepository.findByCnmRVerbaleSoggettosIn(cnmRVerbaleSoggettoListA);
 
 			cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.PROTOCOLLARE,
-					utilsDoqui.createOrGetfolder(cnmTVerbale), utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmDTipoAllegatoRepository.findOne(idTipoAllegato)), false, false,
+					utilsDoqui.createOrGetfolder(cnmTVerbale), utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmDTipoAllegatoRepository.findOne(idTipoAllegato)), false, protocollazioneUscita,
 					utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale), 0, idVerbaleAudizione, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_USCITA_SENZA_ALLEGATI_GENERERATI,
 					cnmTSoggettoList);
 
@@ -675,12 +685,12 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 
 			String fruitore = utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmDTipoAllegato);
 			cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, null, cnmTUser, TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE,
-					utilsDoqui.createOrGetfolder(cnmTVerbale), fruitore, true, false, null, utilsDoqui.getRootActa(cnmTVerbale), 0, 0,
+					utilsDoqui.createOrGetfolder(cnmTVerbale), fruitore, true, protocollazioneUscita, null, utilsDoqui.getRootActa(cnmTVerbale), 0, 0,
 					StadocServiceFacade.TIPOLOGIA_DOC_ACTA_MASTER_USCITA_CON_ALLEGATI, null);
 
 		} else {
 			cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.PROTOCOLLARE,
-					utilsDoqui.createOrGetfolder(cnmTVerbale), utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmDTipoAllegatoRepository.findOne(idTipoAllegato)), false, false,
+					utilsDoqui.createOrGetfolder(cnmTVerbale), utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmDTipoAllegatoRepository.findOne(idTipoAllegato)), false, protocollazioneUscita,
 					utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale), 0, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, null);
 		}
 
@@ -816,11 +826,14 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		// controllo dimensione allegato
 		UploadUtils.checkDimensioneAllegato(byteFile);
 
+		// 20230227 - gestione tipo registrazione (con comparsa è true)
+		boolean protocollazioneUscita = Constants.ALLEGATI_REGISTRAZIONE_IN_USCITA.contains(idTipoAllegato);
+		
 		// 20201026 PP- controllo se e' stato caricato un file firmato , con firma non valida senza firma
 		utilsDoqui.checkFileSign(byteFile, fileName);
 		
 		cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, null, cnmTUser, TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE, folder, fruitore,
-				allegato.isMaster(), false, null, rootActa, numeroAllegati, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_MASTER_USCITA_CON_ALLEGATI, null);
+				allegato.isMaster(), protocollazioneUscita, null, rootActa, numeroAllegati, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_MASTER_USCITA_CON_ALLEGATI, null);
 
 		// 20201021 PP - Imposto il flag pregresso sull'allegato
 		cnmTAllegato.setFlagDocumentoPregresso(pregresso);

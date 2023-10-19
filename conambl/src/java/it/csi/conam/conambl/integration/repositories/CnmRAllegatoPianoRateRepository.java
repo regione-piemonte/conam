@@ -6,7 +6,10 @@ package it.csi.conam.conambl.integration.repositories;
 
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRate;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRatePK;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
 import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
+
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +20,8 @@ public interface CnmRAllegatoPianoRateRepository extends CrudRepository<CnmRAlle
 
 	List<CnmRAllegatoPianoRate> findByCnmTPianoRate(CnmTPianoRate cnmTPianoRate);
 
+	@Query("select ao.cnmTAllegato from CnmRAllegatoPianoRate ao where ao.cnmTPianoRate=?1")
+	List<CnmTAllegato> findCnmTAllegatosByCnmTPianoRate(CnmTPianoRate cnmTPianoRate);
+
+	List<CnmRAllegatoPianoRate> findByCnmTAllegato(CnmTAllegato cnmTAllegato);
 }

@@ -4,17 +4,19 @@
  ******************************************************************************/
 package it.csi.conam.conambl.vo.ordinanza;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 import it.csi.conam.conambl.vo.ParentVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.web.serializer.CustomDateDeserializer;
 import it.csi.conam.conambl.web.serializer.CustomDateSerializer;
 import it.csi.conam.conambl.web.serializer.CustomDateTimeDeserializer;
 import it.csi.conam.conambl.web.serializer.CustomDateTimeSerializer;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class MinOrdinanzaVO extends ParentVO {
 
@@ -44,6 +46,12 @@ public class MinOrdinanzaVO extends ParentVO {
     @JsonSerialize(using = CustomDateSerializer.class)
     @JsonDeserialize(using = CustomDateDeserializer.class)
 	private LocalDate dataFineValidita;
+    
+    private SelectVO causale;
+    private String numeroAccertamento;
+    private Long annoAccertamento;
+    
+    private String numVerbale;
 	
 	public Long getId() {
 		return id;
@@ -156,4 +164,37 @@ public class MinOrdinanzaVO extends ParentVO {
 	public void setDataFineValidita(LocalDate dataFineValidita) {
 		this.dataFineValidita = dataFineValidita;
 	}
+
+	public SelectVO getCausale() {
+		return causale;
+	}
+
+	public void setCausale(SelectVO causale) {
+		this.causale = causale;
+	}
+
+	public String getNumeroAccertamento() {
+		return numeroAccertamento;
+	}
+
+	public void setNumeroAccertamento(String numeroAccertamento) {
+		this.numeroAccertamento = numeroAccertamento;
+	}
+
+	public Long getAnnoAccertamento() {
+		return annoAccertamento;
+	}
+
+	public void setAnnoAccertamento(Long annoAccertamento) {
+		this.annoAccertamento = annoAccertamento;
+	}
+
+	public String getNumVerbale() {
+		return numVerbale;
+	}
+
+	public void setNumVerbale(String numVerbale) {
+		this.numVerbale = numVerbale;
+	}
+	
 }

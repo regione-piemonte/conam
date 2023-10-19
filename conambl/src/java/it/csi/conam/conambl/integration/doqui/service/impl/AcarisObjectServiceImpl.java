@@ -4,12 +4,19 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.doqui.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
+import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.integration.doqui.DoquiConstants;
 import it.csi.conam.conambl.integration.doqui.DoquiServiceFactory;
 import it.csi.conam.conambl.integration.doqui.bean.DocumentoActa;
 import it.csi.conam.conambl.integration.doqui.bean.UtenteActa;
 import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
+import it.csi.conam.conambl.integration.doqui.exception.TroppiAllegatiPerSpostamentoException;
 import it.csi.conam.conambl.integration.doqui.service.AcarisObjectService;
 import it.csi.conam.conambl.integration.doqui.utils.XmlSerializer;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
@@ -17,13 +24,32 @@ import it.csi.util.performance.StopWatch;
 import it.doqui.acta.acaris.objectservice.AcarisException;
 import it.doqui.acta.acaris.objectservice.ObjectServicePort;
 import it.doqui.acta.actasrv.business.util.type.AcarisUtils;
-import it.doqui.acta.actasrv.dto.acaris.type.archive.*;
-import it.doqui.acta.actasrv.dto.acaris.type.common.*;
+import it.doqui.acta.actasrv.dto.acaris.type.archive.DossierPropertiesType;
+import it.doqui.acta.actasrv.dto.acaris.type.archive.EnumDossierStatoType;
+import it.doqui.acta.actasrv.dto.acaris.type.archive.EnumFolderObjectType;
+import it.doqui.acta.actasrv.dto.acaris.type.archive.FascicoloRealeAnnualePropertiesType;
+import it.doqui.acta.actasrv.dto.acaris.type.archive.MoveDocumentPropertiesType;
+import it.doqui.acta.actasrv.dto.acaris.type.archive.VolumeSerieTipologicaDocumentiPropertiesType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.AcarisContentStreamType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.ChangeTokenType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.EnumPropertyFilter;
+import it.doqui.acta.actasrv.dto.acaris.type.common.EnumQueryOperator;
+import it.doqui.acta.actasrv.dto.acaris.type.common.EnumStreamId;
+import it.doqui.acta.actasrv.dto.acaris.type.common.IdAOOType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.IdNodoType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.IdStrutturaType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.NavigationConditionInfoType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.ObjectIdType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.ObjectResponseType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PagingResponseType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PrincipalIdType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PropertyFilterType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.PropertyType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.QueryConditionType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.QueryNameType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.QueryableObjectType;
+import it.doqui.acta.actasrv.dto.acaris.type.common.ValueType;
 import it.doqui.acta.actasrv.dto.acaris.type.management.VitalRecordCodeType;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AcarisObjectServiceImpl extends CommonManagementServiceImpl implements AcarisObjectService
@@ -1017,7 +1043,7 @@ public class AcarisObjectServiceImpl extends CommonManagementServiceImpl impleme
 
 
 	// 20200618_LC
-	public ObjectIdType moveActaDocument(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType associativeObjectId, ObjectIdType sourceFolderId, ObjectIdType destinationFolderId, boolean isRichiestaOffline) throws IntegrationException {
+	public ObjectIdType moveActaDocument(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType associativeObjectId, ObjectIdType sourceFolderId, ObjectIdType destinationFolderId, boolean isRichiestaOffline) throws IntegrationException, TroppiAllegatiPerSpostamentoException {
 		String method = "spostaDocumento";
 
 		// id nuova classificazione
@@ -1031,12 +1057,11 @@ public class AcarisObjectServiceImpl extends CommonManagementServiceImpl impleme
 		// spostamento normale
 		MoveDocumentPropertiesType associativeProperties = null;									
 		
+		
 		// spostamento documento con allegati o documento protocolalto e smistato - interpretare bene la documentazione, il booleano al momento è sempre TRUE
-		if (isRichiestaOffline) {
 		associativeProperties = new MoveDocumentPropertiesType();		
-		associativeProperties.setOfflineMoveRequest(true);		// TRUE se si richiede l'esecuzione asincrona via batch, quando ci sono più allegati di quelli pervisti (= 20)
-		//associativeProperties.setIdSmistamentoType(null);		// idSmistamentoType  (identificatore dello smistamento da utilizzare), quando il documento da spostare è legato ad uno smistamento (cosa e?)
-		}				
+		associativeProperties.setOfflineMoveRequest(isRichiestaOffline);		// TRUE se si richiede l'esecuzione asincrona via batch, quando ci sono più allegati di quelli pervisti (= 20)
+		//associativeProperties.setIdSmistamentoType(null);						// idSmistamentoType  (identificatore dello smistamento da utilizzare), quando il documento da spostare è legato ad uno smistamento (cosa e?)
 		
 		// -----------------------------------------------------------------------------------------------------
 		
@@ -1067,6 +1092,10 @@ public class AcarisObjectServiceImpl extends CommonManagementServiceImpl impleme
 				log.error(method + ". acEx.getFaultInfo().getClassName()     = " + acEx.getFaultInfo().getClassName());
 				log.error(method + ". acEx.getFaultInfo().getTechnicalInfo() = " + acEx.getFaultInfo().getTechnicalInfo());	
 			}
+			
+			if (acEx.getFaultInfo() != null && acEx.getFaultInfo().getErrorCode() != null && acEx.getFaultInfo().getErrorCode().equals(Constants.ACARIS_CODICE_EXC_E167))
+				throw new TroppiAllegatiPerSpostamentoException(acEx.getMessage(), acEx);
+			
 			throw new IntegrationException("Impossibile spostare il documento ", acEx);
 		}
 		catch (Exception e) {
@@ -1555,6 +1584,71 @@ public class AcarisObjectServiceImpl extends CommonManagementServiceImpl impleme
 		return numAllegatiPresenti;
 
 	}
+
+	public ObjectIdType recuperaInfoMoveDocumentOfflineView(String objectIdRichiestaPrenotazione, ObjectIdType repositoryId, PrincipalIdType  principalId) throws IntegrationException{
+		String method = "moveDocumentOfflineView";
+		ObjectIdType result = null;
+
+		QueryableObjectType target = new QueryableObjectType();
+		target.setObject("moveDocumentOfflineView");
+		
+		result = this.getInfoMoveDocumentOfflineView(repositoryId, principalId, target, objectIdRichiestaPrenotazione);
+		if(log.isDebugEnabled()){
+			log.debug(method + ". moveDocumentOfflineView = " + result.getValue());
+		}
+		return result;
+	}
+	
+public ObjectIdType getInfoMoveDocumentOfflineView(ObjectIdType repositoryId, PrincipalIdType principalId, QueryableObjectType target, String objectIdRichiestaPrenotazione) throws IntegrationException {
+		
+		String method = "getInfoMoveDocumentOfflineView";
+		
+		ObjectIdType result = new ObjectIdType();
+		PagingResponseType response = null;
+
+		PropertyFilterType filter = new PropertyFilterType();
+		filter.setFilterType(EnumPropertyFilter.ALL);
+		QueryConditionType condition = new QueryConditionType();
+		condition.setOperator(EnumQueryOperator.EQUALS);
+		condition.setPropertyName("objectIdRichiestaPrenotazione");
+		condition.setValue(objectIdRichiestaPrenotazione);
+		QueryConditionType []conditions = {condition};
+		try {
+			// Chiamate tramite WSDL
+//			response = backOfficeService.query(repositoryId,principalId, target, filter, conditions, null, null, null);
+			response = acarisServiceFactory.getAcarisService().getObjectServicePort().query(repositoryId,principalId, target, filter, conditions, null, null, null);
+			if(response == null){
+				throw new IntegrationException("Impossibile recuperare la info ", new NullPointerException("response is null"));
+			}
+			
+			if(response != null && response.getObjectsLength() > 0) {
+				for(PropertyType prop : response.getObjects()[0].getProperties()) {
+					if(prop.getQueryName()!=null 
+							&& prop.getQueryName().getPropertyName().equalsIgnoreCase("descStato")) {
+						String res = prop.getValue().getContent()[0];
+						result.setValue(res);
+						break;
+					}
+				}
+			}
+		}
+		catch (AcarisException acEx) {
+			log.error(method + ". Impossibile recuperare la info: " + acEx.getMessage());
+			log.error(method + ". acEx.getFaultInfo().getErrorCode() =  " + acEx.getFaultInfo().getErrorCode());
+			log.error(method + ". acEx.getFaultInfo().getPropertyName() = " + acEx.getFaultInfo().getPropertyName());
+			log.error(method + ". acEx.getFaultInfo().getObjectId() = " + acEx.getFaultInfo().getObjectId());
+			log.error(method + ". acEx.getFaultInfo().getExceptionType() = " + acEx.getFaultInfo().getExceptionType());
+			log.error(method + ". acEx.getFaultInfo().getClassName() = " + acEx.getFaultInfo().getClassName());
+			log.error(method + ". acEx.getFaultInfo().getTechnicalInfo = " + acEx.getFaultInfo().getTechnicalInfo());
+			throw new IntegrationException("AcarisException ", acEx);
+		} 
+		catch (Exception e) {
+			log.error(method + ". Exception = " + e.getMessage());
+			throw new IntegrationException("Impossibile recuperare la info ", e);
+		}	
+		return result;
+	}
+
 	
 	
 	

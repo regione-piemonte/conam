@@ -5,6 +5,7 @@
 package it.csi.conam.conambl.integration.doqui.service;
 
 import it.csi.conam.conambl.integration.doqui.exception.IntegrationException;
+import it.csi.conam.conambl.integration.doqui.exception.TroppiAllegatiPerSpostamentoException;
 import it.doqui.acta.actasrv.dto.acaris.type.common.ObjectIdType;
 import it.doqui.acta.actasrv.dto.acaris.type.common.PrincipalIdType;
 
@@ -14,6 +15,6 @@ public interface AcarisMultifilingService
 	
 	public void init();
 	
-	public ObjectIdType aggiungiClassificazione(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType sourceClassificazioneId, ObjectIdType destinationFolderId, boolean isOfflineRequest) throws IntegrationException;
+	public ObjectIdType aggiungiClassificazione(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType sourceClassificazioneId, ObjectIdType destinationFolderId, boolean isOfflineRequest) throws IntegrationException, TroppiAllegatiPerSpostamentoException;
 
 }

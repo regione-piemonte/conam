@@ -99,7 +99,7 @@ public class SollecitoEntityMapperImpl implements SollecitoEntityMapper {
 		
 
 		boolean richiestaInviata = allegatoSollecitoService.isRichiestaBollettiniInviata(dto);
-		boolean bollettinoDaCreare = !richiestaInviata && (dto.getCnmDStatoSollecito().getIdStatoSollecito() == Constants.ID_STATO_SOLLECITO_PROTOCOLLATO
+		boolean bollettinoDaCreare = !richiestaInviata && (dto.getCnmDStatoSollecito().getIdStatoSollecito() == Constants.ID_STATO_SOLLECITO_IN_PROTOCOLLAZIONE
 				|| dto.getCnmDStatoSollecito().getIdStatoSollecito() == Constants.ID_STATO_SOLLECITO_NOTIFICATO) && dto.getDataScadenzaRata() != null;
 		boolean dowloadBollettiniEnable = richiestaInviata && dto.getDataScadenzaRata() != null;
 

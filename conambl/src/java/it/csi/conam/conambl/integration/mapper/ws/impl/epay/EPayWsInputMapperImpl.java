@@ -200,7 +200,11 @@ public class EPayWsInputMapperImpl implements EPayWsInputMapper {
 			Iterator<CnmTNotifica> iterNotifica = cnmTOrdinanza.getCnmTNotificas().iterator();
 			while(iterNotifica.hasNext()) {
 				CnmTNotifica notificaItem = iterNotifica.next();
-				importNotifica = importNotifica.add(notificaItem.getImportoSpeseNotifica());
+				// 20230519 PP - CR abb 167 (issue 5)
+				// Importo spese notifica diventa opzionale
+				if(notificaItem.getImportoSpeseNotifica()!=null) {
+					importNotifica = importNotifica.add(notificaItem.getImportoSpeseNotifica());
+				}
 			}			
 		}
 
@@ -243,6 +247,9 @@ public class EPayWsInputMapperImpl implements EPayWsInputMapper {
 			posizioneDaInserireType.setDescrizioneRata(BigDecimal.ONE.toString());		
 						
 			importoTotale = importoTotale.add(cnmTOrdinanza.getImportoOrdinanza().add(importNotifica));
+			
+			// 20230214 PP - nuovi campi per modifica integrazione PPAY
+			setComponenteImporto(posizioneDaInserireType, cnmTOrdinanza);
 
 			posInserireTypeList.add(posizioneDaInserireType);
 		}	
@@ -263,6 +270,37 @@ public class EPayWsInputMapperImpl implements EPayWsInputMapper {
 		inserisciListaDiCaricoRequest.setTestata(testataListaCarico);
 
 		return inserisciListaDiCaricoRequest;
+	}
+
+	private void setComponenteImporto(PosizioneDaInserireType posizioneDaInserireType, CnmTOrdinanza cnmTOrdinanza) {
+		
+		List<ComponenteImportoType> componentiImportos = null;
+		
+		if(cnmTOrdinanza.getCnmDCausale()!=null) {
+			componentiImportos = new ArrayList<ComponenteImportoType>();
+			ComponenteImportoType ordinanza = new ComponenteImportoType();
+			ordinanza.setAnnoAccertamento(cnmTOrdinanza.getAnnoAccertamento());
+			ordinanza.setNumeroAccertamento(cnmTOrdinanza.getNumeroAccertamento());
+			ordinanza.setCausaleDescrittiva(cnmTOrdinanza.getCnmDCausale().getDescCausale());
+			ordinanza.setImporto(cnmTOrdinanza.getImportoOrdinanza().setScale(2, RoundingMode.HALF_UP));
+			componentiImportos.add(ordinanza);
+			
+			if(cnmTOrdinanza.getCnmTNotificas()!=null && !cnmTOrdinanza.getCnmTNotificas().isEmpty()) {
+				Iterator<CnmTNotifica> iterNotifica = cnmTOrdinanza.getCnmTNotificas().iterator();
+				while(iterNotifica.hasNext()) {
+					CnmTNotifica notificaItem = iterNotifica.next();
+					if(notificaItem.getCnmDCausale()!=null) {
+						ComponenteImportoType notifica = new ComponenteImportoType();
+						notifica.setAnnoAccertamento(notificaItem.getAnnoAccertamento());
+						notifica.setNumeroAccertamento(notificaItem.getNumeroAccertamento());
+						notifica.setCausaleDescrittiva(notificaItem.getCnmDCausale().getDescCausale());
+						notifica.setImporto(notificaItem.getImportoSpeseNotifica().setScale(2, RoundingMode.HALF_UP));
+						componentiImportos.add(notifica);
+					}
+				}			
+			}			
+		}
+		posizioneDaInserireType.setComponentiImporto(componentiImportos.toArray(new ComponenteImportoType[0]) );
 	}
 
 	@Override

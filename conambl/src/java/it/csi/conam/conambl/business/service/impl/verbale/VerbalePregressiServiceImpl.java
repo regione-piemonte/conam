@@ -4,6 +4,7 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.verbale;
 
+import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.verbale.UtilsVerbale;
 import it.csi.conam.conambl.business.service.verbale.VerbalePregressiService;
 import it.csi.conam.conambl.business.service.verbale.VerbaleService;
@@ -13,6 +14,7 @@ import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.exception.VerbalePregressoValidationException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.mapper.entity.EnteEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.VerbaleEntityMapper;
 import it.csi.conam.conambl.integration.repositories.*;
@@ -65,6 +67,9 @@ public class VerbalePregressiServiceImpl implements VerbalePregressiService {
 	@Autowired
 	private EnteEntityMapper enteEntityMapper;
 
+
+	@Autowired
+	private UtilsCnmCProprietaService utilsCnmCProprietaService;
 	
 	@Override
 	@Transactional
@@ -179,6 +184,8 @@ public class VerbalePregressiServiceImpl implements VerbalePregressiService {
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
 		SecurityUtils.verbaleSecurityView(cnmTVerbale, getEnteLeggeByCnmTVerbale(cnmTVerbale));
 
+		includiControlloUtenteProprietario = includiControlloUtenteProprietario && Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED));
+		
 		if (cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser() && includiControlloUtenteProprietario)
 			throw new RuntimeException("l'utente  non può accedere a questo verbale");
 

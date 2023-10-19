@@ -8,11 +8,13 @@ import it.csi.conam.conambl.vo.luoghi.ComuneVO;
 import it.csi.conam.conambl.vo.luoghi.NazioneVO;
 import it.csi.conam.conambl.vo.luoghi.ProvinciaVO;
 import it.csi.conam.conambl.vo.luoghi.RegioneVO;
+import it.csi.conam.conambl.vo.ordinanza.MinOrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.StatoOrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.StatoSoggettoOrdinanzaVO;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author riccardo.bova
@@ -60,6 +62,17 @@ public class SoggettoVO extends MinSoggettoVO {
 	private String idPianoRateizzazione;
 	
 	private DatiRelataNotificaVO relataNotifica;
+	
+	private List<MinOrdinanzaVO> listaOrdinanze;
+	private boolean hasMasterIstanza;
+	
+	public boolean isHasMasterIstanza() {
+		return hasMasterIstanza;
+	}
+
+	public void setHasMasterIstanza(boolean hasMasterIstanza) {
+		this.hasMasterIstanza = hasMasterIstanza;
+	}
 	
 	public SoggettoVO() {
 		super();
@@ -315,6 +328,14 @@ public class SoggettoVO extends MinSoggettoVO {
 
 	public void setRelataNotifica(DatiRelataNotificaVO relataNotifica) {
 		this.relataNotifica = relataNotifica;
+	}
+
+	public List<MinOrdinanzaVO> getListaOrdinanze() {
+		return listaOrdinanze;
+	}
+
+	public void setListaOrdinanze(List<MinOrdinanzaVO> listaOrdinanze) {
+		this.listaOrdinanze = listaOrdinanze;
 	}
 
 }
