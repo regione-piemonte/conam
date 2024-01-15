@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import it.csi.conam.conambl.business.facade.DoquiServiceFacade;
 import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDoqui;
+import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.exception.RemoteWebServiceException;
@@ -58,11 +59,15 @@ import it.csi.conam.conambl.integration.doqui.helper.ManageSpostaDocumentoHelper
 import it.csi.conam.conambl.integration.entity.CnmCParametro;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.entity.CnmDTipoAllegato;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
 import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTOrdinanzaRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
 import it.csi.conam.conambl.security.UserDetails;
@@ -103,6 +108,12 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 	// 20200706_LC
 	@Autowired
 	private ManageSpostaDocumentoHelper manageSpostaDocumentoHelper;
+
+	@Autowired
+	private CnmTOrdinanzaRepository cnmTOrdinanzaRepository;
+
+	@Autowired
+	private CnmROrdinanzaVerbSogRepository cnmROrdinanzaVerbSogRepository;
 	
 
 //	private StadocStadocSoapBindingStub binding;
@@ -753,7 +764,13 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 				request.setMittentiEsterni(TOPOLOGIA_SOGGETTO_GIUDICE);
 			}
 		} else if (tipoDocActa != null && tipoDocActa.equals(TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA)) {
-			request.setAutoreGiuridico(AUTORE_REGIONE_PIEMONTE);
+			if (tipoDocumento == TipoAllegato.BOLLETTINI_RATEIZZAZIONE.getId() || //
+					tipoDocumento == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO.getId() || //
+					tipoDocumento == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO_RATE.getId()) {
+				request.setAutoreGiuridico("NULL_VALUE");
+			}else {
+				request.setAutoreGiuridico(AUTORE_REGIONE_PIEMONTE);
+			}
 			// request.setAutoreFisico(????);
 			request.setApplicativoAlimentante("CONAM");
 			if (tipoDocumento == TipoAllegato.COMPARSA_ALLEGATO.getId() || tipoDocumento == TipoAllegato.ISTANZA_ALLEGATO.getId()) {
@@ -781,7 +798,9 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		
 		// 20210413_LC 
         if (tipoDocumento == TipoAllegato.ORDINANZA_ANNULLAMENTO_ARCHIVIAZIONE.getId()
-                ||tipoDocumento == TipoAllegato.ORDINANZA_ANNULLAMENTO_INGIUNZIONE.getId()) {
+                ||tipoDocumento == TipoAllegato.ORDINANZA_ANNULLAMENTO_INGIUNZIONE.getId()
+                ||tipoDocumento == TipoAllegato.ORDINANZA_ARCHIVIAZIONE.getId()
+                ||tipoDocumento == TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO.getId()) {
     		request.setAutoreFisico("NULL_VALUE"); // si fa così per forzare a null
     		request.setDestinatarioGiuridico("NULL_VALUE");
             request.setCollocazioneCartacea(null);
@@ -925,11 +944,55 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 			cnmTUser = cnmTUserRepository.findOne(user.getIdUser());
 		}
 
-		request.setAutoreFisico(cnmTUser.getNome() + " " + cnmTUser.getCognome());
 		request.setAutoreGiuridico(AUTORE_REGIONE_PIEMONTE);
-		request.setOriginatore(cnmTUser.getNome() + " " + cnmTUser.getCognome());
-		request.setDestinatarioFisico(TOPOLOGIA_SOGGETTO_TRASGRESSORE);
+		
+		// eliminata valorizzazione autore fisico e originatore
+//		request.setOriginatore(cnmTUser.getNome() + " " + cnmTUser.getCognome());
+//		request.setAutoreFisico(cnmTUser.getNome() + " " + cnmTUser.getCognome());
+		
+
 		request.setDestinatarioGiuridico(TOPOLOGIA_SOGGETTO_TRASGRESSORE);
+		request.setDestinatarioFisico(TOPOLOGIA_SOGGETTO_TRASGRESSORE);
+
+		if (tipoDocumento == TipoAllegato.LETTERA_ORDINANZA.getId() ) {
+
+			request.getSoggetto().setTipologia(TOPOLOGIA_SOGGETTO_DESTINATARIO);
+			// soggetti ordinanza
+			// resupero ordinanza
+			String numOrdinanza = nomeFile.substring(18, nomeFile.indexOf("."));
+			String soggettiFisico = "";
+			String soggettiGiuridico = "";
+			CnmTOrdinanza cnmTOrdinanza = cnmTOrdinanzaRepository.findByNumDeterminazione(numOrdinanza);
+			if(cnmTOrdinanza!=null) {
+				List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogs = cnmROrdinanzaVerbSogRepository.findByCnmTOrdinanza(cnmTOrdinanza);
+				if (cnmROrdinanzaVerbSogs != null && !cnmROrdinanzaVerbSogs.isEmpty()) {
+					boolean isFirstFisico = true;
+					boolean isFirstGiuridico = true;
+					for (CnmROrdinanzaVerbSog ovs : cnmROrdinanzaVerbSogs) {
+						CnmTSoggetto cnmTSoggetto = ovs.getCnmRVerbaleSoggetto().getCnmTSoggetto();
+						if (cnmTSoggetto.getNome() != null) {
+							if(isFirstFisico == true) {
+								isFirstFisico = false;
+							}else {
+								soggettiFisico += ", ";
+							}
+							soggettiFisico += cnmTSoggetto.getCognome() + " " + cnmTSoggetto.getNome();
+						} else {
+							if(isFirstGiuridico == true) {
+								isFirstGiuridico = false;
+							}else {
+								soggettiGiuridico += ", ";
+							}
+							soggettiGiuridico += cnmTSoggetto.getRagioneSociale();
+						}
+					}
+				}
+			}
+			
+			request.setDestinatarioFisico(soggettiFisico);
+			request.setDestinatarioGiuridico(soggettiGiuridico);
+		
+		}
 
 		Documento doc = new Documento();
 		doc.setFile(document);

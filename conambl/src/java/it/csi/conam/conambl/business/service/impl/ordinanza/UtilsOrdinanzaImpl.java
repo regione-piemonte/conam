@@ -68,7 +68,8 @@ public class UtilsOrdinanzaImpl implements UtilsOrdinanza {
 		/*---------2021-12-15 - LUCIO ROSADINI - CONTROLLO CODICE FISCALE---------*/
 		for (CnmROrdinanzaVerbSog ovs: cnmTOrdinanza.getCnmROrdinanzaVerbSogs())
 			if (ovs.getCnmRVerbaleSoggetto()!= null && ovs.getCnmRVerbaleSoggetto().getCnmTSoggetto()!= null)
-				testCodiceFiscale(ovs.getCnmRVerbaleSoggetto().getCnmTSoggetto().getCodiceFiscale());
+				testCodiceFiscale(ovs.getCnmRVerbaleSoggetto().getCnmTSoggetto().getCodiceFiscale(),
+						ovs.getCnmRVerbaleSoggetto().getCnmTSoggetto().getCodiceFiscaleGiuridico());
 	}
 
 	@Override
@@ -76,7 +77,8 @@ public class UtilsOrdinanzaImpl implements UtilsOrdinanza {
 		/*---------2021-12-15 - LUCIO ROSADINI - CONTROLLO CODICE FISCALE---------*/
 		for (CnmRVerbaleSoggetto cnmRVerbaleSoggetto: cnmRVerbaleSoggettoList)
 			if (cnmRVerbaleSoggetto.getCnmTSoggetto()!= null)
-				testCodiceFiscale(cnmRVerbaleSoggetto.getCnmTSoggetto().getCodiceFiscale());
+				testCodiceFiscale(cnmRVerbaleSoggetto.getCnmTSoggetto().getCodiceFiscale(), 
+						cnmRVerbaleSoggetto.getCnmTSoggetto().getCodiceFiscaleGiuridico());
 	}
 
 	@Override
@@ -88,11 +90,13 @@ public class UtilsOrdinanzaImpl implements UtilsOrdinanza {
 				cnmRSoggRata.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto()!= null &&
 				cnmRSoggRata.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto().getCnmTSoggetto()!= null
 			)
-				testCodiceFiscale(cnmRSoggRata.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto().getCnmTSoggetto().getCodiceFiscale());
+				testCodiceFiscale(cnmRSoggRata.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto().getCnmTSoggetto().getCodiceFiscale(),
+									cnmRSoggRata.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto().getCnmTSoggetto().getCodiceFiscaleGiuridico());
 		}
 
 	}
-	private void testCodiceFiscale(String codiceFiscale){
-		if (codiceFiscale == null || codiceFiscale.isEmpty()) throw new BusinessException(ErrorCode.NO_COD_FIS);
+	private void testCodiceFiscale(String codiceFiscale, String codiceFiscaleGiuridico){
+		if ((codiceFiscale == null || codiceFiscale.isEmpty()) &&
+				(codiceFiscaleGiuridico == null || codiceFiscaleGiuridico.isEmpty())) throw new BusinessException(ErrorCode.NO_COD_FIS);
 	}
 }

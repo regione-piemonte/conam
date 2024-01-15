@@ -1,0 +1,56 @@
+<wsdl:definitions name="Enti2EPaywsoService" targetNamespace="http://www.csi.it/epay/epaywso/enti2epaywsosrv">
+	<wsdl:types>
+		<xsd:schema>
+			<xsd:import namespace="http://www.csi.it/epay/epaywso/types" schemaLocation="Enti2EPaywsoProxy?xsd=EPaywsoCommonTypes.xsd"/>
+			<xsd:import namespace="http://www.csi.it/epay/epaywso/enti2epaywso/types" schemaLocation="Enti2EPaywsoProxy?xsd=Enti2EPaywsoServiceTypes.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="InserisciListaDiCaricoRequest">
+		<wsdl:part name="parameters" element="srv:InserisciListaDiCaricoRequest"> </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="AggiornaPosizioniDebitorieRequest">
+		<wsdl:part name="parameters" element="srv:AggiornaPosizioniDebitorieRequest"> </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="InserisciListaDiCaricoResponse">
+		<wsdl:part name="parameters" element="cmn:EPaywsoServiceResponse"> </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="AggiornaPosizioniDebitorieResponse">
+		<wsdl:part name="parameters" element="cmn:EPaywsoServiceResponse"> </wsdl:part>
+	</wsdl:message>
+	<wsdl:portType name="Enti2EPaywsoService">
+		<wsdl:operation name="InserisciListaDiCarico">
+			<wsdl:input message="tns:InserisciListaDiCaricoRequest"> </wsdl:input>
+			<wsdl:output message="tns:InserisciListaDiCaricoResponse"> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="AggiornaPosizioniDebitorie">
+			<wsdl:input message="tns:AggiornaPosizioniDebitorieRequest"> </wsdl:input>
+			<wsdl:output message="tns:AggiornaPosizioniDebitorieResponse"> </wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="Enti2EPaywsoServiceSOAP" type="tns:Enti2EPaywsoService">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="InserisciListaDiCarico">
+		<soap:operation soapAction="http://www.csi.it/epay/epaywso/service/InserisciListaDiCarico"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="AggiornaPosizioniDebitorie">
+		<soap:operation soapAction="http://www.csi.it/epay/epaywso/service/AggiornaPosizioniDebitorie"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="Enti2EPaywsoService">
+		<wsdl:port name="Enti2EPaywsoServiceSOAP" binding="tns:Enti2EPaywsoServiceSOAP">
+			<soap:address location="http://tst-srv-paywso.bilancio.csi.it:80/wso001/services/Enti2EPaywsoProxy"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

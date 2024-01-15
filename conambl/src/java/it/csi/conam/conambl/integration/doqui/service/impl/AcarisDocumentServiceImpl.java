@@ -173,16 +173,16 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
     	ClassificazionePropertiesType classificazionePropertiesType = new ClassificazionePropertiesType();
     	
     	// originatore
-    	if(documentoActa.getOriginatore() != null)
-    		properties.setOriginatore(new String[]{CleanUtil.cleanNullValue( documentoActa.getOriginatore())});
+//    	if(documentoActa.getOriginatore() != null)
+//    		properties.setOriginatore(new String[]{CleanUtil.cleanNullValue( documentoActa.getOriginatore())});
     	
     	// autore giuridico
     	if(documentoActa.getAutoreGiuridico() != null)
     		properties.setAutoreGiuridico(new String[]{CleanUtil.cleanNullValue(documentoActa.getAutoreGiuridico())});
     	
     	// autore fisico
-    	if(documentoActa.getAutoreFisico() != null)
-    		properties.setAutoreFisico(new String[]{CleanUtil.cleanNullValue(documentoActa.getAutoreFisico())});
+//    	if(documentoActa.getAutoreFisico() != null)
+//    		properties.setAutoreFisico(new String[]{CleanUtil.cleanNullValue(documentoActa.getAutoreFisico())});
     	
     	// scrittore
     	if(documentoActa.getScrittore() != null)
@@ -675,20 +675,20 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
     	
     	 
     	// originatore
-    	if(documentoElettronicoActa.getOriginatore() != null)
-    		properties.setOriginatore(new String[]{CleanUtil.cleanNullValue(documentoElettronicoActa.getOriginatore())});
+//    	if(documentoElettronicoActa.getOriginatore() != null)
+//    		properties.setOriginatore(new String[]{CleanUtil.cleanNullValue(documentoElettronicoActa.getOriginatore())});
     	
     	// autore giuridico
     	if(documentoElettronicoActa.getAutoreGiuridico() != null)
     		properties.setAutoreGiuridico(new String[]{CleanUtil.cleanNullValue(documentoElettronicoActa.getAutoreGiuridico())});
     	
     	// autore fisico
-    	if(documentoElettronicoActa.getAutoreFisico() != null)
-    		properties.setAutoreFisico(new String[]{CleanUtil.cleanNullValue(documentoElettronicoActa.getAutoreFisico())});
-    	else {
-    		CnmCParametro cnmCParametro = cnmCParametroRepository.findOne(Constants.ID_AUTORE_FISICO_ACTA);
-    		properties.setAutoreFisico(new String[]{cnmCParametro.getValoreString()});
-    	}
+//    	if(documentoElettronicoActa.getAutoreFisico() != null)
+//    		properties.setAutoreFisico(new String[]{CleanUtil.cleanNullValue(documentoElettronicoActa.getAutoreFisico())});
+//    	else {
+//    		CnmCParametro cnmCParametro = cnmCParametroRepository.findOne(Constants.ID_AUTORE_FISICO_ACTA);
+//    		properties.setAutoreFisico(new String[]{cnmCParametro.getValoreString()});
+//    	}
     	
     	// scrittore
     	if(documentoElettronicoActa.getScrittore() != null)
@@ -814,8 +814,8 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
       	    	if(documentoElettronicoActa.getMetadatiActa().getScrittore() != null)
       	    		properties.setScrittore(new String[]{documentoElettronicoActa.getMetadatiActa().getScrittore()});
 	      	    
-	      	    properties.setDestinatarioFisico(new String[]{documentoElettronicoActa.getMetadatiActa().getDestinatarioFisico()}); // SE IL CONTRIBUENTE � UNA PERSONA FISICA
-	      	    properties.setDestinatarioGiuridico(new String[]{documentoElettronicoActa.getMetadatiActa().getDestinatarioGiuridico()}); // SE IL CONTRIBUENTE � UNA PERSONA GIURIDICA
+//	      	    properties.setDestinatarioFisico(new String[]{documentoElettronicoActa.getMetadatiActa().getDestinatarioFisico()}); // SE IL CONTRIBUENTE � UNA PERSONA FISICA
+//	      	    properties.setDestinatarioGiuridico(new String[]{documentoElettronicoActa.getMetadatiActa().getDestinatarioGiuridico()}); // SE IL CONTRIBUENTE � UNA PERSONA GIURIDICA
 	      	   
 	      	    //RAFFAELLA RIPRISTINATA LA FUNZIONALITA' DELLA PAROLA CHIAVE COME IDENTIFICATIVO UNIVOCO AGGIUNTA L'INFORMAZIONE SUL TIPO DI LETTERA NELL'OGGETTO COME DA ANALISI ARCHIVISTICA V09
 //	      	    String paroleChiave = properties.getParoleChiave() + (documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera()!=null?" - " +documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera():"");

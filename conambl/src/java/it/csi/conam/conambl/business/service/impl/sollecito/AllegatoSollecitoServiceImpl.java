@@ -426,8 +426,10 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 				// 20210427_LC
 				CnmRAllegatoSollecito cnmRAllegatoSollecito = Iterables.tryFind(cnmRSollecitoSoggRataList.get(0).getCnmTSollecito().getCnmRAllegatoSollecitos(), UtilsTipoAllegato.findAllegatoInCnmRAllegatoSollecitoByTipoAllegato(TipoAllegato.LETTERA_SOLLECITO_RATE))
 						.orNull();
-				
-				oggettoPagamento = String.format(cnmCParametro.getValoreString(), cnmRAllegatoSollecito!=null?cnmRAllegatoSollecito.getCnmTAllegato().getNumeroProtocollo():null, cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());
+
+//				oggettoPagamento = String.format(cnmCParametro.getValoreString(), cnmRAllegatoSollecito!=null?cnmRAllegatoSollecito.getCnmTAllegato().getNumeroProtocollo():null, cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());
+				// 20231102 PP - protocollo non piu presente nell'oggetto del sollecito
+				oggettoPagamento = String.format(cnmCParametro.getValoreString(), cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());
 			}
 		} else {
 			cnmCParametro = Iterables.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_OGGETTO_PAGAMENTO_SOLLECITO)).orNull();

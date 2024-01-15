@@ -81,16 +81,20 @@ public class EpayServiceImpl implements EpayService {
 		List<String> codicePosizioneDebitoriaSollecitoList = new ArrayList<>();
 
 		for (PosizioneDebitoriaType e : posizioneDebitoriaTypeArray) {
-			String codicePosizioneDebitoria = e.getIdPosizioneDebitoria();
-			logger.info("codicePosizioneDebitoria from ePay: " + codicePosizioneDebitoria);
-			if (codicePosizioneDebitoria.contains(Constants.CODICE_PIANO_RATEIZZAZIONE)) {
-				codicePosizioneDebitoriaPianoRatList.add(codicePosizioneDebitoria);
-			} else if (codicePosizioneDebitoria.contains(Constants.CODICE_ORDINANZA)) {
-				codicePosizioneDebitoriaOrdinanzaList.add(codicePosizioneDebitoria);
-			} else if (codicePosizioneDebitoria.contains(Constants.CODICE_SOLLECITO)) {
-				codicePosizioneDebitoriaSollecitoList.add(codicePosizioneDebitoria);
-			} else {
-				logger.error("codicePosizioneDebitoria sconosciuto");
+			if(e.getCodiceEsito()!=null && e.getCodiceEsito().equalsIgnoreCase("000")) {
+				String codicePosizioneDebitoria = e.getIdPosizioneDebitoria();
+				logger.info("codicePosizioneDebitoria from ePay: " + codicePosizioneDebitoria);
+				if (codicePosizioneDebitoria.contains(Constants.CODICE_PIANO_RATEIZZAZIONE)) {
+					codicePosizioneDebitoriaPianoRatList.add(codicePosizioneDebitoria);
+				} else if (codicePosizioneDebitoria.contains(Constants.CODICE_ORDINANZA)) {
+					codicePosizioneDebitoriaOrdinanzaList.add(codicePosizioneDebitoria);
+				} else if (codicePosizioneDebitoria.contains(Constants.CODICE_SOLLECITO)) {
+					codicePosizioneDebitoriaSollecitoList.add(codicePosizioneDebitoria);
+				} else {
+					logger.error("codicePosizioneDebitoria sconosciuto");
+				}
+			}else {
+				logger.warn("Ricevuto CodiceEsito ["+e.getCodiceEsito()+"] Desc ["+e.getDescrizioneEsito()+"] per PosizioneDebitoria ["+e.getIdPosizioneDebitoria()+"]");
 			}
 		}
 
