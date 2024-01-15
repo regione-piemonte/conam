@@ -58,7 +58,8 @@ export class PregressoOrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
   onChangeData: EventEmitter<any> = new EventEmitter<any>();
 
   public subscribers: any = {};
-
+  isOrdinanza : boolean = true;
+  
   config: Config;
   loaded: boolean;
   idVerbale: number;
@@ -118,7 +119,7 @@ export class PregressoOrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
     this.loadTipoAllegato();
     this.loadStatiOrdinanzaSoggettoInCreazioneOrdinanza();
     this.loaded = true;
-    this.showNotifica = false;
+    this.showNotifica = true;
     setTimeout(() => {
       this.subscribers.form = this.creaOrdinanza.valueChanges.subscribe(
         (data) => {

@@ -510,6 +510,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   }
 
   onChangeCategoriaDocumento(event: any) {
+  	this.showCompMeta = -1;
     let $idTipo: number = event.tipoAllegatoSelezionato.id;
 
     if (this.isPregresso && idAllegatiSuper.indexOf($idTipo) > -1) {

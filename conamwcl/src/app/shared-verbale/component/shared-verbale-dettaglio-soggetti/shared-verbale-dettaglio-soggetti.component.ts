@@ -40,6 +40,8 @@ export class SharedVerbaleDettaglioSoggettiComponent
   isVerbaleConvocazione: boolean = false;
   @Input()
   pregresso: boolean = false;
+  @Input()
+  isOrdinanza: boolean = false;
   @Output()
   selected: EventEmitter<Array<TableSoggettiVerbale>> = new EventEmitter<
     Array<TableSoggettiVerbale>
@@ -51,7 +53,12 @@ export class SharedVerbaleDettaglioSoggettiComponent
   modalLoaded = false;
   //pagina
   loaded: boolean;
-  listaOrdinanzeControl: boolean = false;
+  listaOrdinanzeControl: boolean = false;  
+  
+  public showMessage: boolean = false;
+  public message: string;
+  public typeMessage: string;
+  
   soggetti: Array<TableSoggettiVerbale> = new Array<TableSoggettiVerbale>();
   soggettoSelected: boolean;
   subject: any;
@@ -109,6 +116,20 @@ export class SharedVerbaleDettaglioSoggettiComponent
           this.soggetti = data.map((value) => {
             return TableSoggettiVerbale.map(value);
           });
+		  
+          if(this.pregresso){
+	      	let soggettoSelezionabilePresente = false;
+	      	this.soggetti.forEach((el)=>{
+	      		console.log(el);
+	     		if (!el.ordinanzaCreata) soggettoSelezionabilePresente = true;
+	    	})
+	    	if(!soggettoSelezionabilePresente){
+			    this.showMessage = true;
+			    this.message = "Impossibile procedere con l'inserimento dell'ordinanza in quanto non sono disponibili soggetti selezionabili.";
+			    this.typeMessage = "warning";
+			}
+	      }
+		  
           this.loaded = true;
         }
       });

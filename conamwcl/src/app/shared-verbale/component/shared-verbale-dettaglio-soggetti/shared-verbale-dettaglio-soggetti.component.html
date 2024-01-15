@@ -5,6 +5,7 @@
 <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="!hasOneSog() && soggettoSelected && isVerbaleAudizione">
     <h4 class="border-title"><strong>Soggetti collegati al verbale di audizione</strong></h4>
 </div>
+<shared-alert [message]="message" [type]="typeMessage" *ngIf="showMessage && isOrdinanza"></shared-alert>
 <datatable [data]="soggetti" [config]="config" *ngIf="loaded" (selected)="onSelected($event)">
 </datatable>
 <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="soggettoSelected && isVerbaleAudizione">
