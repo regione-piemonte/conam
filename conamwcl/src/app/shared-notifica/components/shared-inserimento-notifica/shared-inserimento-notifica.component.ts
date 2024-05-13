@@ -34,7 +34,7 @@ export class SharedInserimentoNotificaComponent
 
   //JIRA - Gestione Notifica
   private modalitaModelAll: Array<ModalitaNotificaVO>;
-  private makeNotifyTRUE = [1, 2];
+  private makeNotifyTRUE = [1, 2, 5];
 
   public notificata: boolean;
 
@@ -107,8 +107,10 @@ export class SharedInserimentoNotificaComponent
         );
         let notifivaVuota = new ModalitaNotificaVO();
         this.modalitaModel.push(notifivaVuota);
-        this.notifica.modalita =
-          this.modalitaModel[this.modalitaModel.length - 1];
+        console.log(this.notifica.modalita);
+        if(this.notifica.modalita == null || this.notifica.modalita == undefined ){
+        	this.notifica.modalita = this.modalitaModel[this.modalitaModel.length - 1];
+        }
       } else {
         this.modalitaModel = this.modalitaModelAll.filter((modalita) =>
           this.makeNotifyTRUE.includes(modalita.id)
@@ -267,11 +269,9 @@ export class SharedInserimentoNotificaComponent
   }
 
   //JIRA - Gestione Notifica
-  onChangeNotifica(event: Event, value: number) {  
- 
+  onChangeNotifica(event: Event, value: number) {   
   // issue 5 - ob 167 Causale, Numero accertamento, Anno accertamento divetano opzionali
-      if (value == undefined || value == null) {
-        
+      if (value == undefined || value == null) {        
         this.importNotificaInserito.emit(true);
       } else {
         this.importNotificaInserito.emit(isNaN(Number(value)));

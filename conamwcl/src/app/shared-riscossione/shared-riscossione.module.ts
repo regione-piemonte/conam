@@ -8,7 +8,7 @@ import { SharedRiscossioneRicercaComponent } from "./components/shared-riscossio
 import { SharedRiscossioneSollecitoDettaglioComponent } from "./components/shared-riscossione-sollecito-dettaglio/shared-riscossione-sollecito-dettaglio.component";
 import { SharedRiscossioneConfigService } from "./services/shared-riscossione-config.service";
 import { SharedNotificaModule } from "../shared-notifica/shared-notifica.module";
-import { SharedRiscossioneRicercaRateComponent } from "./components/shared-riscossione-ricerca-rate/shared-riscossione-ricerca-rate.component";
+//import { SharedRiscossioneRicercaRateComponent } from "./components/shared-riscossione-ricerca-rate/shared-riscossione-ricerca-rate.component";
 import { SharedRiscossioneSollecitoDettaglioRateComponent } from "./components/shared-riscossione-sollecito-dettaglio-rate/shared-riscossione-sollecito-dettaglio-rate.component";
 
 
@@ -19,19 +19,19 @@ import { SharedRiscossioneSollecitoDettaglioRateComponent } from "./components/s
         FormsModule,
         RouterModule,
         SharedModule,
-        SharedNotificaModule        
+        SharedNotificaModule
     ],
     exports: [
         SharedRiscossioneRicercaComponent,
-        SharedRiscossioneRicercaRateComponent,
+//        SharedRiscossioneRicercaRateComponent,
         SharedRiscossioneSollecitoDettaglioComponent,
         SharedRiscossioneSollecitoDettaglioRateComponent
     ],
     declarations: [
         SharedRiscossioneRicercaComponent,
-        SharedRiscossioneRicercaRateComponent,
+//        SharedRiscossioneRicercaRateComponent,
         SharedRiscossioneSollecitoDettaglioComponent,
-        SharedRiscossioneSollecitoDettaglioRateComponent        
+        SharedRiscossioneSollecitoDettaglioRateComponent
     ],
     providers: [SharedRiscossioneService, SharedRiscossioneConfigService]
 })

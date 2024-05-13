@@ -7,7 +7,6 @@ import { Routing } from "../../../commons/routing";
 import { TablePianoRateizzazione } from "../../../commons/table/table-piano-rateizzazione";
 import { TableSoggettiOrdinanza } from "../../../commons/table/table-soggetti-ordinanza";
 import { LoggerService } from "../../../core/services/logger/logger.service";
-import { RiscossioneService } from "../../../riscossione/services/riscossione.service";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { PagamentiUtilService } from "../../services/pagamenti-util.serivice";
 import { PagamentiService } from "../../services/pagamenti.service";
@@ -19,21 +18,21 @@ import { PagamentiService } from "../../services/pagamenti.service";
 })
 export class PagamentiRiconciliaSollecitoRateRicercaComponent implements OnInit, OnDestroy {
 
-    public subscribers: any = {};
     public soggetti: Array<TableSoggettiOrdinanza> = new Array<TableSoggettiOrdinanza>();
-    public config: Config;
+    public subscribers: any = {};
     public loaded: boolean = true;
-    public showTable: boolean = false;
+    public config: Config;
     public pianiRateizzazione: Array<TablePianoRateizzazione> = new Array<TablePianoRateizzazione>();
+    public showTable: boolean = false;
 
-    public request: RicercaPianoRateizzazioneRequest = new RicercaPianoRateizzazioneRequest();
 
     public max: boolean = false;
+    public request: RicercaPianoRateizzazioneRequest = new RicercaPianoRateizzazioneRequest();
     //Messaggio top
-    private intervalTop: number = 0;
     public showMessageTop: boolean;
-    public typeMessageTop: String;
+    private intervalTop: number = 0;
     public messageTop: String;
+    public typeMessageTop: String;
 
     isSelectable: (el: TableSoggettiOrdinanza) => boolean = (el: TableSoggettiOrdinanza) => {
         return el.statoSoggettoOrdinanza.id != Constants.STATO_ORDINANZA_SOGGETTO_ARCHIVIATO &&
@@ -43,18 +42,12 @@ export class PagamentiRiconciliaSollecitoRateRicercaComponent implements OnInit,
     }
 
     constructor(
-        private logger: LoggerService,
         private router: Router,
-        private pagamentiService: PagamentiService,
+        private logger: LoggerService,
         private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
+        private pagamentiService: PagamentiService,
         private pagamentiUtilService: PagamentiUtilService,
-
     ) { }
-
-    ngOnInit(): void {
-        this.logger.init(PagamentiRiconciliaSollecitoRateRicercaComponent.name);
-        this.config = this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggetti(true, "Dettaglio", 0, this.isSelectable, null,null);
-    }
 
     ricerca(request: RicercaPianoRateizzazioneRequest) {
         this.loaded = false;
@@ -84,16 +77,14 @@ export class PagamentiRiconciliaSollecitoRateRicercaComponent implements OnInit,
         });
     }
 
-    manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
-        this.messageTop = message;
-        this.scrollTopEnable = true;
-        this.timerShowMessageTop();
+    ngOnInit(): void {
+        this.logger.init(PagamentiRiconciliaSollecitoRateRicercaComponent.name);
+        this.config = this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggetti(true, "Dettaglio", 0, this.isSelectable, null,null);
     }
 
     timerShowMessageTop() {
-        this.showMessageTop = true;
         let seconds: number = 10;
+        this.showMessageTop = true;
         this.intervalTop = window.setInterval(() => {
             seconds -= 1;
             if (seconds === 0) {
@@ -102,14 +93,24 @@ export class PagamentiRiconciliaSollecitoRateRicercaComponent implements OnInit,
         }, 1000);
     }
 
+    manageMessageTop(message: string, type: string) {
+        this.messageTop = message;
+        this.typeMessageTop = type;
+        this.scrollTopEnable = true;
+        this.timerShowMessageTop();
+    }
+    scrollTopEnable: boolean;
     resetMessageTop() {
-        this.showMessageTop = false;
         this.typeMessageTop = null;
+        this.showMessageTop = false;
         this.messageTop = null;
         clearInterval(this.intervalTop);
     }
 
-    scrollTopEnable: boolean;
+    messaggio(message: string){
+        this.manageMessageTop(message,"DANGER");
+    }
+
     ngAfterViewChecked() {
         let scrollTop: HTMLElement = document.getElementById("scrollTop");
         if (this.scrollTopEnable && scrollTop != null) {
@@ -118,17 +119,12 @@ export class PagamentiRiconciliaSollecitoRateRicercaComponent implements OnInit,
         }
     }
 
-    messaggio(message: string){
-        this.manageMessageTop(message,"DANGER");
+    ngOnDestroy(): void {
+        this.logger.destroy(PagamentiRiconciliaSollecitoRateRicercaComponent.name);
     }
-
     dettaglioPiano(event: TableSoggettiOrdinanza) {
         this.pagamentiUtilService.soggettoSollecito = event;
         this.router.navigateByUrl(Routing.PAGAMENTI_RICONCILIA_SOLLECITO_RATE_DETTAGLIO);
     }
 
-
-    ngOnDestroy(): void {
-        this.logger.destroy(PagamentiRiconciliaSollecitoRateRicercaComponent.name);
-    }
 }

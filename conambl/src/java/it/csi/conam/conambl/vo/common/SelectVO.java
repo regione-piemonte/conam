@@ -5,14 +5,16 @@
 package it.csi.conam.conambl.vo.common;
 
 import it.csi.conam.conambl.vo.ParentVO;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class SelectVO extends ParentVO {
 
 	private static final long serialVersionUID = -2641198993382229145L;
 
-	private Long id;
-	private String denominazione;
+	protected Long id;
+	protected String denominazione;
+
 
 	public Long getId() {
 		return id;
@@ -25,11 +27,11 @@ public class SelectVO extends ParentVO {
 	public String getDenominazione() {
 		return denominazione;
 	}
-
+	
 	public void setDenominazione(String denominazione) {
 		this.denominazione = denominazione;
 	}
-
+	
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

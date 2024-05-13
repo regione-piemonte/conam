@@ -1,12 +1,4 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  Output,
-  EventEmitter,
-  OnChanges,
-} from "@angular/core";
+import {  Component,  OnInit,  OnDestroy,  Input,  Output,  EventEmitter,  OnChanges,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Routing } from "../../../commons/routing";
@@ -20,7 +12,6 @@ import { NumberUtilsSharedService } from "../../../shared/service/number-utils-s
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { PagamentiService } from "../../../pagamenti/services/pagamenti.service";
 import { PregressoVerbaleService } from "../../services/pregresso-verbale.service";
-import { RicercaPianoRateizzazioneRequest } from "../../../commons/request/piano-rateizzazione/ricerca-piano-rateizzazione-request";
 import { SalvaPianoPregressiRequest } from "../../../commons/request/pregresso/salva-piano-pregressi-request";
 
 declare var $: any;
@@ -32,33 +23,25 @@ declare var $: any;
 })
 export class PregressoPagamentiPianoInsModDettComponent
   implements OnInit, OnDestroy, OnChanges {
-  @Input()
-  idPiano: number;
-
-  @Input()
-  piano: PianoRateizzazioneVO;
-
-  @Input()
-  idOrdinanza: number;
-
-  @Input()
-  numDeterminazione: string;
+  @Input()  idPiano: number;
+  @Input()  piano: PianoRateizzazioneVO;
+  @Input()  idOrdinanza: number;
+  @Input()  numDeterminazione: string;
 
   idVerbale: number;
   public subscribers: any = {};
 
   public configSoggetti: Config;
 
-  @Output()
-  onChangeData: EventEmitter<any> = new EventEmitter<any>();
+  @Output()  onChangeData: EventEmitter<any> = new EventEmitter<any>();
 
   public loaded: boolean;
   public loadedStatiPiano: boolean;
   public loadedIdSoggettiOrdinanza: boolean;
 
-  //sono in modifica
+  //in modifica
   public isModifica: boolean;
-  //campi abilitati in modifica
+  //campi abilitati (modifica)
   public abilitaModifica: boolean;
 
   public isRataCalcolata: boolean;
@@ -79,7 +62,7 @@ export class PregressoPagamentiPianoInsModDettComponent
 
   public listaSoggetti: Array<TableSoggettiOrdinanza>;
 
-  //Messaggio top
+  // msg top
   private intervalTop: number = 0;
   public showMessageTop: boolean;
   public typeMessageTop: String;
@@ -108,42 +91,6 @@ export class PregressoPagamentiPianoInsModDettComponent
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
       this.idVerbale = +params["id"];
       if (this.idOrdinanza && this.numDeterminazione) {
-        /*this.pregressoVerbaleService.getSoggettiOrdinanza(this.idOrdinanza).subscribe(
-                    data=>{
-                        this.listaSoggetti = data.map(value => {
-                            return TableSoggettiOrdinanza.map(value);
-                        });
-                        this.listTableSoggettiOrdinanza = this.listaSoggetti;
-                        // dopo che selezioni soggetti
-                        // this.listTableSoggettiOrdinanza = this.pagamentiService.soggettiCreaPiano;
-                        this.idSoggettiOrdinanza = this.listTableSoggettiOrdinanza.map(data => data.idSoggettoOrdinanza);
-                        this.listaSoggetti = this.listTableSoggettiOrdinanza;
-                        this.loadedIdSoggettiOrdinanza = true;
-                        this.nuovo();         
-                    }
-                    ZXCCZXSASDA
-                );
-                    let request:RicercaPianoRateizzazioneRequest = new RicercaPianoRateizzazioneRequest();
-                    //request.numeroDeterminazione = 'ZXCCZXSASDA';
-                    request.numeroDeterminazione = this.numDeterminazione;
-                    request.ordinanzaProtocollata = true;
-                    request.tipoRicerca = "CREA_PIANO";
-                
-                    this.pregressoVerbaleService.ricercaSoggettiPiano(request).subscribe(data => {
-                        if (data != null) {
-                            
-                                this.listaSoggetti = data.map(value => {
-                                    return TableSoggettiOrdinanza.map(value);
-                                });
-                                this.listTableSoggettiOrdinanza = this.listaSoggetti;
-                                // dopo che selezioni soggetti
-                                // this.listTableSoggettiOrdinanza = this.pagamentiService.soggettiCreaPiano;
-                                this.idSoggettiOrdinanza = this.listTableSoggettiOrdinanza.map(data => data.idSoggettoOrdinanza);
-                                this.listaSoggetti = this.listTableSoggettiOrdinanza;
-                                this.loadedIdSoggettiOrdinanza = true;
-                                this.nuovo();  
-                        }
-                    });*/
         this.loaded = true;
       } else {
         this.modifica();
@@ -154,9 +101,7 @@ export class PregressoPagamentiPianoInsModDettComponent
   onSelect(els: TableSoggettiOrdinanza[]) {
     if (els.length > 0) {
       this.listTableSoggettiOrdinanza = els;
-      this.idSoggettiOrdinanza = this.listTableSoggettiOrdinanza.map(
-        (data) => data.idSoggettoOrdinanza
-      );
+      this.idSoggettiOrdinanza = this.listTableSoggettiOrdinanza.map(        (data) => data.idSoggettoOrdinanza      );
       this.listaSoggetti = this.listTableSoggettiOrdinanza;
       this.loadedIdSoggettiOrdinanza = true;
       this.nuovo();
@@ -179,9 +124,7 @@ export class PregressoPagamentiPianoInsModDettComponent
     let seconds: number = 10;
     this.intervalTop = window.setInterval(() => {
       seconds -= 1;
-      if (seconds === 0) {
-        this.resetMessageTop();
-      }
+      if (seconds === 0) {this.resetMessageTop();}
     }, 1000);
   }
 
@@ -201,7 +144,7 @@ export class PregressoPagamentiPianoInsModDettComponent
     this.isModifica = false;
     this.loadPiano();
   }
-  // TODO Controllare
+  // Controllare TODO
   ngOnChanges() {
     if (!this.numDeterminazione) {
       this.modifica();
@@ -234,7 +177,6 @@ export class PregressoPagamentiPianoInsModDettComponent
         );
     } else {
       this.loadedIdSoggettiOrdinanza = false;
-      //this.subscribers.getDettaglio = this.pagamentiService.getDettaglioPianoById(this.idPiano, true).subscribe(data => {
       this.idSoggettiOrdinanza = new Array<number>();
       this.idSoggettiOrdinanza = this.piano.soggetti.map(
         (sogg) => sogg.idSoggettoOrdinanza
@@ -260,10 +202,6 @@ export class PregressoPagamentiPianoInsModDettComponent
       this.isRataCalcolata = true;
       this.onChangeDataEmitter();
       this.loaded = true;
-      //}, err => {
-      //    this.logger.error("Errore durante il caricamento del piano");
-      //    this.loaded = true;
-      //});
     }
   }
 
@@ -437,30 +375,20 @@ export class PregressoPagamentiPianoInsModDettComponent
       },
     },
     columns: [
-      {
-        columnName: "numeroRata",
-        displayName: "Numero Rata",
-      },
-      {
-        columnName: "stato.denominazione",
-        displayName: "Stato",
-      },
+      {        columnName: "numeroRata",        displayName: "Numero Rata",      },
+      {        columnName: "stato.denominazione",        displayName: "Stato",      },
       {
         columnName: "importoRata",
         displayName: "Importo Rata",
       },
+      {        columnName: "dataScadenza",        displayName: "Data Scadenza",      },
       {
-        columnName: "dataScadenza",
-        displayName: "Data Scadenza",
-      },
-      {
-        columnName: "codiceAvviso",
-        displayName: "Codice Avviso",
+        columnName: "codiceAvviso",        displayName: "Codice Avviso",
       },
     ],
   };
 
-  //DATEPICKER
+  // D A T E P I C K E R
   scrollImportoEnable: boolean;
   scrollTopEnable: boolean;
   ngAfterViewChecked() {
@@ -495,13 +423,9 @@ export class PregressoPagamentiPianoInsModDettComponent
     }
   }
 
-  byId(o1: SelectVO, o2: SelectVO) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
-  }
+  byId(o1: SelectVO, o2: SelectVO) {return o1 && o2 ? o1.id === o2.id : o1 === o2;}
 
-  isKeyPressed(code: number): boolean {
-    return this.numberUtilsSharedService.numberValid(code);
-  }
+  isKeyPressed(code: number): boolean {return this.numberUtilsSharedService.numberValid(code);}
 
   onInfo(el: any | Array<any>) {
     if (el instanceof Array)
@@ -515,7 +439,5 @@ export class PregressoPagamentiPianoInsModDettComponent
     }
   }
 
-  ngOnDestroy(): void {
-    this.logger.destroy(PregressoPagamentiPianoInsModDettComponent.name);
-  }
+  ngOnDestroy(): void {this.logger.destroy(PregressoPagamentiPianoInsModDettComponent.name);}
 }

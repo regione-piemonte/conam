@@ -13,9 +13,13 @@ import { SharedVerbaleScrittoDifensivoSoggettoComponent } from './component/shar
 import { SharedVerbaleScrittoDifensivoDatiVerbaleComponent } from './component/shared-verbale-scritto-difensivo-dati-verbale/shared-verbale-scritto-difensivo-dati-verbale.component';
 import { SharedVerbaleRicercaScrittoDifensivoComponent } from './component/shared-verbale-ricerca-scritto-difensivo/shared-verbale-ricerca-scritto-difensivo.component';
 import { ListaOrdinanzeComponent } from './component/shared-verbale-dettaglio-soggetti/lista-ordinanze-modal/lista-ordinanze';
-
+import { NoteDetailComponent } from './component/shared-verbale-riepilogo/notes/note-detail/note-detail.component';
+import { NotesListComponent } from './component/shared-verbale-riepilogo/notes/notes-list/notes-list.component';
+//import { VerbaleSoggettoRicercaFisicaComponent } from "./component/shared-verbale-riepilogo/verbale-soggetto-ricerca-fisica/verbale-soggetto-ricerca-fisica.component";
+//import { VerbaleSoggettoRicercaGiuridicaComponent } from "./component/shared-verbale-riepilogo/verbale-soggetto-ricerca-giuridica/verbale-soggetto-ricerca-giuridica.component";
+import { SharedCommonsModule } from '../shared-commons/shared-commons.module';
 @NgModule({
-    imports: [CommonModule, RouterModule, FormsModule, SharedModule],
+    imports: [CommonModule, RouterModule, FormsModule, SharedModule, SharedCommonsModule],
     exports: [
         SharedVerbaleRicercaComponent,
         SharedVerbaleRicercaScrittoDifensivoComponent,
@@ -23,7 +27,9 @@ import { ListaOrdinanzeComponent } from './component/shared-verbale-dettaglio-so
         SharedVerbaleAllegatoTabellaComponent,
         SharedVerbaleDettaglioSoggettiComponent,
         SharedVerbaleScrittoDifensivoDatiVerbaleComponent,
-        SharedVerbaleScrittoDifensivoSoggettoComponent
+        SharedVerbaleScrittoDifensivoSoggettoComponent,
+        NoteDetailComponent,
+        NotesListComponent,
     ],
     declarations: [
         SharedVerbaleRicercaComponent,
@@ -33,7 +39,11 @@ import { ListaOrdinanzeComponent } from './component/shared-verbale-dettaglio-so
         SharedVerbaleDettaglioSoggettiComponent,
         SharedVerbaleAllegatoTabellaComponent,
         SharedVerbaleScrittoDifensivoDatiVerbaleComponent,
-        SharedVerbaleScrittoDifensivoSoggettoComponent
+        SharedVerbaleScrittoDifensivoSoggettoComponent,
+//        VerbaleSoggettoRicercaGiuridicaComponent,
+//        VerbaleSoggettoRicercaFisicaComponent,
+        NoteDetailComponent,
+        NotesListComponent,
     ],
     providers: [SharedVerbaleService, SharedVerbaleConfigService],
 })

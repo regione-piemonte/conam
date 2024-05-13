@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -44,6 +45,16 @@ public class SoggettoPregressiEntityMapperImpl implements SoggettoPregressiEntit
 	@Autowired
 	private CnmTSoggettoRepository cnmTSoggettoRepository;
 
+	
+
+	@Override
+	public SoggettoPregressiVO mapEntityToVO(CnmTSoggetto dto, BigDecimal importoMisuraRidotta, BigDecimal importoPagato) {
+		SoggettoPregressiVO soggettoVO = mapEntityToVO(dto);
+		soggettoVO.setImportoVerbale(importoMisuraRidotta.doubleValue());
+		soggettoVO.setImportoResiduoVerbale(importoMisuraRidotta.doubleValue()-importoPagato.doubleValue());
+		return soggettoVO;
+	}
+	
 	@Override
 	public SoggettoPregressiVO mapEntityToVO(CnmTSoggetto dto) {
 		if (dto == null)

@@ -1,0 +1,52 @@
+<div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+  <h4 class="border-title"><strong>Lista Note</strong></h4>
+</div>
+<shared-spinner *ngIf="!loaded"></shared-spinner>
+<div
+ 
+  class="col-xs-12 col-sm-12 col-md-12 col-lg-12"
+  style="overflow-x: scroll"
+>
+  <datatable
+    [data]="noteList"
+    *ngIf="noteList"
+    [config]="configNote"
+    (onInfo)="toDetailNote($event)"
+    (onDelete)="toDeleteNote($event)"
+  >
+  </datatable>
+
+  <div class="row">
+    <div class="col-12 padding-top-23 text-right">
+      <button
+        type="button"
+        class="btn-conam button-blue float-right"
+        (click)="toDetail()"
+      >
+        <i
+          class="glyphicon glyphicon-share-alt btn-glyphicon img-circle text-blue-conam"
+        ></i>
+        Aggiungi Nota
+      </button>
+    </div>
+  </div>
+</div>
+
+<shared-dialog
+  [titolo]="'Attenzione'"
+  [subMessages]="subMessages"
+  [testo]="messageDialog"
+  [buttonConfirmText]="buttonConfirmText"
+  [buttonAnnullaText]="buttonAnnullaText"
+  [id]="'confirmDialog'"
+></shared-dialog>
+
+<app-note-detail
+*ngIf="modalLoaded"
+  [hideButton]="true"
+  [idVerbale]="idVerbale"
+  (clickLinkEvent)="checkReload(event$)"
+  [titolo]="'Note Verbale'"
+
+  class="w-100"
+></app-note-detail>

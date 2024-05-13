@@ -7,19 +7,12 @@
 
 package it.csi.conam.conambl.integration.beans;
 
-public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
-	/**
-	 * 
-	 */
+public class RequestArchiviaDocumentoFisico extends RequestArchiviaDocumento {
+
 	private static final long serialVersionUID = -5844294324175575503L;
 
-	private java.lang.String applicativoAlimentante;
-
-	private java.lang.String autoreFisico;
-
+	
 	private java.lang.String autoreGiuridico;
-
-	private java.lang.String codiceFruitore;
 
 	private java.lang.String destinatarioFisico;
 
@@ -27,56 +20,39 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 
 	private it.csi.conam.conambl.integration.beans.Documento documento;
 
-	private java.lang.String folder;
-
-	private it.csi.conam.conambl.integration.beans.Metadati metadati;
-
 	private java.lang.String mimeType;
 
 	private java.lang.String originatore;
 
 	private java.lang.String rootFolder;
 
-	private it.csi.conam.conambl.integration.beans.Soggetto soggetto;
-
-	private java.lang.String tipoDocumento;
-
-	// 20200731_LC
-    private java.lang.String collocazioneCartacea;
-
 	// 20211014
 	private java.lang.String dataTopica;
 	private java.util.Date dataCronica;
-    
-    
+
 
 	public RequestArchiviaDocumentoFisico() {
+		super();
 	}
 
 	public RequestArchiviaDocumentoFisico(java.lang.String applicativoAlimentante, java.lang.String autoreFisico, java.lang.String autoreGiuridico, java.lang.String codiceFruitore,
 			java.lang.String destinatarioFisico, java.lang.String destinatarioGiuridico, it.csi.conam.conambl.integration.beans.Documento documento, java.lang.String folder,
 			it.csi.conam.conambl.integration.beans.Metadati metadati, java.lang.String mimeType, java.lang.String originatore, java.lang.String rootFolder,
 			it.csi.conam.conambl.integration.beans.Soggetto soggetto, java.lang.String tipoDocumento, java.lang.String collocazioneCartacea, java.lang.String dataTopica, java.util.Date dataCronica) {
-		this.applicativoAlimentante = applicativoAlimentante;
-		this.autoreFisico = autoreFisico;
+		
+		super(applicativoAlimentante,autoreFisico,codiceFruitore,folder,metadati,soggetto,tipoDocumento,collocazioneCartacea);
+	
 		this.autoreGiuridico = autoreGiuridico;
-		this.codiceFruitore = codiceFruitore;
 		this.destinatarioFisico = destinatarioFisico;
 		this.destinatarioGiuridico = destinatarioGiuridico;
-		this.documento = documento;
-		this.folder = folder;
-		this.metadati = metadati;
 		this.mimeType = mimeType;
 		this.originatore = originatore;
 		this.rootFolder = rootFolder;
-		this.soggetto = soggetto;
-		this.tipoDocumento = tipoDocumento;
-        this.collocazioneCartacea = collocazioneCartacea;
 		this.dataTopica = dataTopica;
 		this.dataCronica = dataCronica;
+		this.documento = documento;
 	}
-	
-	
+
 	/**
 	 * Gets the dataTopica value for this RequestProtocollaDocumentoFisico.
 	 * 
@@ -95,8 +71,6 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 		this.dataTopica = dataTopica;
 	}
 
-	
-	
 	/**
 	 * Gets the dataCronica value for this RequestProtocollaDocumentoFisico.
 	 * 
@@ -115,43 +89,22 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 		this.dataCronica = dataCronica;
 	}
 	
-	
 	/**
-	 * Gets the applicativoAlimentante value for this
-	 * RequestArchiviaDocumentoFisico.
+	 * Gets the documento value for this RequestArchiviaDocumentoFisico.
 	 * 
-	 * @return applicativoAlimentante
+	 * @return documento
 	 */
-	public java.lang.String getApplicativoAlimentante() {
-		return applicativoAlimentante;
+	public it.csi.conam.conambl.integration.beans.Documento getDocumento() {
+		return documento;
 	}
 
 	/**
-	 * Sets the applicativoAlimentante value for this
-	 * RequestArchiviaDocumentoFisico.
+	 * Sets the documento value for this RequestArchiviaDocumentoFisico.
 	 * 
-	 * @param applicativoAlimentante
+	 * @param documento
 	 */
-	public void setApplicativoAlimentante(java.lang.String applicativoAlimentante) {
-		this.applicativoAlimentante = applicativoAlimentante;
-	}
-
-	/**
-	 * Gets the autoreFisico value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @return autoreFisico
-	 */
-	public java.lang.String getAutoreFisico() {
-		return autoreFisico;
-	}
-
-	/**
-	 * Sets the autoreFisico value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @param autoreFisico
-	 */
-	public void setAutoreFisico(java.lang.String autoreFisico) {
-		this.autoreFisico = autoreFisico;
+	public void setDocumento(it.csi.conam.conambl.integration.beans.Documento documento) {
+		this.documento = documento;
 	}
 
 	/**
@@ -170,24 +123,6 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 	 */
 	public void setAutoreGiuridico(java.lang.String autoreGiuridico) {
 		this.autoreGiuridico = autoreGiuridico;
-	}
-
-	/**
-	 * Gets the codiceFruitore value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @return codiceFruitore
-	 */
-	public java.lang.String getCodiceFruitore() {
-		return codiceFruitore;
-	}
-
-	/**
-	 * Sets the codiceFruitore value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @param codiceFruitore
-	 */
-	public void setCodiceFruitore(java.lang.String codiceFruitore) {
-		this.codiceFruitore = codiceFruitore;
 	}
 
 	/**
@@ -228,60 +163,6 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 	 */
 	public void setDestinatarioGiuridico(java.lang.String destinatarioGiuridico) {
 		this.destinatarioGiuridico = destinatarioGiuridico;
-	}
-
-	/**
-	 * Gets the documento value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @return documento
-	 */
-	public it.csi.conam.conambl.integration.beans.Documento getDocumento() {
-		return documento;
-	}
-
-	/**
-	 * Sets the documento value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @param documento
-	 */
-	public void setDocumento(it.csi.conam.conambl.integration.beans.Documento documento) {
-		this.documento = documento;
-	}
-
-	/**
-	 * Gets the folder value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @return folder
-	 */
-	public java.lang.String getFolder() {
-		return folder;
-	}
-
-	/**
-	 * Sets the folder value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @param folder
-	 */
-	public void setFolder(java.lang.String folder) {
-		this.folder = folder;
-	}
-
-	/**
-	 * Gets the metadati value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @return metadati
-	 */
-	public it.csi.conam.conambl.integration.beans.Metadati getMetadati() {
-		return metadati;
-	}
-
-	/**
-	 * Sets the metadati value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @param metadati
-	 */
-	public void setMetadati(it.csi.conam.conambl.integration.beans.Metadati metadati) {
-		this.metadati = metadati;
 	}
 
 	/**
@@ -338,71 +219,9 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 		this.rootFolder = rootFolder;
 	}
 
-	/**
-	 * Gets the soggetto value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @return soggetto
-	 */
-	public it.csi.conam.conambl.integration.beans.Soggetto getSoggetto() {
-		return soggetto;
-	}
-
-	/**
-	 * Sets the soggetto value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @param soggetto
-	 */
-	public void setSoggetto(it.csi.conam.conambl.integration.beans.Soggetto soggetto) {
-		this.soggetto = soggetto;
-	}
-
-	/**
-	 * Gets the tipoDocumento value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @return tipoDocumento
-	 */
-	public java.lang.String getTipoDocumento() {
-		return tipoDocumento;
-	}
-
-	/**
-	 * Sets the tipoDocumento value for this RequestArchiviaDocumentoFisico.
-	 * 
-	 * @param tipoDocumento
-	 */
-	public void setTipoDocumento(java.lang.String tipoDocumento) {
-		this.tipoDocumento = tipoDocumento;
-	}
-
-	
-	
-	
-	
-    /**
-     * Gets the collocazioneCartacea value for this RequestProtocollaDocumentoLogico.
-     * 
-     * @return collocazioneCartacea
-     */
-    public java.lang.String getCollocazioneCartacea() {
-        return collocazioneCartacea;
-    }
-
-
-    /**
-     * Sets the collocazioneCartacea value for this RequestProtocollaDocumentoLogico.
-     * 
-     * @param collocazioneCartacea
-     */
-    public void setCollocazioneCartacea(java.lang.String collocazioneCartacea) {
-        this.collocazioneCartacea = collocazioneCartacea;
-    }
-    
-    
-    
-    
-    
 	private java.lang.Object __equalsCalc = null;
 
+	@Override
 	public synchronized boolean equals(java.lang.Object obj) {
 		if (!(obj instanceof RequestArchiviaDocumentoFisico))
 			return false;
@@ -416,47 +235,32 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 		}
 		__equalsCalc = obj;
 		boolean _equals;
-		_equals = true
-				&& ((this.applicativoAlimentante == null && other.getApplicativoAlimentante() == null)
-						|| (this.applicativoAlimentante != null && this.applicativoAlimentante.equals(other.getApplicativoAlimentante())))
-				&& ((this.autoreFisico == null && other.getAutoreFisico() == null) || (this.autoreFisico != null && this.autoreFisico.equals(other.getAutoreFisico())))
+		_equals = super.equals(obj)
 				&& ((this.autoreGiuridico == null && other.getAutoreGiuridico() == null) || (this.autoreGiuridico != null && this.autoreGiuridico.equals(other.getAutoreGiuridico())))
-				&& ((this.codiceFruitore == null && other.getCodiceFruitore() == null) || (this.codiceFruitore != null && this.codiceFruitore.equals(other.getCodiceFruitore())))
 				&& ((this.destinatarioFisico == null && other.getDestinatarioFisico() == null) || (this.destinatarioFisico != null && this.destinatarioFisico.equals(other.getDestinatarioFisico())))
 				&& ((this.destinatarioGiuridico == null && other.getDestinatarioGiuridico() == null)
 						|| (this.destinatarioGiuridico != null && this.destinatarioGiuridico.equals(other.getDestinatarioGiuridico())))
 				&& ((this.documento == null && other.getDocumento() == null) || (this.documento != null && this.documento.equals(other.getDocumento())))
-				&& ((this.folder == null && other.getFolder() == null) || (this.folder != null && this.folder.equals(other.getFolder())))
-				&& ((this.metadati == null && other.getMetadati() == null) || (this.metadati != null && this.metadati.equals(other.getMetadati())))
 				&& ((this.mimeType == null && other.getMimeType() == null) || (this.mimeType != null && this.mimeType.equals(other.getMimeType())))
 				&& ((this.originatore == null && other.getOriginatore() == null) || (this.originatore != null && this.originatore.equals(other.getOriginatore())))
-				&& ((this.rootFolder == null && other.getRootFolder() == null) || (this.rootFolder != null && this.rootFolder.equals(other.getRootFolder())))
-				&& ((this.soggetto == null && other.getSoggetto() == null) || (this.soggetto != null && this.soggetto.equals(other.getSoggetto())))
-				&& ((this.tipoDocumento == null && other.getTipoDocumento() == null) || (this.tipoDocumento != null && this.tipoDocumento.equals(other.getTipoDocumento())))
-				&& ((this.collocazioneCartacea==null && other.getCollocazioneCartacea()==null) || (this.collocazioneCartacea!=null && this.collocazioneCartacea.equals(other.getCollocazioneCartacea())));
+				&& ((this.rootFolder == null && other.getRootFolder() == null) || (this.rootFolder != null && this.rootFolder.equals(other.getRootFolder())));
 		__equalsCalc = null;
 		return _equals;
 	}
 
 	private boolean __hashCodeCalc = false;
-
+	@Override
 	public synchronized int hashCode() {
 		if (__hashCodeCalc) {
 			return 0;
 		}
 		__hashCodeCalc = true;
-		int _hashCode = 1;
-		if (getApplicativoAlimentante() != null) {
-			_hashCode += getApplicativoAlimentante().hashCode();
-		}
+		int _hashCode = super.hashCode();
 		if (getAutoreFisico() != null) {
 			_hashCode += getAutoreFisico().hashCode();
 		}
 		if (getAutoreGiuridico() != null) {
 			_hashCode += getAutoreGiuridico().hashCode();
-		}
-		if (getCodiceFruitore() != null) {
-			_hashCode += getCodiceFruitore().hashCode();
 		}
 		if (getDestinatarioFisico() != null) {
 			_hashCode += getDestinatarioFisico().hashCode();
@@ -467,12 +271,6 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 		if (getDocumento() != null) {
 			_hashCode += getDocumento().hashCode();
 		}
-		if (getFolder() != null) {
-			_hashCode += getFolder().hashCode();
-		}
-		if (getMetadati() != null) {
-			_hashCode += getMetadati().hashCode();
-		}
 		if (getMimeType() != null) {
 			_hashCode += getMimeType().hashCode();
 		}
@@ -482,22 +280,14 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 		if (getRootFolder() != null) {
 			_hashCode += getRootFolder().hashCode();
 		}
-		if (getSoggetto() != null) {
-			_hashCode += getSoggetto().hashCode();
-		}
-		if (getTipoDocumento() != null) {
-			_hashCode += getTipoDocumento().hashCode();
-		}
-        if (getCollocazioneCartacea() != null) {
-            _hashCode += getCollocazioneCartacea().hashCode();
-        }
 		__hashCodeCalc = false;
 		return _hashCode;
 	}
-
-	// Type metadata
-	private static org.apache.axis.description.TypeDesc typeDesc = new org.apache.axis.description.TypeDesc(RequestArchiviaDocumentoFisico.class, true);
-
+	
+    static {
+        typeDesc = new org.apache.axis.description.TypeDesc(RequestArchiviaDocumentoFisico.class, true);
+    }
+    
 	static {
 		typeDesc.setXmlType(new javax.xml.namespace.QName("urn:stadocStadoc", "RequestArchiviaDocumentoFisico"));
 		org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
@@ -603,28 +393,7 @@ public class RequestArchiviaDocumentoFisico implements java.io.Serializable {
 		elemField.setNillable(true);
 		typeDesc.addFieldDesc(elemField);
 	}
-
-	/**
-	 * Return type metadata object
-	 */
-	public static org.apache.axis.description.TypeDesc getTypeDesc() {
-		return typeDesc;
-	}
-
-	/**
-	 * Get Custom Serializer
-	 */
-	public static org.apache.axis.encoding.Serializer getSerializer(java.lang.String mechType, java.lang.Class _javaType, javax.xml.namespace.QName _xmlType) {
-		return new org.apache.axis.encoding.ser.BeanSerializer(_javaType, _xmlType, typeDesc);
-	}
-
-	/**
-	 * Get Custom Deserializer
-	 */
-	public static org.apache.axis.encoding.Deserializer getDeserializer(java.lang.String mechType, java.lang.Class _javaType, javax.xml.namespace.QName _xmlType) {
-		return new org.apache.axis.encoding.ser.BeanDeserializer(_javaType, _xmlType, typeDesc);
-	}
-
+	
 	@Override
 	public String toString() {
 		return "RequestArchiviaDocumentoFisico [applicativoAlimentante=" + applicativoAlimentante + ", autoreFisico=" + autoreFisico + ", autoreGiuridico=" + autoreGiuridico + ", codiceFruitore="

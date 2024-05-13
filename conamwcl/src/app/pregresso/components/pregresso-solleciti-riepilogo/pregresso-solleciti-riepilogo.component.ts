@@ -8,7 +8,7 @@ import { RicercaOrdinanzaRequest } from "../../../commons/request/ordinanza/rice
 import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { ConfigSharedService } from "../../../shared/service/config-shared.service";
 import { SharedOrdinanzaService } from "../../../shared-ordinanza/service/shared-ordinanza.service";
-import { StatoOrdinanzaVO, StatoSollecitoVO } from "../../../commons/vo/select-vo";
+import { StatoSollecitoVO } from "../../../commons/vo/select-vo";
 import { PregressoVerbaleService } from "../../services/pregresso-verbale.service";
 import { RiepilogoVerbaleVO } from "../../../commons/vo/verbale/riepilogo-verbale-vo";
 import { SharedOrdinanzaRiepilogoComponent } from "../../../shared-ordinanza/component/shared-ordinanza-riepilogo/shared-ordinanza-riepilogo.component";
@@ -26,71 +26,67 @@ import { SalvaSollecitoPregressiRequest } from "../../../commons/request/pregres
 })
 export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
 
-    public subscribers: any = {};
-    public idVerbale: number;
-
     public showTable: boolean;
 
-    public config: Config;
-    public ordinanze: Array<OrdinanzaVO>;
-    public solleciti: Array<SollecitoVO>;
-    public sollecitoSel: SollecitoVO;
-    public sollecitoSaveStato: SollecitoVO;
-    public loaded: boolean = true;
-    
-    public riepilogoVerbale: RiepilogoVerbaleVO;
-    
-    public loadedStatiSollecito  : boolean;
-    public statiSollecitoModel: Array<StatoSollecitoVO>;
-    public nuovoStatoSollecito: StatoSollecitoVO;
+    public idVerbale: number;
+    public subscribers: any = {};
 
-    public request: RicercaOrdinanzaRequest;
+    public config: Config;
+    public solleciti: Array<SollecitoVO>;
+    public ordinanze: Array<OrdinanzaVO>;
+    public sollecitoSel: SollecitoVO;
+    public loaded: boolean = true;
+    public sollecitoSaveStato: SollecitoVO;
+
+    public riepilogoVerbale: RiepilogoVerbaleVO;
+
+    public statiSollecitoModel: Array<StatoSollecitoVO>;
+    public loadedStatiSollecito  : boolean;
+    public nuovoStatoSollecito: StatoSollecitoVO;
 
     public max: boolean = false;
 
+    public request: RicercaOrdinanzaRequest;
+
     idOrdinanza: number;
-    idSollecito: number;
     azione: AzioneOrdinanzaPregressiResponse;
+    idSollecito: number;
     loadedAction: boolean;
-    loadedSollecito: boolean = false;
     isRichiestaBollettiniSent: boolean;
+    loadedSollecito: boolean = false;
     isFirstDownloadBollettini: boolean;
 
-    @ViewChild(SharedOrdinanzaRiepilogoComponent)
-    sharedOrdinanzaRiepilogo: SharedOrdinanzaRiepilogoComponent;
+    @ViewChild(SharedOrdinanzaRiepilogoComponent)    sharedOrdinanzaRiepilogo: SharedOrdinanzaRiepilogoComponent;
     @ViewChild(SharedDialogComponent) sharedDialogs: SharedDialogComponent;
 
     salvaStatoOrdinanzaPregressiRequest: SalvaStatoOrdinanzaPregressiRequest = new SalvaStatoOrdinanzaPregressiRequest();
     statiOrdinanzaMessage: string;
 
-    public buttonAnnullaTexts: string;
     public buttonConfirmTexts: string;
+    public buttonAnnullaTexts: string;
     public subMessagess: Array<string>;
     public alertWarning: string;
 
     constructor(
-        private logger: LoggerService,
         private router: Router,
+        private logger: LoggerService,
         private configSharedService: ConfigSharedService,
-        private sharedOrdinanzaService: SharedOrdinanzaService,
         private activatedRoute: ActivatedRoute,
+        private templateService: TemplateService,
         private pregressoVerbaleService: PregressoVerbaleService,
-        private templateService: TemplateService
     ) { }
 
     ngOnInit(): void {
         this.logger.init(PregressoSollecitiRiepilogoComponent.name);
-        this.config = this.configSharedService.configSolleciti;    
+        this.config = this.configSharedService.configSolleciti;
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idVerbale = +params['id'];
-           
+
             if(this.activatedRoute.snapshot.paramMap.get('idOrdinanza')){
-                // setto il riferimento per la ricerca documento protocollato    
                 this.idOrdinanza = parseInt(this.activatedRoute.snapshot.paramMap.get('idOrdinanza'));
             }
 
-            if (isNaN(this.idOrdinanza))
-                this.router.navigateByUrl(Routing.PREGRESSO_DATI);
+            if (isNaN(this.idOrdinanza))                this.router.navigateByUrl(Routing.PREGRESSO_DATI);
 
             this.load();
 
@@ -100,10 +96,9 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
     load():void{
         this.loadedSollecito = false;
         this.loaded = false;
-        this.pregressoVerbaleService.getSollecitiByOrdinanza(this.idOrdinanza).subscribe( 
+        this.pregressoVerbaleService.getSollecitiByOrdinanza(this.idOrdinanza).subscribe(
             data => {
                 this.resetMessageTop();
-                
                 this.solleciti = data;
                 this.showTable = true;
                 this.loaded = true;
@@ -115,13 +110,11 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
                 }
                 this.logger.error("Errore nella ricerca dell'ordinanza");
             }
-        );   
+        );
     }
-   
+
     onChangeData(event:any){
-        if(event.reload){
-            this.load();
-        }
+        if(event.reload){            this.load();        }
     }
 
     scrollEnable: boolean;
@@ -133,21 +126,20 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
         this.request.tipoRicerca = "RICERCA_ORDINANZA";
         this.request.soggettoVerbale = null;
         this.request.statoOrdinanza = null;
-        this.pregressoVerbaleService.ricercaOrdinanza(ricercaOrdinanzaRequest).subscribe( 
+        this.pregressoVerbaleService.ricercaOrdinanza(ricercaOrdinanzaRequest).subscribe(
             data => {
                 this.resetMessageTop();
                 if(data.length == 1){
                     data.map(value => {
-                        this.max = value.superatoIlMassimo; 
+                        this.max = value.superatoIlMassimo;
                     });
-                }                
-
+                }
                 if(this.max){
                     this.manageMessageTop("Il sistema può mostrare solo 100 risultati per volta. Ridurre l'intervallo di ricerca","WARNING");
                     this.ordinanze = new Array<OrdinanzaVO>();
                 } else{
                     this.ordinanze = data;
-                }  
+                }
                 this.showTable = true;
                 this.loaded = true;
                 this.scrollEnable = true;
@@ -168,7 +160,7 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
             this.scrollEnable = false;
         }
     }
-    
+
     callAzioneOrdinanza() {
         let request: AzioneOrdinanzaRequest = new AzioneOrdinanzaRequest();
         request.id = this.idOrdinanza;
@@ -181,8 +173,7 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
         this.loadedSollecito = false;
         this.sollecitoSaveStato = el;
         this.sollecitoSel = {...el};
-        if (el instanceof Array)
-            throw Error("errore sono stati selezionati più elementi");
+        if (el instanceof Array)            throw Error("errore sono stati selezionati più elementi");
         else{
             this.idSollecito = this.sollecitoSel.idSollecito;
             this.loadedSollecito = true;
@@ -191,19 +182,16 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
 
     }
 
-    messaggio(message: string){
-        this.manageMessageTop(message,"DANGER");
-    }
+    messaggio(message: string){        this.manageMessageTop(message,"DANGER");    }
 
-    //Messaggio top
-    public showMessageTop: boolean;
-    public typeMessageTop: String;
-    public messageTop: String;
     private intervalIdS: number = 0;
+    public showMessageTop: boolean;
+    public messageTop: String;
+    public typeMessageTop: String;
 
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
         this.scrollTopEnable = true;
     }
@@ -213,9 +201,7 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
         let seconds: number = 10;
         this.intervalIdS = window.setInterval(() => {
             seconds -= 1;
-            if (seconds === 0) {
-                this.resetMessageTop();
-            }
+            if (seconds === 0) {                this.resetMessageTop();            }
         }, 1000);
     }
 
@@ -235,9 +221,7 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
         }
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(PregressoSollecitiRiepilogoComponent.name);
-    }
+    ngOnDestroy(): void {        this.logger.destroy(PregressoSollecitiRiepilogoComponent.name);    }
 
     loadAlertWarning() {
         this.subscribers.alertWarning = this.templateService.getMessage('STORDPRWAR').subscribe(data => {
@@ -262,7 +246,7 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
         this.loaded = false;
         let saveRequest = new SalvaSollecitoPregressiRequest(this.idVerbale,this.idOrdinanza);
         this.sollecitoSaveStato.statoSollecito = this.nuovoStatoSollecito;
-        saveRequest.sollecito = this.sollecitoSaveStato;  
+        saveRequest.sollecito = this.sollecitoSaveStato;
         this.subscribers.salva = this.pregressoVerbaleService.salvaSollecito(saveRequest).subscribe(data => {
             this.loaded = true;
             this.load();
@@ -275,7 +259,6 @@ export class PregressoSollecitiRiepilogoComponent implements OnInit, OnDestroy {
         });
     }
 
-    goBack():void{
-        this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO_ORDINANZE + this.idVerbale);
+    goBack():void{        this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO_ORDINANZE + this.idVerbale);
     }
 }

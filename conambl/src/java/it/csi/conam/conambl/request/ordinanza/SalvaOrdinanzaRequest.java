@@ -16,12 +16,11 @@ import java.util.List;
  */
 public class SalvaOrdinanzaRequest extends SalvaAllegatoRequest {
 
-	private static final long serialVersionUID = 1946325489262854786L;
+	private static final long serialVersionUID = 5734345362854786L;
 
 	private MinOrdinanzaVO ordinanza;
 	private List<SoggettoOrdinanzaRequest> soggetti;
 	private NotificaVO notifica;
-	
 
 	public MinOrdinanzaVO getOrdinanza() {
 		return ordinanza;

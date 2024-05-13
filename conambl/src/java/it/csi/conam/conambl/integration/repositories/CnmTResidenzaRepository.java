@@ -25,6 +25,10 @@ public interface CnmTResidenzaRepository extends CrudRepository<CnmTResidenza, I
 	
 	// 20200914 PP - seleziono la residenze specifica per il verbale pregresso
 	CnmTResidenza findByCnmTSoggettoAndIdVerbale(CnmTSoggetto cnmTSoggetto, Integer idVerbale );
-	
-	
+
+	// 20240109 PP - seleziono tutte le residenze del soggetto
+	@Query(value = "select tr from CnmTResidenza tr where tr.cnmTSoggetto = ?1")
+	List<CnmTResidenza> findAllByCnmTSoggetto(CnmTSoggetto cnmTSoggetto);
+
+
 }

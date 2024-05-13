@@ -7,7 +7,6 @@ import { Config } from "../../../shared/module/datatable/classes/config";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { SharedOrdinanzaDettaglio } from "../../../shared-ordinanza/component/shared-ordinanza-dettaglio/shared-ordinanza-dettaglio.component";
 import { SollecitoVO } from "../../../commons/vo/riscossione/sollecito-vo";
-import { DatiSentenzaResponse } from "../../../commons/response/ordinanza/dati-sentenza-response";
 import { RiscossioneSollecitoDettaglioComponent } from "../../../riscossione/components/riscossione-sollecito-dettaglio/riscossione-sollecito-dettaglio.component";
 import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { PagamentiUtilService } from "../../services/pagamenti-util.serivice";
@@ -19,61 +18,60 @@ declare var $: any;
 
 @Component({
   selector: "pagamenti-riconcilia-sollecito-dettaglio",
-  templateUrl: "./pagamenti-riconcilia-sollecito-dettaglio.component.html",
+  //templateUrl: "./pagamenti-riconcilia-sollecito-dettaglio.component.html",
+  templateUrl: "../pagamenti-riconcilia-sollecito-rate-dettaglio/pagamenti-riconcilia-sollecito-rate-dettaglio.component.html",
 })
 export class PagamentiRiconciliaSollecitoDettaglioComponent
   implements OnInit, OnDestroy {
+
   @ViewChild(SharedOrdinanzaDettaglio)
   sharedOrdinanzaDettaglio: SharedOrdinanzaDettaglio;
-  public subscribers: any = {};
+
 
   public loaded: boolean;
 
-  public idOrdinanzaVerbaleSoggetto: number[];
+  public subscribers: any = {};
+
 
   public sollecito: SollecitoVO;
-  public soggettoSollecito: TableSoggettiOrdinanza[];
   public listaSolleciti: Array<SollecitoVO>;
+  public soggettoSollecito: TableSoggettiOrdinanza[];
 
-  public configSoggetti: Config;
+  public idOrdinanzaVerbaleSoggetto: number[];
+
   public configSolleciti: Config;
+  public configSoggetti: Config;
 
   public isRiconcilia: boolean = false;
 
   //Messaggio top
   private intervalTop: number = 0;
-  public showMessageTop: boolean;
   public typeMessageTop: string;
+  public showMessageTop: boolean;
   public messageTop: string;
 
   constructor(
     private logger: LoggerService,
-    private router: Router,
     private sharedRiscossioneService: SharedRiscossioneService,
+    private router: Router,
     private pagamentiUtilService: PagamentiUtilService,
-    private pagamentiService: PagamentiService,
     private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
+    private pagamentiService: PagamentiService,
     private numberUtilsSharedService: NumberUtilsSharedService
   ) {}
 
   ngOnInit(): void {
-
     this.logger.init(RiscossioneSollecitoDettaglioComponent.name);
     this.loaded = false;
-
     this.soggettoSollecito = [];
     this.soggettoSollecito[0] = this.pagamentiUtilService.soggettoSollecito;
-    //this.riscossioneService.soggettoSollecito = null;
     if (!this.soggettoSollecito[0]) {
       this.router.navigateByUrl(Routing.PAGAMENTI_RICONCILIA_SOLLECITO_RICERCA);
     } else {
       this.idOrdinanzaVerbaleSoggetto = [];
       this.idOrdinanzaVerbaleSoggetto[0] = this.soggettoSollecito[0].idSoggettoOrdinanza;
-
       this.loadSollecitiEsistenti();
-
       this.setConfig();
-
       this.sollecito = new SollecitoVO();
       this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
     }
@@ -100,8 +98,8 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
   }
 
   manageMessageTop(message: string, type: string) {
-    this.typeMessageTop = type;
     this.messageTop = message;
+    this.typeMessageTop = type;
     this.scrollTopEnable = true;
     this.timerShowMessageTop();
   }
@@ -117,23 +115,17 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
     }, 1000);
   }
 
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalTop);
-  }
-
   riconciliaSollecito(el: SollecitoVO) {
     this.sollecito = JSON.parse(JSON.stringify(el));
 
     this.isRiconcilia = true;
   }
 
-  annullaRiconciliazione() {
-    this.sollecito = new SollecitoVO();
-    this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
-    this.isRiconcilia = false;
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.typeMessageTop = null;
+    this.messageTop = null;
+    clearInterval(this.intervalTop);
   }
 
   confermaRiconciliazione() {
@@ -165,6 +157,17 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
           this.loaded = true;
         }
       );
+  }
+
+  annullaRiconciliazione() {
+    this.sollecito = new SollecitoVO();
+    this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
+    this.isRiconcilia = false;
+  }
+
+
+  isKeyPressed(code: number): boolean {
+    return this.numberUtilsSharedService.numberValid(code);
   }
 
   setConfig() {
@@ -208,10 +211,7 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
     };
   }
 
-  isKeyPressed(code: number): boolean {
-    return this.numberUtilsSharedService.numberValid(code);
-  }
-
+  scrollTopEnable: boolean;
   manageDatePicker(event: any, i: number) {
     var str: string = "#datetimepicker" + i.toString();
     if ($(str).length) {
@@ -227,15 +227,8 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
       }
     }
   }
-
-  scrollTopEnable: boolean;
-  ngAfterViewChecked() {
-    this.manageDatePicker(null, 1);
-    let scrollTop: HTMLElement = document.getElementById("scrollTop");
-    if (this.scrollTopEnable && scrollTop != null) {
-      scrollTop.scrollIntoView();
-      this.scrollTopEnable = false;
-    }
+  ngOnDestroy(): void {
+    this.logger.destroy(PagamentiRiconciliaSollecitoDettaglioComponent.name);
   }
 
   onInfo(el: any | Array<any>) {
@@ -250,8 +243,13 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
       ]);
     }
   }
-
-  ngOnDestroy(): void {
-    this.logger.destroy(PagamentiRiconciliaSollecitoDettaglioComponent.name);
+  ngAfterViewChecked() {
+    this.manageDatePicker(null, 1);
+    let scrollTop: HTMLElement = document.getElementById("scrollTop");
+    if (this.scrollTopEnable && scrollTop != null) {
+      scrollTop.scrollIntoView();
+      this.scrollTopEnable = false;
+    }
   }
+
 }

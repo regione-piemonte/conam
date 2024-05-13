@@ -4,20 +4,32 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.mapper.entity.impl;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import it.csi.conam.conambl.business.facade.StasServFacade;
 import it.csi.conam.conambl.integration.entity.CnmTPersona;
 import it.csi.conam.conambl.integration.entity.CnmTResidenza;
 import it.csi.conam.conambl.integration.entity.CnmTSocieta;
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
-import it.csi.conam.conambl.integration.mapper.entity.*;
+import it.csi.conam.conambl.integration.mapper.entity.ComuneEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.NazioneEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.PersonaEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.ProvinciaEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.RegioneEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.ResidenzaEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.SocietaEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.ws.stas.AnagraficaWsOutputMapper;
 import it.csi.conam.conambl.integration.repositories.CnmTResidenzaRepository;
 import it.csi.conam.conambl.util.StringConamUtils;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class SoggettoEntityMapperImpl implements SoggettoEntityMapper {
@@ -54,7 +66,13 @@ public class SoggettoEntityMapperImpl implements SoggettoEntityMapper {
 
 		return minSoggettoVO;
 	}
-	
+	@Override
+	public SoggettoVO mapEntityToVO(CnmTSoggetto dto, BigDecimal importoMisuraRidotta, BigDecimal importoPagato) {
+		SoggettoVO soggettoVO = mapEntityToVO(dto);
+		soggettoVO.setImportoVerbale(importoMisuraRidotta.doubleValue());
+		soggettoVO.setImportoResiduoVerbale(importoMisuraRidotta.doubleValue()-importoPagato.doubleValue());
+		return soggettoVO;
+	}
 	@Override
 	public SoggettoVO mapEntityToVO(CnmTSoggetto dto) {
 		if (dto == null)
@@ -63,6 +81,9 @@ public class SoggettoEntityMapperImpl implements SoggettoEntityMapper {
 		CnmTPersona cnmTPersona = dto.getCnmTPersona();
 		CnmTSocieta cnmTSocieta = dto.getCnmTSocieta();
 		CnmTResidenza cnmTResidenza = cnmTResidenzaRepository.findByCnmTSoggetto(dto);
+		if(cnmTResidenza == null){
+			cnmTResidenza = getLastResidenza(dto);
+		}
 		SoggettoVO sogStas = new SoggettoVO();
 		
 		//dataFineValidita
@@ -140,8 +161,25 @@ public class SoggettoEntityMapperImpl implements SoggettoEntityMapper {
 
 		return soggettoVO;
 	}
-	
-	
+
+	private CnmTResidenza getLastResidenza(CnmTSoggetto dto) {
+		List<CnmTResidenza> cnmTResidenzaList = cnmTResidenzaRepository.findAllByCnmTSoggetto(dto);
+		CnmTResidenza cnmTResidenza = null;
+		for(CnmTResidenza residenza : cnmTResidenzaList){
+			if(cnmTResidenza == null){
+				cnmTResidenza = residenza;
+			}else{
+				Date date1 = residenza.getDataOraUpdate()!=null?residenza.getDataOraUpdate():residenza.getDataOraInsert();
+				Date date2 = cnmTResidenza.getDataOraUpdate()!=null?cnmTResidenza.getDataOraUpdate():cnmTResidenza.getDataOraInsert();
+				if(date1.compareTo(date2)>0){
+					cnmTResidenza=residenza;
+				}
+			}
+		}
+		return cnmTResidenza;
+	}
+
+
 	@Override
 	public CnmTSoggetto mapVOtoEntity(SoggettoVO soggettoVO) {
 		if (soggettoVO == null)
@@ -175,12 +213,14 @@ public class SoggettoEntityMapperImpl implements SoggettoEntityMapper {
 		boolean isPersonaFisica = soggetto.getPersonaFisica() != null && soggetto.getPersonaFisica();
 
 		if (isPersonaFisica) {
-			cnmTSoggetto.setCnmTPersona(personaEntityMapper.mapVOtoEntityUpdate(soggetto, cnmTSoggetto.getCnmTPersona()));
+			if(cnmTSoggetto.getCnmTPersona()!=null)
+				cnmTSoggetto.setCnmTPersona(personaEntityMapper.mapVOtoEntityUpdate(soggetto, cnmTSoggetto.getCnmTPersona()));
 			cnmTSoggetto.setCodiceFiscale(StringConamUtils.nullOrUppercase(soggetto.getCodiceFiscale()));
 			cnmTSoggetto.setCognome(StringConamUtils.nullOrUppercase(soggetto.getCognome()));
 			cnmTSoggetto.setNome(StringConamUtils.nullOrUppercase(soggetto.getNome()));
 		} else {
-			cnmTSoggetto.setCnmTSocieta(societaEntityMapper.mapVOtoEntityUpdate(soggetto, cnmTSoggetto.getCnmTSocieta()));
+			if(cnmTSoggetto.getCnmTSocieta()!=null)
+				cnmTSoggetto.setCnmTSocieta(societaEntityMapper.mapVOtoEntityUpdate(soggetto, cnmTSoggetto.getCnmTSocieta()));
 			cnmTSoggetto.setPartitaIva(StringConamUtils.nullOrUppercase(soggetto.getPartitaIva()));
 			cnmTSoggetto.setCodiceFiscaleGiuridico(StringConamUtils.nullOrUppercase(soggetto.getCodiceFiscale()));
 			cnmTSoggetto.setRagioneSociale(soggetto.getRagioneSociale());

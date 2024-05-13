@@ -16,20 +16,28 @@ export class PagamentiRiconciliaPianoComponent implements OnInit, OnDestroy {
 
     public subscribers: any = {};
 
-    public loaded: boolean = true;
-    public showTable: boolean = false;
-    public pianiRateizzazione: Array<TablePianoRateizzazione> = new Array<TablePianoRateizzazione>();
-
     public request: RicercaPianoRateizzazioneRequest = new RicercaPianoRateizzazioneRequest();
 
+    public showTable: boolean = false;
+    public loaded: boolean = true;
+    public pianiRateizzazione: Array<TablePianoRateizzazione> = new Array<TablePianoRateizzazione>();
+
+
     constructor(
-        private logger: LoggerService,
         private router: Router,
+        private logger: LoggerService,
         private pagamentiService: PagamentiService
     ) { }
 
     ngOnInit(): void {
         this.logger.init(PagamentiRiconciliaPianoComponent.name);
+    }
+
+    dettaglioPiano(event: TablePianoRateizzazione) {
+        if (event instanceof Array)
+            throw new Error("Errore sono stati selezionati più elementi");
+        else
+            this.router.navigateByUrl(Routing.PAGAMENTI_RICONCILIA_PIANO_DETTAGLIO + event.id);
     }
 
     ricerca(request: RicercaPianoRateizzazioneRequest) {
@@ -54,13 +62,6 @@ export class PagamentiRiconciliaPianoComponent implements OnInit, OnDestroy {
 
     }
 
-    dettaglioPiano(event: TablePianoRateizzazione) {
-        if (event instanceof Array)
-            throw new Error("Errore sono stati selezionati più elementi");
-        else
-            this.router.navigateByUrl(Routing.PAGAMENTI_RICONCILIA_PIANO_DETTAGLIO + event.id);
-    }
-
     public config: Config = {
         pagination: {
             enable: true
@@ -76,26 +77,11 @@ export class PagamentiRiconciliaPianoComponent implements OnInit, OnDestroy {
             enable: true,
         },
         columns: [
-            {
-                columnName: 'identificativoSoggetto',
-                displayName: 'Codice Fiscale / Partita iva'
-            },
-            {
-                columnName: 'stato.denominazione',
-                displayName: 'Stato'
-            },
-            {
-                columnName: 'saldo',
-                displayName: 'Importo Totale'
-            },
-            {
-                columnName: 'dataCreazione',
-                displayName: 'Data Creazione'
-            },
-            {
-                columnName: 'numProtocollo',
-                displayName: 'Numero Protocollo Piano'
-            }
+            {                columnName: 'identificativoSoggetto',                displayName: 'Codice Fiscale / Partita iva'            },
+            {                columnName: 'stato.denominazione',                displayName: 'Stato'            },
+            {                columnName: 'saldo',                displayName: 'Importo Totale'            },
+            {                columnName: 'dataCreazione',                displayName: 'Data Creazione'            },
+            {                columnName: 'numProtocollo',                displayName: 'Numero Protocollo Piano'            }
         ]
     };
 
@@ -104,27 +90,16 @@ export class PagamentiRiconciliaPianoComponent implements OnInit, OnDestroy {
     }
 
     //Messaggio top
-    public showMessageTop: boolean;
     public typeMessageTop: String;
-    public messageTop: String;
+    public showMessageTop: boolean;
     private intervalIdS: number = 0;
+    public messageTop: String;
 
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
         this.scrollTopEnable = true;
-    }
-
-    timerShowMessageTop() {
-        this.showMessageTop = true;
-        let seconds: number = 10;
-        this.intervalIdS = window.setInterval(() => {
-            seconds -= 1;
-            if (seconds === 0) {
-                this.resetMessageTop();
-            }
-        }, 1000);
     }
 
     resetMessageTop() {
@@ -133,8 +108,21 @@ export class PagamentiRiconciliaPianoComponent implements OnInit, OnDestroy {
         this.messageTop = null;
         clearInterval(this.intervalIdS);
     }
+    timerShowMessageTop() {
+        let seconds: number = 10;
+        this.showMessageTop = true;
+        this.intervalIdS = window.setInterval(() => {
+            seconds -= 1;
+            if (seconds === 0) {
+                this.resetMessageTop();
+            }
+        }, 1000);
+    }
+    ngOnDestroy(): void {
+        this.logger.destroy(PagamentiRiconciliaPianoComponent.name);
+    }
 
-    scrollTopEnable: boolean;
+
     ngAfterViewChecked() {
         let scrollTop: HTMLElement = document.getElementById("scrollTop");
         if (this.scrollTopEnable && scrollTop != null) {
@@ -143,8 +131,6 @@ export class PagamentiRiconciliaPianoComponent implements OnInit, OnDestroy {
         }
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(PagamentiRiconciliaPianoComponent.name);
-    }
+    scrollTopEnable: boolean;
 
 }

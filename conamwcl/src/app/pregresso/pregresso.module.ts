@@ -17,8 +17,8 @@ import { RifNormativiService } from "./services/rif-normativi.service";
 import { VerbaleService } from "./services/verbale.service";
 import { PregressoVerbaleService } from "./services/pregresso-verbale.service";
 import { PregressoEliminazioneComponent } from "./components/pregresso-eliminazione/pregresso-eliminazione.component";
-import { PregressoSoggettoRicercaFisicaComponent } from "./components/pregresso-soggetto/pregresso-soggetto-ricerca-fisica/pregresso-soggetto-ricerca-fisica.component";
-import { PregressoSoggettoRicercaGiuridicaComponent } from "./components/pregresso-soggetto/pregresso-soggetto-ricerca-giuridica/pregresso-soggetto-ricerca-giuridica.component";
+//import { PregressoSoggettoRicercaFisicaComponent } from "./components/pregresso-soggetto/pregresso-soggetto-ricerca-fisica/pregresso-soggetto-ricerca-fisica.component";
+//import { PregressoSoggettoRicercaGiuridicaComponent } from "./components/pregresso-soggetto/pregresso-soggetto-ricerca-giuridica/pregresso-soggetto-ricerca-giuridica.component";
 import { PregressoOrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent } from "./components/pregresso-ordinanza-ins-crea-ordinanza/pregresso-ordinanza-ins-crea-ordinanza.component";
 import { PregressoOrdinanzeRiepilogoComponent } from "./components/pregresso-ordinanze-riepilogo/pregresso-ordinanze-riepilogo.component";
 import { PregressoPianiRiepilogoComponent } from "./components/pregresso-piani-riepilogo/pregresso-piani-riepilogo.component";
@@ -39,6 +39,7 @@ import { SharedRiscossioneModule } from "../shared-riscossione/shared-riscossion
 import { PregressoDisposizioneGiudiceInsComponent } from "./components/pregresso-disposizione-giudice-ins/pregresso-disposizione-giudice-ins.component";
 import { PregressoRicevutaPagamentoOrdinanzaInsComponent } from "./components/pregresso-ricevuta-pagamento-ordinanza-ins/pregresso-ricevuta-pagamento-ordinanza-ins.component";
 import { PregressoSelezionaSoggettiComponent } from "./components/pregresso-seleziona-soggetti/pregresso-seleziona-soggetti.component";
+import { SharedCommonsModule } from "../shared-commons/shared-commons.module";
 
 @NgModule({
     imports: [
@@ -51,7 +52,8 @@ import { PregressoSelezionaSoggettiComponent } from "./components/pregresso-sele
         SharedNotificaModule,
         SharedVerbaleModule,
         PagamentiModule,
-        SharedRiscossioneModule
+        SharedRiscossioneModule,
+        SharedCommonsModule
     ],
     exports: [
         PregressoAllegatoComponent,
@@ -76,7 +78,7 @@ import { PregressoSelezionaSoggettiComponent } from "./components/pregresso-sele
         PregressoRicevutaPagamentoOrdinanzaInsComponent,
         PregressoSelezionaSoggettiComponent,
         PregressoPagamentiPianoInsModDettComponent,
-      
+
     ],
     declarations: [
         PregressoAllegatoComponent,
@@ -88,8 +90,8 @@ import { PregressoSelezionaSoggettiComponent } from "./components/pregresso-sele
         PregressoInserimentoComponent,
         PregressoInserimentoManualeComponent,
         PregressoInserimentoActaComponent,
-        PregressoSoggettoRicercaGiuridicaComponent,
-        PregressoSoggettoRicercaFisicaComponent,
+        //PregressoSoggettoRicercaGiuridicaComponent,
+        //PregressoSoggettoRicercaFisicaComponent,
         PregressoStatoComponent,
         PregressoOrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent,
         PregressoOrdinanzeRiepilogoComponent,

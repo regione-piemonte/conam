@@ -22,6 +22,7 @@ import { RiscossioneSollecitoRateRicercaComponent } from "./components/ricossion
 import { RiscossioneSollecitoRateDettaglioComponent } from "./components/riscossione-sollecito-rate-dettaglio/riscossione-sollecito-rate-dettaglio.component";
 import { SharedPagamentiModule } from "../shared-pagamenti/shared-pagamenti.module";
 import { RiscossioneSollecitoRateTemplateComponent } from "./components/riscossione-sollecito-rate-template/riscossione-sollecito-rate-template.component";
+import { SharedCommonsModule } from "../shared-commons/shared-commons.module";
 
 @NgModule({
     imports: [
@@ -36,7 +37,7 @@ import { RiscossioneSollecitoRateTemplateComponent } from "./components/riscossi
         SharedTemplateModule,
         SharedNotificaModule,
         SharedPagamentiModule,
-        
+        SharedCommonsModule
     ],
     exports: [
         RiscossioneSollecitoRicercaComponent,
@@ -49,7 +50,7 @@ import { RiscossioneSollecitoRateTemplateComponent } from "./components/riscossi
         RiscossioneSollecitoViewNotificaComponent,
         RiscossioneRiscossioneCoattivaRicercaComponent,
         RiscossioneRiscossioneCoattivaElencoComponent,
-     
+
 
     ],
     declarations: [
@@ -63,8 +64,8 @@ import { RiscossioneSollecitoRateTemplateComponent } from "./components/riscossi
         RiscossioneSollecitoViewNotificaComponent,
         RiscossioneRiscossioneCoattivaRicercaComponent,
         RiscossioneRiscossioneCoattivaElencoComponent,
-       
-       
+
+
     ],
     providers: [RiscossioneService, SharedRiscossioneService,]
 })

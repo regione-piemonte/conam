@@ -11,7 +11,6 @@ import { Location } from "@angular/common";
 import { SharedRiscossioneService } from "../../../shared-riscossione/services/shared-riscossione.service";
 import { IsCreatedVO } from "../../../commons/vo/isCreated-vo";
 import { saveAs } from "file-saver";
-
 import { Template11SollecitoPagamentoRateComponent } from "../../../template/components/template-11-lettera-sollecito-pagamento-rate/template-11-lettera-sollecito-pagamento-rate.component";
 
 @Component({
@@ -20,49 +19,46 @@ import { Template11SollecitoPagamentoRateComponent } from "../../../template/com
 })
 export class RiscossioneSollecitoRateTemplateComponent
   implements OnInit, OnDestroy {
+
   @ViewChild(Template11SollecitoPagamentoRateComponent)
   template: Template11SollecitoPagamentoRateComponent;
 
   public subscribers: any = {};
 
-  public loaded: boolean;
-  public isAnteprima: boolean = false;
-  public isPrinted: boolean = false;
-  public scrollEnable: boolean;
-
   public idSollecito: number;
 
-  public datiTemplateModel: DatiTemplateVO;
-  public datiTemplateModelStampa: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
-  public datiCompilati: DatiTemplateCompilatiVO;
+  public scrollEnable: boolean;
+  public isAnteprima: boolean = false;
+  public loaded: boolean;
+  public isPrinted: boolean = false;
 
   public url: string;
 
-  //Messaggio Top
-  public showMessageTop: boolean;
-  public typeMessageTop: String;
-  public messageTop: String;
-  private intervalIdS: number = 0;
+  public datiTemplateModelStampa: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
+  public datiTemplateModel: DatiTemplateVO;
+  public datiCompilati: DatiTemplateCompilatiVO;
 
-  visualizzaAnteprimaValidIntestazione: boolean;
   visualizzaAnteprimaValidTemplate: boolean;
+  visualizzaAnteprimaValidIntestazione: boolean;
+
+  //Messaggio Top
+  private intervalIdS: number = 0;
+  public typeMessageTop: String;
+  public showMessageTop: boolean;
+  public messageTop: String;
 
   constructor(
+    private sharedRiscossioneService: SharedRiscossioneService,
     private logger: LoggerService,
-    private router: Router,
     private activatedRoute: ActivatedRoute,
-    private templateService: TemplateService,
     private location: Location,
-    private sanitizer: DomSanitizer,
-    private sharedRiscossioneService: SharedRiscossioneService
-  ) //private userService: UserService,
-  {}
+    private templateService: TemplateService,
+  ){}
 
   ngOnInit(): void {
     this.logger.init(RiscossioneSollecitoRateTemplateComponent.name);
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
       this.idSollecito = +params["id"];
-
       let request: DatiTemplateRequest = new DatiTemplateRequest();
       request.codiceTemplate = Constants.TEMPLATE_SOLLECITO_PAGAMENTO_RATE;
       request.idSollecito = this.idSollecito;
@@ -84,7 +80,6 @@ export class RiscossioneSollecitoRateTemplateComponent
   indietro() {
     this.location.back();
   }
-
   visualizzaAnteprima() {
     this.datiTemplateModelStampa = this.template.getDatiCompilati();
     this.isAnteprima = true;
@@ -92,20 +87,19 @@ export class RiscossioneSollecitoRateTemplateComponent
     this.scrollEnable = true;
   }
 
+
+
   proseguiModifica() {
-    this.isAnteprima = false;
     this.isStampa = false;
+    this.isAnteprima = false;
     this.template.setAnteprima(false);
     this.template.setStampa(false);
     this.scrollEnable = true;
   }
 
-  public isStampa: boolean = false;
-  public isStampaProtocollata: boolean = false;
-  public loadedScarica: boolean = false;
   stampaPDF() {
-    this.isPrinted = true;
     this.isStampa = true;
+    this.isPrinted = true;
 
     this.template.setStampa(true);
     this.template.setDatiCompilati(this.datiTemplateModelStampa);
@@ -140,10 +134,10 @@ export class RiscossioneSollecitoRateTemplateComponent
                 (err) => {
                   this.logger.error("Errore durante il download del PDF");
                   //this.loaded = true;
-                  this.scrollEnable = true;
                   this.isStampa = true;
-                  this.loadedScarica = false;
+                  this.scrollEnable = true;
                   this.isPrinted = false;
+                  this.loadedScarica = false;
                 }
               );
           } else {
@@ -153,10 +147,10 @@ export class RiscossioneSollecitoRateTemplateComponent
             );
             this.isAnteprima = false;
             //this.loaded = true;
-            this.scrollEnable = true;
             this.isStampa = true;
-            this.loadedScarica = false;
+            this.scrollEnable = true;
             this.isPrinted = false;
+            this.loadedScarica = false;
           }
         });
     } else {
@@ -164,6 +158,10 @@ export class RiscossioneSollecitoRateTemplateComponent
       this.scrollEnable = true;
     }
   }
+
+  public isStampaProtocollata: boolean = false;
+  public isStampa: boolean = false;
+  public loadedScarica: boolean = false;
 
   scarica() {
     this.loaded = false;
@@ -187,6 +185,12 @@ export class RiscossioneSollecitoRateTemplateComponent
     });
   }
 
+  manageMessageTop(message: string, type: string) {
+    this.messageTop = message;
+    this.typeMessageTop = type;
+    this.timerShowMessageTop();
+  }
+
   checkDatiTemplate(dati: DatiTemplateCompilatiVO): boolean {
     let flag: boolean = true;
     for (let field in dati) {
@@ -195,15 +199,9 @@ export class RiscossioneSollecitoRateTemplateComponent
     return flag;
   }
 
-  manageMessageTop(message: string, type: string) {
-    this.typeMessageTop = type;
-    this.messageTop = message;
-    this.timerShowMessageTop();
-  }
-
   timerShowMessageTop() {
     this.showMessageTop = true;
-    let seconds: number = 20; //this.configService.getTimeoutMessagge();
+    let seconds: number = 20;
     this.intervalIdS = window.setInterval(() => {
       seconds -= 1;
       if (seconds === 0) {
@@ -212,11 +210,8 @@ export class RiscossioneSollecitoRateTemplateComponent
     }, 1000);
   }
 
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalIdS);
+  setFormValidTemplate(event: boolean) {
+    this.visualizzaAnteprimaValidTemplate = event;
   }
 
   ngAfterViewChecked() {
@@ -227,11 +222,16 @@ export class RiscossioneSollecitoRateTemplateComponent
     }
   }
 
-  setFormValidTemplate(event: boolean) {
-    this.visualizzaAnteprimaValidTemplate = event;
-  }
 
   ngOnDestroy(): void {
     this.logger.init(RiscossioneSollecitoRateTemplateComponent.name);
   }
+
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.typeMessageTop = null;
+    this.messageTop = null;
+    clearInterval(this.intervalIdS);
+  }
+
 }

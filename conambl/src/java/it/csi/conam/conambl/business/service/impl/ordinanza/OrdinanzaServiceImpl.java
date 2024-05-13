@@ -158,13 +158,14 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 	@Autowired
 	private CnmDCausaleRepository cnmDCausaleRepository;
 
+	//	Issue 3 - Sonarqube
 	@Override
+	@Transactional
 	public void testIfOrdinanzaPagata(Integer idOrdinanza, UserDetails userDetails) {
 		testIfOrdinanzaPagata(cnmTOrdinanzaRepository.findOne(idOrdinanza), userDetails);
 	}
 
 	@Override
-	@Transactional
 	public void testIfOrdinanzaPagata(CnmTOrdinanza cnmTOrdinanza, UserDetails userDetails) {
 		Double importoPagato = 0D;
 		for (CnmTAcconto acconto: cnmTOrdinanza.getCnmTAccontos())

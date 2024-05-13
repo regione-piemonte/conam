@@ -1,12 +1,4 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  ViewChild,
-  Input,
-  Output,
-  EventEmitter,
-} from "@angular/core";
+import {  Component,  OnInit,  OnDestroy,  ViewChild,  Input,  Output,  EventEmitter,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router } from "@angular/router";
 import { Config } from "../../../shared/module/datatable/classes/config";
@@ -18,21 +10,14 @@ import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { Constants } from "../../../commons/class/constants";
 import { SharedOrdinanzaDettaglio } from "../../../shared-ordinanza/component/shared-ordinanza-dettaglio/shared-ordinanza-dettaglio.component";
 import { SharedRiscossioneService } from "../../../shared-riscossione/services/shared-riscossione.service";
-
 //JIRA - Gestione Notifica
-import { SalvaSollecitoRequest } from "../../../commons/request/riscossione/salva-sollecito-request";
 import { SharedRiscossioneSollecitoDettaglioComponent } from "../../../shared-riscossione/components/shared-riscossione-sollecito-dettaglio/shared-riscossione-sollecito-dettaglio.component";
-import { RicercaSoggettiOrdinanzaRequest } from "../../../commons/request/ordinanza/ricerca-soggetti-ordinanza-request";
 import { PregressoVerbaleService } from "../../services/pregresso-verbale.service";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { NgForm } from "@angular/forms";
 import { ConfigAllegatoVO } from "../../../commons/vo/verbale/config-allegato-vo";
 import { AllegatoSharedService } from "../../../shared/service/allegato-shared.service";
-import {
-  FieldTypeVO,
-  SelectVO,
-  TipoAllegatoVO,
-} from "../../../commons/vo/select-vo";
+import {  FieldTypeVO,  SelectVO,  TipoAllegatoVO,} from "../../../commons/vo/select-vo";
 import { AllegatoFieldVO } from "../../../commons/vo/verbale/allegato-field-vo";
 import { NumberUtilsSharedService } from "../../../shared/service/number-utils-shared.service";
 
@@ -49,43 +34,31 @@ interface Elem {
 })
 export class PregressoRicevutaPagamentoOrdinanzaInsComponent
   implements OnInit, OnDestroy {
-  @Input()
-  idOrdinanza: number;
-
-  @Input()
-  numDeterminazione: string;
-
-  @Input()
-  tipoAllegatoInput: Array<TipoAllegatoVO>;
-  @Input()
-  allegati: boolean;
-
-  @Output()
-  onChangeData: EventEmitter<any> = new EventEmitter<any>();
-
+  @Input()  idOrdinanza: number;
+  @Input()  numDeterminazione: string;
+  @Input()  tipoAllegatoInput: Array<TipoAllegatoVO>;
+  @Input()  allegati: boolean;
+  @Output()  onChangeData: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild(SharedDialogComponent) sharedDialog: SharedDialogComponent;
-  @ViewChild(SharedOrdinanzaDettaglio)
-  sharedOrdinanzaDettaglio: SharedOrdinanzaDettaglio;
-  @ViewChild(SharedRiscossioneSollecitoDettaglioComponent)
-  sharedRiscossioneSollecitoDettaglioComponent: SharedRiscossioneSollecitoDettaglioComponent;
-  @ViewChild("creaDisposizioneForm")
-  private creaDisposizioneForm: NgForm;
-
-  public mapConfigAllegati: Map<number, Array<Array<ConfigAllegatoVO>>>;
+  @ViewChild(SharedOrdinanzaDettaglio)  sharedOrdinanzaDettaglio: SharedOrdinanzaDettaglio;
+  @ViewChild(SharedRiscossioneSollecitoDettaglioComponent)  sharedRiscossioneSollecitoDettaglioComponent: SharedRiscossioneSollecitoDettaglioComponent;
+  @ViewChild("creaDisposizioneForm")  private creaDisposizioneForm: NgForm;
 
   public subscribers: any = {};
 
-  public loaded: boolean;
+  public mapConfigAllegati: Map<number, Array<Array<ConfigAllegatoVO>>>;
+
   public loadedAction: boolean = true;
+  public loaded: boolean;
+
+  public soggettoSollecito: TableSoggettiOrdinanza[];
+  public sollecito: SollecitoVO;
+  public listaSolleciti: Array<SollecitoVO>;
 
   public idOrdinanzaVerbaleSoggetto: number[];
 
-  public sollecito: SollecitoVO;
-  public soggettoSollecito: TableSoggettiOrdinanza[];
-  public listaSolleciti: Array<SollecitoVO>;
-
-  public configSoggetti: Config;
   public configSolleciti: Config;
+  public configSoggetti: Config;
 
   //Pop-up
   public buttonAnnullaText: string;
@@ -93,39 +66,39 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
   public subMessages: Array<string>;
 
   //Messaggio top
-  private intervalTop: number = 0;
   public showMessageTop: boolean;
-  public typeMessageTop: String;
+  private intervalTop: number = 0;
   public messageTop: String;
+  public typeMessageTop: String;
 
   //FLAG MODIFICA
-  public isModifica: boolean = true;
   public modificabile: boolean;
+  public isModifica: boolean = true;
 
   //flag nuovo
   public isNuovo: boolean = true;
 
-  public loadedConfig: boolean;
   public comboLoaded: Array<boolean>;
-  public validMetadata: boolean;
+  public loadedConfig: boolean;
   public disableAll: boolean;
+  public validMetadata: boolean;
 
-  public tipoAllegatoModel: Array<TipoAllegatoVO>;
   public tipoAllegatoSelezionato: TipoAllegatoVO;
-  public configAllegatoSelezionato: Array<Array<ConfigAllegatoVO>>;
+  public tipoAllegatoModel: Array<TipoAllegatoVO>;
   public nomeAllegatoTmp: string;
+  public configAllegatoSelezionato: Array<Array<ConfigAllegatoVO>>;
 
-  public comboModel: Array<Array<SelectVO>>;
   public metaDataModel: Array<AllegatoFieldVO>;
-  public tmpModel: Array<Elem>; //un array di elementi senza tipo, da rimappare nell'array effettivo alla fine
+  public comboModel: Array<Array<SelectVO>>;
   public maxSize: number = 5242880;
-  public sizeAlert: boolean = false;
+  public tmpModel: Array<Elem>; //array elementi senza tipo, da rimappare alla fine in array effettivo
   public typeAlert: boolean = false;
+  public sizeAlert: boolean = false;
 
-  public eliminaM: boolean = true;
   public confermaM: boolean = true;
-  public senzaAllegati: boolean = true;
+  public eliminaM: boolean = true;
   public allegatoM: boolean = false;
+  public senzaAllegati: boolean = true;
   public flagAllegatoMaster: boolean = false;
   typeAction: any = {
     isCombo: (t: SelectVO): boolean => {
@@ -147,24 +120,24 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
       return t ? t.id === Constants.FT_DATA_ORA : false;
     },
     getInputType: (ft: SelectVO): string => {
-      if (
-        this.typeAction.isText(ft) ||
-        this.typeAction.isDate(ft) ||
-        this.typeAction.isDataOra(ft)
-      )
+      if ( this.typeAction.isText(ft) || this.typeAction.isDate(ft) || this.typeAction.isDataOra(ft)){
         return "text";
-      if (this.typeAction.isNumeric(ft)) return "number";
-      if (this.typeAction.isCheckbox(ft)) return "checkbox";
+      }
+      if (this.typeAction.isNumeric(ft)) {
+        return "number";
+      }
+      if (this.typeAction.isCheckbox(ft)) {
+        return "checkbox";
+      }
     },
   };
 
   constructor(
     private logger: LoggerService,
-    private router: Router,
     private sharedRiscossioneService: SharedRiscossioneService,
-    private pregressoVerbaleService: PregressoVerbaleService,
-    private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
     private allegatoSharedService: AllegatoSharedService,
+    private router: Router,
+    private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
     private numberUtilsSharedService: NumberUtilsSharedService
   ) {}
 
@@ -173,18 +146,9 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     this.loaded = false;
     this.setConfig();
 
-    /* this.soggettoSollecito = [];
-            this.idOrdinanzaVerbaleSoggetto = [];
-            this.idOrdinanzaVerbaleSoggetto[0] = this.soggettoSollecito[0].idSoggettoOrdinanza;
-
-      
-
-            this.sollecito = new SollecitoVO();
-            this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
-        */
     this.sollecito = new SollecitoVO();
-    this.loaded = true;
     this.idOrdinanzaVerbaleSoggetto = [];
+    this.loaded = true;
     this.mapConfigAllegati = new Map();
     this.callConfig();
     setTimeout(() => {
@@ -230,32 +194,32 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     for (i = 0; i < this.tmpModel.length; i++) {
       this.metaDataModel[i].idField = this.tmpModel[i].idField;
       this.metaDataModel[i].fieldType = this.tmpModel[i].fieldType;
-      if (this.typeAction.isNumeric(this.metaDataModel[i].fieldType))
+      if (this.typeAction.isNumeric(this.metaDataModel[i].fieldType)){
         this.metaDataModel[i].numberValue = this.tmpModel[i].value;
-      else if (this.typeAction.isText(this.metaDataModel[i].fieldType))
+      } else if (this.typeAction.isText(this.metaDataModel[i].fieldType)){
         this.metaDataModel[i].stringValue = this.tmpModel[i].value;
-      else if (this.typeAction.isDate(this.metaDataModel[i].fieldType))
+      } else if (this.typeAction.isDate(this.metaDataModel[i].fieldType)){
         this.metaDataModel[i].dateValue = this.tmpModel[i].value;
-      else if (this.typeAction.isCheckbox(this.metaDataModel[i].fieldType))
+      } else if (this.typeAction.isCheckbox(this.metaDataModel[i].fieldType)){
         this.metaDataModel[i].booleanValue = this.tmpModel[i].value;
-      else if (
+      } else if (
         this.typeAction.isCombo(this.metaDataModel[i].fieldType) &&
         this.tmpModel[i].value
-      )
+      ){
         this.metaDataModel[i].numberValue = this.tmpModel[i].value.id;
-      //salvo l'ID
-      else if (this.typeAction.isDataOra(this.metaDataModel[i].fieldType))
+      }  else if (this.typeAction.isDataOra(this.metaDataModel[i].fieldType)) {//salvo l'ID
         this.metaDataModel[i].dateTimeValue = this.tmpModel[i].value;
+      }
     }
   }
 
   callConfig() {
-    //recupero la lista di config
+    // recupero lista config
     this.subscribers.configAllegato = this.allegatoSharedService
       .getConfigAllegato()
       .map((config) => {
         this.mapConfigAllegati = this.remapConfig(
-          //È IMPORTANTE che il campo ordine e il campo riga siano coerenti come numerazione crescente sul DB!!
+          // IMPORTANTE: campo "ordine" e "riga" coerenti come numerazione crescente sul DB!
           config.sort((el, el2) => {
             if (el.idTipo > el2.idTipo) return 1;
             if (el.idTipo < el2.idTipo) return -1;
@@ -265,18 +229,14 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
         this.mostraMetadati();
       })
       .subscribe(
-        (data) => {
-          //
-        },
-        (err) => {
-          this.logger.error("Errore nel recupero dei config degli allegati");
-        }
+        (data) => {          /**/        },
+        (err) => {          this.logger.error("Errore nel recupero dei config degli allegati");        }
       );
   }
   /**
-   * Trasforma i dati di configurazione da BE del form di allegati in una mappa {key=id tipo,value=array di config}
-   * Copiato da GRMED :)
-   * @param data dati da trasformare
+   * Trasforma dati configurazione da BE del form di allegati in mappa { key=id tipo,value=array config }
+   *  Copiato da G R M E D :)
+   * @param data  dati da trasformare
    */
   remapConfig(
     data: Array<ConfigAllegatoVO>
@@ -286,9 +246,9 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
       let c;
       if (!res.has(e.idTipo)) res.set(e.idTipo, []);
       c = res.get(e.idTipo);
-      // Dividere i config in più array per elemento.riga identici:
-      // 1) se inizio del ciclo sul tipo
-      // 2) nuovo valore prop "riga" rispetto a elemento precedente
+      // Dividere config in più array x elemento.riga identici:
+      // 1) se inizio ciclo sul tipo
+      // 2) nuovo valore prop "riga" rispetto elemento precedente
       if (c.length === 0 || e.riga !== (i < 1 ? 0 : data[i - 1].riga))
         c.push([]);
       c[c.length - 1].push(e);
@@ -296,16 +256,17 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     return res;
   }
 
-  check(index: number, type: FieldTypeVO) {
-    if (!this.typeAction.isCheckbox(type)) return;
-    this.tmpModel[index].value = !this.tmpModel[index].value;
-  }
-
   onBlur($event, index: number, type: FieldTypeVO) {
     if (!(this.typeAction.isDate(type) || this.typeAction.isDataOra(type)))
       return;
     this.tmpModel[index].value = $event.srcElement.value;
   }
+  check(index: number, type: FieldTypeVO) {
+    if (!this.typeAction.isCheckbox(type)) return;
+    this.tmpModel[index].value = !this.tmpModel[index].value;
+  }
+
+
 
   manageDatePicker(i: number) {
     var str: string = "#datetimepicker_" + i.toString();
@@ -324,10 +285,7 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     }
   }
 
-  isKeyPressed(code: number, type: FieldTypeVO): boolean {
-    if (!this.typeAction.isNumeric(type)) return true;
-    return this.numberUtilsSharedService.numberValid(code);
-  }
+
 
   initModel() {
     this.tmpModel = new Array<Elem>();
@@ -337,7 +295,10 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     this.tipoAllegatoModel = this.tipoAllegatoInput;
     this.senzaAllegati = this.allegati;
   }
-
+  isKeyPressed(code: number, type: FieldTypeVO): boolean {
+    if (!this.typeAction.isNumeric(type)) return true;
+    return this.numberUtilsSharedService.numberValid(code);
+  }
   mostraMetadati() {
     // disposizioni del giudice
     this.tipoAllegatoSelezionato = this.tipoAllegatoInput.find(
@@ -351,11 +312,11 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
 
     this.senzaAllegati = false;
 
-    // se trovo un id, cerco il config corrispondente
+    // se trovo un id  cerco config corrispondente
     if ($idTipo != 10 && this.mapConfigAllegati.has($idTipo)) {
       this.configAllegatoSelezionato = this.mapConfigAllegati.get($idTipo);
 
-      //inizializzo i model
+      // inizializzo model
       let index = 0;
       this.configAllegatoSelezionato.forEach((arr, i) => {
         arr.forEach((el, j) => {
@@ -418,12 +379,6 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
       );
   }
 
-  manageMessageTop(message: string, type: string) {
-    this.typeMessageTop = type;
-    this.messageTop = message;
-    this.scrollTopEnable = true;
-    this.timerShowMessageTop();
-  }
 
   timerShowMessageTop() {
     this.showMessageTop = true;
@@ -436,11 +391,11 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     }, 1000);
   }
 
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalTop);
+  manageMessageTop(message: string, type: string) {
+    this.typeMessageTop = type;
+    this.messageTop = message;
+    this.scrollTopEnable = true;
+    this.timerShowMessageTop();
   }
 
   generaMessaggio() {
@@ -451,26 +406,6 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     this.subMessages.push(
       "Importo da sollecitare: " + this.sollecito.importoSollecitato
     );
-  }
-
-  creaSollecito() {
-    /*this.loaded = false;
-        //JIRA - Gestione Notifica
-        //----------------------
-        let salvaSollecitoRequest: SalvaSollecitoRequest = new SalvaSollecitoRequest();
-        salvaSollecitoRequest.sollecito = this.sollecito;
-        salvaSollecitoRequest.notifica = this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject();
-        //------------------------
-        //this.subscribers.salvataggio = this.riscossioneService.salvaSollecito(this.sollecito).subscribe(data => {
-        this.subscribers.salvataggio = this.riscossioneService.salvaSollecito(salvaSollecitoRequest).subscribe(data => {
-            this.router.navigateByUrl(Routing.RISCOSSIONE_SOLLECITO_TEMPLATE + data);
-        }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessageTop(err.message, err.type);
-            }
-            this.logger.error("Errore durante il salvataggio del sollecito");
-            this.loaded = true;
-        });*/
   }
 
   modificaVediSollecito(el: SollecitoVO) {
@@ -488,11 +423,11 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     }
   }
 
-  annullaModifica() {
-    this.sollecito = new SollecitoVO();
-    this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
-    this.isModifica = false;
-    this.isNuovo = true;
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.typeMessageTop = null;
+    this.messageTop = null;
+    clearInterval(this.intervalTop);
   }
 
   getData() {
@@ -502,8 +437,16 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     };
   }
 
+  annullaModifica() {
+    this.sollecito = new SollecitoVO();
+    this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
+    this.isModifica = false;
+    this.isNuovo = true;
+  }
+
+
   isDisabledCreaSollecito(): boolean {
-    //JIRA - Gestione Notifica: non necessaria in questa sezione
+    //JIRA - Gestione Notifica: non necessaria qui in questa sezione
     let checkNotifica: boolean = true;
     if (
       this.sharedRiscossioneSollecitoDettaglioComponent != null ||
@@ -550,6 +493,10 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     }
   }
 
+  ngOnDestroy(): void {
+    this.logger.destroy(PregressoRicevutaPagamentoOrdinanzaInsComponent.name);
+  }
+
   onInfo(el: any | Array<any>) {
     if (el instanceof Array)
       throw Error("errore sono stati selezionati più elementi");
@@ -563,9 +510,6 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
     }
   }
 
-  ngOnDestroy(): void {
-    this.logger.destroy(PregressoRicevutaPagamentoOrdinanzaInsComponent.name);
-  }
   setConfig() {
     this.configSoggetti = this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggetti(
       false,
@@ -583,26 +527,11 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
         },
       },
       columns: [
-        {
-          columnName: "numeroProtocollo",
-          displayName: "Numero Protocollo",
-        },
-        {
-          columnName: "dataScadenza",
-          displayName: "Data Scadenza",
-        },
-        {
-          columnName: "importoSollecitatoString",
-          displayName: "Importo da sollecitare",
-        },
-        {
-          columnName: "maggiorazioneString",
-          displayName: "Maggiorazione",
-        },
-        {
-          columnName: "statoSollecito.denominazione",
-          displayName: "Stato",
-        },
+        {          columnName: "numeroProtocollo",          displayName: "Numero Protocollo",        },
+        {          columnName: "dataScadenza",          displayName: "Data Scadenza",        },
+        {          columnName: "importoSollecitatoString",          displayName: "Importo da sollecitare",        },
+        {          columnName: "maggiorazioneString",          displayName: "Maggiorazione",        },
+        {          columnName: "statoSollecito.denominazione",          displayName: "Stato",        },
       ],
     };
   }
@@ -610,4 +539,5 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
   byId(o1: SelectVO, o2: SelectVO) {
     return o1 && o2 ? o1.id === o2.id : o1 === o2;
   }
+
 }

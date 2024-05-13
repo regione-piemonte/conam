@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class SalvaAllegatoRequest extends ParentRequest {
 
-	private static final long serialVersionUID = -3620699452083779279L;
+	private static final long serialVersionUID = -1424667745583779279L;
 
 	private byte[] file;
 	private String filename;

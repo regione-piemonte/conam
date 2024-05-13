@@ -1,21 +1,9 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  Output,
-  EventEmitter,
+import {  Component,  OnInit,  OnDestroy,  Input,  Output,  EventEmitter,
 } from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
-import {
-  EnteVO,
-  StatoVerbaleVO,
-  AmbitoVO,
-  NormaVO,
-  SelectVO,
+import {  EnteVO,  StatoVerbaleVO,  AmbitoVO,  NormaVO,  SelectVO,
 } from "../../../commons/vo/select-vo";
 import { UserService } from "../../../core/services/user.service";
-import { RifNormativiService } from "../../../verbale/services/rif-normativi.service";
 import { SoggettoVerbaleRequest } from "../../../commons/request/verbale/soggetto-verbale-request";
 import { RicercaVerbaleRequest } from "../../../commons/request/verbale/ricerca-verbale-request";
 import { SharedVerbaleService } from "../../service/shared-verbale.service";
@@ -30,7 +18,7 @@ import { RicercaScrittoDifensivoRequest } from "../../../commons/request/verbale
 export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, OnDestroy {
   public subscribers: any = {};
 
-  //tab1
+  //tab 1
   public entiLegge: Array<EnteVO> = new Array<EnteVO>();
   public tabScrittoDifensivo: boolean = false;
   public loadedStatoVerbale: boolean;
@@ -42,19 +30,19 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
   public normaModel = new Array<NormaVO>();
   public statoSelected: StatoVerbaleVO;
 
-  //tab2
+  //tab 2
   public tabTrasgressore: boolean = false;
   public isTrasgressorePersonaFisica: boolean = false;
   public isTrasgressorePersonaGiuridica: boolean = false;
   public soggettoVerbaleTrasgressore: SoggettoVerbaleRequest;
 
-  //tab3
+  //tab 3
   public tabObbligatoInSolido: boolean = false;
   public isObbligatoInSolidoPersonaFisica: boolean = false;
   public soggettoVerbaleObbligato: SoggettoVerbaleRequest;
   public isObbligatoInSolidoPersonaGiuridica: boolean = false;
 
-  //ricerca
+  // search
   public ricercaScrittoDifensivo: RicercaScrittoDifensivoRequest;
 
   @Output() onSearch = new EventEmitter<RicercaScrittoDifensivoRequest>();
@@ -63,9 +51,7 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
   @Input() config: ConfigVerbaleRicerca;
 
   constructor(
-    private logger: LoggerService,
-    private sharedVerbaleService: SharedVerbaleService,
-    private userService: UserService,
+    private logger: LoggerService,    private sharedVerbaleService: SharedVerbaleService,    private userService: UserService,
   ) {}
 
   ngOnInit(): void {
@@ -83,13 +69,11 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
     });
 
     this.setRequest();
-
     this.statoVerbale(this.config.tipoRicerca);
   }
 
   tabActions: any = {
     changeScrittoDifensivo: () => {
-  
       this.tabScrittoDifensivo = !this.tabScrittoDifensivo;
       if (!this.tabScrittoDifensivo) {
         this.ricercaScrittoDifensivo.numeroProtocollo = null;
@@ -99,11 +83,10 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
         this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
         this.isTrasgressorePersonaFisica = false;
         this.isTrasgressorePersonaGiuridica = false;
-       
+
       }
     },
     changeTrasgressore: () => {
-    
       this.tabTrasgressore = !this.tabTrasgressore;
       if (!this.tabTrasgressore) {
         this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
@@ -207,13 +190,11 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
           }
           this.loadedStatoVerbale = true;
         },
-        (err) => {
-          this.logger.error("Errore nel recupero degli stati dei verbali");
-        }
+        (err) => {          this.logger.error("Errore nel recupero degli stati dei verbali");        }
       );
   }
 
- 
+
   pulisciFiltri() {
     this.ricercaScrittoDifensivo = new RicercaScrittoDifensivoRequest();
     this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
@@ -245,8 +226,7 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
 
   isDisable(field: string, type: string) {
     if (type == "T") {
-      let condFisica: Boolean =
-        !this.tabTrasgressore || !this.isTrasgressorePersonaFisica;
+      let condFisica: Boolean =        !this.tabTrasgressore || !this.isTrasgressorePersonaFisica;
       if (field == "CFT")
         return (
           condFisica ||
@@ -258,8 +238,7 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
           condFisica ||
           !this.isEmpty(this.soggettoVerbaleTrasgressore.codiceFiscale)
         );
-      let condGiuridica: Boolean =
-        !this.tabTrasgressore || !this.isTrasgressorePersonaGiuridica;
+      let condGiuridica: Boolean =        !this.tabTrasgressore || !this.isTrasgressorePersonaGiuridica;
       if (field == "DN")
         return (
           condGiuridica ||
@@ -284,8 +263,7 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
         );
     }
     if (type == "O") {
-      let condFisica: Boolean =
-        !this.tabObbligatoInSolido || !this.isObbligatoInSolidoPersonaFisica;
+      let condFisica: Boolean =        !this.tabObbligatoInSolido || !this.isObbligatoInSolidoPersonaFisica;
       if (field == "CFT")
         return (
           condFisica ||
@@ -297,8 +275,7 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
           condFisica ||
           !this.isEmpty(this.soggettoVerbaleObbligato.codiceFiscale)
         );
-      let condGiuridica: Boolean =
-        !this.tabObbligatoInSolido || !this.isObbligatoInSolidoPersonaGiuridica;
+      let condGiuridica: Boolean =        !this.tabObbligatoInSolido || !this.isObbligatoInSolidoPersonaGiuridica;
       if (field == "DN")
         return (
           condGiuridica ||
@@ -324,9 +301,7 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
     }
   }
 
-  isEmpty(str) {
-    return !str || 0 === str.length;
-  }
+  isEmpty(str) {    return !str || 0 === str.length;  }
 
   setRequest() {
     if (this.request == null) this.pulisciFiltri();
@@ -357,20 +332,15 @@ export class SharedVerbaleRicercaScrittoDifensivoComponent implements OnInit, On
     }
   }
 
-  compareFn(c1: SelectVO, c2: SelectVO): boolean {
-    return c1 && c2 ? c1.id === c2.id : c1 === c2;
-  }
+  compareFn(c1: SelectVO, c2: SelectVO): boolean {    return c1 && c2 ? c1.id === c2.id : c1 === c2;  }
 
-  ngOnDestroy(): void {
-    this.logger.destroy(SharedVerbaleRicercaScrittoDifensivoComponent.name);
-  }
+  ngOnDestroy(): void {    this.logger.destroy(SharedVerbaleRicercaScrittoDifensivoComponent.name);  }
 
-  private createDefaultConfig(): ConfigVerbaleRicerca {
-    return { showFieldStatoVerbale: true, tipoRicerca: "GF" }; //GF: Gestione Fascicolo
+  private createDefaultConfig(): ConfigVerbaleRicerca {    return { showFieldStatoVerbale: true, tipoRicerca: "GF" }; //GF: Gestione Fascicolo
   }
 }
 
-//aggiungere eventuali altre proprieta
+// aggiungere eventuali altre proprieta
 export interface ConfigVerbaleRicerca {
   showFieldStatoVerbale: boolean;
   tipoRicerca: string;

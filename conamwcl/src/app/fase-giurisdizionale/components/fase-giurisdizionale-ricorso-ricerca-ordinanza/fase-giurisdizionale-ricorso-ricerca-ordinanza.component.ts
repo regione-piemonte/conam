@@ -17,19 +17,19 @@ import { Constants } from "../../../commons/class/constants";
 })
 export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnInit, OnDestroy {
 
-    public subscribers: any = {};
-
     public showTable: boolean;
 
-    public config: Config;
-    public ordinanze: Array<OrdinanzaVO>;
-    public ordinanzaSel: OrdinanzaVO;
+    public subscribers: any = {};
+
     public loaded: boolean = true;
+    public config: Config;
+    public ordinanzaSel: OrdinanzaVO;
+    public ordinanze: Array<OrdinanzaVO>;
 
     public request: RicercaOrdinanzaRequest
 
-    public loadedStatiOrdinanza: boolean;
     public statiOrdinanzaModel: Array<StatoOrdinanzaVO>;
+    public loadedStatiOrdinanza: boolean;
 
     constructor(
         private logger: LoggerService,
@@ -37,12 +37,6 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
         private configSharedService: ConfigSharedService,
         private sharedOrdinanzaService: SharedOrdinanzaService,
     ) { }
-
-    ngOnInit(): void {
-        this.logger.init(FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent.name);
-        this.config = this.configSharedService.configRicercaOrdinanza;
-        this.loadStatiOrdinanza();
-    }
 
     loadStatiOrdinanza(){
         this.loadedStatiOrdinanza = false;
@@ -53,7 +47,12 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
         })
     }
 
-    scrollEnable: boolean;
+    ngOnInit(): void {
+        this.logger.init(FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent.name);
+        this.config = this.configSharedService.configRicercaOrdinanza;
+        this.loadStatiOrdinanza();
+    }
+
     ricercaOrdinanza(ricercaOrdinanzaRequest: RicercaOrdinanzaRequest) {
         this.request = ricercaOrdinanzaRequest;
         this.showTable = false;
@@ -62,8 +61,9 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
         this.sharedOrdinanzaService.ricercaOrdinanza(ricercaOrdinanzaRequest).subscribe(
             data => {
                 this.resetMessageTop2();
-                if (data != null)
+                if (data != null){
                     this.ordinanze = data;
+                }
                 this.showTable = true;
                 this.loaded = true;
                 this.scrollEnable = true;
@@ -77,6 +77,8 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
         );
     }
 
+    scrollEnable: boolean;
+
     ngAfterContentChecked() {
         let out: HTMLElement = document.getElementById("scrollBottom");
         if (this.loaded && this.scrollEnable && this.showTable && out != null) {
@@ -87,27 +89,28 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
 
     onDettaglio(el: any | Array<any>) {
         this.ordinanzaSel = el;
-        if (el instanceof Array)
+        if (el instanceof Array){
             throw Error("errore sono stati selezionati più elementi");
-        else
+        } else {
             this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_RICORSO_DETTAGLIO_ORDINANZA + el.id);
+        }
     }
 
     //Messaggio top
-    public showMessageTop: boolean;
     public typeMessageTop: String;
-    public messageTop: String;
+    public showMessageTop: boolean;
     private intervalIdS: number = 0;
+    public messageTop: String;
 
     manageMessage(err: ExceptionVO) {
-        this.typeMessageTop = err.type;
         this.messageTop = err.message;
+        this.typeMessageTop = err.type;
         this.timerShowMessageTop();
     }
 
     timerShowMessageTop() {
-        this.showMessageTop = true;
         let seconds: number = 30;
+        this.showMessageTop = true;
         this.intervalIdS = window.setInterval(() => {
             seconds -= 1;
             if (seconds === 0) {
@@ -117,8 +120,8 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
     }
     resetMessageTop() {
         this.showMessageTop = false;
-        this.typeMessageTop = null;
         this.messageTop = null;
+        this.typeMessageTop = null;
         clearInterval(this.intervalIdS);
     }
 
@@ -127,17 +130,10 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
     }
 
     //Messaggio top
-    public showMessageTop2: boolean;
     public typeMessageTop2: String;
-    public messageTop2: String;
+    public showMessageTop2: boolean;
     private intervalIdS2: number = 0;
-
-    manageMessageTop2(message: string, type: string) {
-        this.typeMessageTop2 = type;
-        this.messageTop2 = message;
-        this.timerShowMessageTop2();
-        this.scrollTopEnable2 = true;
-    }
+    public messageTop2: String;
 
     timerShowMessageTop2() {
         this.showMessageTop2 = true;
@@ -150,6 +146,15 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
         }, 1000);
     }
 
+    manageMessageTop2(message: string, type: string) {
+        this.typeMessageTop2 = type;
+        this.messageTop2 = message;
+        this.timerShowMessageTop2();
+        this.scrollTopEnable2 = true;
+    }
+
+    scrollTopEnable2: boolean;
+
     resetMessageTop2() {
         this.showMessageTop2 = false;
         this.typeMessageTop2 = null;
@@ -157,7 +162,6 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
         clearInterval(this.intervalIdS2);
     }
 
-    scrollTopEnable2: boolean;
     ngAfterViewChecked() {
         let scrollTop: HTMLElement = document.getElementById("scrollTop");
         if (this.scrollTopEnable2 && scrollTop != null) {
@@ -166,13 +170,11 @@ export class FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent implements OnIn
         }
     }
 
-
-    goToFaseGiurisdizionaleElencoOrdinanze() {
-        this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_RICORSO_DETTAGLIO_ORDINANZA);
-    }
-
     ngOnDestroy(): void {
         this.logger.destroy(FaseGiurisdizionaleRicorsoRicercaOrdinanzaComponent.name);
     }
 
+    goToFaseGiurisdizionaleElencoOrdinanze() {
+        this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_RICORSO_DETTAGLIO_ORDINANZA);
+    }
 }

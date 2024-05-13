@@ -26,60 +26,58 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
 
     public configSoggetti: Config
 
-    public loaded: boolean;
     public loadedStatiPiano: boolean;
+    public loaded: boolean;
     public loadedIdSoggettiOrdinanza: boolean;
 
     //sono in modifica
-    public isModifica: boolean;
     //campi abilitati in modifica
+    public isModifica: boolean;
     public abilitaModifica: boolean;
 
     public isRataCalcolata: boolean;
-    public isRataRicalcolata: boolean;
     public isRataDaModificare: boolean;
-    public isRataDaModificareData: boolean;
+    public isRataRicalcolata: boolean;
     public rataDaModificareDataInput: string[]=[];
+    public isRataDaModificareData: boolean;
     public rataDaModificareDataCurrentRata: RataVO[];
 
     public numeroRataSelezionata: string;
 
     //Routing
-    idPiano: number;
     idSoggettiOrdinanza: Array<number>;
+    idPiano: number;
     listTableSoggettiOrdinanza: Array<TableSoggettiOrdinanza>
 
     public statoPianoModel: Array<StatoPianoVO>;
-    public importoTotale: number;
     public nuovoImportoRata: number;
+    public importoTotale: number;
     public idRataSelezionata: number;
 
-    public piano: PianoRateizzazioneVO;
     public listaSoggetti: Array<TableSoggettiOrdinanza>;
+    public piano: PianoRateizzazioneVO;
 
     //Messaggio top
-    private intervalTop: number = 0;
-    public showMessageTop: boolean;
-    public typeMessageTop: String;
     public messageTop: String;
+    public showMessageTop: boolean;
+    private intervalTop: number = 0;
+    public typeMessageTop: String;
 
     constructor(
-        private logger: LoggerService,
         private router: Router,
-        private activatedRoute: ActivatedRoute,
+        private logger: LoggerService,
         private pagamentiService: PagamentiService,
         private numberUtilsSharedService: NumberUtilsSharedService,
+        private activatedRoute: ActivatedRoute,
         private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService
     ) { }
 
     ngOnInit(): void {
         this.logger.init(PagamentiPianoInsModComponent.name);
         this.configSoggetti = this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggetti(false, "", null, null, null,(el: any)=>true);
-        
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idPiano = +params['idPiano'];
             this.listTableSoggettiOrdinanza = this.pagamentiService.soggettiCreaPiano;
-
             if (this.idPiano) {
                 if (this.activatedRoute.snapshot.paramMap.get('action') == 'primoSalvataggio')
                     this.manageMessageTop("Piano salvato con successo", "SUCCESS");
@@ -93,27 +91,27 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
                 this.getMessaggioManualeByidOrdinanzaVerbaleSoggetto();
             }
             else this.router.navigateByUrl(Routing.PAGAMENTI_CREA_PIANO);
-        });     
-          
+        });
+
     }
     getMessaggioManualeByidOrdinanzaVerbaleSoggetto(){
         this.pagamentiService.getMessaggioManualeByidOrdinanzaVerbaleSoggetto(this.idSoggettiOrdinanza[0]).subscribe(data => {
             if(data){
               this.manageMessageTop(data.message, data.type)
-            }  
+            }
           });
     }
 
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
         this.scrollTopEnable = true;
     }
 
     timerShowMessageTop() {
-        this.showMessageTop = true;
         let seconds: number = 10;
+        this.showMessageTop = true;
         this.intervalTop = window.setInterval(() => {
             seconds -= 1;
             if (seconds === 0) {
@@ -123,8 +121,8 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
     }
 
     resetMessageTop() {
-        this.showMessageTop = false;
         this.typeMessageTop = null;
+        this.showMessageTop = false;
         this.messageTop = null;
         clearInterval(this.intervalTop);
     }
@@ -140,14 +138,14 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
     }
 
     loadPiano() {
-        this.loaded = false;        
+        this.loaded = false;
         if (!this.isModifica) {
-            this.subscribers.precompilaPiano = this.pagamentiService.precompilaPiano(this.idSoggettiOrdinanza).subscribe(data => {                
+            this.subscribers.precompilaPiano = this.pagamentiService.precompilaPiano(this.idSoggettiOrdinanza).subscribe(data => {
                 data.importoSpeseProcessuali = 0;
-                this.piano = data;                
-                this.importoTotale = this.piano.importoSanzione + 
-                                     this.piano.importoSpeseNotifica + 
-                                     this.piano.importoSpeseProcessuali + 
+                this.piano = data;
+                this.importoTotale = this.piano.importoSanzione +
+                                     this.piano.importoSpeseNotifica +
+                                     this.piano.importoSpeseProcessuali +
                                      ((this.piano.importoMaggiorazione===undefined||this.piano.importoMaggiorazione===null) ? 0 : this.piano.importoMaggiorazione);
                 this.abilitaModifica = true;
                 this.loaded = true;
@@ -164,9 +162,9 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
                 this.getMessaggioManualeByidOrdinanzaVerbaleSoggetto();
                 this.listaSoggetti = this.piano.soggetti.map(sogg => TableSoggettiOrdinanza.map(sogg));
                 this.loadedIdSoggettiOrdinanza = true;
-                this.importoTotale = this.piano.importoSanzione + 
-                                     this.piano.importoSpeseNotifica + 
-                                     this.piano.importoSpeseProcessuali + 
+                this.importoTotale = this.piano.importoSanzione +
+                                     this.piano.importoSpeseNotifica +
+                                     this.piano.importoSpeseProcessuali +
                                      ((this.piano.importoMaggiorazione===undefined||this.piano.importoMaggiorazione===null) ? 0 : this.piano.importoMaggiorazione);
                 this.abilitaModifica = true;
                 this.isRataCalcolata = true;
@@ -178,6 +176,24 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
         }
     }
 
+    setDefaultRateDataFineValidita(){
+        const maxDataScadenza = this.piano.rate[this.piano.rate.length-1].dataScadenza;
+        /*this.piano.rate.map(
+            item=>{
+                if(!item.dataFineValidita){
+                    item.dataFineValidita = maxDataScadenza;
+                }
+                return item;
+            }
+        );*/
+        this.piano.rate.forEach(item => {
+            if (!item.dataFineValidita) {
+                item.dataFineValidita = maxDataScadenza;
+            }
+        });
+
+    }
+
     loadStatiPiano() {
         this.loadedStatiPiano = false;
         this.subscribers.statiPiano = this.pagamentiService.getStatiPiano().subscribe(data => {
@@ -185,27 +201,15 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
             this.loadedStatiPiano = true;
         });
     }
-    setDefaultRateDataFineValidita(){    
-        const maxDataScadenza = this.piano.rate[this.piano.rate.length-1].dataScadenza;
-        this.piano.rate.map(
-            item=>{
-                if(!item.dataFineValidita){
-                    item.dataFineValidita = maxDataScadenza;
-                }
-                return item;
-            }
-        );
-    }
-
     calcolaRata() {
         this.loaded = false;
-        this.isRataCalcolata = false;        
+        this.isRataCalcolata = false;
         this.subscribers.calcolRata = this.pagamentiService.calcolaRata(this.piano).subscribe(data => {
             this.piano = data;
-            this.setDefaultRateDataFineValidita();            
-            this.importoTotale = this.piano.importoSanzione + 
-                                 this.piano.importoSpeseNotifica + 
-                                 this.piano.importoSpeseProcessuali + 
+            this.setDefaultRateDataFineValidita();
+            this.importoTotale = this.piano.importoSanzione +
+                                 this.piano.importoSpeseNotifica +
+                                 this.piano.importoSpeseProcessuali +
                                  ((this.piano.importoMaggiorazione===undefined||this.piano.importoMaggiorazione===null) ? 0 : this.piano.importoMaggiorazione);
             this.isRataCalcolata = true;
             this.abilitaModifica = false;
@@ -233,9 +237,9 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
         this.subscribers.calcolRata = this.pagamentiService.ricalcolaRata(tmp).subscribe(data => {
             this.piano = data;
             this.setDefaultRateDataFineValidita();
-            this.importoTotale = this.piano.importoSanzione + 
-                                 this.piano.importoSpeseNotifica + 
-                                 this.piano.importoSpeseProcessuali + 
+            this.importoTotale = this.piano.importoSanzione +
+                                 this.piano.importoSpeseNotifica +
+                                 this.piano.importoSpeseProcessuali +
                                  ((this.piano.importoMaggiorazione===undefined||this.piano.importoMaggiorazione===null) ? 0 : this.piano.importoMaggiorazione);
             this.isRataCalcolata = true;
             this.isRataRicalcolata = true;
@@ -251,6 +255,10 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
         });
     }
 
+    isDisabledRicalcola() {
+        return (!this.nuovoImportoRata || this.nuovoImportoRata <= 0) ? true : false;
+    }
+
     modificaRata(rataSelezionata: RataVO) {
         this.nuovoImportoRata = null;
         this.idRataSelezionata = null;
@@ -260,16 +268,6 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
             return rata.numeroRata == rataSelezionata.numeroRata;
         }).numeroRata;
         this.numeroRataSelezionata = (this.idRataSelezionata == 1 ? "prima" : "ultima");
-    }
-
-    isDisabledRicalcola() {
-        return (!this.nuovoImportoRata || this.nuovoImportoRata <= 0) ? true : false;
-    }
-
-    annulla() {
-        this.isRataCalcolata = false;
-        this.abilitaModifica = true;
-        this.piano.rate = null;
     }
 
     salva() {
@@ -290,6 +288,12 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
             this.loaded = true;
         });
     }
+    annulla() {
+        this.isRataCalcolata = false;
+        this.abilitaModifica = true;
+        this.piano.rate = null;
+    }
+
 
     creaPiano() {
         this.loaded = false;
@@ -321,7 +325,7 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
     cambiaDataFineValidita() {
         let y=0;
         this.rataDaModificareDataCurrentRata.forEach(r=>{
-            r.dataFineValidita = this.rataDaModificareDataInput[y];   
+            r.dataFineValidita = this.rataDaModificareDataInput[y];
             this.rataDaModificareDataInput[y]='';
             y++;
         });
@@ -423,12 +427,12 @@ export class PagamentiPianoInsModComponent implements OnInit, OnDestroy {
         return this.numberUtilsSharedService.numberValid(code);
     }
 
-    onInfo(el: any | Array<any>){    
+    onInfo(el: any | Array<any>){
         if (el instanceof Array)
             throw Error("errore sono stati selezionati più elementi");
         else{
-            let azione: string = el.ruolo; 
-            this.router.navigate([Routing.SOGGETTO_RIEPILOGO + el.idSoggetto, { action: azione }]);    
+            let azione: string = el.ruolo;
+            this.router.navigate([Routing.SOGGETTO_RIEPILOGO + el.idSoggetto, { action: azione }]);
         }
     }
 

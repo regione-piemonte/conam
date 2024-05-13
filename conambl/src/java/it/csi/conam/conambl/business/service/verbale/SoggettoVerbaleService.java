@@ -37,5 +37,7 @@ public interface SoggettoVerbaleService {
 	List<SoggettoVO> getSoggettiByIdVerbaleAudizione(Integer id);
 
 	SoggettoPregressiVO ricercaSoggettoPerPIvaPregressi(MinSoggettoVO minSoggettoVO, UserDetails userDetails);
+	
+	void updateImportoVerbaleSoggetto(Integer id, Double importoVerbale, UserDetails userDetails);
 
 }

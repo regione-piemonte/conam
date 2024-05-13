@@ -59,7 +59,7 @@ export class PregressoOrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
 
   public subscribers: any = {};
   isOrdinanza : boolean = true;
-  
+
   config: Config;
   loaded: boolean;
   idVerbale: number;
@@ -112,7 +112,8 @@ export class PregressoOrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
       true,
       1,
       this.isSelectable,
-      false
+      false,
+          false
     );
     this.ordinanza = new OrdinanzaVO();
     this.soggettiArray = new Array();

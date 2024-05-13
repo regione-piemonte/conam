@@ -235,7 +235,7 @@ public class LoggingAspect {
 
 		if (AopUtils.isJdkDynamicProxy(proxy)) {
 			while ((AopUtils.isJdkDynamicProxy(proxy))) {
-				return getTargetObject(((Advised) proxy).getTargetSource().getTarget());
+				proxy = getTargetObject(((Advised) proxy).getTargetSource().getTarget());
 			}
 			return proxy.getClass();
 		} else if (AopUtils.isCglibProxy(proxy)) {
@@ -258,7 +258,7 @@ public class LoggingAspect {
 
 	private String getRequestRai(HttpServletRequest request) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String rai = String.valueOf(-Double.valueOf(Math.floor(100000 + random.nextDouble() * 800000)).intValue());
+		String rai = String.valueOf(-(random.nextInt(800000) + 100000));
 		// se non ho sessione genero un ray casuale
 		if (auth == null)
 			return rai;

@@ -4,17 +4,19 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.verbale;
 
+import java.util.List;
+
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.common.MessageVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.leggi.EnteVO;
+import it.csi.conam.conambl.vo.verbale.NotaVO;
 import it.csi.conam.conambl.vo.verbale.RiepilogoVerbaleVO;
 import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVORaggruppatoPerSoggetto;
 import it.csi.conam.conambl.vo.verbale.VerbaleVO;
-
-import java.util.List;
 
 public interface VerbaleService {
 
@@ -63,4 +65,14 @@ public interface VerbaleService {
 	CnmTVerbale salvaNumeroProtocollo(Integer idVerbale, String numeroProtocollo, CnmTUser cnmTUser);
 
 	CnmTVerbale salvaCnmTVerbale(CnmTVerbale cnmTVerbale);
+	
+	VerbaleVO salvaNota(NotaVO nota, Long idVerbale, UserDetails userDetails);
+	
+	VerbaleVO modificaNota(NotaVO nota, UserDetails userDetails);
+	
+	VerbaleVO eliminaNota(Long IdNota, UserDetails userDetails);
+
+	List<SelectVO> getAmbitiNote();
+	
+	
 }

@@ -6,8 +6,6 @@ package it.csi.conam.conambl.integration.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 
@@ -18,39 +16,13 @@ import java.util.List;
 @Entity
 @Table(name="cnm_d_nazione")
 @NamedQuery(name="CnmDNazione.findAll", query="SELECT c FROM CnmDNazione c")
-public class CnmDNazione implements Serializable {
+public class CnmDNazione extends CnmNazioneCommons implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="id_nazione")
 	private long idNazione;
-
-	@Column(name="cod_belfiore_nazione")
-	private String codBelfioreNazione;
-
-	@Column(name="cod_istat_nazione")
-	private String codIstatNazione;
-
-	@Column(name="denom_nazione")
-	private String denomNazione;
-
-	@Column(name="dt_id_stato")
-	private BigDecimal dtIdStato;
-
-	@Column(name="dt_id_stato_next")
-	private BigDecimal dtIdStatoNext;
-
-	@Column(name="dt_id_stato_prev")
-	private BigDecimal dtIdStatoPrev;
-
-	@Temporal(TemporalType.DATE)
-	@Column(name="fine_validita")
-	private Date fineValidita;
-
-	@Temporal(TemporalType.DATE)
-	@Column(name="inizio_validita")
-	private Date inizioValidita;
 
 	//bi-directional many-to-one association to CnmDRegione
 	@OneToMany(mappedBy="cnmDNazione")
@@ -77,6 +49,7 @@ public class CnmDNazione implements Serializable {
 	private List<CnmTResidenza> cnmTResidenzas;
 
 	public CnmDNazione() {
+		super();
 	}
 
 	public long getIdNazione() {
@@ -85,70 +58,6 @@ public class CnmDNazione implements Serializable {
 
 	public void setIdNazione(long idNazione) {
 		this.idNazione = idNazione;
-	}
-
-	public String getCodBelfioreNazione() {
-		return this.codBelfioreNazione;
-	}
-
-	public void setCodBelfioreNazione(String codBelfioreNazione) {
-		this.codBelfioreNazione = codBelfioreNazione;
-	}
-
-	public String getCodIstatNazione() {
-		return this.codIstatNazione;
-	}
-
-	public void setCodIstatNazione(String codIstatNazione) {
-		this.codIstatNazione = codIstatNazione;
-	}
-
-	public String getDenomNazione() {
-		return this.denomNazione;
-	}
-
-	public void setDenomNazione(String denomNazione) {
-		this.denomNazione = denomNazione;
-	}
-
-	public BigDecimal getDtIdStato() {
-		return this.dtIdStato;
-	}
-
-	public void setDtIdStato(BigDecimal dtIdStato) {
-		this.dtIdStato = dtIdStato;
-	}
-
-	public BigDecimal getDtIdStatoNext() {
-		return this.dtIdStatoNext;
-	}
-
-	public void setDtIdStatoNext(BigDecimal dtIdStatoNext) {
-		this.dtIdStatoNext = dtIdStatoNext;
-	}
-
-	public BigDecimal getDtIdStatoPrev() {
-		return this.dtIdStatoPrev;
-	}
-
-	public void setDtIdStatoPrev(BigDecimal dtIdStatoPrev) {
-		this.dtIdStatoPrev = dtIdStatoPrev;
-	}
-
-	public Date getFineValidita() {
-		return this.fineValidita;
-	}
-
-	public void setFineValidita(Date fineValidita) {
-		this.fineValidita = fineValidita;
-	}
-
-	public Date getInizioValidita() {
-		return this.inizioValidita;
-	}
-
-	public void setInizioValidita(Date inizioValidita) {
-		this.inizioValidita = inizioValidita;
 	}
 
 	public List<CnmDRegione> getCnmDRegiones() {

@@ -34,6 +34,8 @@ import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
+import it.csi.conam.conambl.integration.entity.CnmDAmbitoNote;
 import it.csi.conam.conambl.integration.entity.CnmDArticolo;
 import it.csi.conam.conambl.integration.entity.CnmDComma;
 import it.csi.conam.conambl.integration.entity.CnmDComune;
@@ -54,15 +56,18 @@ import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
 import it.csi.conam.conambl.integration.entity.CnmRVerbaleIllecito;
 import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTNota;
 import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
-import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.integration.entity.CsiLogAudit.TraceOperation;
+import it.csi.conam.conambl.integration.mapper.entity.AmbitoNoteEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.EnteEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.NotaEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.VerbaleEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.VerbaleSoggettoEntityMapper;
+import it.csi.conam.conambl.integration.repositories.CnmDAmbitoNoteRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDComuneRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDLetteraRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
@@ -77,13 +82,16 @@ import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogReposit
 import it.csi.conam.conambl.integration.repositories.CnmRVerbaleIllecitoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTNotaRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTOrdinanzaRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTVerbaleRepository;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.common.MessageVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.leggi.EnteVO;
 import it.csi.conam.conambl.vo.leggi.RiferimentiNormativiVO;
+import it.csi.conam.conambl.vo.verbale.NotaVO;
 import it.csi.conam.conambl.vo.verbale.RiepilogoVerbaleVO;
 import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVORaggruppatoPerSoggetto;
@@ -160,6 +168,18 @@ public class VerbaleServiceImpl implements VerbaleService {
 
 	@Autowired
 	private CnmDComuneRepository cnmDComuneRepository;
+
+	@Autowired
+	private CnmTNotaRepository cnmTNotaRepository;
+
+	@Autowired
+	private NotaEntityMapper notaEntityMapper;
+	
+	@Autowired
+	private CnmDAmbitoNoteRepository cnmDAmbitoNoteRepository;
+
+	@Autowired
+	private AmbitoNoteEntityMapper ambitoNoteEntityMapper;
 	
 	@Override
 	@Transactional
@@ -313,9 +333,9 @@ public class VerbaleServiceImpl implements VerbaleService {
 		if (cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser() && includiControlloUtenteProprietario)
 			throw new RuntimeException("l'utente non puo accedere a questo verbale");
 
-		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
-				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO && !includeEliminati)
-			throw new SecurityException("il verbale non e nello stato corretto per essere visualizzato");
+//		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+//				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO && !includeEliminati)
+//			throw new SecurityException("il verbale non e nello stato corretto per essere visualizzato");
 
 		// se il verbale e' pregresso, prendo anche i riferimenti normativi scaduti
 		if(cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != 1) {
@@ -633,4 +653,59 @@ public class VerbaleServiceImpl implements VerbaleService {
 		return verbaleSoggettoEntityMapper.mapEntityToVO(verbaleSoggetto);
 	}
 	/*LUCIO 2021/04/21 - FINE Gestione casi di recidività*/
+
+	@Override
+	public VerbaleVO salvaNota(NotaVO nota, Long idVerbale, UserDetails userDetails) {
+		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());
+		CnmTNota entity = notaEntityMapper.mapVOtoEntity(nota);
+		entity.setIdVerbale(idVerbale.intValue());
+		entity.setCnmTUser2(cnmTUser);
+		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
+		entity.setDataOraInsert(now);
+		cnmTNotaRepository.save(entity);
+
+		VerbaleVO result = this.getVerbaleById(entity.getIdVerbale(), userDetails, true, false, false);
+		// TODO logaudit INSERIMENTO NOTA
+		utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.INSERIMENTO_NOTA.getOperation(),entity.getClass().getAnnotation(Table.class).name(),"id_nota="+entity.getIdNota(), Thread.currentThread().getStackTrace()[1].getMethodName(), result.getNumero());
+		
+		return result;
+	}
+
+	@Override
+	public VerbaleVO eliminaNota(Long idNota, UserDetails userDetails) {
+		CnmTNota cnmTNota = cnmTNotaRepository.findOne(idNota);
+		cnmTNotaRepository.delete(cnmTNota);
+		
+		VerbaleVO result = this.getVerbaleById(cnmTNota.getIdVerbale(), userDetails, true, false, false);
+		// TODO logaudit ELIMINA NOTA
+		utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.ELIMINA_NOTA.getOperation(),cnmTNota.getClass().getAnnotation(Table.class).name(),"id_nota="+cnmTNota.getIdNota(), Thread.currentThread().getStackTrace()[1].getMethodName(), result.getNumero());
+		
+		return result;
+	}
+
+	@Override
+	public VerbaleVO modificaNota(NotaVO nota, UserDetails userDetails) {
+		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());
+		CnmTNota cnmTNota = cnmTNotaRepository.findOne(nota.getIdNota());
+		CnmTNota entity = notaEntityMapper.mapVOtoEntity(nota);
+		cnmTNota.setOggetto(entity.getOggetto());
+		cnmTNota.setDesc(entity.getDesc());
+		cnmTNota.setDate(entity.getDate());
+		cnmTNota.setCnmDAmbitoNote(entity.getCnmDAmbitoNote());
+		cnmTNota.setCnmTUser1(cnmTUser);
+		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
+		cnmTNota.setDataOraUpdate(now);
+		cnmTNotaRepository.save(cnmTNota);
+		
+		VerbaleVO result = this.getVerbaleById(cnmTNota.getIdVerbale(), userDetails, true, false, false);
+		// TODO logaudit MODIFICA NOTA
+		utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.MODIFICA_NOTA.getOperation(),cnmTNota.getClass().getAnnotation(Table.class).name(),"id_nota="+cnmTNota.getIdNota(), Thread.currentThread().getStackTrace()[1].getMethodName(), result.getNumero());
+		
+		return result;
+	}
+	
+	@Override
+	public List<SelectVO> getAmbitiNote() {
+		return ambitoNoteEntityMapper.mapListEntityToListVO((List<CnmDAmbitoNote>) cnmDAmbitoNoteRepository.findAll());
+	}
 }

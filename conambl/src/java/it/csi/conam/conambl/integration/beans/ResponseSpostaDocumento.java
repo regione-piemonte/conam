@@ -5,19 +5,11 @@
 package it.csi.conam.conambl.integration.beans;
 
 // 20200706_LC
-public class ResponseSpostaDocumento  extends ResponseProtocollaDocumento implements java.io.Serializable {
+public class ResponseSpostaDocumento  extends ResponseProtocollaDocumento {
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 333388785900288354L;
-
-	private java.lang.String idDocumento;
-
-    private java.lang.String indiceClassificazione;
-
-    private java.lang.String protocollo;
-    
-
 
     public ResponseSpostaDocumento() {
     }
@@ -26,73 +18,9 @@ public class ResponseSpostaDocumento  extends ResponseProtocollaDocumento implem
            java.lang.String idDocumento,
            java.lang.String indiceClassificazione,
            java.lang.String protocollo) {
-           this.idDocumento = idDocumento;
-           this.indiceClassificazione = indiceClassificazione;
-           this.protocollo = protocollo;
+            super(idDocumento, indiceClassificazione,protocollo);
     }
 
-
-    /**
-     * Gets the idDocumento value for this ResponseSpostaDocumento.
-     * 
-     * @return idDocumento
-     */
-    public java.lang.String getIdDocumento() {
-        return idDocumento;
-    }
-
-
-    /**
-     * Sets the idDocumento value for this ResponseSpostaDocumento.
-     * 
-     * @param idDocumento
-     */
-    public void setIdDocumento(java.lang.String idDocumento) {
-        this.idDocumento = idDocumento;
-    }
-
-
-    /**
-     * Gets the indiceClassificazione value for this ResponseSpostaDocumento.
-     * 
-     * @return indiceClassificazione
-     */
-    public java.lang.String getIndiceClassificazione() {
-        return indiceClassificazione;
-    }
-
-
-    /**
-     * Sets the indiceClassificazione value for this ResponseSpostaDocumento.
-     * 
-     * @param indiceClassificazione
-     */
-    public void setIndiceClassificazione(java.lang.String indiceClassificazione) {
-        this.indiceClassificazione = indiceClassificazione;
-    }
-
-
-    /**
-     * Gets the protocollo value for this ResponseSpostaDocumento.
-     * 
-     * @return protocollo
-     */
-    public java.lang.String getProtocollo() {
-        return protocollo;
-    }
-
-    
-
-
-	
-	/**
-     * Sets the protocollo value for this ResponseSpostaDocumento.
-     * 
-     * @param protocollo
-     */
-    public void setProtocollo(java.lang.String protocollo) {
-        this.protocollo = protocollo;
-    }
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
@@ -139,9 +67,9 @@ public class ResponseSpostaDocumento  extends ResponseProtocollaDocumento implem
         return _hashCode;
     }
 
-    // Type metadata
-    private static org.apache.axis.description.TypeDesc typeDesc =
-        new org.apache.axis.description.TypeDesc(ResponseSpostaDocumento.class, true);
+    static {
+    	typeDesc =  new org.apache.axis.description.TypeDesc(ResponseSpostaDocumento.class, true);
+    }
 
     static {
         typeDesc.setXmlType(new javax.xml.namespace.QName("urn:stadocStadoc", "ResponseSpostaDocumento"));
@@ -164,36 +92,4 @@ public class ResponseSpostaDocumento  extends ResponseProtocollaDocumento implem
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
     }
-
-    /**
-     * Return type metadata object
-     */
-    public static org.apache.axis.description.TypeDesc getTypeDesc() {
-        return typeDesc;
-    }
-
-    /**
-     * Get Custom Serializer
-     */
-    public static org.apache.axis.encoding.Serializer getSerializer(
-           java.lang.String mechType, 
-           java.lang.Class _javaType,  
-           javax.xml.namespace.QName _xmlType) {
-        return 
-          new  org.apache.axis.encoding.ser.BeanSerializer(
-            _javaType, _xmlType, typeDesc);
-    }
-
-    /**
-     * Get Custom Deserializer
-     */
-    public static org.apache.axis.encoding.Deserializer getDeserializer(
-           java.lang.String mechType, 
-           java.lang.Class _javaType,  
-           javax.xml.namespace.QName _xmlType) {
-        return 
-          new  org.apache.axis.encoding.ser.BeanDeserializer(
-            _javaType, _xmlType, typeDesc);
-    }
-
 }

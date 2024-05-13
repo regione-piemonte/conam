@@ -570,6 +570,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
               return true;
             }
           },
+          false,
           false
         );
       this.showCompMeta = 27;
@@ -589,6 +590,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
               return true;
             }
           },
+          false,
           false
         );
       this.showCompMeta = 10;
@@ -1195,7 +1197,9 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   ) {
     let inserted = new Array<string>();
     let losed = new Array<string>();
+    /*
     saveRequest.documentoProtocollato.objectIdDocumento;
+    */
 
     this.dataRicercaProtocollo.forEach((item) => {
       let nome =

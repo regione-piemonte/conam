@@ -10,6 +10,7 @@ export class TablePianoRateizzazione extends MinPianoRateizzazioneVO {
         tablePianoRat.stato = value.stato;
         let identificativosoggetti: string = "";
         let delimeter = " - ";
+        /* sonar fix
         if (value.soggetti != null) {
             for (let i = 0; i < value.soggetti.length; i++) {
                 if (identificativosoggetti != "") identificativosoggetti = identificativosoggetti + delimeter;
@@ -19,6 +20,12 @@ export class TablePianoRateizzazione extends MinPianoRateizzazioneVO {
                 else {
                     identificativosoggetti = identificativosoggetti + value.soggetti[i].codiceFiscale;
                 }
+            }
+        }*/
+        if (value.soggetti != null) {
+            for (let soggetto of value.soggetti) {
+                if (identificativosoggetti != "") identificativosoggetti += delimeter;
+                identificativosoggetti += soggetto.codiceFiscale;
             }
         }
         tablePianoRat.identificativoSoggetto = identificativosoggetti;

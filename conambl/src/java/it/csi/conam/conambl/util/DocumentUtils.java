@@ -47,9 +47,10 @@ public class DocumentUtils {
 		
 		// TODO PP - 20200708 PP- aggiungere controllo firma (PAdES) in caso di file .pdf con lib openPDF
 		//20200726_ET aggiunta verifica pdf firmati, DA TESTARE CON PDF FIRMATI!!!!
-		else if(document!=null && nomeFile!=null && nomeFile.toUpperCase().endsWith(".PDF")) {			
+		else if(document!=null && nomeFile!=null && nomeFile.toUpperCase().endsWith(".PDF")) {
+			PdfReader reader = null;
 			try {
-				PdfReader reader = new PdfReader(document);
+				reader = new PdfReader(document);
 				AcroFields fields = reader.getAcroFields();
 				ArrayList signatureNames = fields.getSignatureNames();
 				if(signatureNames != null && !signatureNames.isEmpty()) {
@@ -58,6 +59,9 @@ public class DocumentUtils {
 			} catch (IOException e) {
 //				TODO: che si deve fare? rilancio una eccezione oppure vado avanti?
 				logger.error("Non e' stato possibile verificare se il pdf e' firmato", e);
+			} finally {
+				//	Issue 3 - Sonarqube (add finally)
+				if (reader!=null) reader.close();
 			}
 			
 		}
@@ -104,15 +108,18 @@ public class DocumentUtils {
     private static boolean checkSignature(byte[] pdf) throws IOException {
     	boolean ret = false;
         byte[] produced = fakeSignature(pdf);
-        PdfReader r = null;
+        PdfReader reader = null;
         try {
-        	r = new PdfReader(produced);
+			reader = new PdfReader(produced);
 //            boolean b = r.getAcroFields().signatureCoversWholeDocument("Signature1");
-            boolean b = r.getAcroFields().signatureCoversWholeDocument("mysig");
+            boolean b = reader.getAcroFields().signatureCoversWholeDocument("mysig");
             System.out.println(b);
         }catch(Throwable t) {
-        	if(r!=null)r.close();
-        }
+        	t.printStackTrace();
+        } finally {
+			//	Issue 3 - Sonarqube (add finally)
+			if (reader!=null) reader.close();
+		}
         return ret;
     }
 

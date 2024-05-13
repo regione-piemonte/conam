@@ -227,11 +227,58 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 		return cnmTSoggettos;
 	}
 
-	
+
 	@Override
 	public CnmTSoggetto updateSoggettoDBWithIdStas(CnmTSoggetto cnmTSoggetto, CnmTUser cnmTUser, SoggettoVO sogDb, SoggettoVO sogStas, SoggettoVO soggetto) {
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
 		cnmTSoggetto = cnmTSoggettoRepository.findOne(sogDb.getId());
+		cnmTSoggetto.setIdStas(sogStas.getIdStas());
+		CnmTPersona cnmTPersona = cnmTSoggetto.getCnmTPersona();
+		CnmTSocieta cnmTSocieta = cnmTSoggetto.getCnmTSocieta();
+
+		if (cnmTPersona != null) {
+			cnmTPersonaRepository.delete(cnmTPersona);
+		} else if (cnmTSocieta != null) {
+			cnmTSocietaRepository.delete(cnmTSocieta);
+		}
+		cnmTSoggetto.setCnmTPersona(null);
+		cnmTSoggetto.setCnmTSocieta(null);
+		cnmTSoggetto.setCnmTUser1(cnmTUser);
+		cnmTSoggetto.setDataOraUpdate(now);
+		cnmTSoggetto = cnmTSoggettoRepository.saveAndFlush(cnmTSoggetto);
+
+		cnmTPersonaRepository.flush();
+		cnmTSocietaRepository.flush();
+
+		if (soggetto.getDenomComuneNascitaEstero() != null && sogStas.getDenomComuneNascitaEstero() == null) {
+			cnmTPersona = new CnmTPersona();
+			cnmTPersona.setDenomComuneNascitaEstero(soggetto.getDenomComuneNascitaEstero());
+			if (soggetto.getNazioneNascita().getId() != null && sogStas.getNazioneNascita() == null) {
+				cnmTPersona.setCnmDNazione(cnmDNazioneRepository.findByIdNazione(soggetto.getNazioneNascita().getId()));
+			}
+			cnmTPersona.setCnmTUser2(cnmTUser);
+			cnmTPersona.setDataOraInsert(now);
+			cnmTPersonaRepository.save(cnmTPersona);
+			cnmTSoggetto.setCnmTPersona(cnmTPersona);
+		}
+
+		if (soggetto.getRegioneNascita().getId() != null && sogStas.getRegioneNascita() == null) {
+			cnmTPersona = new CnmTPersona();
+			cnmTPersona.setCnmDComune(cnmDComuneRepository.findByIdComune(soggetto.getComuneNascita().getId()));
+			cnmTPersona.setCnmTUser2(cnmTUser);
+			cnmTPersona.setDataOraInsert(now);
+			cnmTPersonaRepository.save(cnmTPersona);
+			cnmTSoggetto.setCnmTPersona(cnmTPersona);
+		}
+
+		return cnmTSoggetto;
+	}
+	
+	@Override
+	//	Issue 3 - Sonarqube
+	public CnmTSoggetto updateSoggettoDBWithIdStas(CnmTUser cnmTUser, SoggettoVO sogDb, SoggettoVO sogStas, SoggettoVO soggetto) {
+		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
+		CnmTSoggetto cnmTSoggetto = cnmTSoggettoRepository.findOne(sogDb.getId());
 		cnmTSoggetto.setIdStas(sogStas.getIdStas());
 		CnmTPersona cnmTPersona = cnmTSoggetto.getCnmTPersona();
 		CnmTSocieta cnmTSocieta = cnmTSoggetto.getCnmTSocieta();

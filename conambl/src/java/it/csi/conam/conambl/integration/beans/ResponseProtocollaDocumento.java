@@ -9,28 +9,34 @@ package it.csi.conam.conambl.integration.beans;
 
 import java.util.List;
 
-public class ResponseProtocollaDocumento  implements java.io.Serializable {
+public class ResponseProtocollaDocumento implements java.io.Serializable {
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 7115580596715872914L;
 
-	private java.lang.String idDocumento;
+	protected java.lang.String idDocumento;
 
-    private java.lang.String indiceClassificazione;
+    protected java.lang.String indiceClassificazione;
 
-    private java.lang.String protocollo;
+    protected java.lang.String protocollo;
 
     // 20201120_LC
-    private java.lang.String objectIdDocumento;
-    private java.lang.String idFolder;
+    protected java.lang.String objectIdDocumento;
+    protected java.lang.String idFolder;
     
     // 20201124_LC
-    private List<String> objectIdDocumentoToTraceList;
+    protected List<String> objectIdDocumentoToTraceList;
     
     public ResponseProtocollaDocumento() {
     }
 
+    public ResponseProtocollaDocumento(java.lang.String idDocumento, java.lang.String indiceClassificazione, java.lang.String protocollo) {
+    	  this.idDocumento = idDocumento;
+          this.indiceClassificazione = indiceClassificazione;
+          this.protocollo = protocollo;
+	}
+    
     public ResponseProtocollaDocumento(
            java.lang.String idDocumento,
            java.lang.String indiceClassificazione,
@@ -46,8 +52,8 @@ public class ResponseProtocollaDocumento  implements java.io.Serializable {
            this.objectIdDocumentoToTraceList = objectIdDocumentoToTraceList;
     }
 
-
-    /**
+    
+	/**
      * Gets the idDocumento value for this ResponseProtocollaDocumento.
      * 
      * @return idDocumento
@@ -151,13 +157,6 @@ public class ResponseProtocollaDocumento  implements java.io.Serializable {
     }
     
     
-    
-    
-    
-    
-
-    
-    
 
     public List<String> getObjectIdDocumentoToTraceList() {
 		return objectIdDocumentoToTraceList;
@@ -166,13 +165,6 @@ public class ResponseProtocollaDocumento  implements java.io.Serializable {
 	public void setObjectIdDocumentoToTraceList(List<String> objectIdDocumentoToTraceList) {
 		this.objectIdDocumentoToTraceList = objectIdDocumentoToTraceList;
 	}
-
-	
-	
-	
-	
-    
-    
     
     
     private java.lang.Object __equalsCalc = null;
@@ -233,7 +225,7 @@ public class ResponseProtocollaDocumento  implements java.io.Serializable {
     }
 
     // Type metadata
-    private static org.apache.axis.description.TypeDesc typeDesc =
+    protected static org.apache.axis.description.TypeDesc typeDesc =
         new org.apache.axis.description.TypeDesc(ResponseProtocollaDocumento.class, true);
 
     static {
@@ -282,7 +274,7 @@ public class ResponseProtocollaDocumento  implements java.io.Serializable {
      */
     public static org.apache.axis.encoding.Serializer getSerializer(
            java.lang.String mechType, 
-           java.lang.Class _javaType,  
+           java.lang.Class<?> _javaType,  
            javax.xml.namespace.QName _xmlType) {
         return 
           new  org.apache.axis.encoding.ser.BeanSerializer(
@@ -294,7 +286,7 @@ public class ResponseProtocollaDocumento  implements java.io.Serializable {
      */
     public static org.apache.axis.encoding.Deserializer getDeserializer(
            java.lang.String mechType, 
-           java.lang.Class _javaType,  
+           java.lang.Class<?>  _javaType,  
            javax.xml.namespace.QName _xmlType) {
         return 
           new  org.apache.axis.encoding.ser.BeanDeserializer(

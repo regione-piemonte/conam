@@ -26,22 +26,22 @@ public class SollecitoVO extends ParentVO {
 	private String numeroProtocollo;
 	@JsonSerialize(using = CustomDateSerializer.class)
 	@JsonDeserialize(using = CustomDateDeserializer.class)
-	private LocalDate dataScadenza;
+	public LocalDate dataScadenza;
 	private BigDecimal importoSollecitato;
 	private BigDecimal maggiorazione;
 	private StatoSollecitoVO statoSollecito;
 	private Integer idSoggettoOrdinanza;
-	public Boolean bollettinoDaCreare;
-	public Boolean downloadBollettiniEnable;
-	public Boolean isNotificaCreata;
-	public BigDecimal importoPagato;
+	private Boolean bollettinoDaCreare;
+	private Boolean downloadBollettiniEnable;
+	private Boolean isNotificaCreata;
+	private BigDecimal importoPagato;
 	@JsonSerialize(using = CustomDateSerializer.class)
 	@JsonDeserialize(using = CustomDateDeserializer.class)
 	public LocalDate dataPagamento;
-	public Boolean isRiconciliaEnable;
-	public Boolean isCreatoDalloUserCorrente;
-	public String importoSollecitatoString;
-	public String maggiorazioneString;
+	private Boolean isRiconciliaEnable;
+	private Boolean isCreatoDalloUserCorrente;
+	private String importoSollecitatoString;
+	private String maggiorazioneString;
 	private SoggettoVO soggetto;
 	@JsonSerialize(using = CustomDateSerializer.class)
 	@JsonDeserialize(using = CustomDateDeserializer.class)

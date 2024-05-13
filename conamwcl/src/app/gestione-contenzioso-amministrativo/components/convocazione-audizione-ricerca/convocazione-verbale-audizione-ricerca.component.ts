@@ -9,8 +9,6 @@ import { RicercaVerbaleRequest } from "../../../commons/request/verbale/ricerca-
 import { ConfigSharedService } from "../../../shared/service/config-shared.service";
 import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
 import { SharedVerbaleRicercaComponent, ConfigVerbaleRicerca } from "../../../shared-verbale/component/shared-verbale-ricerca/shared-verbale-ricerca.component";
-import { Constants } from "../../../commons/class/constants";
-import { StatoVerbaleVO } from "../../../commons/vo/select-vo";
 
 @Component({
     selector: 'convocazione-audizione-ricerca',
@@ -19,19 +17,19 @@ import { StatoVerbaleVO } from "../../../commons/vo/select-vo";
 })
 export class ConvocazioneAudizioneRicercaComponent implements OnInit, OnDestroy {
 
-    public showTable: boolean;
-
-    public config: Config;
     public verbali: Array<MinVerbaleVO>;
-    public verbaleSel: MinVerbaleVO;
+    public config: Config;
     public loaded: boolean = true;
+    public verbaleSel: MinVerbaleVO;
 
-    @ViewChild(SharedVerbaleRicercaComponent)
-    private sharedVerbaleRicercaComponent: SharedVerbaleRicercaComponent
+    public showTable: boolean;
 
     request: RicercaVerbaleRequest;
 
     public configVerbaleRicerca: ConfigVerbaleRicerca = { showFieldStatoVerbale: true, tipoRicerca: 'GC' };
+
+    @ViewChild(SharedVerbaleRicercaComponent)
+    private sharedVerbaleRicercaComponent: SharedVerbaleRicercaComponent
 
     constructor(
         private logger: LoggerService,
@@ -46,15 +44,15 @@ export class ConvocazioneAudizioneRicercaComponent implements OnInit, OnDestroy 
         this.verbali = new Array();
     }
 
-    scrollEnable: boolean;
     ricercaFascicolo(ricercaVerbaleRequest: RicercaVerbaleRequest) {
         this.request = ricercaVerbaleRequest;
         this.showTable = false;
         this.loaded = false;
         this.sharedVerbaleService.ricercaVerbale(ricercaVerbaleRequest).subscribe(
             data => {
-                if (data != null)
+                if (data != null){
                     this.verbali = data;
+                }
                 this.showTable = true;
                 this.loaded = true;
                 this.scrollEnable = true;
@@ -68,6 +66,16 @@ export class ConvocazioneAudizioneRicercaComponent implements OnInit, OnDestroy 
         );
     }
 
+    scrollEnable: boolean;
+
+    onDettaglio(el: any | Array<any>) {
+        this.verbaleSel = el;
+        if (el instanceof Array){
+            throw Error("errore sono stati selezionati più elementi");
+        }
+        this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_RIEPILOGO + el.id)
+    }
+
     ngAfterContentChecked() {
         let out: HTMLElement = document.getElementById("scrollBottom");
         if (this.loaded && this.scrollEnable && this.showTable && out != null) {
@@ -76,27 +84,11 @@ export class ConvocazioneAudizioneRicercaComponent implements OnInit, OnDestroy 
         }
     }
 
-    onDettaglio(el: any | Array<any>) {
-        this.verbaleSel = el;
-        if (el instanceof Array)
-            throw Error("errore sono stati selezionati più elementi");
-
-        this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_RIEPILOGO + el.id)
-    }
-
-
-
     //Messaggio top
-    public showMessageTop: boolean;
     public typeMessageTop: String;
-    public messageTop: String;
+    public showMessageTop: boolean;
     private intervalIdS: number = 0;
-
-    manageMessage(err: ExceptionVO) {
-        this.typeMessageTop = err.type;
-        this.messageTop = err.message;
-        this.timerShowMessageTop();
-    }
+    public messageTop: String;
 
     timerShowMessageTop() {
         this.showMessageTop = true;
@@ -108,6 +100,14 @@ export class ConvocazioneAudizioneRicercaComponent implements OnInit, OnDestroy 
             }
         }, 1000);
     }
+    ngOnDestroy(): void {
+        this.logger.destroy(ConvocazioneAudizioneRicercaComponent.name);
+    }
+    manageMessage(err: ExceptionVO) {
+        this.typeMessageTop = err.type;
+        this.messageTop = err.message;
+        this.timerShowMessageTop();
+    }
     resetMessageTop() {
         this.showMessageTop = false;
         this.typeMessageTop = null;
@@ -115,8 +115,4 @@ export class ConvocazioneAudizioneRicercaComponent implements OnInit, OnDestroy 
         clearInterval(this.intervalIdS);
     }
 
-
-    ngOnDestroy(): void {
-        this.logger.destroy(ConvocazioneAudizioneRicercaComponent.name);
-    }
 }

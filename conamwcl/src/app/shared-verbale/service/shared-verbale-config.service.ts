@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { LoggerService } from "../../core/services/logger/logger.service";
 import { Config } from "../../shared/module/datatable/classes/config";
+import { SoggettoVO } from "../../commons/vo/verbale/soggetto-vo";
 
 
 @Injectable()
@@ -10,7 +11,8 @@ export class SharedVerbaleConfigService implements OnDestroy {
         selection: boolean,
         selectionType: number,
         isSelectable: (el: any) => boolean,
-        deleteEnable: boolean
+        deleteEnable: boolean,
+        editEnable: boolean
     ) {
         let config: Config = JSON.parse(JSON.stringify(this.configSoggettiVerbale));
         if (selection) {
@@ -19,9 +21,10 @@ export class SharedVerbaleConfigService implements OnDestroy {
             config.selection.selectionType = selectionType;
         }
         config.delete.enable = deleteEnable;
+        config.edit.enable = editEnable;
         return config;
     }
-   
+    
     public getConfigResidenzaList(
         selection: boolean,
         selectionType: number,
@@ -51,10 +54,24 @@ export class SharedVerbaleConfigService implements OnDestroy {
         delete: {
             enable: true
         },
+	    edit: {
+	      enable: true,
+	      isEditable: (soggetto: SoggettoVO) => {
+	        return true;
+	      },
+	    },
         columns: [
             {
                 columnName: 'identificativoSoggetto',
                 displayName: 'Identificativo Soggetto'
+            },
+            {
+                columnName: 'importoVerbale',
+                displayName: 'Importo in misura ridotta'
+            },
+            {
+                columnName: 'importoResiduoVerbale',
+                displayName: 'Importo Residuo'
             },
             {
                 columnName: 'nomeCognomeRagioneSociale',

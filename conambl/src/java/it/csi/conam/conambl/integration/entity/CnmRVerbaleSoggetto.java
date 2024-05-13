@@ -6,6 +6,7 @@ package it.csi.conam.conambl.integration.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -64,6 +65,12 @@ public class CnmRVerbaleSoggetto implements Serializable {
 	@JoinColumn(name="id_verbale")
 	private CnmTVerbale cnmTVerbale;
 
+	@Column(name="importo_mis_ridotta")
+	private BigDecimal importoMisuraRidotta;
+
+	@Column(name="importo_pagato")
+	private BigDecimal importoPagato = new BigDecimal(0);
+	
 	public CnmRVerbaleSoggetto() {
 	}
 
@@ -200,6 +207,22 @@ public class CnmRVerbaleSoggetto implements Serializable {
 		} else if (!idVerbaleSoggetto.equals(other.idVerbaleSoggetto))
 			return false;
 		return true;
+	}
+
+	public BigDecimal getImportoMisuraRidotta() {
+		return importoMisuraRidotta;
+	}
+
+	public void setImportoMisuraRidotta(BigDecimal importoMisuraRidotta) {
+		this.importoMisuraRidotta = importoMisuraRidotta;
+	}
+
+	public BigDecimal getImportoPagato() {
+		return importoPagato;
+	}
+
+	public void setImportoPagato(BigDecimal importoPagato) {
+		this.importoPagato = importoPagato;
 	}
 
 }

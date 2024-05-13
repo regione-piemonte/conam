@@ -36,4 +36,6 @@ public interface CnmRSoggRataRepository extends JpaRepository<CnmRSoggRata, CnmR
 
 	CnmRSoggRata findByCnmROrdinanzaVerbSogAndCnmTRata(CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog, CnmTRata cnmTRata);
 
+	List<CnmRSoggRata> findByCnmTRata(CnmTRata cnmTRata);
+
 }

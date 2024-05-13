@@ -18,18 +18,18 @@ import { SharedVerbaleService } from "../../../shared-verbale/service/shared-ver
 export class VerbaleRicercaComponent implements OnInit, OnDestroy {
   public showTable: boolean;
 
-  public config: Config;
-  public verbali: Array<MinVerbaleVO>;
-  public verbaleSel: MinVerbaleVO;
-  public loaded: boolean = true;
-
   public request: RicercaVerbaleRequest;
 
+  public config: Config;
+  public verbali: Array<MinVerbaleVO>;
+  public loaded: boolean = true;
+  public verbaleSel: MinVerbaleVO;
+
   constructor(
-    private logger: LoggerService,
     private configSharedService: ConfigSharedService,
-    private sharedVerbaleService: SharedVerbaleService,
+    private logger: LoggerService,
     private router: Router,
+    private sharedVerbaleService: SharedVerbaleService,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
@@ -46,7 +46,9 @@ export class VerbaleRicercaComponent implements OnInit, OnDestroy {
     this.loaded = false;
     this.sharedVerbaleService.ricercaVerbale(ricercaVerbaleRequest).subscribe(
       (data) => {
-        if (data != null) this.verbali = data;
+        if (data != null) {
+          this.verbali = data;
+        }
         this.showTable = true;
         this.loaded = true;
         this.scrollEnable = true;
@@ -64,24 +66,20 @@ export class VerbaleRicercaComponent implements OnInit, OnDestroy {
 
   onDettaglio(el: any | Array<any>) {
     this.verbaleSel = el;
-    if (el instanceof Array)
+    if (el instanceof Array){
       throw Error("errore sono stati selezionati più elementi");
-    else if (this.verbaleSel.modificabile)
+    } else if (this.verbaleSel.modificabile) {
       this.router.navigateByUrl(Routing.VERBALE_DATI + el.id);
-    else this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + el.id);
+    } else {
+      this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + el.id);
+    }
   }
 
   //Messaggio top
-  public showMessageTop: boolean;
-  public typeMessageTop: String;
-  public messageTop: String;
   private intervalIdS: number = 0;
-
-  manageMessage(err: ExceptionVO) {
-    this.typeMessageTop = err.type;
-    this.messageTop = err.message;
-    this.timerShowMessageTop();
-  }
+  public showMessageTop: boolean;
+  public messageTop: String;
+  public typeMessageTop: String;
 
   timerShowMessageTop() {
     this.showMessageTop = true;
@@ -93,11 +91,14 @@ export class VerbaleRicercaComponent implements OnInit, OnDestroy {
       }
     }, 1000);
   }
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalIdS);
+  manageMessage(err: ExceptionVO) {
+    this.typeMessageTop = err.type;
+    this.messageTop = err.message;
+    this.timerShowMessageTop();
+  }
+
+  ngOnDestroy(): void {
+    this.logger.destroy(VerbaleRicercaComponent.name);
   }
 
   ngAfterContentChecked() {
@@ -108,7 +109,11 @@ export class VerbaleRicercaComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.logger.destroy(VerbaleRicercaComponent.name);
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.typeMessageTop = null;
+    this.messageTop = null;
+    clearInterval(this.intervalIdS);
   }
+
 }

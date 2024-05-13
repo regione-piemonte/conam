@@ -4,6 +4,8 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.mapper.entity;
 
+import java.math.BigDecimal;
+
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.mapper.EntityMapper;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
@@ -14,5 +16,7 @@ public interface SoggettoEntityMapper extends EntityMapper<CnmTSoggetto, Soggett
 	MinSoggettoVO mapEntityToMinVO(CnmTSoggetto dto);
 	
 	void mapVOtoUpdateEntity(SoggettoVO soggetto, CnmTSoggetto cnmTSoggetto);
+	
+	SoggettoVO mapEntityToVO(CnmTSoggetto dto, BigDecimal importoMisuraRidotta, BigDecimal importoPagato);
 
 }

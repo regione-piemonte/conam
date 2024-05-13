@@ -64,10 +64,10 @@
                     <span *ngFor="let d of denominazioneList">{{d}}</span>
                     <span *ngIf="denominazioneList.length==1; else soggettiMultipli2">assistito</span>
                     <ng-template #soggettiMultipli2>assistiti</ng-template>
-                    da -->
+                    da 
                     <span class="form-control-view" *ngIf="isAnteprima || isStampa">{{datiCompilati.nomeAvvocato}}</span>
                     <input type="text" id="nomeAvvocato" *ngIf="!isAnteprima && !isStampa" class="form-control" style="display: inline-block; width: 15%"
-                        name="nomeAvvocato" [(ngModel)]="datiCompilati.nomeAvvocato" placeholder="Nome Cognome Avvocato" required>                    quale
+                        name="nomeAvvocato" [(ngModel)]="datiCompilati.nomeAvvocato" placeholder="Nome Cognome Avvocato" required> -->                   quale
                     audito a richiesta in merito ai processi verbali n° 
                     <span class="form-control-view" *ngIf="isAnteprima || isStampa">{{datiCompilati.processiVerbali}}</span>
                     <input type="text" id="processiVerbali" *ngIf="!isAnteprima && !isStampa" class="form-control" style="display: inline-block; width: 15%"

@@ -96,7 +96,8 @@ public class AcarisNavigationServiceImpl extends
 		{
 			log.debug(method + ". END");			
 		}
-        return fascicolo.getObjectId();
+		//	Issue 3 - Sonarqube
+		return fascicolo != null ? fascicolo.getObjectId() : null;
 	}
 
 	public ObjectResponseType recuperaChildren(ObjectIdType repositoryId, PrincipalIdType principalId, ObjectIdType objectId, boolean isGruppoAllegati) throws IntegrationException{
@@ -147,20 +148,23 @@ public class AcarisNavigationServiceImpl extends
         // 20211019_LC Jira CONAM-152	-	estrazione corretta del gruppoAllegati
         if (isGruppoAllegati) {
         	// cerca tra tutti gli oggetti uno di tipo GruppoAllegati			
-        	for (int i = 0; i < children.getObjectsLength(); i++) {
-        		PropertyType[] prop = children.getObjects(i).getProperties();
-        		for (int j = 0; j < prop.length; j++) {
-        			PropertyType propertyType = prop[j];
-        			if (propertyType.getQueryName().getClassName().equalsIgnoreCase("GruppoAllegatiPropertiesType")) {
-        				response = children.getObjects(i); 
-        			}
-        		}
-        	}
+			//	Issue 3 - Sonarqube
+			if (children != null) {
+				for (int i = 0; i < children.getObjectsLength(); i++) {
+					PropertyType[] prop = children.getObjects(i).getProperties();
+					for (PropertyType propertyType : prop) {
+						if (propertyType.getQueryName().getClassName().equalsIgnoreCase("GruppoAllegatiPropertiesType")) {
+							response = children.getObjects(i);
+						}
+					}
+				}
+			}
 
-        } else {
+		} else {
         	// prende il primo in caso di documento (DocumentoSemplicePropertiesType)
-        	if (children.getObjectsLength()>0) response = children.getObjects(0);    
-        }
+			//	Issue 3 - Sonarqube
+			if (children != null && children.getObjectsLength() > 0) response = children.getObjects(0);
+		}
         
         
          return response;

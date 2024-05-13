@@ -2,13 +2,8 @@ import { Component, OnInit, OnDestroy, ViewChild } from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Routing } from "../../../commons/routing";
-import {
-  ProvinciaVO,
-  ComuneVO,
-  RegioneVO,
-  RuoloVO,
-  NazioneVO,
-} from "../../../commons/vo/select-vo";
+import {  ProvinciaVO,  ComuneVO,  RegioneVO,
+  RuoloVO,  NazioneVO,} from "../../../commons/vo/select-vo";
 import { Config } from "../../../shared/module/datatable/classes/config";
 import { VerbaleService } from "../../services/verbale.service";
 import { SoggettoVO } from "../../../commons/vo/verbale/soggetto-vo";
@@ -21,6 +16,8 @@ import { TableSoggettiVerbale } from "../../../commons/table/table-soggetti-verb
 import { SharedVerbaleConfigService } from "../../../shared-verbale/service/shared-verbale-config.service";
 import { SharedDialogComponent } from "../../../shared/component/shared-dialog/shared-dialog.component";
 import { UtilSubscribersService } from "../../../core/services/util-subscribers-service";
+import { VerbaleVO } from "../../../commons/vo/verbale/verbale-vo";
+import { SoggettoService } from "../../../soggetto/services/soggetto.service";
 
 declare var $: any;
 
@@ -31,62 +28,65 @@ declare var $: any;
 export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
   @ViewChild(SharedDialogComponent) sharedDialog: SharedDialogComponent;
 
-  //datatable
-  public soggetti: Array<TableSoggettiVerbale> = new Array<TableSoggettiVerbale>();
-  public config: Config;
-
-  //global
+  // global
   public loadedSoggetti: boolean;
   public idVerbale: number;
   public subscribers: any = {};
 
-  public loaderRegioni: boolean = false;
-  public regioneModel: Array<RegioneVO> = new Array<RegioneVO>();
-  public provinciaModel: Array<ProvinciaVO> = new Array<ProvinciaVO>();
-  public loaderProvince: boolean = true;
-  public comuneModel: Array<ComuneVO> = new Array<ComuneVO>();
-  public loaderComuni: boolean = true;
-  public loaderNazioni: boolean;
-  public nazioneResidenzaModel: Array<NazioneVO> = new Array<NazioneVO>();
+  // datatable
+  public soggetti: Array<TableSoggettiVerbale> = new Array<TableSoggettiVerbale>();
+  public config: Config;
 
   private indirizzo: string;
-  private civico: string;
   private cap: string;
+  private civico: string;
   private indirizzoEstero: string;
-  private civicoEstero: string;
   private capEstero: string;
+  private civicoEstero: string;
+	public importoVerbale: number=0;
+	public importo: number=0;
 
-  //ruolo
+  public loaderRegioni: boolean = false;
+  public provinciaModel: Array<ProvinciaVO> = new Array<ProvinciaVO>();
+  public regioneModel: Array<RegioneVO> = new Array<RegioneVO>();
+  public nazioneResidenzaModel: Array<NazioneVO> = new Array<NazioneVO>();
+  public loaderProvince: boolean = true;
+  public loaderComuni: boolean = true;
+  public comuneModel: Array<ComuneVO> = new Array<ComuneVO>();
+  public loaderNazioni: boolean;
+
+  // ruolo
   public ruoloModel = new Array<RuoloVO>();
 
-  //insert soggetto
+  // insert soggetto
   public isAggiungiSoggetto: boolean;
-  public soggetto: SoggettoVO;
   public modalita: string;
-  public showResidenza: boolean = false;
+  public soggetto: SoggettoVO;
   public loadedSalvaRicerca: boolean;
-  public comuneEstero: boolean = false;
+  public showResidenza: boolean = false;
   public comuneEsteroDisabled: boolean = false;
+  public comuneEstero: boolean = false;
 
-  //Messaggio top
-  public showMessageTop: boolean;
+  // edit soggetto
+  public soggettoModifica: TableSoggettiVerbale;
+  public isModificaSoggetto: boolean;
+
+  // Messaggio top
   public typeMessageTop: String;
+  public showMessageTop: boolean;
   public messageTop: String;
 
-  private intervalIdS: number = 0;
-  private intervalIdW: number = 0;
-
-  //Messaggio conferma eliminazione
-  public buttonAnnullaText: string;
+  // Messaggio conferma eliminazione
   public buttonConfirmText: string;
+  public buttonAnnullaText: string;
   public subMessages: Array<string>;
 
-  //warning meta pagina
-  public showMessageBottom: boolean;
-  public typeMessageBottom: String;
-  public messageBottom: String;
+  private intervalIdS: number = 0;
 
-  private intervalIdSBottom: number = 0;
+  //warning meta pagina
+  public typeMessageBottom: String;
+  public showMessageBottom: boolean;
+  public messageBottom: String;
 
   //RUOLO
   public loaderRuolo: boolean;
@@ -95,25 +95,31 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
   public formGiuridicoValid: boolean;
   public formFisicoValid: boolean;
 
+  private intervalIdSBottom: number = 0;
+
   constructor(
-    private logger: LoggerService,
     private router: Router,
-    private activatedRoute: ActivatedRoute,
+    private logger: LoggerService,
     private luoghiService: LuoghiService,
-    private verbaleService: VerbaleService,
+    private activatedRoute: ActivatedRoute,
     private utilSubscribersService: UtilSubscribersService,
+    private verbaleService: VerbaleService,
     private sharedVerbaleService: SharedVerbaleService,
-    private sharedVerbaleConfigService: SharedVerbaleConfigService
+    private soggettoService: SoggettoService,
+    private sharedVerbaleConfigService: SharedVerbaleConfigService,
   ) {}
 
   ngOnInit(): void {
     this.logger.init(VerbaleSoggettoComponent.name);
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
       this.idVerbale = +params["id"];
-      //condizione di uscita
+      // condizione di uscita
       if (isNaN(this.idVerbale))
         this.router.navigateByUrl(Routing.VERBALE_RICERCA);
-
+        this.verbaleService.getVerbaleById(this.idVerbale).subscribe((data: VerbaleVO)=>{
+          this.importo= data.importo;
+          this.importoVerbale= data.importo;
+      })
       this.loadSoggettiAssociatiAVerbale();
       this.loadNazioni();
       this.loadRegioni();
@@ -124,13 +130,6 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
     });
   }
 
-  //PROVINCIA RESIDENZA
-  public isDisabledComuneProvincia(type: string) {
-    if (type == "P" && this.soggetto.regioneResidenza.id == null) return true;
-    if (type == "C" && this.soggetto.provinciaResidenza.id == null) return true;
-    return false;
-  }
-
   loadNazioni() {
     this.loaderNazioni = false;
     this.subscribers.nazioni = this.luoghiService.getNazioni().subscribe(
@@ -138,23 +137,16 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
         this.nazioneResidenzaModel = data;
         this.loaderNazioni = true;
       },
-      (err) => {
-        this.logger.error("Errore nel recupero delle nazioni");
+      (err) => {        this.logger.error("Errore nel recupero delle nazioni");
       }
     );
   }
 
-  loadRegioni() {
-    this.loaderRegioni = false;
-    this.subscribers.regioni = this.luoghiService.getRegioni().subscribe(
-      (data) => {
-        this.regioneModel = data;
-        this.loaderRegioni = true;
-      },
-      (err) => {
-        this.logger.error("Errore nel recupero delle regioni");
-      }
-    );
+  // PROVINCIA  RESIDENZA
+  public isDisabledComuneProvincia(type: string) {
+    if (type == "P" && this.soggetto.regioneResidenza.id == null) {return true;}
+    if (type == "C" && this.soggetto.provinciaResidenza.id == null) {return true;}
+    return false;
   }
 
   loadProvince(id: number) {
@@ -167,10 +159,31 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
           this.provinciaModel = data;
           this.loaderProvince = true;
         },
-        (err) => {
-          this.logger.error("Errore nel recupero delle province");
-        }
+        (err) => {          this.logger.error("Errore nel recupero delle province");        }
       );
+  }
+
+  loadRegioni() {
+    this.loaderRegioni = false;
+    this.subscribers.regioni = this.luoghiService.getRegioni().subscribe(
+      (data) => {
+        this.regioneModel = data;
+        this.loaderRegioni = true;
+      },
+      (err) => {        this.logger.error("Errore nel recupero delle regioni");
+      }
+    );
+  }
+
+  manageLuoghiBySoggetto() {
+    if (
+      this.soggetto.regioneResidenza != null &&
+      this.soggetto.regioneResidenza.id != null
+    ) {      this.loadProvince(this.soggetto.regioneResidenza.id);    }
+    if (
+      this.soggetto.provinciaResidenza != null &&
+      this.soggetto.provinciaResidenza.id != null
+    ) {      this.loadComuni(this.soggetto.provinciaResidenza.id);    }
   }
 
   loadComuni(id: number) {
@@ -188,22 +201,7 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
       );
   }
 
-  manageLuoghiBySoggetto() {
-    if (
-      this.soggetto.regioneResidenza != null &&
-      this.soggetto.regioneResidenza.id != null
-    ) {
-      this.loadProvince(this.soggetto.regioneResidenza.id);
-    }
-    if (
-      this.soggetto.provinciaResidenza != null &&
-      this.soggetto.provinciaResidenza.id != null
-    ) {
-      this.loadComuni(this.soggetto.provinciaResidenza.id);
-    }
-  }
-
-  //RUOLI
+  // RUOLI
   loadRuoli() {
     this.loaderRuolo = false;
     this.subscribers.ruolo = this.verbaleService.ruoliSoggetto().subscribe(
@@ -211,42 +209,32 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
         this.ruoloModel = data;
         this.loaderRuolo = true;
       },
-      (err) => {
-        this.logger.error("Errore nel recupero dei ruoli");
-      }
+      (err) => {        this.logger.error("Errore nel recupero dei ruoli");      }
     );
+  }
+
+  //CHANGE PERSONA
+  cambiaPersona(type: string) {
+    this.soggetto = new SoggettoVO();
+    this.modalita = "R";
+    this.soggetto.personaFisica = type == "G" ? false : true;
+    this.showResidenza = false;
   }
 
   loadSoggettiAssociatiAVerbale() {
     this.config = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
-      false,
-      null,
-      null,
+      false,      null,
+      null,      true,
       true
     );
     this.subscribers.soggetto = this.sharedVerbaleService
       .getSoggettiByIdVerbale(this.idVerbale, true)
       .subscribe((data) => {
         if (data != null) {
-          this.soggetti = data.map((value) => {
-            return TableSoggettiVerbale.map(value);
-          });
+          this.soggetti = data.map((value) => {            return TableSoggettiVerbale.map(value);          });
         }
         this.loadedSoggetti = true;
       });
-  }
-
-  //CHANGE PERSONA
-  cambiaPersona(type: string) {
-    this.soggetto = new SoggettoVO();
-    this.soggetto.personaFisica = type == "G" ? false : true;
-    this.modalita = "R";
-    this.showResidenza = false;
-  }
-
-  //CHANGE RESIDENZA
-  cambiaResidenza(type: string) {
-    this.soggetto.residenzaEstera = type == "I" ? false : true;
   }
 
   ricerca(event: any, tipoPersona: string) {
@@ -269,13 +257,15 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
             );
 
             this.loadedSalvaRicerca = true;
-          } else {
-            this.ricercaSoggetto(min);
-          }
+          } else {            this.ricercaSoggetto(min);          }
         });
     } else {
       this.ricercaSoggetto(min);
     }
+  }
+
+  // CHANGE RESIDENZA
+  cambiaResidenza(type: string) {    this.soggetto.residenzaEstera = type == "I" ? false : true;
   }
 
   ricercaSoggetto(min: MinSoggettoVO) {
@@ -292,6 +282,7 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
             this.soggetto,
             data
           );
+
           if (this.soggetto.residenzaEstera) {
             this.indirizzoEstero = this.soggetto.indirizzoResidenza;
             this.civicoEstero = this.soggetto.civicoResidenza;
@@ -322,27 +313,33 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
       );
   }
 
+  manageMessageTop(message: string, type: string) {
+    this.messageTop = message;
+    this.typeMessageTop = type;
+    this.timerShowMessageTop();
+  }
+
   manageMessage(err: ExceptionVO) {
     this.typeMessageTop = err.type;
     this.messageTop = err.message;
     this.timerShowMessageTop();
   }
 
-  manageMessageTop(message: string, type: string) {
-    this.typeMessageTop = type;
-    this.messageTop = message;
-    this.timerShowMessageTop();
-  }
-
   timerShowMessageTop() {
     this.showMessageTop = true;
-    let seconds: number = 30; //this.configService.getTimeoutMessagge();
+    let seconds: number = 30; // this. configService. getTimeoutMessagge();
     this.intervalIdS = window.setInterval(() => {
       seconds -= 1;
       if (seconds === 0) {
         this.resetMessageTop();
       }
     }, 1000);
+  }
+
+  manageMessageBottom(message: string, type: string) {
+    this.typeMessageBottom = type;
+    this.messageBottom = message;
+    this.timerShowMessageBottom();
   }
 
   resetMessageTop() {
@@ -352,15 +349,9 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
     clearInterval(this.intervalIdS);
   }
 
-  manageMessageBottom(message: string, type: string) {
-    this.typeMessageBottom = type;
-    this.messageBottom = message;
-    this.timerShowMessageBottom();
-  }
-
   timerShowMessageBottom() {
     this.showMessageBottom = true;
-    let seconds: number = 30; //this.configService.getTimeoutMessagge();
+    let seconds: number = 30; // this. configService .getTimeoutMessagge();
     this.intervalIdSBottom = window.setInterval(() => {
       seconds -= 1;
       if (seconds === 0) {
@@ -369,26 +360,41 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  pulisciFiltri() {
+    this.importo=this.importoVerbale;
+
+    this.comuneEstero = false;
+    this.comuneEsteroDisabled = false;
+    if(!this.isModificaSoggetto){
+    	this.soggetto = new SoggettoVO();
+	    this.soggetto.personaFisica = true;
+	    this.modalita = "R";
+	    this.indirizzo = null;
+	    this.indirizzoEstero = null;
+	    this.civico = null;
+	    this.civicoEstero = null;
+	    this.cap = null;
+	    this.capEstero = null;
+	    this.showResidenza = false;
+	 }else{
+		this.soggetto.personaFisica = true;
+		this.soggetto.nome = '';
+		this.soggetto.cognome = '';
+	    this.soggetto.personaFisica = true;
+	    this.modalita = "R";
+	    this.soggetto.dataNascita = null;
+	    this.soggetto.nazioneNascitaEstera = false;
+	      if(this.soggetto.regioneNascita) { this.soggetto.regioneNascita.id = 0;}
+	      if(this.soggetto.provinciaNascita) { this.soggetto.provinciaNascita.id = 0;}
+	      if(this.soggetto.comuneNascita) { this.soggetto.comuneNascita.id = 0;}
+	 }
+  }
+
   resetMessageBottom() {
     this.showMessageBottom = false;
     this.typeMessageBottom = null;
     this.messageBottom = null;
     clearInterval(this.intervalIdSBottom);
-  }
-
-  pulisciFiltri() {
-    this.comuneEstero = false;
-    this.comuneEsteroDisabled = false;
-    this.soggetto = new SoggettoVO();
-    this.modalita = "R";
-    this.showResidenza = false;
-    this.soggetto.personaFisica = true;
-    this.indirizzo = null;
-    this.indirizzoEstero = null;
-    this.civico = null;
-    this.civicoEstero = null;
-    this.cap = null;
-    this.capEstero = null;
   }
 
   salvaSoggetto() {
@@ -407,15 +413,23 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
       this.soggetto.nazioneResidenza = null;
       this.soggetto.denomComuneResidenzaEstero = null;
     }
+    this.soggetto.importoVerbale =this.importo;
     this.subscribers.salvaSoggettoVerbale = this.verbaleService
       .salvaSoggetto(this.soggetto, this.idVerbale)
       .subscribe(
         (data) => {
           if (data.comuneNascitaValido) {
+	        if(this.isModificaSoggetto){
+	          	this.soggetti.splice( this.soggetti.indexOf(this.soggettoModifica), 1);
+          	}
             this.soggetti.push(TableSoggettiVerbale.map(data));
             this.isAggiungiSoggetto = false;
             this.pulisciFiltri();
-            this.manageMessageTop("Soggetto aggiunto con successo", "SUCCESS");
+
+            if(this.isModificaSoggetto){            	this.manageMessageTop("Soggetto modificato con successo", "SUCCESS");
+            }else {            	this.manageMessageTop("Soggetto aggiunto con successo", "SUCCESS");
+            }
+            this.isModificaSoggetto = false;
           } else {
             this.manageMessageTop(
               "Il luogo di nascita selezionato non è compatibile con la data di nascita del soggetto. Inserire una regione-provincia-comune validi alla data di nascita.",
@@ -427,8 +441,8 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
         },
         (err) => {
           if (err instanceof ExceptionVO) {
-            this.showResidenza = true;
             this.loadedSalvaRicerca = true;
+            this.showResidenza = true;
             this.manageMessage(err);
             this.logger.error("Errore nell'eliminazione del verbale");
           }
@@ -436,23 +450,66 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
       );
   }
 
+  // modifica soggetto
+  modifica(el: TableSoggettiVerbale) {
+	console.log('modifica');
+	console.log(el);
+  this.modalita = "E";
+	this.soggettoModifica = el;
+    this.isModificaSoggetto = true;
+    this.isAggiungiSoggetto = false;
+
+    this.subscribers.soggetto = this.soggettoService.getSoggettoById(el.id,this.idVerbale).subscribe((data) => {
+        this.soggetto = data;
+		console.log(this.soggetto);
+          this.comuneEstero = true;
+          if (data.nazioneNascitaEstera && !data.denomComuneNascitaEstero)
+            this.comuneEsteroDisabled = false;
+          else this.comuneEsteroDisabled = true;
+          this.loadedSalvaRicerca = true;
+          this.soggetto = SoggettoVO.editSoggettoFromSoggetto(
+            this.soggetto,
+            data
+          );
+    	  this.importo = this.soggetto.importoVerbale;
+          if (this.soggetto.residenzaEstera) {
+            this.indirizzoEstero = this.soggetto.indirizzoResidenza;
+            this.civicoEstero = this.soggetto.civicoResidenza;
+            this.capEstero = this.soggetto.cap;
+            if (this.soggetto.idStas != null) {
+              this.indirizzo = this.soggetto.indirizzoResidenzaStas;
+              this.civico = this.soggetto.civicoResidenzaStas;
+              this.cap = this.soggetto.capStas;
+            }
+          } else {
+            this.indirizzo = this.soggetto.indirizzoResidenza;
+            this.civico = this.soggetto.civicoResidenza;
+            this.cap = this.soggetto.cap;
+          }
+          this.manageLuoghiBySoggetto();
+          this.showResidenza = true;
+
+    });
+
+
+  }
+
   //elimina soggetto
   confermaEliminazione(el: TableSoggettiVerbale) {
-    this.logger.info(
-      "Richiesta eliminazione del soggetto " + el.idVerbaleSoggetto
-    );
+    this.logger.info(      "Richiesta eliminazione del soggetto " + el.idVerbaleSoggetto    );
     this.generaMessaggio(el);
     this.buttonAnnullaText = "Annulla";
     this.buttonConfirmText = "Conferma";
 
-    //mostro un messaggio
+    // messaggio
     this.sharedDialog.open();
 
-    //unsubscribe
-    this.utilSubscribersService.unsbscribeByName(this.subscribers, "save");
+    // un subscribe
     this.utilSubscribersService.unsbscribeByName(this.subscribers, "close");
+    this.utilSubscribersService.unsbscribeByName(this.subscribers, "save");
 
-    //premo "Conferma"
+
+    //"Conferma"
     this.subscribers.save = this.sharedDialog.salvaAction.subscribe(
       (data) => {
         this.loadedSoggetti = false;
@@ -465,18 +522,15 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
               this.soggetti.splice(this.soggetti.indexOf(el), 1);
               this.loadSoggettiAssociatiAVerbale();
               this.loadedSoggetti = true;
-              this.manageMessageTop(
-                "Soggetto eliminato con successo",
-                "SUCCESS"
+              this.manageMessageTop(                "Soggetto eliminato con successo",                "SUCCESS"
               );
+              this.isModificaSoggetto = false;
             },
             (err) => {
               if (err instanceof ExceptionVO) {
                 this.manageMessage(err);
               }
-              this.logger.error(
-                "Errore nell'eliminazione del soggetto " +
-                  el.identificativoSoggetto
+              this.logger.error(                "Errore nell'eliminazione del soggetto " +                  el.identificativoSoggetto
               );
               this.loadedSoggetti = true;
             }
@@ -489,45 +543,27 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
 
     //premo "Annulla"
     this.subscribers.close = this.sharedDialog.closeAction.subscribe(
-      (data) => {
-        this.subMessages = new Array<string>();
-      },
-      (err) => {
-        this.logger.error(err);
-      }
+      (data) => {        this.subMessages = new Array<string>();      },
+      (err) => {        this.logger.error(err);      }
     );
+  }
+
+  // ROUT ING
+  goToVerbaleRiepilogo() {    this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + this.idVerbale);
+  }
+
+  goToVerbaleDati() {    this.router.navigateByUrl(Routing.VERBALE_DATI + this.idVerbale);
   }
 
   generaMessaggio(el: TableSoggettiVerbale) {
     this.subMessages = new Array<string>();
-
     let incipit: string = "Si intende eliminare il seguente soggetto?";
-
     this.subMessages.push(incipit);
     this.subMessages.push(el.nomeCognomeRagioneSociale);
   }
 
-  //ROUTING
-  goToVerbaleRiepilogo() {
-    this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + this.idVerbale);
-  }
-
-  goToVerbaleDati() {
-    this.router.navigateByUrl(Routing.VERBALE_DATI + this.idVerbale);
-  }
-
   goToVerbaleAllegato() {
     this.router.navigateByUrl(Routing.VERBALE_ALLEGATO + this.idVerbale);
-  }
-
-  //DATEPICKER
-  manageDatePicker() {
-    if ($("#datepicker").length) {
-      $("#datepicker").datetimepicker({
-        format: "DD/MM/YYYY",
-        locale: "it",
-      });
-    }
   }
 
   ngOnDestroy(): void {
@@ -547,14 +583,32 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  formDisabled(form: NgForm) {
-    if (this.soggetto.personaFisica)
-      return !(this.formFisicoValid && form.valid);
-    else return !(this.formGiuridicoValid && form.valid);
+  // DATE PICKER
+  manageDatePicker() {
+    if ($("#datepicker").length) {
+      $("#datepicker").datetimepicker({
+        format: "DD/MM/YYYY",
+        locale: "it",
+      });
+    }
   }
 
   public setFormValid(event: boolean, type: string) {
-    if (type == "F") this.formFisicoValid = event;
     if (type == "G") this.formGiuridicoValid = event;
+    if (type == "F") this.formFisicoValid = event;
   }
+
+  annullaModifica(){
+    this.pulisciFiltri();
+    this.isModificaSoggetto = false;
+    this.isAggiungiSoggetto = false;
+  }
+
+  formDisabled(form: NgForm) {
+    if (this.soggetto.personaFisica) {
+      return !(this.formFisicoValid && form.valid);}
+    else {
+      return !(this.formGiuridicoValid && form.valid);}
+  }
+
 }

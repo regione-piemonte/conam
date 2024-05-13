@@ -79,6 +79,10 @@ export class SharedOrdinanzaDettaglioSoggetti implements OnInit, OnDestroy {
               );
               break;
             }
+            if(s.verbale!=null){
+				this.idVerbale = s.verbale.id;
+				
+			}
           }
           if(!this.isIstanzaRateizzazione){
             this.loaded = true;

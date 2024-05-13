@@ -4,8 +4,19 @@
  ******************************************************************************/
 package it.csi.conam.conambl.dispatcher.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
-import it.csi.conam.conambl.business.service.verbale.*;
+import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.AzioneVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.RicercaVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.SoggettoVerbaleService;
+import it.csi.conam.conambl.business.service.verbale.VerbaleService;
 import it.csi.conam.conambl.dispatcher.VerbaleDispatcher;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
@@ -19,16 +30,21 @@ import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.IstruttoreVO;
 import it.csi.conam.conambl.vo.UtenteVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
-import it.csi.conam.conambl.vo.verbale.*;
+import it.csi.conam.conambl.vo.common.SelectVO;
+import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.MinVerbaleVO;
+import it.csi.conam.conambl.vo.verbale.NotaVO;
+import it.csi.conam.conambl.vo.verbale.RiepilogoVerbaleVO;
+import it.csi.conam.conambl.vo.verbale.RuoloSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.SoggettoVO;
+import it.csi.conam.conambl.vo.verbale.StatoManualeVO;
+import it.csi.conam.conambl.vo.verbale.StatoVerbaleVO;
+import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVORaggruppatoPerSoggetto;
+import it.csi.conam.conambl.vo.verbale.VerbaleVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.RiepilogoAllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author riccardo.bova
@@ -116,6 +132,11 @@ public class VerbaleDispatcherImpl implements VerbaleDispatcher {
 //		return soggettoVerbaleService.salvaSoggettoPregressi(id, soggetto, userDetails);
 	}
 
+	@Override
+	public void updateImportoVerbaleSoggetti(Integer id, Double importoVerbale, UserDetails userDetails) {
+		soggettoVerbaleService.updateImportoVerbaleSoggetto(id, importoVerbale, userDetails);
+	}
+	
 	@Override
 	public void eliminaSoggettoByIdVerbaleSoggetto(Integer id, UserDetails userDetails) {
 		soggettoVerbaleService.eliminaSoggettoByIdVerbaleSoggetto(id, userDetails);
@@ -283,4 +304,24 @@ public class VerbaleDispatcherImpl implements VerbaleDispatcher {
 		return responseList;
 	}
 	/*LUCIO 2021/04/21 - FINE Gestione casi di recidività*/
+
+	@Override
+	public VerbaleVO salvaNota(NotaVO nota, Long IdVerbale, UserDetails userDetails) {
+		return verbaleService.salvaNota(nota, IdVerbale, userDetails);
+	}
+
+	@Override
+	public VerbaleVO modificaNota(NotaVO nota, UserDetails userDetails) {
+		return verbaleService.modificaNota(nota, userDetails);
+	}
+
+	@Override
+	public VerbaleVO eliminaNota(Long idNota, UserDetails userDetails) {
+		return verbaleService.eliminaNota(idNota, userDetails);
+	}
+
+	@Override
+	public List<SelectVO> getAmbitiNote() {
+		return verbaleService.getAmbitiNote();
+	}
 }

@@ -30,6 +30,9 @@ public interface AllegatoDispatcher {
 
 	@PreAuthorize(value = AuthorizationRoles.UTENTE)
 	List<SelectVO> getDecodificaSelectSoggettiAllegato(Integer idverbale);
+
+	@PreAuthorize(value = AuthorizationRoles.UTENTE)
+	List<SelectVO> getDecodificaSelectSoggettiAllegatoCompleto(Integer idverbale);
 	
 	// 20200903_LC gestione pregresso (nuova resposne)
 	//20220321_SB modifica per gestione della paginazione nella ricerca

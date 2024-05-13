@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, Input, Output } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { Config } from "../../../../shared/module/datatable/classes/config";
-//Con bootstrap va fatto cosi
+//x bootstrap
 declare var jquery: any;
 declare var $: any;
 
@@ -13,18 +13,9 @@ export class ListaOrdinanzeComponent implements AfterViewInit{
   constructor() {}
   config: Config = {
     columns: [
-      {
-        displayName: "Numero Determinazione",
-        columnName: "numDeterminazione",
-      },
-      {
-        displayName: "Tipo Ordinanza",
-        columnName: "tipo.denominazione",
-      },
-      {
-        displayName: "Stato",
-        columnName: "stato.denominazione",
-      },
+      {        displayName: "Numero Determinazione",        columnName: "numDeterminazione",      },
+      {        displayName: "Tipo Ordinanza",        columnName: "tipo.denominazione",      },
+      {        displayName: "Stato",        columnName: "stato.denominazione",      },
     ],
   };
   @Input()  ordinanze: Array<any>;
@@ -38,30 +29,34 @@ export class ListaOrdinanzeComponent implements AfterViewInit{
   @Input() subLinks: Array<any>;
   @Input() hideButton: boolean;
   @Input() id: string = "myModal";
-  @Output()
-  clickLinkEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output()  clickLinkEvent: EventEmitter<any> = new EventEmitter<any>();
 
   ngOnInit(): void {
-    if (!this.titolo) this.titolo = "titolo non definito";
-    if (!this.buttonAnnullaText) this.buttonAnnullaText = "No";
-    if (!this.buttonConfirmText) this.buttonConfirmText = "Si";
+    if (!this.titolo) {
+      this.titolo = "titolo non definito";
+    }
+    if (!this.buttonAnnullaText) {
+      this.buttonAnnullaText = "No";
+    }
+    if (!this.buttonConfirmText) {
+      this.buttonConfirmText = "Si";
+    }
+  }
+  ngAfterViewInit(){
 
   }
-ngAfterViewInit(){
-
-}
-  //APRE
+  // APRE
   public open() {
     $("#" + this.id).modal("show");
     this.loaded = true;
   }
-  //CHIUDE
+  // CHIUDE
   public close() {
     $("#" + this.id).modal("hide");
     this.loaded=false;
   }
 
-  //SUBJECT PER IL SALVATAGGIO -DA  EFFETTUARE IL SUBSCRIBE
+  // SUBJECT x SALVATAGGIO - DA  fare SUBSCRIBE
   private saveSubject = new Subject<Boolean>();
   public salvaAction: Observable<Boolean> = this.saveSubject.asObservable();
 
@@ -70,7 +65,7 @@ ngAfterViewInit(){
     this.saveSubject.next(true);
   }
 
-  //SUBJECT PER IL SALVATAGGIO -DA  EFFETTUARE IL SUBSCRIBE
+  // SUBJECT x SALVATAGGIO - DA FARE SUBSCRIBE
   private closeSubject = new Subject<Boolean>();
   public closeAction: Observable<Boolean> = this.closeSubject.asObservable();
 
@@ -87,7 +82,5 @@ ngAfterViewInit(){
     this.XSubject.next(true);
   }
 
-  public clickLink(l: any): void {
-    this.clickLinkEvent.emit(l);
-  }
+  public clickLink(l: any): void {    this.clickLinkEvent.emit(l);  }
 }

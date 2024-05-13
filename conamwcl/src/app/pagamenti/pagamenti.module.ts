@@ -36,6 +36,7 @@ import { PagamentiRiconciliaSollecitoRateRicercaComponent } from "./components/p
 import { PagamentiRiconciliaSollecitoRateDettaglioComponent } from "./components/pagamenti-riconcilia-sollecito-rate-dettaglio/pagamenti-riconcilia-sollecito-rate-dettaglio.component";
 import { pagamentiRiconciliaManualePagamentoOrdinanzaComponent } from "./components/pagamenti-riconcilia-manuale-pagamento-ordinanza/pagamenti-riconcilia-manuale-pagamento-ordinanza.component";
 import { pagamentiRiconciliaManualePagamentoOrdinanzaDettaglioComponent } from "./components/pagamenti-riconcilia-manuale-pagamento-ordinanza-dettaglio/pagamenti-riconcilia-manuale-pagamento-ordinanza-dettaglio.component";
+import { SharedCommonsModule } from "../shared-commons/shared-commons.module";
 
 @NgModule({
     imports: [
@@ -50,7 +51,8 @@ import { pagamentiRiconciliaManualePagamentoOrdinanzaDettaglioComponent } from "
         SharedRiscossioneModule,
         TemplateModule,
         SharedTemplateModule,
-        SharedNotificaModule
+        SharedNotificaModule,
+        SharedCommonsModule
     ],
     exports: [
         PagamentiRiconciliaVerbaleRicercaComponent,

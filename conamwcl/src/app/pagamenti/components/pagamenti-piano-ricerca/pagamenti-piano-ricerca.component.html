@@ -5,7 +5,7 @@
     <div class="principal-div col-xs-12 col-sm-12 col-md-10 col-lg-10" style="padding-top: 30px" *ngIf="loaded">
         <div class="panel-primary-conam panel-conam ">
             <div class="panel-heading-conam">
-                <strong>Ricerca piano di rateizzazione</strong> 
+                <strong>Ricerca piano di rateizzazione</strong>
             </div>
             <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop"></shared-alert>
             <form>
@@ -15,9 +15,11 @@
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <h4 class="border-title"><strong>Ricerca per:</strong></h4>
                             </div>
-                            <shared-ricerca-piano [enableRicercaPiano]="true" [ricercaPianoRequest]="request"
+                            <!--<shared-ricerca-piano [enableRicercaPiano]="true" [ricercaPianoRequest]="request"
                                 [isRiconciliaPiano]="false" (ricerca)="ricerca($event)" (messaggio)="messaggio($event)">
-                            </shared-ricerca-piano>
+                            </shared-ricerca-piano>--><shared-commons-ricerca-piano-rate [enableRicercaPiano]="true" [ricercaPianoRequest]="request"
+                                [isRiconciliaPiano]="false" (ricerca)="ricerca($event)" (messaggio)="messaggio($event)">
+                            </shared-commons-ricerca-piano-rate>
                             <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="showTable">
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                     <h4 class="border-title"><strong>Piani Individuati</strong></h4>

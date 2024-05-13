@@ -12,11 +12,12 @@ import { SharedModule } from "../shared/shared.module";
 import { RifNormativiService } from "./services/rif-normativi.service";
 import { VerbaleService } from "./services/verbale.service";
 import { VerbaleEliminazioneComponent } from "./components/verbale-eliminazione/verbale-eliminazione.component";
-import { VerbaleSoggettoRicercaFisicaComponent } from "./components/verbale-soggetto/verbale-soggetto-ricerca-fisica/verbale-soggetto-ricerca-fisica.component";
-import { VerbaleSoggettoRicercaGiuridicaComponent } from "./components/verbale-soggetto/verbale-soggetto-ricerca-giuridica/verbale-soggetto-ricerca-giuridica.component";
+//import { VerbaleSoggettoRicercaFisicaComponent } from "./components/verbale-soggetto/verbale-soggetto-ricerca-fisica/verbale-soggetto-ricerca-fisica.component";
+//import { VerbaleSoggettoRicercaGiuridicaComponent } from "./components/verbale-soggetto/verbale-soggetto-ricerca-giuridica/verbale-soggetto-ricerca-giuridica.component";
 import { SharedVerbaleModule } from "../shared-verbale/shared-verbale.module";
 import { VerbaleRicercaScrittiDifensiviComponent } from "./components/verbale-ricerca-scritti-difensivi/verbale-ricerca-scritti-difensivi.component";
 import { VerbaleScrittoDifensivoComponent } from "./components/verbale-scritto-difensivo/verbale-scritto-difensivo.component";
+import { SharedCommonsModule } from "../shared-commons/shared-commons.module";
 
 @NgModule({
     imports: [
@@ -26,6 +27,7 @@ import { VerbaleScrittoDifensivoComponent } from "./components/verbale-scritto-d
         VerbaleRoutingModule,
         SharedModule,
         SharedVerbaleModule,
+        SharedCommonsModule
     ],
     exports: [
         VerbaleAllegatoComponent,
@@ -44,8 +46,8 @@ import { VerbaleScrittoDifensivoComponent } from "./components/verbale-scritto-d
         VerbaleDatiComponent,
         VerbaleRiepilogoComponent,
         VerbaleEliminazioneComponent,
-        VerbaleSoggettoRicercaGiuridicaComponent,
-        VerbaleSoggettoRicercaFisicaComponent,
+//        VerbaleSoggettoRicercaGiuridicaComponent,
+//        VerbaleSoggettoRicercaFisicaComponent,
         VerbaleRicercaScrittiDifensiviComponent,
         VerbaleScrittoDifensivoComponent
     ],

@@ -14,21 +14,19 @@ import { PagamentiService } from "../../services/pagamenti.service";
 })
 export class PagamentiPianoCreaComponent implements OnInit, OnDestroy {
 
-    public subscribers: any = {};
     public loaded: boolean = true;
-    public soggetti: Array<TableSoggettiOrdinanza> = new Array<TableSoggettiOrdinanza>();
+    public subscribers: any = {};
     public config: Config;
+    public soggetti: Array<TableSoggettiOrdinanza> = new Array<TableSoggettiOrdinanza>();
     public showTable: boolean;
-
-    public request: RicercaPianoRateizzazioneRequest = new RicercaPianoRateizzazioneRequest();
 
     public max: boolean = false;
 
-    //Messaggio top
-    private intervalTop: number = 0;
+    public request: RicercaPianoRateizzazioneRequest = new RicercaPianoRateizzazioneRequest();
     public showMessageTop: boolean;
-    public typeMessageTop: String;
+    private intervalTop: number = 0;
     public messageTop: String;
+    public typeMessageTop: String;
 
     isSelectable: (el: TableSoggettiOrdinanza) => boolean = (el: TableSoggettiOrdinanza) => {
         return !el.pianoRateizzazioneCreato;
@@ -39,10 +37,10 @@ export class PagamentiPianoCreaComponent implements OnInit, OnDestroy {
     }
 
     constructor(
-        private logger: LoggerService,
         private router: Router,
+        private logger: LoggerService,
+        private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
         private pagamentiService: PagamentiService,
-        private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService
     ) { }
 
     ngOnInit(): void {
@@ -62,16 +60,12 @@ export class PagamentiPianoCreaComponent implements OnInit, OnDestroy {
             this.showTable = true;
             if (data != null) {
                 if(data.length == 1){
-                    data.map(value => {
-                        this.max = value.superatoIlMassimo;
-                    });
+                    data.map(value => {                        this.max = value.superatoIlMassimo;                    });
                 }
                 if(this.max){
                     this.manageMessageTop("Il sistema può mostrare solo 100 risultati per volta. Ridurre l'intervallo di ricerca","WARNING");
                 }else {
-                    this.soggetti = data.map(value => {
-                        return TableSoggettiOrdinanza.map(value);
-                    });
+                    this.soggetti = data.map(value => {                        return TableSoggettiOrdinanza.map(value);                    });
                 }
             }
         });
@@ -82,15 +76,14 @@ export class PagamentiPianoCreaComponent implements OnInit, OnDestroy {
         this.router.navigateByUrl(Routing.PAGAMENTI_PIANO_INSERIMENTO);
     }
 
-    onInfo(el: any | Array<any>){    
-        if (el instanceof Array)
-            throw Error("errore sono stati selezionati più elementi");
+    onInfo(el: any | Array<any>){
+        if (el instanceof Array)             throw Error("errore sono stati selezionati più elementi");
         else{
-            let azione: string = el.ruolo; 
-            this.router.navigate([Routing.SOGGETTO_RIEPILOGO + el.idSoggetto, { action: azione }]);    
+            let azione: string = el.ruolo;
+            this.router.navigate([Routing.SOGGETTO_RIEPILOGO + el.idSoggetto, { action: azione }]);
         }
     }
-    
+
     manageMessageTop(message: string, type: string) {
         this.typeMessageTop = type;
         this.messageTop = message;
@@ -103,9 +96,7 @@ export class PagamentiPianoCreaComponent implements OnInit, OnDestroy {
         let seconds: number = 10;
         this.intervalTop = window.setInterval(() => {
             seconds -= 1;
-            if (seconds === 0) {
-                this.resetMessageTop();
-            }
+            if (seconds === 0) {                this.resetMessageTop();            }
         }, 1000);
     }
 
@@ -116,11 +107,12 @@ export class PagamentiPianoCreaComponent implements OnInit, OnDestroy {
         clearInterval(this.intervalTop);
     }
 
-    messaggio(message: string){
-        this.manageMessageTop(message,"DANGER");
-    }
+    messaggio(message: string){        this.manageMessageTop(message,"DANGER");    }
 
     scrollTopEnable: boolean;
+    ngOnDestroy(): void {        this.logger.destroy(PagamentiPianoCreaComponent.name);
+    }
+
     ngAfterViewChecked() {
         let scrollTop: HTMLElement = document.getElementById("scrollTop");
         if (this.scrollTopEnable && scrollTop != null) {
@@ -129,8 +121,5 @@ export class PagamentiPianoCreaComponent implements OnInit, OnDestroy {
         }
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(PagamentiPianoCreaComponent.name);
-    }
 
 }

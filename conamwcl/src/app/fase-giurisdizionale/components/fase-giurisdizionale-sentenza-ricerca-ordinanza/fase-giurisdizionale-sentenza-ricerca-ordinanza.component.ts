@@ -17,24 +17,24 @@ import { Constants } from "../../../commons/class/constants";
 })
 export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnInit, OnDestroy {
 
-    public subscribers: any = {};
-
     public showTable: boolean;
 
-    public config: Config;
-    public ordinanze: Array<OrdinanzaVO>;
-    public ordinanzaSel: OrdinanzaVO;
-    public loaded: boolean = true;
+    public subscribers: any = {};
 
-    public loadedStatiOrdinanza: boolean;
+    public ordinanze: Array<OrdinanzaVO>;
+    public config: Config;
+    public loaded: boolean = true;
+    public ordinanzaSel: OrdinanzaVO;
+
     public statiOrdinanzaModel: Array<StatoOrdinanzaVO>;
+    public loadedStatiOrdinanza: boolean;
 
     public request: RicercaOrdinanzaRequest
 
     constructor(
-        private logger: LoggerService,
-        private router: Router,
         private configSharedService: ConfigSharedService,
+        private router: Router,
+        private logger: LoggerService,
         private sharedOrdinanzaService: SharedOrdinanzaService
     ) { }
 
@@ -53,7 +53,6 @@ export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnI
         })
     }
 
-    scrollEnable: boolean;
     ricercaOrdinanza(ricercaOrdinanzaRequest: RicercaOrdinanzaRequest) {
         this.request = ricercaOrdinanzaRequest;
         this.showTable = false;
@@ -76,6 +75,13 @@ export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnI
             }
         );
     }
+    scrollEnable: boolean;
+
+    //Messaggio top
+    public typeMessageTop: String;
+    public showMessageTop: boolean;
+    private intervalIdS: number = 0;
+    public messageTop: String;
 
     ngAfterContentChecked() {
         let out: HTMLElement = document.getElementById("scrollBottom");
@@ -85,17 +91,6 @@ export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnI
         }
     }
 
-    //Messaggio top
-    public showMessageTop: boolean;
-    public typeMessageTop: String;
-    public messageTop: String;
-    private intervalIdS: number = 0;
-
-    manageMessage(err: ExceptionVO) {
-        this.typeMessageTop = err.type;
-        this.messageTop = err.message;
-        this.timerShowMessageTop();
-    }
 
     timerShowMessageTop() {
         this.showMessageTop = true;
@@ -108,11 +103,10 @@ export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnI
         }, 1000);
     }
 
-    resetMessageTop() {
-        this.showMessageTop = false;
-        this.typeMessageTop = null;
-        this.messageTop = null;
-        clearInterval(this.intervalIdS);
+    manageMessage(err: ExceptionVO) {
+        this.typeMessageTop = err.type;
+        this.messageTop = err.message;
+        this.timerShowMessageTop();
     }
 
     onDettaglio(el: any | Array<any>) {
@@ -123,22 +117,23 @@ export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnI
             this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_SENTENZA_DETTAGLIO_ORDINANZA + el.id);
     }
 
+    resetMessageTop() {
+        this.showMessageTop = false;
+        this.typeMessageTop = null;
+        this.messageTop = null;
+        clearInterval(this.intervalIdS);
+    }
+
+    //Messaggio top
+    public typeMessageTop2: String;
+    public showMessageTop2: boolean;
+    private intervalIdS2: number = 0;
+    public messageTop2: String;
+
     messaggio(message: string){
         this.manageMessageTop2(message,"DANGER");
     }
 
-    //Messaggio top
-    public showMessageTop2: boolean;
-    public typeMessageTop2: String;
-    public messageTop2: String;
-    private intervalIdS2: number = 0;
-
-    manageMessageTop2(message: string, type: string) {
-        this.typeMessageTop2 = type;
-        this.messageTop2 = message;
-        this.timerShowMessageTop2();
-        this.scrollTopEnable2 = true;
-    }
 
     timerShowMessageTop2() {
         this.showMessageTop2 = true;
@@ -151,6 +146,15 @@ export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnI
         }, 1000);
     }
 
+    manageMessageTop2(message: string, type: string) {
+        this.typeMessageTop2 = type;
+        this.messageTop2 = message;
+        this.timerShowMessageTop2();
+        this.scrollTopEnable2 = true;
+    }
+
+    scrollTopEnable2: boolean;
+
     resetMessageTop2() {
         this.showMessageTop2 = false;
         this.typeMessageTop2 = null;
@@ -158,7 +162,6 @@ export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnI
         clearInterval(this.intervalIdS2);
     }
 
-    scrollTopEnable2: boolean;
     ngAfterViewChecked() {
         let scrollTop: HTMLElement = document.getElementById("scrollTop");
         if (this.scrollTopEnable2 && scrollTop != null) {
@@ -167,12 +170,11 @@ export class FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent implements OnI
         }
     }
 
-    goToFaseGiurisdizionaleElencoSentenze() {
-        this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_SENTENZA_DETTAGLIO_ORDINANZA);
-    }
-
     ngOnDestroy(): void {
         this.logger.destroy(FaseGiurisdizionaleSentenzaRicercaOrdinanzaComponent.name);
+    }
+    goToFaseGiurisdizionaleElencoSentenze() {
+        this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_SENTENZA_DETTAGLIO_ORDINANZA);
     }
 
 }

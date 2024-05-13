@@ -14,7 +14,7 @@ import javax.servlet.ServletContext;
  */
 public abstract class SpringSupportedResource {
 
-	public boolean springBeansInjected = false;
+	private boolean springBeansInjected = false;
 	
 	private static Logger logger = Logger.getLogger(SpringSupportedResource.class);
 

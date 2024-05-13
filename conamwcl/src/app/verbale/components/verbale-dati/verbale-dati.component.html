@@ -221,10 +221,10 @@
                 <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
                   <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
                     <label for="impMisRidotta" class="control-label"
-                      >Importo in misura ridotta</label
+                      >Importo in misura ridotta verbale</label
                     >
                   </div>
-                  <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
+                  <div class="ccol-xs-12 col-sm-12 col-md-6 col-lg-6">
                     <input
                       type="number"
                       id="impMisRidotta"
@@ -262,7 +262,27 @@
                       </div>
                     </div>
                   </div>
+                  <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                    <button
+                    type="button"
+                    class="btn-conam button-green"
+                    *ngIf="showAggiornaImportiSoggetto"
+                    (click)="uploadImportiSogg()"
+                  >
+                    <i
+                      class="
+                      glyphicon glyphicon-share-alt
+                      btn-glyphicon
+                      img-circle
+                      text-green-conam
+                      "
+                    ></i>
+                    Aggiorna importi su soggetti
+                  </button>
+                  </div>
                 </div>
+                <!------>
+           
               </div>
               <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <!--Stato del verbale-->

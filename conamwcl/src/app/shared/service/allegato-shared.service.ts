@@ -59,6 +59,10 @@ export class AllegatoSharedService implements OnDestroy {
         var url: string = this.config.getBEServer() + '/restfacade/allegato/getDecodificaSelectSoggettiAllegato/' + idVerbale.toString();
         return this.http.get<Array<SelectVO>>(url);
     }
+    getDecodificaSelectSoggettiAllegatoCompleto(idVerbale: number): Observable<Array<SelectVO>> {
+        var url: string = this.config.getBEServer() + '/restfacade/allegato/getDecodificaSelectSoggettiAllegatoCompleto/' + idVerbale.toString();
+        return this.http.get<Array<SelectVO>>(url);
+    }
     
     ngOnDestroy(): void {
         this.logger.destroyService(AllegatoSharedService.name);

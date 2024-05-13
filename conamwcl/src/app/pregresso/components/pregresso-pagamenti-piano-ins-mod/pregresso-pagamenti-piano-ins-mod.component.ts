@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  Output,
-  EventEmitter,
-} from "@angular/core";
+import {  Component,  OnInit,  OnDestroy,  Input,  Output,  EventEmitter,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Routing } from "../../../commons/routing";
@@ -30,29 +23,23 @@ declare var $: any;
 })
 export class PregressoPagamentiPianoInsModComponent
   implements OnInit, OnDestroy {
-  @Input()
-  idPiano: number;
-
-  @Input()
-  idOrdinanza: number;
-
-  @Input()
-  numDeterminazione: string;
+  @Input()  idPiano: number;
+  @Input()  idOrdinanza: number;
+  @Input()  numDeterminazione: string;
 
   public subscribers: any = {};
 
   public configSoggetti: Config;
 
-  @Output()
-  onChangeData: EventEmitter<any> = new EventEmitter<any>();
+  @Output()  onChangeData: EventEmitter<any> = new EventEmitter<any>();
 
   public loaded: boolean;
   public loadedStatiPiano: boolean;
   public loadedIdSoggettiOrdinanza: boolean;
 
-  //sono in modifica
+  // in modifica
   public isModifica: boolean;
-  //campi abilitati in modifica
+  // campi abilitati in modifica
   public abilitaModifica: boolean;
 
   public isRataCalcolata: boolean;
@@ -72,7 +59,7 @@ export class PregressoPagamentiPianoInsModComponent
   public piano: PianoRateizzazioneVO;
   public listaSoggetti: Array<TableSoggettiOrdinanza>;
 
-  //Messaggio top
+  // Messaggio TOP
   private intervalTop: number = 0;
   public showMessageTop: boolean;
   public typeMessageTop: String;
@@ -102,36 +89,17 @@ export class PregressoPagamentiPianoInsModComponent
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
       this.idPiano = +params["idPiano"];
       if (this.idOrdinanza && this.numDeterminazione) {
-        /*this.pregressoVerbaleService.getSoggettiOrdinanza(this.idOrdinanza).subscribe(
-                    data=>{
-                        this.listaSoggetti = data.map(value => {
-                            return TableSoggettiOrdinanza.map(value);
-                        });
-                        this.listTableSoggettiOrdinanza = this.listaSoggetti;
-                        // dopo che selezioni soggetti
-                        // this.listTableSoggettiOrdinanza = this.pagamentiService.soggettiCreaPiano;
-                        this.idSoggettiOrdinanza = this.listTableSoggettiOrdinanza.map(data => data.idSoggettoOrdinanza);
-                        this.listaSoggetti = this.listTableSoggettiOrdinanza;
-                        this.loadedIdSoggettiOrdinanza = true;
-                        this.nuovo();         
-                    }
-                    ZXCCZXSASDA
-                );*/
         let request: RicercaPianoRateizzazioneRequest = new RicercaPianoRateizzazioneRequest();
-        //request.numeroDeterminazione = 'ZXCCZXSASDA';
         request.numeroDeterminazione = this.numDeterminazione;
         request.ordinanzaProtocollata = true;
         request.tipoRicerca = "CREA_PIANO";
-
         this.piano = new PianoRateizzazioneVO();
         this.piano.stato = new StatoPianoVO();
         this.pregressoVerbaleService
           .ricercaSoggettiPiano(request)
           .subscribe((data) => {
             if (data != null) {
-              this.listaSoggetti = data.map((value) => {
-                return TableSoggettiOrdinanza.map(value);
-              });
+              this.listaSoggetti = data.map((value) => {                return TableSoggettiOrdinanza.map(value);              });
               this.loaded = true;
             }
           });
@@ -142,8 +110,7 @@ export class PregressoPagamentiPianoInsModComponent
   onSelected(els: TableSoggettiOrdinanza[]) {
     if (els && els.length > 0) {
       this.listTableSoggettiOrdinanza = els;
-      // dopo che selezioni soggetti
-      // this.listTableSoggettiOrdinanza = this.pagamentiService.soggettiCreaPiano;
+      // dopo selezioni soggetti
       this.idSoggettiOrdinanza = this.listTableSoggettiOrdinanza.map(
         (data) => data.idSoggettoOrdinanza
       );
@@ -170,9 +137,7 @@ export class PregressoPagamentiPianoInsModComponent
     let seconds: number = 10;
     this.intervalTop = window.setInterval(() => {
       seconds -= 1;
-      if (seconds === 0) {
-        this.resetMessageTop();
-      }
+      if (seconds === 0) {        this.resetMessageTop();      }
     }, 1000);
   }
 
@@ -210,9 +175,7 @@ export class PregressoPagamentiPianoInsModComponent
                 : this.piano.importoMaggiorazione);
             this.abilitaModifica = true;
           },
-          (err) => {
-            this.logger.error("Errore durante il caricamento del piano");
-          }
+          (err) => {            this.logger.error("Errore durante il caricamento del piano");          }
         );
     } else {
       this.loadedIdSoggettiOrdinanza = false;
@@ -222,12 +185,8 @@ export class PregressoPagamentiPianoInsModComponent
           (data) => {
             this.piano = data;
             this.idSoggettiOrdinanza = new Array<number>();
-            this.idSoggettiOrdinanza = this.piano.soggetti.map(
-              (sogg) => sogg.idSoggettoOrdinanza
-            );
-            this.listaSoggetti = this.piano.soggetti.map((sogg) =>
-              TableSoggettiOrdinanza.map(sogg)
-            );
+            this.idSoggettiOrdinanza = this.piano.soggetti.map(              (sogg) => sogg.idSoggettoOrdinanza            );
+            this.listaSoggetti = this.piano.soggetti.map((sogg) =>              TableSoggettiOrdinanza.map(sogg)            );
             this.loadedIdSoggettiOrdinanza = true;
             this.importoTotale =
               this.piano.importoSanzione +
@@ -341,9 +300,7 @@ export class PregressoPagamentiPianoInsModComponent
       this.idRataSelezionata == 1 ? "prima" : "ultima";
   }
 
-  isDisabledRicalcola() {
-    return !this.nuovoImportoRata || this.nuovoImportoRata <= 0 ? true : false;
-  }
+  isDisabledRicalcola() {    return !this.nuovoImportoRata || this.nuovoImportoRata <= 0 ? true : false;  }
 
   annulla() {
     this.isRataCalcolata = false;
@@ -369,10 +326,7 @@ export class PregressoPagamentiPianoInsModComponent
           this.isRataRicalcolata = false;
           if (!this.isModifica)
             this.router.navigate(
-              [
-                Routing.PAGAMENTI_PIANO_MODIFICA + data,
-                { action: "primoSalvataggio" },
-              ],
+              [                Routing.PAGAMENTI_PIANO_MODIFICA + data,                { action: "primoSalvataggio" },              ],
               { replaceUrl: true }
             );
           else {
@@ -384,7 +338,7 @@ export class PregressoPagamentiPianoInsModComponent
           if (err instanceof ExceptionVO) {
             this.manageMessageTop(err.message, err.type);
           }
-          this.logger.error("Errore durante il salvataggio del piano");
+          this.logger.error("Errore salvataggio piano");
           this.loaded = true;
         }
       );
@@ -406,7 +360,7 @@ export class PregressoPagamentiPianoInsModComponent
           if (err instanceof ExceptionVO) {
             this.manageMessageTop(err.message, err.type);
           }
-          this.logger.error("Errore durante la creazione del piano");
+          this.logger.error("Errore creazione piano");
           this.loaded = true;
         }
       );
@@ -420,26 +374,11 @@ export class PregressoPagamentiPianoInsModComponent
       },
     },
     columns: [
-      {
-        columnName: "numeroRata",
-        displayName: "Numero Rata",
-      },
-      {
-        columnName: "stato.denominazione",
-        displayName: "Stato",
-      },
-      {
-        columnName: "importoRata",
-        displayName: "Importo Rata",
-      },
-      {
-        columnName: "dataScadenza",
-        displayName: "Data Scadenza",
-      },
-      {
-        columnName: "codiceAvviso",
-        displayName: "Codice Avviso",
-      },
+      {        columnName: "numeroRata",        displayName: "Numero Rata",      },
+      {        columnName: "stato.denominazione",        displayName: "Stato",      },
+      {        columnName: "importoRata",        displayName: "Importo Rata",      },
+      {        columnName: "dataScadenza",        displayName: "Data Scadenza",      },
+      {        columnName: "codiceAvviso",        displayName: "Codice Avviso",      },
     ],
   };
 
@@ -478,13 +417,9 @@ export class PregressoPagamentiPianoInsModComponent
     }
   }
 
-  byId(o1: SelectVO, o2: SelectVO) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
-  }
+  byId(o1: SelectVO, o2: SelectVO) {return o1 && o2 ? o1.id === o2.id : o1 === o2;}
 
-  isKeyPressed(code: number): boolean {
-    return this.numberUtilsSharedService.numberValid(code);
-  }
+  isKeyPressed(code: number): boolean {return this.numberUtilsSharedService.numberValid(code);}
 
   onInfo(el: any | Array<any>) {
     if (el instanceof Array)
@@ -497,8 +432,5 @@ export class PregressoPagamentiPianoInsModComponent
       ]);
     }
   }
-
-  ngOnDestroy(): void {
-    this.logger.destroy(PregressoPagamentiPianoInsModComponent.name);
-  }
+  ngOnDestroy(): void {this.logger.destroy(PregressoPagamentiPianoInsModComponent.name);}
 }

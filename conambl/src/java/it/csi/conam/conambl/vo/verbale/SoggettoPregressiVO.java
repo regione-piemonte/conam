@@ -40,6 +40,9 @@ public class SoggettoPregressiVO extends MinSoggettoVO {
 	private Boolean comuneNascitaValido = true;
 
 	private List<ResidenzaVO> residenzaList= new ArrayList<ResidenzaVO>();
+
+	private Double importoVerbale;
+	private Double importoResiduoVerbale;
 	
 	public SoggettoPregressiVO() {
 		super();
@@ -186,5 +189,21 @@ public class SoggettoPregressiVO extends MinSoggettoVO {
 		if(!residenzaList.contains(residenza)) {
 			residenzaList.add(residenza);
 		}
+	}
+
+	public Double getImportoVerbale() {
+		return importoVerbale;
+	}
+
+	public void setImportoVerbale(Double importoVerbale) {
+		this.importoVerbale = importoVerbale;
+	}
+
+	public Double getImportoResiduoVerbale() {
+		return importoResiduoVerbale;
+	}
+
+	public void setImportoResiduoVerbale(Double importoResiduoVerbale) {
+		this.importoResiduoVerbale = importoResiduoVerbale;
 	}
 }

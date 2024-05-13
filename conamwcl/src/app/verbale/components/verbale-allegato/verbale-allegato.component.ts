@@ -30,95 +30,93 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
 
   public subscribers: any = {};
 
-  public idVerbale: number;
   public loaded: boolean;
-  public loadedConfig: boolean;
+  public idVerbale: number;
   public loadedAllegato: boolean = true;
-  public loadedCategoriaAllegato: boolean;
+  public loadedConfig: boolean;
   public riepilogoVerbale: RiepilogoVerbaleVO;
+  public loadedCategoriaAllegato: boolean;
 
-  public allegatoModel: RiepilogoAllegatoVO = new RiepilogoAllegatoVO();
   public tipoAllegatoModel: Array<TipoAllegatoVO>;
+  public allegatoModel: RiepilogoAllegatoVO = new RiepilogoAllegatoVO();
 
-  public showMessageTop: boolean;
   public typeMessageTop: string;
-  public messageTop: string;
+  public showMessageTop: boolean;
   public alertBottom: boolean =  false;
+  public messageTop: string;
   private intervalIdS: number = 0;
 
-  public buttonModificaFlag: boolean;
   public allegaDocumentoFlag: boolean;
+  public buttonModificaFlag: boolean;
   public eliminaAllegatoFlag: boolean;
 
-  public buttonAnnullaTexts: string;
   public buttonConfirmTexts: string;
+  public buttonAnnullaTexts: string;
   public subMessagess: Array<string>;
-
-  public configVerb: Config;
-  public configIstr: Config;
-  public configGiurisd: Config;
-  public configRateizzazione: Config;
 
   scrollEnable: boolean;
 
+  public configVerb: Config;
+  public configGiurisd: Config;
+  public configIstr: Config;
+  public configRateizzazione: Config;
+
+
   constructor(
     private logger: LoggerService,
-    private router: Router,
     private activatedRoute: ActivatedRoute,
-    private sharedVerbaleService: SharedVerbaleService,
+    private router: Router,
     private verbaleService: VerbaleService,
+    private sharedVerbaleService: SharedVerbaleService,
     private utilSubscribersService: UtilSubscribersService,
-    private datatableService: DatatableService,
     private configSharedService: ConfigSharedService,
     private fascicoloService: FascicoloService,
+    private datatableService: DatatableService,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
     this.logger.init(VerbaleAllegatoComponent.name);
-
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
       this.idVerbale = +params["id"];
-      if (isNaN(this.idVerbale))
+      if (isNaN(this.idVerbale)){
         this.router.navigateByUrl(Routing.VERBALE_DATI);
-
-      // setto il riferimento per la ricerca documento protocollato
+      }
+      // setto il riferimento della ricerca documento protocollato
       this.fascicoloService.ref = this.router.url;
 
       this.subscribers.statoVerbale = this.sharedVerbaleService
         .getAzioniVerbale(this.idVerbale)
         .subscribe((data) => {
-          this.buttonModificaFlag = data.modificaVerbaleEnable;
           this.allegaDocumentoFlag = data.aggiungiAllegatoEnable;
+          this.buttonModificaFlag = data.modificaVerbaleEnable;
           this.eliminaAllegatoFlag = data.eliminaAllegatoEnable;
-
-          //setto i config
+          // set config
           this.configVerb = this.configSharedService.getConfigDocumentiVerbale(
             this.eliminaAllegatoFlag
           );
           this.configIstr = this.configSharedService.configDocumentiIstruttoria;
           this.configGiurisd = this.configSharedService.configDocumentiGiurisdizionale;
           this.configRateizzazione = this.configSharedService.configDocumentiRateizzazione;
-
           this.loadedConfig = true;
         });
 
-      //recupero gli allegati da mettere in tabella
+      // allegati x tabella
       this.subscribers.allegati = this.verbaleService
         .getAllegatiByIdVerbale(this.idVerbale)
         .subscribe(
           (data) => {
             this.allegatoModel = data;
-            this.allegatoModel.verbale.forEach((all) => {
-              all.theUrl = new MyUrl(all.nome, null);
-            });
             this.allegatoModel.istruttoria.forEach((all) => {
               all.theUrl = new MyUrl(all.nome, null);
             });
-            this.allegatoModel.giurisdizionale.forEach((all) => {
+            this.allegatoModel.verbale.forEach((all) => {
               all.theUrl = new MyUrl(all.nome, null);
             });
             this.allegatoModel.rateizzazione.forEach((all) => {
+              all.theUrl = new MyUrl(all.nome, null);
+            });
+            this.allegatoModel.giurisdizionale.forEach((all) => {
               all.theUrl = new MyUrl(all.nome, null);
             });
             this.loaded = true;
@@ -127,13 +125,23 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
             this.logger.error("Errore nel recupero degli allegati");
           }
         );
-
       this.loadTipoAllegato();
-      // recupero il riepilogoverbale
+      // recupero riepilogo verbale
       this.subscribers.riepilogo = this.sharedVerbaleService.riepilogoVerbale(this.idVerbale).subscribe(data => {
         this.riepilogoVerbale = data;
-      }); 
+      });
     });
+  }
+
+  timerShowMessageTop() {
+    this.showMessageTop = true;
+    let seconds: number = 20;
+    this.intervalIdS = window.setInterval(() => {
+      seconds -= 1;
+      if (seconds === 0) {
+        this.resetMessageTop();
+      }
+    }, 1000);
   }
 
   manageMessage(type: string, message: string) {
@@ -142,24 +150,8 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
     this.timerShowMessageTop();
   }
 
-  timerShowMessageTop() {
-    this.showMessageTop = true;
-    let seconds: number = 20; //this.configService.getTimeoutMessagge();
-    this.intervalIdS = window.setInterval(() => {
-      seconds -= 1;
-      if (seconds === 0) {
-        this.resetMessageTop();
-      }
-    }, 1000);
-  }
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalIdS);
-  }
-  
-  //recupero le tipologie di allegato allegabili
+
+  // recupero tipologie allegato allegabili
   loadTipoAllegato() {
     this.loadedCategoriaAllegato = false;
     let request = new TipologiaAllegabiliRequest();
@@ -170,17 +162,22 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
         (data) => {
           this.tipoAllegatoModel = data.sort((a, b) => a.id - b.id);
           this.loadedCategoriaAllegato = true;
-          // setto il riferimento per la ricerca documento protocollato
+          // setto riferimento ricerca documento protocollato
           this.fascicoloService.tipoAllegatoModel = this.tipoAllegatoModel;
         },
         (err) => {
-          if (err instanceof ExceptionVO) {
-            this.manageMessage(err.type, err.message);
-          }
+          if (err instanceof ExceptionVO) {            this.manageMessage(err.type, err.message);          }
           this.logger.info("Errore nel recupero dei tipi di allegato");
           this.loadedCategoriaAllegato = true;
         }
       );
+  }
+
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.typeMessageTop = null;
+    this.messageTop = null;
+    clearInterval(this.intervalIdS);
   }
 
   salvaAllegato(nuovoAllegato: SalvaAllegatoVerbaleRequest) {
@@ -193,7 +190,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
         (data) => {
           if (nuovoAllegato.file != null) {
             data.theUrl = this.datatableService.creaUrl(nuovoAllegato.file);
-            //mostro il nuovo allegato in tabella
+            // mostro nuovo allegato in tabella
             if (data.idCategoria == 1) this.allegatoModel.verbale.push(data);
             if (data.idCategoria == 2)
               this.allegatoModel.istruttoria.push(data);
@@ -203,7 +200,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
               this.allegatoModel.rateizzazione.push(data);
           }
 
-          //recupero gli allegati da mettere in tabella
+          // recupero allegati x tabella
           this.subscribers.allegati = this.verbaleService
             .getAllegatiByIdVerbale(this.idVerbale)
             .subscribe(
@@ -228,7 +225,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
             );
 
           this.loadTipoAllegato();
-          //mostro un messaggio
+          // mostro messaggio
           this.manageMessage("SUCCESS", "Documento caricato con successo");
           this.loaded = true;
           this.scrollEnable = true;
@@ -260,12 +257,12 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
         }
         this.fascicoloService.categoriesDuplicated = tipiAllegatoDuplicabili;
 
-        // setto il numero di protocollo per la ricerca documento protocollato
+        // setto numero protocollo ricerca documento protocollato
         this.fascicoloService.searchFormRicercaProtocol =
           ricerca.numeroProtocollo;
-        // setto i dati per la ricerca documento protocollato
+        // setto dati ricerca documento protocollato
         this.fascicoloService.dataRicercaProtocollo =
-          data.documentoProtocollatoVOList;      
+          data.documentoProtocollatoVOList;
         if (data.messaggio) {
           this.alertBottom = true;
           this.fascicoloService.message = data.messaggio;
@@ -298,14 +295,14 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
     this.buttonAnnullaTexts = "Annulla";
     this.buttonConfirmTexts = "Conferma";
 
-    //mostro un messaggio
+    // mostro messaggio
     this.sharedDialogs.open();
 
-    //unsubscribe
+    // unsubscribe
     this.utilSubscribersService.unsbscribeByName(this.subscribers, "save");
     this.utilSubscribersService.unsbscribeByName(this.subscribers, "close");
 
-    //premo "Conferma"
+    // premo Conferma
     this.subscribers.save = this.sharedDialogs.salvaAction.subscribe(
       (data) => {
         this.loaded = false;
@@ -313,7 +310,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
           .eliminaAllegato(el.id, this.idVerbale)
           .subscribe(
             (data) => {
-              //elimina l'allegato
+              // elimina allegato
               this.logger.info("Elimina elemento da tabella");
               this.allegatoModel.verbale.splice(
                 this.allegatoModel.verbale.indexOf(el),
@@ -341,7 +338,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
       }
     );
 
-    //premo "Annulla"
+    // premo Annulla
     this.subscribers.close = this.sharedDialogs.closeAction.subscribe(
       (data) => {
         this.subMessagess = new Array<string>();
@@ -354,7 +351,6 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
 
   ngAfterViewChecked() {
     let out: HTMLElement = document.getElementById("scrollTop");
-
     if (
       this.loaded &&
       this.scrollEnable &&
@@ -367,6 +363,10 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
     }
   }
 
+  goToVerbaleRiepilogo() {
+    this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + this.idVerbale);
+  }
+
   generaMessaggio(el: AllegatoVO) {
     this.subMessagess = new Array<string>();
 
@@ -376,27 +376,24 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
     this.subMessagess.push(el.theUrl.nomeFile);
   }
 
-  goToVerbaleRiepilogo() {
-    this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + this.idVerbale);
-  }
-
-  goToVerbaleDati() {
-    this.router.navigateByUrl(Routing.VERBALE_DATI + this.idVerbale);
+  onLoadedAllegato(loaded: any) {
+    this.loadedAllegato = loaded;
   }
 
   goToVerbaleSoggetto() {
     this.router.navigateByUrl(Routing.VERBALE_SOGGETTO + this.idVerbale);
   }
 
-  byId(o1: SelectVO, o2: SelectVO) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
+  goToVerbaleDati() {
+    this.router.navigateByUrl(Routing.VERBALE_DATI + this.idVerbale);
   }
 
   ngOnDestroy(): void {
     this.logger.destroy(VerbaleAllegatoComponent.name);
   }
 
-  onLoadedAllegato(loaded: any) {
-    this.loadedAllegato = loaded;
+  byId(o1: SelectVO, o2: SelectVO) {
+    return o1 && o2 ? o1.id === o2.id : o1 === o2;
   }
+
 }

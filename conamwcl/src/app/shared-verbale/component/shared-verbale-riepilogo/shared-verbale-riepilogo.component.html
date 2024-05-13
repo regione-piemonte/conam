@@ -96,14 +96,13 @@
           <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
             <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
               <label for="impMisRidotta" class="control-label"
-                >Importo in misura ridotta</label
+                >Importo in misura ridotta verbale</label
               >
             </div>
             <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
               {{ riepilogoVerbale.verbale.importo | currency: "EUR":"symbol" }}
             </div>
           </div>
-
           <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
             <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
               <label for="impMisRidotta" class="control-label"
@@ -114,19 +113,18 @@
               {{ riepilogoVerbale.verbale.stato.denominazione }}
             </div>
           </div>
+
+
         </div>
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-          <div *ngIf="riepilogoVerbale.verbale.importoResiduo" class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
+          <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
             <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-              <label for="impMisRidotta" class="control-label"
-                >Importo residuo</label
+              <label for="impMisRidottaTotale" class="control-label"
+                >Importo in misura ridotta totale</label
               >
             </div>
             <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
-              {{
-                riepilogoVerbale.verbale.importoResiduo
-                  | currency: "EUR":"symbol"
-              }}
+              {{ riepilogoVerbale.verbale?.importoTotale | currency: "EUR":"symbol" }}
             </div>
           </div>
           <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
@@ -139,6 +137,9 @@
               {{ riepilogoVerbale.verbale?.istruttoreCreatore?.denominazione }}
             </div>
           </div>
+
+
+
           <div
             class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6"
             *ngIf="riepilogoVerbale.verbale.istruttoreAssegnato != null"
@@ -152,6 +153,7 @@
               {{ riepilogoVerbale.verbale?.istruttoreAssegnato?.denominazione }}
             </div>
           </div>
+
           <div
             class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6"
             *ngIf="riepilogoVerbale.verbale.statoManuale != null"
@@ -163,6 +165,19 @@
             </div>
             <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
               {{ riepilogoVerbale.verbale?.statoManuale?.denominazione }}
+            </div>
+          </div>
+          <div *ngIf="riepilogoVerbale.verbale.importoResiduo" class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
+            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+              <label for="impMisRidotta" class="control-label"
+                >Importo residuo totale</label
+              >
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
+              {{
+                riepilogoVerbale.verbale.importoResiduo
+                  | currency: "EUR":"symbol"
+              }}
             </div>
           </div>
         </div>
@@ -228,10 +243,237 @@
           [data]="dataSoggVerbale"
           [config]="configSoggVerbale"
           (onInfo)="onInfo($event)"
+          (onEdit)="modifica($event)"
         >
         </datatable>
+
+      <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop">
+                                </shared-alert>
+                            </div>
+                        <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="!loadedSalvaRicerca">
+                            <shared-spinner></shared-spinner>
+                        </div>
+            <form #soggettoForm="ngForm" (ngSubmit)="salva()">
+    					<div *ngIf="isModificaSoggetto && loadedSalvaRicerca">
+                            <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <h4 class="border-title" >
+                                    	<strong *ngIf="isAggiungiSoggetto">Aggiungi un nuovo soggetto</strong>
+                                    	<strong  *ngIf="isModificaSoggetto">Modifica soggetto</strong>
+                                    </h4>
+                                </div>
+                            </div>
+                            <shared-alert [message]="messageBottom" [type]="typeMessageBottom" *ngIf="showMessageBottom">
+                            </shared-alert>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12"
+                                        style="border: 2px solid #0153a9; padding:30px;">
+                                        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 padding-top-15">
+                                            <div class="radio">
+                                                <input id="personaFisica" name="radio" type="radio" [disabled]="isModificaSoggetto"
+                                                    [checked]="soggetto.personaFisica" (click)="cambiaPersona('F')">
+                                                <label for="personaFisica" class="radio-label">Persona fisica</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-top-15">
+                                            <div class="radio">
+                                                <input id="personaGiuridica" name="radio" type="radio" [disabled]="isModificaSoggetto"
+                                                    [checked]="!soggetto.personaFisica" (click)="cambiaPersona('G')">
+                                                <label for="personaGiuridica" class="radio-label">Persona
+                                                    giuridica</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div *ngIf="soggetto?.personaFisica">
+                                <!--<verbale-soggetto-ricerca-fisica [soggetto]="soggetto"
+                                    (pulisci)="pulisciFiltri($event)" [modalita]="modalita" [comuneEstero]="comuneEstero"
+                                    [comuneEsteroDisabled]="comuneEsteroDisabled"
+                                    (formValid)="setFormValid($event,'F')"></verbale-soggetto-ricerca-fisica>-->
+                                <shared-commons-soggetto-ricerca-fisica [soggetto]="soggetto"
+                                    (pulisci)="pulisciFiltri($event)" [modalita]="modalita" [comuneEstero]="comuneEstero"
+                                    [comuneEsteroDisabled]="comuneEsteroDisabled"
+                                    (formValid)="setFormValid($event,'F')"></shared-commons-soggetto-ricerca-fisica>
+                            </div>
+
+                            <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12"
+                                *ngIf="!(soggetto?.personaFisica)">
+                                <!--<verbale-soggetto-ricerca-giuridica [soggetto]="soggetto"
+                                    [modalita]="modalita" (pulisci)="pulisciFiltri($event)"
+                                    (formValid)="setFormValid($event,'G')"></verbale-soggetto-ricerca-giuridica>-->
+                                <shared-commons-soggetto-ricerca-giuridica [soggetto]="soggetto"
+                                    [modalita]="modalita" (pulisci)="pulisciFiltri($event)"
+                                    (formValid)="setFormValid($event,'G')"></shared-commons-soggetto-ricerca-giuridica>
+                            </div>
+
+                            <div *ngIf="showResidenza">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <h4 class="border-title"><strong>Dati di residenza</strong></h4>
+                                </div>
+                                <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div class="form-group col-xs-12 col-sm-12 col-md-4 col-lg-3 padding-top-15">
+                                        <div class="radio" style="padding-left:30px">
+                                            <input id="residenzaItaliana" name="radioResidenza" type="radio"
+                                                [checked]="!soggetto.residenzaEstera" (click)="cambiaResidenza('I')">
+                                            <label for="residenzaItaliana" class="radio-label">Residenza italiana</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-xs-12 col-sm-12 col-md-4 col-lg-3 padding-top-15">
+                                        <div class="radio" style="padding-left:30px">
+                                            <input id="residenzaEstera" name="radioResidenza" type="radio"
+                                                [checked]="soggetto.residenzaEstera" (click)="cambiaResidenza('E')">
+                                            <label for="residenzaEstera" class="radio-label">Residenza estera</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div *ngIf="!soggetto.residenzaEstera">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="regioneResidenza" class="control-label">Regione</label>
+                                        <shared-spinner-form [diameter]="30"
+                                            *ngIf="!loaderRegioni;  else elseRegioneResidenza"></shared-spinner-form>
+                                        <ng-template #elseRegioneResidenza>
+                                            <select class="form-control" id="regioneResidenza"
+                                                [(ngModel)]="soggetto.regioneResidenza.id" name="regioneResidenza"
+                                                (change)="loadProvince(soggetto.regioneResidenza.id)"
+                                                [disabled]="isDisable('RR') && !isModificaSoggetto">
+                                                <option *ngFor="let reg of regioneModel" [value]="reg.id">
+                                                    {{reg.denominazione}}</option>
+                                            </select>
+                                        </ng-template>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="provinciaResidenza" class="control-label">Provincia</label>
+                                        <shared-spinner-form [diameter]="30"
+                                            *ngIf="!loaderProvince;  else elseProvinciaResidenza"></shared-spinner-form>
+                                        <ng-template #elseProvinciaResidenza>
+                                            <select class="form-control" id="provinciaResidenza"
+                                                [(ngModel)]="soggetto.provinciaResidenza.id" name="provinciaResidenza"
+                                                [disabled]="isDisable('PR') && !isModificaSoggetto"
+                                                (change)="loadComuni(soggetto.provinciaResidenza.id)">
+                                                <option *ngFor="let prov of provinciaModel" [value]="prov.id">
+                                                    {{prov.denominazione}}</option>
+                                            </select>
+                                        </ng-template>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="comuneResidenza" class="control-label">Comune</label>
+                                        <shared-spinner-form [diameter]="30"
+                                            *ngIf="!loaderComuni;  else elseComuneResidenza"></shared-spinner-form>
+                                        <ng-template #elseComuneResidenza>
+                                            <select class="form-control" id="comuneResidenza"
+                                                [(ngModel)]="soggetto.comuneResidenza.id" [disabled]="isDisable('CR') && !isModificaSoggetto"
+                                                name="comuneResidenza">
+                                                <option *ngFor="let com of comuneModel" [value]="com.id">
+                                                    {{com.denominazione}}</option>
+                                            </select>
+                                        </ng-template>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="indirizzoPg" class="control-label">Indirizzo</label>
+                                        <input type="text" id="indirizzoPg" class="form-control"
+                                            [(ngModel)]="indirizzo" name="indirizzoPg"
+                                            [disabled]="isDisable('IR') && !isModificaSoggetto">
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="civicoPg" class="control-label">Civico</label>
+                                        <input type="text" id="civicoPg" class="form-control"
+                                            [(ngModel)]="civico" name="civicoPg"
+                                            [disabled]="isDisable('CI') && !isModificaSoggetto">
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="cap" class="control-label">Cap</label>
+                                        <input type="text" id="capPg" class="form-control" [(ngModel)]="cap"
+                                            name="cap" [disabled]="isDisable('CAP') && !isModificaSoggetto" maxlength="5" pattern="[0-9]{5}">
+                                    </div>
+                                </div>
+                                <div *ngIf="soggetto.residenzaEstera">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6" >
+                                        <label for="nazioneResidenza" class="control-label">Stato estero</label>
+                                        <shared-spinner-form [diameter]="30"
+                                            *ngIf="!loaderNazioni;  else elseNazioneResidenza"></shared-spinner-form>
+                                        <ng-template #elseNazioneResidenza>
+                                            <select class="form-control" id="nazioneResidenza"
+                                                [(ngModel)]="soggetto.nazioneResidenza.id" name="nazioneResidenza">
+                                                <option *ngFor="let naz of nazioneResidenzaModel" [value]="naz.id">
+                                                    {{naz.denominazione}}</option>
+                                            </select>
+                                        </ng-template>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="comuneResidenzaEstero" class="control-label">Città</label>
+                                        <input type="text" id="comuneResidenzaEstero" class="form-control"
+                                            [(ngModel)]="soggetto.denomComuneResidenzaEstero" name="comuneResidenzaEstero">
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="indirizzoPgEstero" class="control-label">Indirizzo</label>
+                                        <input type="text" id="indirizzoPgEstero" class="form-control"
+                                            [(ngModel)]="indirizzoEstero" name="indirizzoPgEstero">
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="civicoPgEstero" class="control-label">Civico</label>
+                                        <input type="text" id="civicoPgEstero" class="form-control"
+                                            [(ngModel)]="civicoEstero" name="civicoPgEstero">
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                        <label for="capEstero" class="control-label">Codice postale</label>
+                                        <input type="text" id="capEstero" class="form-control" [(ngModel)]="capEstero"
+                                            name="capEstero" maxlength="6">
+                                    </div>
+                                </div>
+                                <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <h4 class="border-title"><strong>Altri dati</strong></h4>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                    <label for="ruoloPg" class="control-label">Ruolo</label>
+                                    <select class="form-control" id="ruoloPg" [(ngModel)]="soggetto.ruolo.id"
+                                        name="ruoloPg" required>
+                                        <option *ngFor="let ruo of ruoloModel" [value]="ruo.id">{{ruo.denominazione}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                    <label for="importomisuraRidotta" class="control-label">Importo in misura ridotta</label>
+                                    <input type="number" id="importomisuraRidotta"  class="form-control" [(ngModel)]="importo"
+                                            name="importomisuraRidotta" required >
+                                </div>
+
+                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6" *ngIf="!(soggetto.personaFisica)">
+                                    <label for="note" class="control-label">Rapp.legale/Amministratore</label>
+                                    <input type="text" id="note" class="form-control"
+                                        [(ngModel)]="soggetto.noteSoggetto" name="note">
+                                </div>
+                                <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-top-15">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
+                                        <button type="button" class="btn-conam button-green" (click)="salvaSoggetto()"
+                                            [disabled]="formDisabled(soggettoForm)">
+                                            <i
+                                                class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"></i>
+                                            Conferma</button>
+                                        <button *ngIf="!isModificaSoggetto" type="button" class="btn-conam button-light-blue"
+                                            (click)="pulisciFiltri()">
+                                            <i
+                                                class="glyphicon glyphicon-arrow-left btn-glyphicon img-circle text-light-blue-conam"></i>
+                                            Annulla</button>
+
+                                        <button *ngIf="isModificaSoggetto" type="button" class="btn-conam button-light-blue"
+                                            (click)="isModificaSoggetto=false;">
+                                            <i
+                                                class="glyphicon glyphicon-arrow-left btn-glyphicon img-circle text-light-blue-conam"></i>
+                                            Annulla</button>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+
+            </form>
+
       </div>
     </div>
+
   </div>
   <div class="panel-conam panel-grey-conam">
     <div class="panel-heading-conam" role="tab" id="headingThree">
@@ -268,6 +510,35 @@
       </div>
     </div>
   </div>
+
+  <!----NOTES--->
+  <div class="panel-conam panel-grey-conam">
+    <div class="panel-heading-conam" role="tab" id="headingThree">
+      <h4 class="panel-title">
+        <a
+          class="collapsed"
+          data-toggle="collapse"
+          data-parent="#accordion"
+          href="#note"
+          aria-expanded="false"
+          aria-controls="riepilogoVerbale"
+        >
+          Note
+        </a>
+      </h4>
+    </div>
+    <div
+      id="note"
+      class="panel-collapse collapse"
+      role="tabpanel"
+      aria-labelledby="headingThree"
+    >
+      <div class="panel-body">
+        <app-notes-list [idVerbale]="idVerbale" [configNote]="configNote" [noteList]="notes"></app-notes-list>
+      </div>
+    </div>
+  </div>
+  <!------------->
 </div>
 <shared-dialog
   [titolo]="'Attenzione'"

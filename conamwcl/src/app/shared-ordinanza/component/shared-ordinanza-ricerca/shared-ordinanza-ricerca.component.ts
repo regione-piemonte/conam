@@ -1,20 +1,8 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  Output,
-  EventEmitter,
-} from "@angular/core";
+import {  Component,  OnInit,  OnDestroy,  Input,  Output,  EventEmitter,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
-import {
-  StatoVerbaleVO,
-  StatoOrdinanzaVO,
-  SelectVO,
-} from "../../../commons/vo/select-vo";
+import {  StatoOrdinanzaVO,  SelectVO,} from "../../../commons/vo/select-vo";
 import { SoggettoVerbaleRequest } from "../../../commons/request/verbale/soggetto-verbale-request";
 import { RicercaOrdinanzaRequest } from "../../../commons/request/ordinanza/ricerca-ordinanza-request";
-import { SharedOrdinanzaService } from "../../service/shared-ordinanza.service";
 import { CalendarUtils } from "../../../fase-giurisdizionale/module/calendar/component/commons/calendar-utils";
 
 declare var $: any;
@@ -25,41 +13,37 @@ declare var $: any;
   styleUrls: ["./shared-ordinanza-ricerca.component.scss"],
 })
 export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
-  public subscribers: any = {};
 
   //tab1
   public tabOrdinanza: boolean;
   public loadedStatoVerbale: boolean;
-  //public isNumVerbObbligatorio: boolean = true;
-  //public isNumDetObbligatorio: boolean = true;
 
-  @Input()
-  loadedStatiOrdinanza: boolean;
-  @Input()
-  statiOrdinanzaModel: Array<StatoOrdinanzaVO>;
+  public subscribers: any = {};
+
+  @Input()  statiOrdinanzaModel: Array<StatoOrdinanzaVO>;
+  @Input()  loadedStatiOrdinanza: boolean;
 
   //tab2
-  public tabTrasgressore: boolean = false;
   public isTrasgressorePersonaFisica: boolean = false;
-  public isTrasgressorePersonaGiuridica: boolean = false;
+  public tabTrasgressore: boolean = false;
   public soggettoVerbaleTrasgressore: SoggettoVerbaleRequest;
+  public isTrasgressorePersonaGiuridica: boolean = false;
 
   //tab3
-  public tabObbligatoInSolido: boolean = false;
   public isObbligatoInSolidoPersonaFisica: boolean = false;
-  public soggettoVerbaleObbligato: SoggettoVerbaleRequest;
+  public tabObbligatoInSolido: boolean = false;
   public isObbligatoInSolidoPersonaGiuridica: boolean = false;
+  public soggettoVerbaleObbligato: SoggettoVerbaleRequest;
 
   //ricerca
   public ricercaOrdinanzaModel: RicercaOrdinanzaRequest;
 
-  @Output() onSearch = new EventEmitter<RicercaOrdinanzaRequest>();
   @Output() messaggio = new EventEmitter<any>();
+  @Output() onSearch = new EventEmitter<RicercaOrdinanzaRequest>();
   @Input() request: RicercaOrdinanzaRequest;
 
   constructor(
     private logger: LoggerService,
-    private sharedOrdinanzaService: SharedOrdinanzaService
   ) {}
 
   ngOnInit(): void {
@@ -70,11 +54,11 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
   setRequest() {
     if (this.request == null) this.pulisciFiltri();
     else {
-      this.ricercaOrdinanzaModel = this.request;
       this.tabOrdinanza = true;
+      this.ricercaOrdinanzaModel = this.request;
       this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
-      this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
       this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
+      this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
       this.soggettoVerbaleObbligato.tipoSoggetto = "O";
       if (
         this.request.soggettoVerbale != null &&
@@ -84,13 +68,19 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
           if (x.tipoSoggetto == "T") {
             this.soggettoVerbaleTrasgressore = x;
             this.tabTrasgressore = true;
-            if (x.personaFisica) this.isTrasgressorePersonaFisica = true;
-            else this.isTrasgressorePersonaGiuridica = true;
+            if (x.personaFisica) {
+              this.isTrasgressorePersonaFisica = true;
+            } else {
+              this.isTrasgressorePersonaGiuridica = true;
+            }
           } else if (x.tipoSoggetto == "O") {
             this.soggettoVerbaleObbligato = x;
             this.tabObbligatoInSolido = true;
-            if (x.personaFisica) this.isObbligatoInSolidoPersonaFisica = true;
-            else this.isObbligatoInSolidoPersonaGiuridica = true;
+            if (x.personaFisica) {
+              this.isObbligatoInSolidoPersonaFisica = true;
+            } else {
+              this.isObbligatoInSolidoPersonaGiuridica = true;
+            }
           }
         }
       }
@@ -101,32 +91,30 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
   }
 
   pulisciFiltri() {
-    this.ricercaOrdinanzaModel = new RicercaOrdinanzaRequest();
     this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
+    this.ricercaOrdinanzaModel = new RicercaOrdinanzaRequest();
     this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
     this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
     this.soggettoVerbaleObbligato.tipoSoggetto = "O";
-    this.tabOrdinanza = false;
     this.tabObbligatoInSolido = false;
-    this.isObbligatoInSolidoPersonaFisica = false;
+    this.tabOrdinanza = false;
     this.isObbligatoInSolidoPersonaGiuridica = false;
-    this.tabTrasgressore = false;
+    this.isObbligatoInSolidoPersonaFisica = false;
     this.isTrasgressorePersonaFisica = false;
+    this.tabTrasgressore = false;
     this.isTrasgressorePersonaGiuridica = false;
-    //this.isNumDetObbligatorio = true;
-    //this.isNumVerbObbligatorio = true;
   }
 
   tabActions: any = {
-    //Ricordarsi di svuotare i campi quando ci saranno gli oggetti
+    // MEMO svuotare campi quando ci saranno gli oggetti
     changeOrdinanza: () => {
       this.tabOrdinanza = !this.tabOrdinanza;
       if (!this.tabOrdinanza) {
-        this.ricercaOrdinanzaModel.numeroDeterminazione = null;
         this.ricercaOrdinanzaModel.numeroVerbale = null;
+        this.ricercaOrdinanzaModel.numeroDeterminazione = null;
         this.ricercaOrdinanzaModel.statoOrdinanza = new Array<StatoOrdinanzaVO>();
-        this.ricercaOrdinanzaModel.dataOrdinanzaDa = null;
         this.ricercaOrdinanzaModel.dataOrdinanzaA = null;
+        this.ricercaOrdinanzaModel.dataOrdinanzaDa = null;
       }
     },
     changeTrasgressore: () => {
@@ -134,11 +122,11 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
       if (!this.tabTrasgressore) {
         this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
         this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
+        this.isTrasgressorePersonaGiuridica = false;
         this.isTrasgressorePersonaFisica = false;
-        this.isTrasgressorePersonaGiuridica = false;
       } else {
-        this.isTrasgressorePersonaFisica = true;
         this.isTrasgressorePersonaGiuridica = false;
+        this.isTrasgressorePersonaFisica = true;
       }
     },
     changeObbligatoInSolido: () => {
@@ -146,11 +134,11 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
       if (!this.tabObbligatoInSolido) {
         this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
         this.soggettoVerbaleObbligato.tipoSoggetto = "O";
+        this.isObbligatoInSolidoPersonaGiuridica = false;
         this.isObbligatoInSolidoPersonaFisica = false;
-        this.isObbligatoInSolidoPersonaGiuridica = false;
       } else {
-        this.isObbligatoInSolidoPersonaFisica = true;
         this.isObbligatoInSolidoPersonaGiuridica = false;
+        this.isObbligatoInSolidoPersonaFisica = true;
       }
     },
     checkTrasgressorePersonaFisica: () => {
@@ -184,14 +172,6 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
       this.soggettoVerbaleObbligato.tipoSoggetto = "O";
       this.soggettoVerbaleObbligato.personaFisica = false;
     },
-    /*checkNumDetObbligatorio: () => {
-            this.isNumDetObbligatorio = true;
-            this.isNumVerbObbligatorio = false;
-        },
-        checkNumVerbObbligatorio: () => {
-            this.isNumVerbObbligatorio = true;
-            this.isNumDetObbligatorio = false;
-        }*/
   };
 
   isDisable(field: string, type: string) {
@@ -342,10 +322,6 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
     }
   }
 
-  isEmpty(str) {
-    return !str || 0 === str.length;
-  }
-
   manageDatePicker(event: any, i: number) {
     if ($("#datetimepicker1").length > 0) {
       $("#datetimepicker1").datetimepicker({
@@ -391,6 +367,10 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
     }
   }
 
+  isEmpty(str) {
+    return !str || 0 === str.length;
+  }
+
   disableForm(validForm: boolean) {
     let condition: boolean =
       !this.tabOrdinanza &&
@@ -433,25 +413,19 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
           this.soggettoVerbaleObbligato
         );
       }
-
       this.onSearch.emit(this.ricercaOrdinanzaModel);
     }
   }
 
-  interceptor(event: Event) {
-    event.preventDefault();
-  }
+  byId(o1: SelectVO, o2: SelectVO) {    return o1 && o2 ? o1.id === o2.id : o1 === o2;  }
 
-  byId(o1: SelectVO, o2: SelectVO) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
-  }
+  interceptor(event: Event) {    event.preventDefault();  }
+
+  ngOnDestroy(): void {    this.logger.destroy(SharedOrdinanzaRicercaComponent.name);  }
 
   ngAfterViewChecked() {
     this.manageDatePicker(null, 1);
     this.manageDatePicker(null, 2);
   }
 
-  ngOnDestroy(): void {
-    this.logger.destroy(SharedOrdinanzaRicercaComponent.name);
-  }
 }

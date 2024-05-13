@@ -20,11 +20,11 @@ export class FaseGiurisdizionaleCancelleriaDettaglioOrdinanzaComponent implement
     configAllegati: Config;
 
     constructor(
-        private logger: LoggerService,
         private router: Router,
+        private logger: LoggerService,
         private activatedRoute: ActivatedRoute,
+        private configSharedService: ConfigSharedService,
         private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
-        private configSharedService: ConfigSharedService
     ) { }
 
     ngOnInit(): void {
@@ -33,8 +33,9 @@ export class FaseGiurisdizionaleCancelleriaDettaglioOrdinanzaComponent implement
             this.idOrdinanza = +params['idOrdinanza'];
             this.configSoggetti = this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggetti(false, "Aggiungi Comunicazioni Cancelleria", 0, null, null,(el: any)=>true);
             this.configAllegati = this.configSharedService.configDocumentiOrdinanza;
-            if (this.activatedRoute.snapshot.paramMap.get('action') == 'caricato')
+            if (this.activatedRoute.snapshot.paramMap.get('action') == 'caricato'){
                 this.manageMessageTop("Comunicazione allegata con successo", 'SUCCESS');
+            }
         });
     }
 
@@ -42,20 +43,19 @@ export class FaseGiurisdizionaleCancelleriaDettaglioOrdinanzaComponent implement
         this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_CANCELLERIA_ALLEGATO_ORDINANZA + this.idOrdinanza.toString());
     }
 
-    //Messaggio top
-    public showMessageTop: boolean;
     public typeMessageTop: String;
+    public showMessageTop: boolean;
     public messageTop: String;
 
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
     }
 
     timerShowMessageTop() {
-        this.showMessageTop = true;
         const source = timer(1000, 1000).take(31);
+        this.showMessageTop = true;
         this.subscribers.timer = source.subscribe(val => {
             if (val == 30)
                 this.resetMessageTop();
@@ -63,13 +63,11 @@ export class FaseGiurisdizionaleCancelleriaDettaglioOrdinanzaComponent implement
     }
 
     resetMessageTop() {
-        this.showMessageTop = false;
         this.typeMessageTop = null;
+        this.showMessageTop = false;
         this.messageTop = null;
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(FaseGiurisdizionaleCancelleriaDettaglioOrdinanzaComponent.name);
-    }
+    ngOnDestroy(): void {        this.logger.destroy(FaseGiurisdizionaleCancelleriaDettaglioOrdinanzaComponent.name);    }
 
 }

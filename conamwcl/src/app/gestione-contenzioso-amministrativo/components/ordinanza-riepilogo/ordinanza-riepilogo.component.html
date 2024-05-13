@@ -11,7 +11,7 @@
                 <div class="form-group row">
                     <div id="scrollTop"></div>
                     <shared-ordinanza-riepilogo [showAnnullamentoParts]="showAnnullamentoParts" [idVerbale]="idVerbale" [idOrdinanza]="idOrdinanza" [isFirstDownloadBollettini]="isFirstDownloadBollettini"></shared-ordinanza-riepilogo>
-                    <div *ngIf="azione?.dowloadBollettiniEnable && loadedAction" class="alert alert-warning col-xs-12 col-sm-12 col-md-12 col-lg-12" role="alert">
+                    <div *ngIf="azione?.downloadBollettiniEnable && loadedAction" class="alert alert-warning col-xs-12 col-sm-12 col-md-12 col-lg-12" role="alert">
                             <strong>Attenzione!</strong> La richiesta di creazione bollettini è stata inviata alla piattaforma dei pagamenti online PiemontePAY.
                              Per poter generare il PDF dei bollettini, cliccare sul pulsante "Scarica Bollettini".
                     </div>
@@ -28,7 +28,7 @@
                             Invia Richiesta Bollettini</button>
 
                         <button type="button" class="btn-conam button-grey"
-                            *ngIf="azione?.dowloadBollettiniEnable && loadedAction" (click)="dowloadBollettini()">
+                            *ngIf="azione?.downloadBollettiniEnable && loadedAction" (click)="dowloadBollettini()">
                             <i class="glyphicon glyphicon-floppy-save btn-glyphicon img-circle text-grey-conam"></i>
                             Scarica Bollettini</button>
 

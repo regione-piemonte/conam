@@ -45,6 +45,11 @@ public class AllegatoDispatcherImpl implements AllegatoDispatcher {
 		return commonAllegatoService.getDecodificaSelectSoggettiAllegato(idverbale);
 	}
 
+	@Override
+	public List<SelectVO> getDecodificaSelectSoggettiAllegatoCompleto(Integer idverbale) {
+		return commonAllegatoService.getDecodificaSelectSoggettiAllegatoCompleto(idverbale);
+	}
+	
 	// 20200903_LC gestione pregresso
 	//20220321_SB modifica per gestione della paginazione nella ricerca
 	@Override

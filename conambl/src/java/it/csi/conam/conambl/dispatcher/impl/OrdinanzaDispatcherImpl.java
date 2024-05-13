@@ -27,6 +27,7 @@ import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -161,7 +162,9 @@ public class OrdinanzaDispatcherImpl implements OrdinanzaDispatcher {
 		return allegatoOrdinanzaService.isLetteraSaved(request);
 	}
 
+	//	Issue 3 - Sonarqube
 	@Override
+	@Transactional
 	public MessageVO salvaAllegatoProtocollatoOrdinanzaSoggetto(SalvaAllegatiProtocollatiRequest request,
 			UserDetails userDetails) {
 		return allegatoOrdinanzaService.salvaAllegatoProtocollatoOrdinanzaSoggetto(request, userDetails, false);

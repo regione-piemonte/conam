@@ -9,8 +9,6 @@ import { RicercaVerbaleRequest } from "../../../commons/request/verbale/ricerca-
 import { ConfigSharedService } from "../../../shared/service/config-shared.service";
 import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
 import { SharedVerbaleRicercaComponent, ConfigVerbaleRicerca } from "../../../shared-verbale/component/shared-verbale-ricerca/shared-verbale-ricerca.component";
-import { Constants } from "../../../commons/class/constants";
-import { StatoVerbaleVO } from "../../../commons/vo/select-vo";
 
 @Component({
     selector: 'emissione-verbale-audizione-ricerca',
@@ -19,19 +17,19 @@ import { StatoVerbaleVO } from "../../../commons/vo/select-vo";
 })
 export class EmissioneVerbaleAudizioneRicercaComponent implements OnInit, OnDestroy {
 
+    public config: Config;
+    public loaded: boolean = true;
+    public verbaleSel: MinVerbaleVO;
+    public verbali: Array<MinVerbaleVO>;
+
     public showTable: boolean;
 
-    public config: Config;
-    public verbali: Array<MinVerbaleVO>;
-    public verbaleSel: MinVerbaleVO;
-    public loaded: boolean = true;
-
-    @ViewChild(SharedVerbaleRicercaComponent)
-    private sharedVerbaleRicercaComponent: SharedVerbaleRicercaComponent
+    public configVerbaleRicerca: ConfigVerbaleRicerca = { showFieldStatoVerbale: true, tipoRicerca: 'GC' };
 
     request: RicercaVerbaleRequest;
 
-    public configVerbaleRicerca: ConfigVerbaleRicerca = { showFieldStatoVerbale: true, tipoRicerca: 'GC' };
+    @ViewChild(SharedVerbaleRicercaComponent)
+    private sharedVerbaleRicercaComponent: SharedVerbaleRicercaComponent
 
     constructor(
         private logger: LoggerService,
@@ -46,15 +44,23 @@ export class EmissioneVerbaleAudizioneRicercaComponent implements OnInit, OnDest
         this.verbali = new Array();
     }
 
-    scrollEnable: boolean;
+    ngAfterContentChecked() {
+        let out: HTMLElement = document.getElementById("scrollBottom");
+        if (this.loaded && this.scrollEnable && this.showTable && out != null) {
+            out.scrollIntoView();
+            this.scrollEnable = false;
+        }
+    }
+
     ricercaFascicolo(ricercaVerbaleRequest: RicercaVerbaleRequest) {
         this.request = ricercaVerbaleRequest;
         this.showTable = false;
         this.loaded = false;
         this.sharedVerbaleService.ricercaVerbale(ricercaVerbaleRequest).subscribe(
             data => {
-                if (data != null)
+                if (data != null){
                     this.verbali = data;
+                }
                 this.showTable = true;
                 this.loaded = true;
                 this.scrollEnable = true;
@@ -68,14 +74,6 @@ export class EmissioneVerbaleAudizioneRicercaComponent implements OnInit, OnDest
         );
     }
 
-    ngAfterContentChecked() {
-        let out: HTMLElement = document.getElementById("scrollBottom");
-        if (this.loaded && this.scrollEnable && this.showTable && out != null) {
-            out.scrollIntoView();
-            this.scrollEnable = false;
-        }
-    }
-
     onDettaglio(el: any | Array<any>) {
         this.verbaleSel = el;
         if (el instanceof Array)
@@ -83,14 +81,7 @@ export class EmissioneVerbaleAudizioneRicercaComponent implements OnInit, OnDest
 
         this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_RIEPILOGO + el.id)
     }
-
-
-
-    //Messaggio top
-    public showMessageTop: boolean;
-    public typeMessageTop: String;
-    public messageTop: String;
-    private intervalIdS: number = 0;
+    scrollEnable: boolean;
 
     manageMessage(err: ExceptionVO) {
         this.typeMessageTop = err.type;
@@ -98,16 +89,12 @@ export class EmissioneVerbaleAudizioneRicercaComponent implements OnInit, OnDest
         this.timerShowMessageTop();
     }
 
-    timerShowMessageTop() {
-        this.showMessageTop = true;
-        let seconds: number = 30//this.configService.getTimeoutMessagge();
-        this.intervalIdS = window.setInterval(() => {
-            seconds -= 1;
-            if (seconds === 0) {
-                this.resetMessageTop();
-            }
-        }, 1000);
-    }
+    //Messaggio top
+    private intervalIdS: number = 0;
+    public messageTop: String;
+    public typeMessageTop: String;
+    public showMessageTop: boolean;
+
     resetMessageTop() {
         this.showMessageTop = false;
         this.typeMessageTop = null;
@@ -115,8 +102,19 @@ export class EmissioneVerbaleAudizioneRicercaComponent implements OnInit, OnDest
         clearInterval(this.intervalIdS);
     }
 
-
     ngOnDestroy(): void {
         this.logger.destroy(EmissioneVerbaleAudizioneRicercaComponent.name);
     }
+
+    timerShowMessageTop() {
+        let seconds: number = 30
+        this.showMessageTop = true;
+        this.intervalIdS = window.setInterval(() => {
+            seconds -= 1;
+            if (seconds === 0) {
+                this.resetMessageTop();
+            }
+        }, 1000);
+    }
+
 }

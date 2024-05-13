@@ -1,10 +1,5 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  ViewChild,
-  Sanitizer,
-} from "@angular/core";
+import {  Component,  OnInit,  OnDestroy,
+  ViewChild,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { ActivatedRoute } from "@angular/router";
 import { DatiTemplateVO } from "../../../commons/vo/template/dati-template-vo";
@@ -14,7 +9,6 @@ import { TemplateService } from "../../../template/services/template.service";
 import { DatiTemplateRequest } from "../../../commons/request/template/dati-template-request";
 import { Constants } from "../../../commons/class/constants";
 import { Location } from "@angular/common";
-import { DomSanitizer } from "@angular/platform-browser";
 import { SharedPagamentiService } from "../../../shared-pagamenti/services/shared-pagamenti.service";
 import { IsCreatedVO } from "../../../commons/vo/isCreated-vo";
 import { saveAs } from "file-saver";
@@ -30,38 +24,35 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
 
   public subscribers: any = {};
 
-  public loaded: boolean;
   public isAnteprima: boolean = false;
+  public loaded: boolean;
   public isPrinted: boolean = false;
   public scrollEnable: boolean;
 
-  public idPiano: number;
 
   public datiTemplateModel: DatiTemplateVO;
+  public idPiano: number;
   public datiCompilati: DatiTemplateCompilatiVO;
 
   public url: string;
 
-  //Messaggio Top
-  public showMessageTop: boolean;
   public typeMessageTop: String;
   public messageTop: String;
+  public showMessageTop: boolean;
   private intervalIdS: number = 0;
 
-  public datiTemplateModelStampa: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
 
   visualizzaAnteprimaValidIntestazione: boolean;
+  public datiTemplateModelStampa: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
   visualizzaAnteprimaValidTemplate: boolean = false;
 
   constructor(
-    private logger: LoggerService,
-    //private router: Router,
     private activatedRoute: ActivatedRoute,
-    private templateService: TemplateService,
+    private logger: LoggerService,
     private location: Location,
-    private sanitizer: DomSanitizer,
+    private templateService: TemplateService,
     private sharedPagamentiService: SharedPagamentiService
-  ) //private userService: UserService,
+  )
   {}
 
   ngOnInit(): void {
@@ -88,9 +79,7 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
     });
   }
 
-  indietro() {
-    this.location.back();
-  }
+  indietro() {    this.location.back();  }
 
   visualizzaAnteprima() {
     this.isAnteprima = true;
@@ -102,8 +91,8 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
   proseguiModifica() {
     this.isAnteprima = false;
     this.template.setAnteprima(false);
-    this.scrollEnable = true;
     this.isStampa = false;
+    this.scrollEnable = true;
     this.template.setStampa(false);
   }
   public isStampa: boolean = false;
@@ -111,16 +100,13 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
   public loadedScarica: boolean = false;
 
   stampaPDF() {
-    this.isPrinted = true;
     this.isStampa = true;
-
+    this.isPrinted = true;
     this.template.setStampa(true);
     this.template.setDatiCompilati(this.datiTemplateModelStampa);
-
     let tmp: DatiTemplateCompilatiVO = this.template.getDatiCompilati();
     this.resetMessageTop();
     if (this.checkDatiTemplate(tmp)) {
-      //this.loaded = false;
       let request: DatiTemplateRequest = new DatiTemplateRequest();
       request.codiceTemplate = Constants.TEMPLATE_RATEIZZAZIONI;
       request.idPiano = this.idPiano;
@@ -135,11 +121,7 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
               .stampaTemplate(request)
               .subscribe(
                 (data) => {
-                  //saveAs(data, 'Lettera Piano Rateizzazione.pdf');
-                  //this.url = URL.createObjectURL(data);
-                  // this.isPrinted = true;
                   this.scrollEnable = true;
-                  //this.loaded = true;
                   this.isStampaProtocollata = true;
                   this.manageMessageTop(
                     "Lettera di rateizzazione creata con successo.",
@@ -148,7 +130,6 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
                 },
                 (err) => {
                   this.logger.error("Errore durante il download del PDF");
-                  // this.loaded = true;
                   this.scrollEnable = true;
                 }
               );
@@ -158,7 +139,6 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
               "DANGER"
             );
             this.isAnteprima = false;
-            // this.loaded = true;
             this.scrollEnable = true;
           }
         });
@@ -200,15 +180,13 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
 
   checkDatiTemplate(dati: DatiTemplateCompilatiVO): boolean {
     let flag: boolean = true;
-    for (let field in dati) {
-      if (!dati[field]) flag = false;
-    }
+    for (let field in dati) {      if (!dati[field]) flag = false;    }
     return flag;
   }
 
   manageMessageTop(message: string, type: string) {
-    this.typeMessageTop = type;
     this.messageTop = message;
+    this.typeMessageTop = type;
     this.timerShowMessageTop();
   }
 
@@ -217,8 +195,7 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
     let seconds: number = 20; //this.configService.getTimeoutMessagge();
     this.intervalIdS = window.setInterval(() => {
       seconds -= 1;
-      if (seconds === 0) {
-        this.resetMessageTop();
+      if (seconds === 0) {        this.resetMessageTop();
       }
     }, 1000);
   }
@@ -229,7 +206,8 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
     this.messageTop = null;
     clearInterval(this.intervalIdS);
   }
-
+  ngOnDestroy(): void {    this.logger.destroy(PagamentiTemplateComponent.name);
+  }
   ngAfterViewChecked() {
     let out: HTMLElement = document.getElementById("scrollTop");
     if (this.loaded && this.scrollEnable && out != null) {
@@ -238,11 +216,8 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
     }
   }
 
-  setFormValidTemplate(event: boolean) {
-    this.visualizzaAnteprimaValidTemplate = event;
+  setFormValidTemplate(event: boolean) {    this.visualizzaAnteprimaValidTemplate = event;
   }
 
-  ngOnDestroy(): void {
-    this.logger.destroy(PagamentiTemplateComponent.name);
-  }
+
 }

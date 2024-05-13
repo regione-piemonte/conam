@@ -4,6 +4,27 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+import org.jboss.resteasy.spi.validation.ValidateRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.dispatcher.VerbaleDispatcher;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
@@ -11,6 +32,7 @@ import it.csi.conam.conambl.request.SalvaSoggettoRequest;
 import it.csi.conam.conambl.request.TipologiaAllegabiliRequest;
 import it.csi.conam.conambl.request.verbale.RicercaVerbaleRequest;
 import it.csi.conam.conambl.request.verbale.SalvaAzioneRequest;
+import it.csi.conam.conambl.request.verbale.SalvaNotaRequest;
 import it.csi.conam.conambl.request.verbale.SalvaStatoManualeRequest;
 import it.csi.conam.conambl.request.verbale.SetRecidivoVerbaleSoggettoListRequest;
 import it.csi.conam.conambl.response.AzioneVerbaleResponse;
@@ -20,22 +42,17 @@ import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.IstruttoreVO;
 import it.csi.conam.conambl.vo.UtenteVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
-import it.csi.conam.conambl.vo.verbale.*;
+import it.csi.conam.conambl.vo.common.SelectVO;
+import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.MinVerbaleVO;
+import it.csi.conam.conambl.vo.verbale.StatoManualeVO;
+import it.csi.conam.conambl.vo.verbale.StatoVerbaleVO;
+import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVORaggruppatoPerSoggetto;
+import it.csi.conam.conambl.vo.verbale.VerbaleVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.RiepilogoAllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.jboss.resteasy.spi.validation.ValidateRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author riccardo.bova
@@ -134,7 +151,15 @@ public class VerbaleResource extends SpringSupportedResource {
 		UserDetails utente = SecurityUtils.getUser();
 		return Response.ok(verbaleDispatcher.salvaSoggetto(salvaSoggettoRequest.getIdVerbale(), salvaSoggettoRequest.getSoggetto(), utente)).build();
 	}
-
+	
+	@POST
+	@Path("/modificaImportoSoggetti")
+	public Response modificaImportoSoggetti(@QueryParam("idVerbale") Integer id, @QueryParam("importoVerbale") Double importoVerbale) {
+		UserDetails utente = SecurityUtils.getUser();
+		verbaleDispatcher.updateImportoVerbaleSoggetti(id, importoVerbale, utente);
+		return Response.ok().build();
+	}
+	
 	@GET
 	@Path("/eliminaSoggettoByIdVerbaleSoggetto")
 	public Response eliminaSoggettoByIdVerbaleSoggetto(@QueryParam("idVerbaleSoggetto") Integer id) {
@@ -386,4 +411,34 @@ public class VerbaleResource extends SpringSupportedResource {
 		return Response.ok(response).build();
 	}
 	/*LUCIO 2021/04/21 - FINE Gestione casi di recidività*/
+	
+
+	@POST
+	@Path("/nota")
+	public Response salvaNota(@Valid @NotNull(message = "RESCON13") SalvaNotaRequest request) {
+		UserDetails userDetails = SecurityUtils.getUser();		
+		return Response.ok(verbaleDispatcher.salvaNota(request.getNota(), request.getIdVerbale(), userDetails)).build();
+	}
+	
+	@PUT
+	@Path("/nota")
+	public Response modificaNota(@Valid @NotNull(message = "RESCON13") SalvaNotaRequest request) {
+		UserDetails userDetails = SecurityUtils.getUser();
+		return Response.ok(verbaleDispatcher.modificaNota(request.getNota(), userDetails)).build();
+	}
+
+	@DELETE
+	@Path("/nota")
+	public Response EliminaNota(@QueryParam("idNota") Long idNota) {
+		UserDetails userDetails = SecurityUtils.getUser();		
+		return Response.ok(verbaleDispatcher.eliminaNota(idNota, userDetails)).build();
+	}
+	
+
+	@GET
+	@Path("/getAmbitiNote")
+	public Response getAmbitiNote() {
+		List<SelectVO> ambiti = verbaleDispatcher.getAmbitiNote();
+		return Response.ok(ambiti).build();
+	}
 }

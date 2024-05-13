@@ -1,12 +1,8 @@
 import {
-  Component,
-  OnInit,
-  OnDestroy,
-  ViewChild,
-  Input,
+  Component,  OnInit,  OnDestroy,
+  ViewChild,  Input,
   Output,
-  EventEmitter,
-} from "@angular/core";
+  EventEmitter,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router } from "@angular/router";
 import { Config } from "../../../shared/module/datatable/classes/config";
@@ -18,20 +14,12 @@ import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { Constants } from "../../../commons/class/constants";
 import { SharedOrdinanzaDettaglio } from "../../../shared-ordinanza/component/shared-ordinanza-dettaglio/shared-ordinanza-dettaglio.component";
 import { SharedRiscossioneService } from "../../../shared-riscossione/services/shared-riscossione.service";
-
-//JIRA - Gestione Notifica
-import { SalvaSollecitoRequest } from "../../../commons/request/riscossione/salva-sollecito-request";
 import { SharedRiscossioneSollecitoDettaglioComponent } from "../../../shared-riscossione/components/shared-riscossione-sollecito-dettaglio/shared-riscossione-sollecito-dettaglio.component";
-import { RicercaSoggettiOrdinanzaRequest } from "../../../commons/request/ordinanza/ricerca-soggetti-ordinanza-request";
-import { PregressoVerbaleService } from "../../services/pregresso-verbale.service";
-import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { NgForm } from "@angular/forms";
 import { ConfigAllegatoVO } from "../../../commons/vo/verbale/config-allegato-vo";
 import { AllegatoSharedService } from "../../../shared/service/allegato-shared.service";
-import {
-  FieldTypeVO,
-  SelectVO,
-  TipoAllegatoVO,
+import {  FieldTypeVO,
+  SelectVO,  TipoAllegatoVO,
 } from "../../../commons/vo/select-vo";
 import { AllegatoFieldVO } from "../../../commons/vo/verbale/allegato-field-vo";
 import { NumberUtilsSharedService } from "../../../shared/service/number-utils-shared.service";
@@ -49,27 +37,15 @@ interface Elem {
 })
 export class PregressoDisposizioneGiudiceInsComponent
   implements OnInit, OnDestroy {
-  @Input()
-  idOrdinanza: number;
-
-  @Input()
-  numDeterminazione: string;
-
-  @Input()
-  tipoAllegatoInput: Array<TipoAllegatoVO>;
-  @Input()
-  allegati: boolean;
-
-  @Output()
-  onChangeData: EventEmitter<any> = new EventEmitter<any>();
-
+  @Input()  idOrdinanza: number;
+  @Input()  numDeterminazione: string;
+  @Input()  tipoAllegatoInput: Array<TipoAllegatoVO>;
+  @Input()  allegati: boolean;
+  @Output()  onChangeData: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild(SharedDialogComponent) sharedDialog: SharedDialogComponent;
-  @ViewChild(SharedOrdinanzaDettaglio)
-  sharedOrdinanzaDettaglio: SharedOrdinanzaDettaglio;
-  @ViewChild(SharedRiscossioneSollecitoDettaglioComponent)
-  sharedRiscossioneSollecitoDettaglioComponent: SharedRiscossioneSollecitoDettaglioComponent;
-  @ViewChild("creaDisposizioneForm")
-  private creaDisposizioneForm: NgForm;
+  @ViewChild(SharedOrdinanzaDettaglio)  sharedOrdinanzaDettaglio: SharedOrdinanzaDettaglio;
+  @ViewChild(SharedRiscossioneSollecitoDettaglioComponent)  sharedRiscossioneSollecitoDettaglioComponent: SharedRiscossioneSollecitoDettaglioComponent;
+  @ViewChild("creaDisposizioneForm")  private creaDisposizioneForm: NgForm;
 
   public mapConfigAllegati: Map<number, Array<Array<ConfigAllegatoVO>>>;
 
@@ -87,23 +63,23 @@ export class PregressoDisposizioneGiudiceInsComponent
   public configSoggetti: Config;
   public configSolleciti: Config;
 
-  //Pop-up
-  public buttonAnnullaText: string;
-  public buttonConfirmText: string;
-  public subMessages: Array<string>;
-
-  //Messaggio top
+  // Mssaggio top
   private intervalTop: number = 0;
   public showMessageTop: boolean;
   public typeMessageTop: String;
   public messageTop: String;
 
-  //FLAG MODIFICA
+  // Popup
+  public buttonAnnullaText: string;
+  public buttonConfirmText: string;
+  public subMessages: Array<string>;
+
+  // flag nuovo
+  public isNuovo: boolean = true;
+
+  // FLAG MODIFICA
   public isModifica: boolean = true;
   public modificabile: boolean;
-
-  //flag nuovo
-  public isNuovo: boolean = true;
 
   public loadedConfig: boolean;
   public comboLoaded: Array<boolean>;
@@ -117,7 +93,7 @@ export class PregressoDisposizioneGiudiceInsComponent
 
   public comboModel: Array<Array<SelectVO>>;
   public metaDataModel: Array<AllegatoFieldVO>;
-  public tmpModel: Array<Elem>; //un array di elementi senza tipo, da rimappare nell'array effettivo alla fine
+  public tmpModel: Array<Elem>; // un array di elementi senza tipo, da rimappare nell'array effettivo alla fine
   public maxSize: number = 5242880;
   public sizeAlert: boolean = false;
   public typeAlert: boolean = false;
@@ -128,60 +104,46 @@ export class PregressoDisposizioneGiudiceInsComponent
   public allegatoM: boolean = false;
   public flagAllegatoMaster: boolean = false;
   typeAction: any = {
-    isCombo: (t: SelectVO): boolean => {
-      return t ? t.id === Constants.FT_ELENCO : false;
+    isCombo: (t: SelectVO): boolean => {      return t ? t.id === Constants.FT_ELENCO : false;
     },
-    isDate: (t: SelectVO): boolean => {
-      return t ? t.id === Constants.FT_DATE : false;
+    isDate: (t: SelectVO): boolean => {      return t ? t.id === Constants.FT_DATE : false;
     },
-    isText: (t: SelectVO): boolean => {
-      return t ? t.id === Constants.FT_STRING : false;
+    isText: (t: SelectVO): boolean => {      return t ? t.id === Constants.FT_STRING : false;
     },
-    isNumeric: (t: SelectVO): boolean => {
-      return t ? t.id === Constants.FT_NUMERIC : false;
+    isNumeric: (t: SelectVO): boolean => {      return t ? t.id === Constants.FT_NUMERIC : false;
     },
-    isCheckbox: (t: SelectVO): boolean => {
-      return t ? t.id === Constants.FT_BOOLEAN : false;
+    isCheckbox: (t: SelectVO): boolean => {      return t ? t.id === Constants.FT_BOOLEAN : false;
     },
-    isDataOra: (t: SelectVO): boolean => {
-      return t ? t.id === Constants.FT_DATA_ORA : false;
+    isDataOra: (t: SelectVO): boolean => {      return t ? t.id === Constants.FT_DATA_ORA : false;
     },
-    getInputType: (ft: SelectVO): string => {
-      if (
-        this.typeAction.isText(ft) ||
-        this.typeAction.isDate(ft) ||
-        this.typeAction.isDataOra(ft)
-      )
+    getInputType: (ft: SelectVO): string => {      if (
+        this.typeAction.isText(ft) || this.typeAction.isDate(ft) || this.typeAction.isDataOra(ft)
+      ){
         return "text";
+      }
       if (this.typeAction.isNumeric(ft)) return "number";
       if (this.typeAction.isCheckbox(ft)) return "checkbox";
     },
   };
 
   constructor(
-    private logger: LoggerService,
     private router: Router,
-    private sharedRiscossioneService: SharedRiscossioneService,
-    private pregressoVerbaleService: PregressoVerbaleService,
-    private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
+    private logger: LoggerService,
     private allegatoSharedService: AllegatoSharedService,
+    private sharedRiscossioneService: SharedRiscossioneService,
     private numberUtilsSharedService: NumberUtilsSharedService
   ) {}
 
   ngOnInit(): void {
     this.logger.init(PregressoDisposizioneGiudiceInsComponent.name);
     this.setConfig();
-
-    this.sollecito = new SollecitoVO();
-
     this.mapConfigAllegati = new Map();
+    this.sollecito = new SollecitoVO();
     this.callConfig();
     this.loaded = true;
     setTimeout(() => {
       this.subscribers.form = this.creaDisposizioneForm.valueChanges.subscribe(
-        (data) => {
-          this.onChangeDataEmitter();
-        }
+        (data) => { this.onChangeDataEmitter(); }
       );
     });
   }
@@ -195,11 +157,7 @@ export class PregressoDisposizioneGiudiceInsComponent
 
   onChangeDataEmitter() {
     let obj: any = {};
-    if (
-      !this.creaDisposizioneForm.valid ||
-      !this.idOrdinanzaVerbaleSoggetto ||
-      this.idOrdinanzaVerbaleSoggetto.length < 1
-    ) {
+    if (!this.creaDisposizioneForm.valid || !this.idOrdinanzaVerbaleSoggetto || this.idOrdinanzaVerbaleSoggetto.length < 1) {
       obj.disabled = true;
     } else {
       obj.disabled = false;
@@ -214,24 +172,26 @@ export class PregressoDisposizioneGiudiceInsComponent
   mapMetadati() {
     let i: number;
     for (i = 0; i < this.tmpModel.length; i++) {
-      this.metaDataModel[i].idField = this.tmpModel[i].idField;
       this.metaDataModel[i].fieldType = this.tmpModel[i].fieldType;
-      if (this.typeAction.isNumeric(this.metaDataModel[i].fieldType))
+      this.metaDataModel[i].idField = this.tmpModel[i].idField;
+      if (this.typeAction.isNumeric(this.metaDataModel[i].fieldType)) {
         this.metaDataModel[i].numberValue = this.tmpModel[i].value;
-      else if (this.typeAction.isText(this.metaDataModel[i].fieldType))
+      } else if (this.typeAction.isText(this.metaDataModel[i].fieldType)) {
         this.metaDataModel[i].stringValue = this.tmpModel[i].value;
-      else if (this.typeAction.isDate(this.metaDataModel[i].fieldType))
+      } else if (this.typeAction.isDate(this.metaDataModel[i].fieldType)) {
         this.metaDataModel[i].dateValue = this.tmpModel[i].value;
-      else if (this.typeAction.isCheckbox(this.metaDataModel[i].fieldType))
+      } else if (this.typeAction.isCheckbox(this.metaDataModel[i].fieldType)) {
         this.metaDataModel[i].booleanValue = this.tmpModel[i].value;
-      else if (
+      } else if (
         this.typeAction.isCombo(this.metaDataModel[i].fieldType) &&
         this.tmpModel[i].value
-      )
+      ) {
         this.metaDataModel[i].numberValue = this.tmpModel[i].value.id;
+      }
       //salvo l'ID
-      else if (this.typeAction.isDataOra(this.metaDataModel[i].fieldType))
+      else if (this.typeAction.isDataOra(this.metaDataModel[i].fieldType)) {
         this.metaDataModel[i].dateTimeValue = this.tmpModel[i].value;
+      }
     }
   }
 
@@ -243,20 +203,16 @@ export class PregressoDisposizioneGiudiceInsComponent
         this.mapConfigAllegati = this.remapConfig(
           //È IMPORTANTE che il campo ordine e il campo riga siano coerenti come numerazione crescente sul DB!!
           config.sort((el, el2) => {
-            if (el.idTipo > el2.idTipo) return 1;
-            if (el.idTipo < el2.idTipo) return -1;
+            if (el.idTipo > el2.idTipo) {              return 1;            }
+            if (el.idTipo < el2.idTipo) {              return -1;            }
             return el.ordine > el2.ordine ? 1 : -1;
           })
         );
         this.mostraMetadati();
       })
       .subscribe(
-        (data) => {
-          //
-        },
-        (err) => {
-          this.logger.error("Errore nel recupero dei config degli allegati");
-        }
+        (data) => { /**/ },
+        (err) => { this.logger.error("Errore nel recupero dei config degli allegati"); }
       );
   }
   /**
@@ -288,8 +244,8 @@ export class PregressoDisposizioneGiudiceInsComponent
   }
 
   onBlur($event, index: number, type: FieldTypeVO) {
-    if (!(this.typeAction.isDate(type) || this.typeAction.isDataOra(type)))
-      return;
+    if (!(this.typeAction.isDate(type) || this.typeAction.isDataOra(type))){
+      return;}
     this.tmpModel[index].value = $event.srcElement.value;
   }
 
@@ -310,24 +266,25 @@ export class PregressoDisposizioneGiudiceInsComponent
     }
   }
 
-  isKeyPressed(code: number, type: FieldTypeVO): boolean {
-    if (!this.typeAction.isNumeric(type)) return true;
-    return this.numberUtilsSharedService.numberValid(code);
-  }
 
   initModel() {
     this.tmpModel = new Array<Elem>();
-    this.metaDataModel = new Array<AllegatoFieldVO>();
     this.comboModel = new Array<Array<SelectVO>>();
     this.comboLoaded = new Array<boolean>();
     this.tipoAllegatoModel = this.tipoAllegatoInput;
     this.senzaAllegati = this.allegati;
+    this.metaDataModel = new Array<AllegatoFieldVO>();
+  }
+
+  isKeyPressed(code: number, type: FieldTypeVO): boolean {
+    if (!this.typeAction.isNumeric(type)) {      return true;
+    }
+    return this.numberUtilsSharedService.numberValid(code);
   }
 
   mostraMetadati() {
     // disposizioni del giudice
-    this.tipoAllegatoSelezionato = this.tipoAllegatoInput.find(
-      (item) => item.id == 14
+    this.tipoAllegatoSelezionato = this.tipoAllegatoInput.find(      (item) => item.id == 14
     );
     this.loadedConfig = false;
     this.validMetadata = false;
@@ -366,15 +323,13 @@ export class PregressoDisposizioneGiudiceInsComponent
                   );
                 },
                 (err) => {
-                  this.logger.error(
-                    "Errore nel recupero dell'elenco di " + el.idFonteElenco
+                  this.logger.error(                    "Errore nel recupero dell'elenco di " + el.idFonteElenco
                   );
                 }
               );
           }
         });
       });
-
       this.loadedConfig = true;
     }
   }
@@ -395,13 +350,21 @@ export class PregressoDisposizioneGiudiceInsComponent
           this.loaded = true;
         },
         (err) => {
-          if (err instanceof ExceptionVO) {
-            this.manageMessageTop(err.message, err.type);
-          }
+          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
           this.logger.error("Errore durante il caricamento dei solleciti");
           this.loaded = true;
         }
       );
+  }
+
+  timerShowMessageTop() {
+    this.showMessageTop = true;
+    let seconds: number = 10;
+    this.intervalTop = window.setInterval(() => {
+      seconds -= 1;
+      if (seconds === 0) {        this.resetMessageTop();
+      }
+    }, 1000);
   }
 
   manageMessageTop(message: string, type: string) {
@@ -411,74 +374,11 @@ export class PregressoDisposizioneGiudiceInsComponent
     this.timerShowMessageTop();
   }
 
-  timerShowMessageTop() {
-    this.showMessageTop = true;
-    let seconds: number = 10;
-    this.intervalTop = window.setInterval(() => {
-      seconds -= 1;
-      if (seconds === 0) {
-        this.resetMessageTop();
-      }
-    }, 1000);
-  }
-
   resetMessageTop() {
     this.showMessageTop = false;
     this.typeMessageTop = null;
     this.messageTop = null;
     clearInterval(this.intervalTop);
-  }
-
-  generaMessaggio() {
-    this.subMessages = new Array<string>();
-
-    this.subMessages.push("Si intende eliminare il sollecito selezionato?");
-    this.subMessages.push("Data Creazione: " + this.sollecito.dataScadenza);
-    this.subMessages.push(
-      "Importo da sollecitare: " + this.sollecito.importoSollecitato
-    );
-  }
-
-  creaSollecito() {
-    /*this.loaded = false;
-        //JIRA - Gestione Notifica
-        //----------------------
-        let salvaSollecitoRequest: SalvaSollecitoRequest = new SalvaSollecitoRequest();
-        salvaSollecitoRequest.sollecito = this.sollecito;
-        salvaSollecitoRequest.notifica = this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject();
-        //------------------------
-        //this.subscribers.salvataggio = this.riscossioneService.salvaSollecito(this.sollecito).subscribe(data => {
-        this.subscribers.salvataggio = this.riscossioneService.salvaSollecito(salvaSollecitoRequest).subscribe(data => {
-            this.router.navigateByUrl(Routing.RISCOSSIONE_SOLLECITO_TEMPLATE + data);
-        }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessageTop(err.message, err.type);
-            }
-            this.logger.error("Errore durante il salvataggio del sollecito");
-            this.loaded = true;
-        });*/
-  }
-
-  modificaVediSollecito(el: SollecitoVO) {
-    this.sollecito = JSON.parse(JSON.stringify(el));
-    if (el.statoSollecito.id == Constants.SOLLECITO_BOZZA) {
-      this.modificabile = true;
-    } else {
-      this.modificabile = false;
-    }
-    this.isModifica = true;
-    this.isNuovo = false;
-
-    if(this.sharedRiscossioneSollecitoDettaglioComponent){
-      this.sharedRiscossioneSollecitoDettaglioComponent.aggiornaNotifica();
-    }
-  }
-
-  annullaModifica() {
-    this.sollecito = new SollecitoVO();
-    this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
-    this.isModifica = false;
-    this.isNuovo = true;
   }
 
   getData() {
@@ -487,6 +387,33 @@ export class PregressoDisposizioneGiudiceInsComponent
       notifica: this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject(),
     };
   }
+
+  generaMessaggio() {
+    this.subMessages = new Array<string>();
+    this.subMessages.push("Si intende eliminare il sollecito selezionato?");
+    this.subMessages.push("Data Creazione: " + this.sollecito.dataScadenza);
+    this.subMessages.push(      "Importo da sollecitare: " + this.sollecito.importoSollecitato    );
+  }
+
+  annullaModifica() {
+    this.sollecito = new SollecitoVO();
+    this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
+    this.isNuovo = true;
+    this.isModifica = false;
+  }
+
+  modificaVediSollecito(el: SollecitoVO) {
+    this.sollecito = JSON.parse(JSON.stringify(el));
+    if (el.statoSollecito.id == Constants.SOLLECITO_BOZZA) {      this.modificabile = true;
+    } else {      this.modificabile = false;
+    }
+    this.isModifica = true;
+    this.isNuovo = false;
+
+    if(this.sharedRiscossioneSollecitoDettaglioComponent){      this.sharedRiscossioneSollecitoDettaglioComponent.aggiornaNotifica();
+    }
+  }
+
 
   isDisabledCreaSollecito(): boolean {
     //JIRA - Gestione Notifica: non necessaria in questa sezione
@@ -506,14 +433,10 @@ export class PregressoDisposizioneGiudiceInsComponent
             .importoSpeseNotifica == undefined ||
           this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject()
             .importoSpeseNotifica == null
-        ) {
-          checkNotifica = true;
+        ) {          checkNotifica = true;
         } else {
           checkNotifica = isNaN(
-            Number(
-              this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject()
-                .importoSpeseNotifica
-            )
+            Number(this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject().importoSpeseNotifica)
           );
         }
       }
@@ -549,9 +472,14 @@ export class PregressoDisposizioneGiudiceInsComponent
     }
   }
 
+  byId(o1: SelectVO, o2: SelectVO) {
+    return o1 && o2 ? o1.id === o2.id : o1 === o2;
+  }
+
   ngOnDestroy(): void {
     this.logger.destroy(PregressoDisposizioneGiudiceInsComponent.name);
   }
+
   setConfig() {
     this.configSolleciti = {
       selection: {
@@ -561,31 +489,23 @@ export class PregressoDisposizioneGiudiceInsComponent
         },
       },
       columns: [
-        {
-          columnName: "numeroProtocollo",
+        {          columnName: "numeroProtocollo",
           displayName: "Numero Protocollo",
         },
-        {
-          columnName: "dataScadenza",
+        {          columnName: "dataScadenza",
           displayName: "Data Scadenza",
         },
-        {
-          columnName: "importoSollecitatoString",
+        {          columnName: "importoSollecitatoString",
           displayName: "Importo da sollecitare",
         },
-        {
-          columnName: "maggiorazioneString",
+        {          columnName: "maggiorazioneString",
           displayName: "Maggiorazione",
         },
-        {
-          columnName: "statoSollecito.denominazione",
+        {          columnName: "statoSollecito.denominazione",
           displayName: "Stato",
         },
       ],
     };
   }
 
-  byId(o1: SelectVO, o2: SelectVO) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
-  }
 }

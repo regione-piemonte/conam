@@ -25,14 +25,14 @@ public class DatiTemplateCompilatiVO extends ParentVO {
 	private String scadenzaPagamento;
 	private String riferimentoNormativo;
 
-	public String processiVerbali;
-	public String nomeAvvocato;
-	public String indirizzo;
-	public String oraInizio;
-	public String anno;
-	public String mese;
-	public String giorno;
-	public String dichiara;
+	private String processiVerbali;
+	private String nomeAvvocato;
+	private String indirizzo;
+	private String oraInizio;
+	private String anno;
+	private String mese;
+	private String giorno;
+	private String dichiara;
 	
 	// 20210312_LC
 	private DatiTemplateCompilatiLetAnnVO datiLetteraAnnullamento;

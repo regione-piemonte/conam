@@ -4,7 +4,7 @@
  ******************************************************************************/
 package it.csi.conam.conambl.vo.leggi;
 
-import it.csi.conam.conambl.vo.common.SelectVO;
+import it.csi.conam.conambl.vo.common.CommonVO;
 import it.csi.conam.conambl.web.serializer.CustomDateDeserializer;
 import it.csi.conam.conambl.web.serializer.CustomDateSerializer;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -18,7 +18,7 @@ import java.time.LocalDate;
  * @author riccardo.bova
  * @date 13 nov 2018
  */
-public class LetteraVO extends SelectVO {
+public class LetteraVO extends CommonVO {
 
 	private static final long serialVersionUID = 8011990771663997222L;
 
@@ -29,32 +29,45 @@ public class LetteraVO extends SelectVO {
 	@JsonDeserialize(using = CustomDateDeserializer.class)
 	private LocalDate scadenzaImporti;
 	private String descrizioneIllecito;
-	@JsonSerialize(using = CustomDateSerializer.class)
-	@JsonDeserialize(using = CustomDateDeserializer.class)
-	private LocalDate dataFineValidita;
-	@JsonSerialize(using = CustomDateSerializer.class)
-	@JsonDeserialize(using = CustomDateDeserializer.class)
-	private LocalDate dataInizioValidita;
-
-	public LocalDate getDataFineValidita() {
-		return dataFineValidita;
-	}
-
-	public void setDataFineValidita(LocalDate dataFineValidita) {
-		this.dataFineValidita = dataFineValidita;
-	}
-
-	public LocalDate getDataInizioValidita() {
-		return dataInizioValidita;
-	}
-
-	public void setDataInizioValidita(LocalDate dataInizioValidita) {
-		this.dataInizioValidita = dataInizioValidita;
-	}
 
 	public BigDecimal getSanzioneMinima() {
 		return sanzioneMinima;
 	}
+	
+	@Override
+	public int hashCode() {
+	    final int prime = 31;
+	    int result = super.hashCode();
+	    result = prime * result + ((sanzioneMinima == null) ? 0 : sanzioneMinima.hashCode());
+	    result = prime * result + ((sanzioneMassima == null) ? 0 : sanzioneMassima.hashCode());
+	    result = prime * result + ((importoMisuraRidotta == null) ? 0 : importoMisuraRidotta.hashCode());
+	    result = prime * result + ((scadenzaImporti == null) ? 0 : scadenzaImporti.hashCode());
+	    result = prime * result + ((descrizioneIllecito == null) ? 0 : descrizioneIllecito.hashCode());
+	    return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+	    if (this == obj)
+	        return true;
+	    if (obj == null || getClass() != obj.getClass())
+	        return false;
+	    if (!super.equals(obj))
+	        return false;
+
+	    LetteraVO other = (LetteraVO) obj;
+
+	    if (sanzioneMinima != null ? !sanzioneMinima.equals(other.sanzioneMinima) : other.sanzioneMinima != null)
+	        return false;
+	    if (sanzioneMassima != null ? !sanzioneMassima.equals(other.sanzioneMassima) : other.sanzioneMassima != null)
+	        return false;
+	    if (importoMisuraRidotta != null ? !importoMisuraRidotta.equals(other.importoMisuraRidotta) : other.importoMisuraRidotta != null)
+	        return false;
+	    if (scadenzaImporti != null ? !scadenzaImporti.equals(other.scadenzaImporti) : other.scadenzaImporti != null)
+	        return false;
+	    return descrizioneIllecito != null ? descrizioneIllecito.equals(other.descrizioneIllecito) : other.descrizioneIllecito == null;
+	}
+
 
 	public BigDecimal getSanzioneMassima() {
 		return sanzioneMassima;

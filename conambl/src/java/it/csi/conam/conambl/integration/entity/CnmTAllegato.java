@@ -61,27 +61,27 @@ public class CnmTAllegato implements Serializable {
 	private boolean flagDocumentoPregresso;
 
 	// bi-directional many-to-one association to CnmRAllegatoOrdVerbSog
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmRAllegatoOrdVerbSog> cnmRAllegatoOrdVerbSogs;
 
 	// bi-directional many-to-one association to CnmRAllegatoOrdinanza
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmRAllegatoOrdinanza> cnmRAllegatoOrdinanzas;
 
 	// bi-directional many-to-one association to CnmRAllegatoPianoRate
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmRAllegatoPianoRate> cnmRAllegatoPianoRates;
 
 	// bi-directional many-to-one association to CnmRAllegatoSollecito
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmRAllegatoSollecito> cnmRAllegatoSollecitos;
 
 	// bi-directional many-to-one association to CnmRAllegatoVerbSog
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmRAllegatoVerbSog> cnmRAllegatoVerbSogs;
 
 	// bi-directional many-to-one association to CnmRAllegatoVerbale
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmRAllegatoVerbale> cnmRAllegatoVerbales;
 
 	// bi-directional many-to-one association to CnmDStatoAllegato
@@ -105,15 +105,15 @@ public class CnmTAllegato implements Serializable {
 	private CnmTUser cnmTUser2;
 
 	// bi-directional many-to-one association to CnmTAllegatoField
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmTAllegatoField> cnmTAllegatoFields;
 	
 	// bi-directional many-to-one association to CnmTScrittoDifensivo
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmTScrittoDifensivo> cnmTScrittoDifensivos;
 	
 	// bi-directional many-to-one association to cnmTAcconto
-	@OneToMany(mappedBy = "cnmTAllegato")
+	@OneToMany(mappedBy = "cnmTAllegato", fetch = FetchType.LAZY)
 	private List<CnmTAcconto> cnmTAcconto;
 	
 	public CnmTAllegato() {

@@ -17,24 +17,24 @@ import { Constants } from "../../../commons/class/constants";
 })
 export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements OnInit, OnDestroy {
 
-    public subscribers: any = {};
-
     public showTable: boolean;
 
-    public config: Config;
+    public subscribers: any = {};
+
     public ordinanze: Array<OrdinanzaVO>;
-    public ordinanzaSel: OrdinanzaVO;
+    public config: Config;
     public loaded: boolean = true;
+    public ordinanzaSel: OrdinanzaVO;
 
     public request: RicercaOrdinanzaRequest;
 
-    public loadedStatiOrdinanza: boolean;
     public statiOrdinanzaModel: Array<StatoOrdinanzaVO>;
+    public loadedStatiOrdinanza: boolean;
 
     constructor(
-        private logger: LoggerService,
-        private router: Router,
         private configSharedService: ConfigSharedService,
+        private router: Router,
+        private logger: LoggerService,
         private sharedOrdinanzaService: SharedOrdinanzaService,
     ) { }
 
@@ -47,17 +47,19 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
     loadStatiOrdinanza(){
         this.loadedStatiOrdinanza = false;
         this.sharedOrdinanzaService.getStatiOrdinanza().subscribe( data => {
-            if(data!=null)
+            if(data!=null){
                 this.statiOrdinanzaModel = data.filter(a => (a.id != Constants.STATO_ORDINANZA_RISCOSSA_CON_SORIS));
+            }
             this.loadedStatiOrdinanza = true;
         })
     }
-    
+
+    scrollEnable: boolean;
+
     messaggio(message: string){
         this.manageMessageTop2(message,"DANGER");
     }
 
-    scrollEnable: boolean;
     ricercaOrdinanza(ricercaOrdinanzaRequest: RicercaOrdinanzaRequest) {
         this.request = ricercaOrdinanzaRequest;
         this.showTable = false;
@@ -81,14 +83,6 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
         );
     }
 
-    ngAfterContentChecked() {
-        let out: HTMLElement = document.getElementById("scrollBottom");
-        if (this.loaded && this.scrollEnable && this.showTable && out != null) {
-            out.scrollIntoView();
-            this.scrollEnable = false;
-        }
-    }
-
     onDettaglio(el: any | Array<any>) {
         this.ordinanzaSel = el;
         if (el instanceof Array)
@@ -98,17 +92,19 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
             ;
     }
 
-    //Messaggio top
-    public showMessageTop: boolean;
-    public typeMessageTop: String;
-    public messageTop: String;
-    private intervalIdS: number = 0;
-
-    manageMessage(err: ExceptionVO) {
-        this.typeMessageTop = err.type;
-        this.messageTop = err.message;
-        this.timerShowMessageTop();
+    ngAfterContentChecked() {
+        let out: HTMLElement = document.getElementById("scrollBottom");
+        if (this.loaded && this.scrollEnable && this.showTable && out != null) {
+            out.scrollIntoView();
+            this.scrollEnable = false;
+        }
     }
+
+    //Messaggio top
+    public typeMessageTop: String;
+    public showMessageTop: boolean;
+    private intervalIdS: number = 0;
+    public messageTop: String;
 
     timerShowMessageTop() {
         this.showMessageTop = true;
@@ -120,6 +116,26 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
             }
         }, 1000);
     }
+
+    manageMessage(err: ExceptionVO) {
+        this.typeMessageTop = err.type;
+        this.messageTop = err.message;
+        this.timerShowMessageTop();
+    }
+
+    manageMessageTop2(message: string, type: string) {
+        this.typeMessageTop2 = type;
+        this.messageTop2 = message;
+        this.timerShowMessageTop2();
+        this.scrollTopEnable2 = true;
+    }
+
+    //Messaggio top
+    private intervalIdS2: number = 0;
+    public showMessageTop2: boolean;
+    public messageTop2: String;
+    public typeMessageTop2: String;
+
     resetMessageTop() {
         this.showMessageTop = false;
         this.typeMessageTop = null;
@@ -127,17 +143,11 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
         clearInterval(this.intervalIdS);
     }
 
-    //Messaggio top
-    public showMessageTop2: boolean;
-    public typeMessageTop2: String;
-    public messageTop2: String;
-    private intervalIdS2: number = 0;
-
-    manageMessageTop2(message: string, type: string) {
-        this.typeMessageTop2 = type;
-        this.messageTop2 = message;
-        this.timerShowMessageTop2();
-        this.scrollTopEnable2 = true;
+    resetMessageTop2() {
+        this.showMessageTop2 = false;
+        this.typeMessageTop2 = null;
+        this.messageTop2 = null;
+        clearInterval(this.intervalIdS2);
     }
 
     timerShowMessageTop2() {
@@ -151,14 +161,6 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
         }, 1000);
     }
 
-    resetMessageTop2() {
-        this.showMessageTop2 = false;
-        this.typeMessageTop2 = null;
-        this.messageTop2 = null;
-        clearInterval(this.intervalIdS2);
-    }
-
-    scrollTopEnable2: boolean;
     ngAfterViewChecked() {
         let scrollTop: HTMLElement = document.getElementById("scrollTop");
         if (this.scrollTopEnable2 && scrollTop != null) {
@@ -167,12 +169,15 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
         }
     }
 
-    goToFaseGiurisdizionaleElencoOrdinanze() {
-        this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_CANCELLERIA_DETTAGLIO_ORDINANZA);
-    }
+    scrollTopEnable2: boolean;
 
     ngOnDestroy(): void {
         this.logger.destroy(FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent.name);
     }
+
+    goToFaseGiurisdizionaleElencoOrdinanze() {
+        this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_CANCELLERIA_DETTAGLIO_ORDINANZA);
+    }
+
 
 }

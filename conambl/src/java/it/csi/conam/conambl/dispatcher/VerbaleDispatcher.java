@@ -16,6 +16,7 @@ import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.IstruttoreVO;
 import it.csi.conam.conambl.vo.UtenteVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.verbale.*;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.RiepilogoAllegatoVO;
@@ -58,6 +59,9 @@ public interface VerbaleDispatcher {
 	@PreAuthorize(value = AuthorizationRoles.CREAZIONE_VERBALE_SOGGETTI)
 	SoggettoVO salvaSoggetto(Integer id, SoggettoVO soggetto, UserDetails userDetails);
 
+	@PreAuthorize(value = AuthorizationRoles.CREAZIONE_VERBALE_SOGGETTI)
+	void updateImportoVerbaleSoggetti(Integer id, Double importoVerbale, UserDetails userDetails);
+	
 	@PreAuthorize(value = AuthorizationRoles.CREAZIONE_VERBALE_SOGGETTI)
 	SoggettoVO ricercaSoggetto(MinSoggettoVO minSoggettoVO, UserDetails userDetails);
 	
@@ -163,5 +167,17 @@ public interface VerbaleDispatcher {
 		UserDetails userDetails
 	);
 	/*LUCIO 2021/04/21 - FINE Gestione casi di recidività*/
+	
+	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
+	VerbaleVO salvaNota(NotaVO nota, Long IdVerbale, UserDetails userDetails);
+
+	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
+	VerbaleVO modificaNota(NotaVO nota, UserDetails userDetails);
+	
+	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
+	VerbaleVO eliminaNota(Long idNota, UserDetails userDetails);
+
+	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
+	List<SelectVO> getAmbitiNote();
 	
 }

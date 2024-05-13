@@ -246,9 +246,28 @@ export class SharedAllegatoMetadatiInserimentoComponent
                     );
                   }
                 );
-            } else {
+            } else if (el.fieldType.id == 7){
               this.subscribers.getSelect = this.allegatoSharedService
                 .getDecodificaSelectSoggettiAllegato(
+                  this.riepilogoVerbale.verbale.id
+                )
+                .subscribe(
+                  (data) => {
+                    this.comboModel[el.idModel] = data;
+                    this.comboLoaded[el.idModel] = true;
+                    this.logger.info(
+                      "Caricata lista per il campo numero " + el.idModel
+                    );
+                  },
+                  (err) => {
+                    this.logger.error(
+                      "Errore nel recupero dell'elenco di " + el.idFonteElenco
+                    );
+                  }
+                );
+            }else {
+              this.subscribers.getSelect = this.allegatoSharedService
+                .getDecodificaSelectSoggettiAllegatoCompleto(
                   this.riepilogoVerbale.verbale.id
                 )
                 .subscribe(
@@ -298,34 +317,51 @@ export class SharedAllegatoMetadatiInserimentoComponent
     this._onValid();
   }
   checkPagamento() {
-    const differenza =
-      this.riepilogoVerbale.verbale.importoResiduo - this.tmpModel[1].value;
-    const isParziale =
-      this.tmpModel[3].value == null ||
-      this.tmpModel[3].value == "" ||
-      this.tmpModel[3].value == "false"
-        ? false
-        : true;
-    if (differenza < 0) {
+   	var residuo = this.tmpModel[0].value.denominazione;
+  	
+  	console.log(residuo);
+  	console.log(residuo.substring(residuo.indexOf('Imp residuo ')+12,residuo.length));
+  	residuo = residuo.substring(residuo.indexOf('Imp residuo ')+12,residuo.length);
+  	
+  	if (residuo == "0.00") {
       this.manageMessageTop(
-        "Attenzione! Non inserire un importo superiore al residuo da pagare",
+        "Attenzione! Il soggetto ha gia' pagato l'intero importo",
         "DANGER",
         false
       );
-    } else if (differenza > 0 && !isParziale) {
-      this.manageMessageTop(
-        "Attenzione! Non è stato selezionato pagamento parziale, non inserire un importo inferiore al totale",
-        "DANGER",
-        false
-      );
-    } else if (differenza === 0 && isParziale) {
-      this.manageMessageTop(
-        'Attenzione, è stato selezionato "pagamento parziale" inserire un importo inferiore al totale',
-        "DANGER",
-        false
-      );
-    } else {
-      this.confermaPagamento(isParziale);
+    } else{
+	  	const differenza =
+	      residuo - this.tmpModel[2].value;
+	      
+	    //const differenza =
+	      //this.riepilogoVerbale.verbale.importoResiduo - this.tmpModel[2].value;
+	    const isParziale =
+	      this.tmpModel[4].value == null ||
+	      this.tmpModel[4].value == "" ||
+	      this.tmpModel[4].value == "false"
+	        ? false
+	        : true;
+	    if (differenza < 0) {
+	      this.manageMessageTop(
+	        "Attenzione! Non inserire un importo superiore al residuo da pagare ("+residuo+")",
+	        "DANGER",
+	        false
+	      );
+	    } else if (differenza > 0 && !isParziale) {
+	      this.manageMessageTop(
+	        "Attenzione! Non è stato selezionato pagamento parziale, non inserire un importo inferiore al totale ("+residuo+")",
+	        "DANGER",
+	        false
+	      );
+	    } else if (differenza === 0 && isParziale) {
+	      this.manageMessageTop(
+	        'Attenzione, è stato selezionato "pagamento parziale" inserire un importo inferiore al totale ('+residuo+')',
+	        "DANGER",
+	        false
+	      );
+	    } else {
+	      this.confermaPagamento(isParziale);
+	    }
     }
   }
   confermaPagamento(isParziale: boolean) {
@@ -333,7 +369,7 @@ export class SharedAllegatoMetadatiInserimentoComponent
       this.generaMessaggio(
         "Si sta inserendo un pagamento parziale per il fascicolo con Numero Verbale " +
           this.riepilogoVerbale.verbale.numero +
-          ". Il fascicolo potrà procedere con l'iter sanzionatorio. Per procedere con il salvataggio selezionare il tasto Conferma. Annulla pertornare indietro."
+          ". Il fascicolo potrà procedere con l'iter sanzionatorio. Per procedere con il salvataggio selezionare il tasto Conferma. Annulla per tornare indietro."
       );
     else
       this.generaMessaggio(
@@ -734,7 +770,7 @@ export class SharedAllegatoMetadatiInserimentoComponent
       if (t.id === Constants.FT_ELENCO) {
         return t ? t.id === Constants.FT_ELENCO : false;
       } else {
-        return t ? t.id === Constants.FT_ELENCO_SOGG : false;
+        return t ? (t.id === Constants.FT_ELENCO_SOGG || t.id ===  Constants.FT_ELENCO_SOGG_COMPL) : false;
       }
     },
     isDate: (t: SelectVO): boolean => {

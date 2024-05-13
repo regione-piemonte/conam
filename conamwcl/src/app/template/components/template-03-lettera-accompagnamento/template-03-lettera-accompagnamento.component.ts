@@ -1,12 +1,9 @@
 import {
   Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  Output,
+  OnInit,  OnDestroy,
+  Input,  Output,
   ViewChild,
-  EventEmitter,
-} from "@angular/core";
+  EventEmitter,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { UserService } from "../../../core/services/user.service";
 import { DatiTemplateCompilatiVO } from "../../../commons/vo/template/dati-template-compilati-vo";
@@ -24,45 +21,34 @@ export class Template03LetteraAccompagnamentoComponent
 
   public funzionario: string;
 
-  //gestione anteprima
   public isAnteprima: boolean;
   public isStampa: boolean;
 
-  //dati precompilati
-  @Input()
-  data: DatiTemplateVO;
+  @Input()  data: DatiTemplateVO;
 
-  //output
-  @Output()
-  formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output()  formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
   formIntestazioneValid: boolean;
 
   public datiCompilati: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
 
-  //form view child
-  @ViewChild("formTemplate")
-  private formTemplate: NgForm;
+  @ViewChild("formTemplate")  private formTemplate: NgForm;
   @ViewChild(SharedTemplateIntestazioneComponent)
   intestazione: SharedTemplateIntestazioneComponent;
-  public infoEnteArray: string[] 
+  public infoEnteArray: string[]
   constructor(
+    private userService: UserService,
     private logger: LoggerService,
-    private userService: UserService
   ) {}
 
   ngOnInit(): void {
     this.logger.init(Template03LetteraAccompagnamentoComponent.name);
     this.subscribers.userProfile = this.userService.profilo$.subscribe(
       (user) => {
-        if (user != null) {
-          this.funzionario = user.nome + " " + user.cognome;
-        }
+        if (user != null) {          this.funzionario = user.nome + " " + user.cognome;        }
       }
     );
     this.subscribers.form = this.formTemplate.valueChanges.subscribe((data) => {
-      this.formValid.next(
-        this.formTemplate.valid && this.formIntestazioneValid
-      );
+      this.formValid.next(        this.formTemplate.valid && this.formIntestazioneValid      );
     });
     this.infoEnteArray= this.data.sedeEnte.split(";");
     this.datiCompilati.sedeEnteRiga1 =  this.infoEnteArray[0] ? this.infoEnteArray[0] : ' '
@@ -73,37 +59,36 @@ export class Template03LetteraAccompagnamentoComponent
     this.popolaCampi();
   }
 
-  popolaCampi() {
-    this.datiCompilati.testoLibero = this.data.testoLibero;
-    this.datiCompilati.intestazioneConoscenza = this.data.intestazioneConoscenza;
-    this.datiCompilati.emailOrgano = this.data.emailOrgano;
-    this.datiCompilati.email = this.data.email; 
-  }
-
   setAnteprima(flag: boolean) {
     this.isAnteprima = flag;
     this.intestazione.setAnteprima(flag);
   }
 
-  setStampa(flag: boolean) {
-    this.isStampa = flag;
-    this.intestazione.setAnteprima(flag);
+  popolaCampi() {
+    this.datiCompilati.testoLibero = this.data.testoLibero;
+    this.datiCompilati.intestazioneConoscenza = this.data.intestazioneConoscenza;
+    this.datiCompilati.emailOrgano = this.data.emailOrgano;
+    this.datiCompilati.email = this.data.email;
   }
+
+
 
   getDatiCompilati(): DatiTemplateCompilatiVO {
     return this.datiCompilati;
+  }
+  setStampa(flag: boolean) {
+    this.isStampa = flag;
+    this.intestazione.setAnteprima(flag);
   }
 
   setDatiCompilati(dati: DatiTemplateCompilatiVO) {
     this.datiCompilati = dati;
   }
 
+  ngOnDestroy(): void {    this.logger.destroy(Template03LetteraAccompagnamentoComponent.name);  }
+
   setFormIntestazioneValid(event: boolean) {
     this.formIntestazioneValid = event;
     this.formValid.next(this.formTemplate.valid && this.formIntestazioneValid);
-  }
-
-  ngOnDestroy(): void {
-    this.logger.destroy(Template03LetteraAccompagnamentoComponent.name);
   }
 }

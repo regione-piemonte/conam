@@ -64,8 +64,10 @@ public class SoggettoVO extends MinSoggettoVO {
 	private DatiRelataNotificaVO relataNotifica;
 	
 	private List<MinOrdinanzaVO> listaOrdinanze;
+	private Double importoVerbale = 0.0;
+	private Double importoResiduoVerbale;
 	private boolean hasMasterIstanza;
-	
+
 	public boolean isHasMasterIstanza() {
 		return hasMasterIstanza;
 	}
@@ -73,7 +75,7 @@ public class SoggettoVO extends MinSoggettoVO {
 	public void setHasMasterIstanza(boolean hasMasterIstanza) {
 		this.hasMasterIstanza = hasMasterIstanza;
 	}
-	
+
 	public SoggettoVO() {
 		super();
 	}
@@ -336,6 +338,22 @@ public class SoggettoVO extends MinSoggettoVO {
 
 	public void setListaOrdinanze(List<MinOrdinanzaVO> listaOrdinanze) {
 		this.listaOrdinanze = listaOrdinanze;
+	}
+
+	public Double getImportoVerbale() {
+		return importoVerbale;
+	}
+
+	public void setImportoVerbale(Double importoVerbale) {
+		this.importoVerbale = importoVerbale;
+	}
+
+	public Double getImportoResiduoVerbale() {
+		return importoResiduoVerbale;
+	}
+
+	public void setImportoResiduoVerbale(Double importoResiduoVerbale) {
+		this.importoResiduoVerbale = importoResiduoVerbale;
 	}
 
 }

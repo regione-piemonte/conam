@@ -27,6 +27,8 @@ import it.csi.conam.conambl.integration.entity.CnmDStatoVerbale;
 import it.csi.conam.conambl.integration.entity.CnmREnteNorma;
 import it.csi.conam.conambl.integration.entity.CnmRFunzionarioIstruttore;
 import it.csi.conam.conambl.integration.entity.CnmRVerbaleIllecito;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTNota;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.mapper.entity.AmbitoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.ArticoloEntityMapper;
@@ -36,6 +38,7 @@ import it.csi.conam.conambl.integration.mapper.entity.EnteEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.IstruttoreEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.LetteraEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.NormaEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.NotaEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.ProvinciaEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.RegioneEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.StatoManualeEntityMapper;
@@ -48,7 +51,9 @@ import it.csi.conam.conambl.integration.repositories.CnmDStatoPregressoRepositor
 import it.csi.conam.conambl.integration.repositories.CnmDStatoVerbaleRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRFunzionarioIstruttoreRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRVerbaleIllecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTAllegatoFieldRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTNotaRepository;
 import it.csi.conam.conambl.request.verbale.DatiVerbaleRequest;
 import it.csi.conam.conambl.util.VerbaleSearchParam;
 import it.csi.conam.conambl.vo.leggi.EnteVO;
@@ -114,6 +119,13 @@ public class VerbaleEntityMapperImpl implements VerbaleEntityMapper {
 	@Autowired
 	private CnmTAllegatoFieldRepository cnmTAllegatoFieldRepository;
 	
+	@Autowired
+	private CnmRVerbaleSoggettoRepository cnmRVerbaleSoggettoRepository;
+	
+	@Autowired
+	private CnmTNotaRepository cnmTNotaRepository;
+	@Autowired
+	private NotaEntityMapper notaEntityMapper;
 	
 	@Override
 	public VerbaleVO mapEntityToVO(CnmTVerbale dto) {
@@ -163,9 +175,21 @@ public class VerbaleEntityMapperImpl implements VerbaleEntityMapper {
 		
 		// 20210921 PP - valorizzo importo residuo sottraendo gli importi già pagati
 		verbale.setImportoResiduo(verbale.getImporto());
+		BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(dto.getIdVerbale());
 		try {
-			BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(dto.getIdVerbale());
-			verbale.setImportoResiduo(verbale.getImportoResiduo()-importoPagato.intValue());
+			List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findVerbaleSoggettoByIdVerbale(verbale.getId().intValue());
+			
+			// [Importo residuo totale] = (sommatoria di tutti gli importi in misura ridotta presenti su ogni soggetto) - tutti i pagamenti effettuati
+			BigDecimal importoTotale = new BigDecimal(0);				
+			for(CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmRVerbaleSoggettoList) {
+				importoTotale = importoTotale.add(cnmRVerbaleSoggetto.getImportoMisuraRidotta());
+			}
+			BigDecimal importoResiduo = importoTotale;
+			if(importoPagato != null) importoResiduo = importoResiduo.subtract(importoPagato);			
+			
+			verbale.setImportoTotale(importoTotale.doubleValue());
+			verbale.setImportoResiduo(importoResiduo.doubleValue());
+			
 		}catch(Throwable t) {}
 
 		
@@ -247,6 +271,12 @@ public class VerbaleEntityMapperImpl implements VerbaleEntityMapper {
 			verbale.getEnteAccertatore().setDenominazione(verbale.getEnteAccertatore().getDenominazione() + " - " + dto.getCnmDComuneEnte().getDenomComune());
 		}
 		
+		// 20231004 PP - nuovo campo note (OB 204)
+		List<CnmTNota> note = cnmTNotaRepository.findByIdVerbale(verbale.getId().intValue());
+		if(note!=null && note.size() > 0) {
+			verbale.setNote(notaEntityMapper.mapListEntityToListVO(note));
+		}
+		
 		return verbale;
 	}
 	
@@ -276,7 +306,8 @@ public class VerbaleEntityMapperImpl implements VerbaleEntityMapper {
 		cnmTVerbale.setDataOraAccertamento(utilsDate.asTimeStamp(vo.getDataOraAccertamento()));
 		cnmTVerbale.setNumeroProtocollo(vo.getNumeroProtocollo());
 		cnmTVerbale.setDataOraViolazione(utilsDate.asTimeStamp(vo.getDataOraViolazione()));
-		cnmTVerbale.setImportoVerbale(new BigDecimal(vo.getImporto()).setScale(2, RoundingMode.HALF_UP));
+		//	Issue 3 - Sonarqube
+		cnmTVerbale.setImportoVerbale(BigDecimal.valueOf(vo.getImporto()).setScale(2, RoundingMode.HALF_UP));
 		cnmTVerbale.setCnmDComune(cnmDComuneRepository.findOne(vo.getComune().getId()));
 		cnmTVerbale.setLocalitaViolazione(vo.getIndirizzo());
 		Long statoManualeId = Constants.ID_STATO_MANUALE_DEFAULT;

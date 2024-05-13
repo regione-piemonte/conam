@@ -30,6 +30,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class PianoRateizzazioneEntityMapperImpl implements PianoRateizzazioneEntityMapper {
@@ -147,7 +148,8 @@ public class PianoRateizzazioneEntityMapperImpl implements PianoRateizzazioneEnt
 				rata.setImportoPagato(cnmRSoggRata.getImportoPagato());
 				rata.setDataPagamento(utilsDate.asLocalDate(cnmRSoggRata.getDataPagamento()));
 				Integer idSoggetto = cnmRSoggRata.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto().getCnmTSoggetto().getIdSoggetto();
-				if (sog == null || idSoggetto != sog.getId())
+				//	Issue 3 - Sonarqube
+				if (sog == null || !Objects.equals(idSoggetto, sog.getId()))
 					sog = UtilsSoggetto.findSoggetto(soggettoList, UtilsSoggetto.findByIdSoggetto(idSoggetto));
 				rata.setIdentificativoSoggetto(sog.getPersonaFisica() ? sog.getNome() + " " + sog.getCognome() : sog.getRagioneSociale());
 				rata.setIdOrdinanzaVerbaleSoggetto(cnmRSoggRata.getId().getIdOrdinanzaVerbSog());

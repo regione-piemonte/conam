@@ -101,13 +101,15 @@ public class AzioneOrdinanzaPregressiServiceImpl implements AzioneOrdinanzaPregr
 		azioneOrdinanzaResponse.setDettaglioRicevutaPagamentoEnable(false);
 		
 		List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmTOrdinanza(cnmTOrdinanza);
-		for(@SuppressWarnings("unused") CnmRSoggRata cnmRSoggRata: cnmRSoggRataRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList)) {
+
+		//	Issue 3 - Sonarqube
+		List<CnmRSoggRata> cnmRSoggRataList = cnmRSoggRataRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList);
+		if(cnmRSoggRataList != null && !cnmRSoggRataList.isEmpty()){
 			azioneOrdinanzaResponse.setDettaglioPianoEnable(true);
-			break;
 		}
-		for(@SuppressWarnings("unused") CnmTSollecito cnmTSollecito: cnmTSollecitoRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList)) {
+		List<CnmTSollecito> cnmTSollecitoList = cnmTSollecitoRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList);
+		if(cnmTSollecitoList != null && !cnmTSollecitoList.isEmpty()){
 			azioneOrdinanzaResponse.setDettaglioSollecitoEnable(true);
-			break;
 		}
 		
 		List<CnmRAllegatoOrdVerbSog> cnmRAllegatoOrdVerbSogList = cnmRAllegatoOrdVerbSogRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList);
@@ -159,13 +161,14 @@ public class AzioneOrdinanzaPregressiServiceImpl implements AzioneOrdinanzaPregr
 		azioneOrdinanzaResponse.setDettaglioDispGiudiceEnable(false);
 		azioneOrdinanzaResponse.setDettaglioRicevutaPagamentoEnable(false);
 
-		for(@SuppressWarnings("unused") CnmRSoggRata cnmRSoggRata: cnmRSoggRataRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList)) {
+		//	Issue 3 - Sonarqube
+		List<CnmRSoggRata> cnmRSoggRataList = cnmRSoggRataRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList);
+		if(cnmRSoggRataList != null && !cnmRSoggRataList.isEmpty()){
 			azioneOrdinanzaResponse.setDettaglioPianoEnable(true);
-			break;
 		}
-		for(@SuppressWarnings("unused") CnmTSollecito cnmTSollecito: cnmTSollecitoRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList)) {
+		List<CnmTSollecito> cnmTSollecitoList = cnmTSollecitoRepository.findByCnmROrdinanzaVerbSogIn(cnmROrdinanzaVerbSogList);
+		if(cnmTSollecitoList != null && !cnmTSollecitoList.isEmpty()){
 			azioneOrdinanzaResponse.setDettaglioSollecitoEnable(true);
-			break;
 		}
 		
 		for(TipoAllegatoVO tipoAllegato: allegatoOrdinanzaService.getTipologiaAllegatiOrdinanzaByCnmTOrdinanza(cnmTOrdinanza)) {

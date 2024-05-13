@@ -4,11 +4,29 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.ordinanza;
 
+import java.io.FileNotFoundException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import it.csi.conam.conambl.business.facade.EPayServiceFacade;
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
@@ -21,14 +39,53 @@ import it.csi.conam.conambl.business.service.ordinanza.UtilsOrdinanza;
 import it.csi.conam.conambl.business.service.util.UtilsCodeWriter;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.util.UtilsDoqui;
-import it.csi.conam.conambl.common.*;
+import it.csi.conam.conambl.common.Constants;
+import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.Report;
+import it.csi.conam.conambl.common.TipoAllegato;
+import it.csi.conam.conambl.common.TipoProtocolloAllegato;
+import it.csi.conam.conambl.common.exception.BollettinoException;
 import it.csi.conam.conambl.common.exception.BusinessException;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmCParametro;
+import it.csi.conam.conambl.integration.entity.CnmDElementoElenco;
+import it.csi.conam.conambl.integration.entity.CnmDMessaggio;
+import it.csi.conam.conambl.integration.entity.CnmDStatoAllegato;
+import it.csi.conam.conambl.integration.entity.CnmDStatoOrdVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmDStatoOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmDTipoAllegato;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdVerbSogPK;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoOrdinanzaPK;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTAllegatoField;
+import it.csi.conam.conambl.integration.entity.CnmTNotifica;
+import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.mapper.entity.AllegatoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.TipoAllegatoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.ws.epay.EPayWsInputMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDElementoElencoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoOrdVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoFieldRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTOrdinanzaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.integration.specification.CnmDTipoAllegatoSpecification;
 import it.csi.conam.conambl.jasper.BollettinoJasper;
 import it.csi.conam.conambl.request.SalvaAllegatiMultipliRequest;
@@ -38,7 +95,11 @@ import it.csi.conam.conambl.request.ordinanza.SalvaAllegatoOrdinanzaRequest;
 import it.csi.conam.conambl.request.ordinanza.SalvaAllegatoOrdinanzaVerbaleSoggettoRequest;
 import it.csi.conam.conambl.scheduled.AllegatoScheduledService;
 import it.csi.conam.conambl.security.UserDetails;
-import it.csi.conam.conambl.util.*;
+import it.csi.conam.conambl.util.UploadUtils;
+import it.csi.conam.conambl.util.UtilsFieldAllegato;
+import it.csi.conam.conambl.util.UtilsParametro;
+import it.csi.conam.conambl.util.UtilsRata;
+import it.csi.conam.conambl.util.UtilsTipoAllegato;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.template.DatiTemplateVO;
@@ -48,22 +109,6 @@ import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoMultiploVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.FileNotFoundException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.text.NumberFormat;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author riccardo.bova
@@ -781,7 +826,8 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		while (iterCnmTAllegato.hasNext()) {
 			CnmTAllegato cnmTAllegato = iterCnmTAllegato.next();
 			AllegatoVO al = allegatoEntityMapper.mapEntityToVO(cnmTAllegato);
-			al.setNumeroDeterminazioneOrdinanza(cnmROrdinanzaVerbSog.getCnmTOrdinanza().getNumDeterminazione());
+			//	Issue 3 - Sonarqube
+			al.setNumeroDeterminazioneOrdinanza(cnmROrdinanzaVerbSog != null ? cnmROrdinanzaVerbSog.getCnmTOrdinanza().getNumDeterminazione() : null);
 			Long categoria = cnmTAllegato.getCnmDTipoAllegato().getCnmDCategoriaAllegato().getIdCategoriaAllegato();
 			addToMap(allegatoCategoriaMap, categoria, al);
 		}
@@ -897,7 +943,8 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 			allegatoCategoriaMap.put(categoria, allegatoVOList);
 		}
 		for (AllegatoVO a : allegatoVOList) {
-			if (a.getId() == al.getId())
+			//	Issue 3 - Sonarqube
+			if (Objects.equals(a.getId(), al.getId()))
 				return;
 		}
 		allegatoVOList.add(al);
@@ -1237,6 +1284,13 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 	public List<DocumentoScaricatoVO> downloadBollettiniByIdOrdinanza(Integer idOrdinanza) {
 		// 20200824_LC nuovo type per gestione documento multiplo
 		try {
+			// TODO TASK 23,24,25			
+			List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmTOrdinanza(cnmTOrdinanzaRepository.findOne(idOrdinanza));
+			for(CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog : cnmROrdinanzaVerbSogList) {
+				if(cnmROrdinanzaVerbSog.getCodEsitoListaCarico()!=null && !cnmROrdinanzaVerbSog.getCodEsitoListaCarico().equalsIgnoreCase("000")) {
+					throw new BollettinoException(ErrorCode.BOLLETTINI_ERRORE_GENERAZIONE, cnmROrdinanzaVerbSog.getCodEsitoListaCarico());
+				}
+			}
 			// 20200825_LC
 			List<DocumentoScaricatoVO> encodedDocs = getAllegatoByIdOrdinanza(idOrdinanza,
 					TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO);
@@ -1340,8 +1394,8 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		return nomePDF;
 	}
 
+	//	Issue 3 - Sonarqube
 	@Override
-	@Transactional
 	public MessageVO salvaAllegatoProtocollatoOrdinanzaSoggetto(SalvaAllegatiProtocollatiRequest request,
 			UserDetails userDetails, boolean pregresso) {
 
@@ -1593,7 +1647,9 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 	// 20210425_LC lotto2scenario6 - istanza + allegati (protocollati insieme dal
 	// batch)
 
+	//	Issue 3 - Sonarqube
 	@Override
+	@Transactional
 	public List<MessageVO> salvaAllegatiMultipli(List<InputPart> data, List<InputPart> file, UserDetails userDetails,
 			boolean pregresso) {
 

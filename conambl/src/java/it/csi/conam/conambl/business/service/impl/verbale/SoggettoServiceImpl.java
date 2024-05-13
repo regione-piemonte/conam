@@ -28,6 +28,7 @@ import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTAllegatoField;
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
+import it.csi.conam.conambl.integration.mapper.entity.RuoloSoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoPregressiEntityMapper;
 import it.csi.conam.conambl.integration.repositories.CnmDElementoElencoRepository;
@@ -42,6 +43,7 @@ import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.UtilsFieldAllegato;
 import it.csi.conam.conambl.vo.verbale.DatiRelataNotificaVO;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.RuoloSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoPregressiVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
 
@@ -83,6 +85,9 @@ public class SoggettoServiceImpl implements SoggettoService {
 	@Autowired
 	private CnmDElementoElencoRepository cnmDElementoElencoRepository;
 
+	@Autowired
+	private RuoloSoggettoEntityMapper ruoloSoggettoEntityMapper;
+	
 	/*LUCIO 2021/04/23 - FINE Gestione casi di recidività*/
 	public List<SoggettoVO> ricercaSoggetti(MinSoggettoVO soggetto, UserDetails userDetails){
 		List<CnmTSoggetto> soggetti = cnmTSoggettoRepository.findAll(
@@ -112,6 +117,15 @@ public class SoggettoServiceImpl implements SoggettoService {
 		CnmTSoggetto cnmTSoggetto = utilsSoggetto.validateAndGetCnmTSoggetto(id);
 
 		SoggettoVO soggetto = soggettoEntityMapper.mapEntityToVO(cnmTSoggetto);
+
+		CnmTVerbale cnmTVerbale = cnmTVerbaleRepository.findOne(idVerbale);
+		CnmRVerbaleSoggetto cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.findByCnmTVerbaleAndCnmTSoggetto(cnmTVerbale, cnmTSoggetto);
+		if(cnmRVerbaleSoggetto != null) {
+			soggetto.setImportoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
+			soggetto.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue()-cnmRVerbaleSoggetto.getImportoPagato().doubleValue());
+			soggetto.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(cnmRVerbaleSoggetto.getCnmDRuoloSoggetto()));
+			soggetto.setIdSoggettoVerbale(cnmRVerbaleSoggetto.getIdVerbaleSoggetto());
+		}
 		soggetto = commonSoggettoService.attachResidenzaPregressi(soggetto, cnmTSoggetto, idVerbale);
 		soggetto = attachDatiRelataNotifica(soggetto, cnmTSoggetto, idVerbale);
 		
@@ -138,11 +152,13 @@ public class SoggettoServiceImpl implements SoggettoService {
 				
 				CnmTAllegatoField dataSpedizione = Iterables.tryFind(field, UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(Constants.ID_FIELD_DATA_SPEDIZIONE_NOTIFICA))
 						.orNull();
-				datiRelataNotificaVO.setDataSpedizione(dataSpedizione!=null&&dataSpedizione.getValoreData()!=null? new SimpleDateFormat("dd/MM/YYYY").format(dataSpedizione.getValoreData()):null);
+				//	Issue 3 - Sonarqube
+				datiRelataNotificaVO.setDataSpedizione(dataSpedizione!=null&&dataSpedizione.getValoreData()!=null? new SimpleDateFormat("dd/MM/yyyy").format(dataSpedizione.getValoreData()):null);
 				
 				CnmTAllegatoField dataNotifica = Iterables.tryFind(field, UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(Constants.ID_FIELD_DATA_NOTIFICA))
 						.orNull();
-				datiRelataNotificaVO.setDataNotifica(dataNotifica!=null&&dataNotifica.getValoreData()!=null?new SimpleDateFormat("dd/MM/YYYY").format(dataNotifica.getValoreData()):null);
+				//	Issue 3 - Sonarqube
+				datiRelataNotificaVO.setDataNotifica(dataNotifica!=null&&dataNotifica.getValoreData()!=null?new SimpleDateFormat("dd/MM/yyyy").format(dataNotifica.getValoreData()):null);
 				// new SimpleDateFormat("DD/MM/YYYY").format(dataNotifica.getValoreData())
 				CnmTAllegatoField speseNotifica = Iterables.tryFind(field, UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(Constants.ID_FIELD_SPESE_NOTIFICA))
 						.orNull();

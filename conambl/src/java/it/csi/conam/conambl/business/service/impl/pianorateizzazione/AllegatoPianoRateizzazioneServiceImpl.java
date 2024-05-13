@@ -19,6 +19,7 @@ import it.csi.conam.conambl.business.service.util.UtilsCodeWriter;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.util.UtilsDoqui;
 import it.csi.conam.conambl.common.*;
+import it.csi.conam.conambl.common.exception.BollettinoException;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.integration.entity.*;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
@@ -391,6 +392,21 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 	@Override
 	public List<DocumentoScaricatoVO> downloadBollettiniByIdPiano(Integer idPiano) {
 		// 20200824_LC nuovo type per gestione documento multiplo
+		
+		// TODO TASK 23,24,25						
+		CnmTPianoRate cnmTPianoRate = cnmTPianoRateRepository.findOne(idPiano);
+		List<CnmTRata> cnmTRataList = cnmTRataRepository.findByCnmTPianoRateOrderByNumeroRataAsc(cnmTPianoRate);
+		
+		if(cnmTRataList != null && cnmTRataList.size() > 0) {
+			for(CnmTRata cnmTRata : cnmTRataList) {
+				List<CnmRSoggRata> cnmRSoggRataList = cnmRSoggRataRepository.findByCnmTRata(cnmTRata);
+				if(cnmRSoggRataList != null && cnmRSoggRataList.get(0) != null && 
+						cnmRSoggRataList.get(0).getCodEsitoListaCarico()!=null && !cnmRSoggRataList.get(0).getCodEsitoListaCarico().equalsIgnoreCase("000")) {
+					throw new BollettinoException(ErrorCode.BOLLETTINI_ERRORE_GENERAZIONE, cnmRSoggRataList.get(0).getCodEsitoListaCarico());
+				}
+			}
+		}
+		
 		try {
 			// 20200825_LC
 			List<DocumentoScaricatoVO> encodedDocs = getAllegatoByIdPiano(idPiano, TipoAllegato.BOLLETTINI_RATEIZZAZIONE);

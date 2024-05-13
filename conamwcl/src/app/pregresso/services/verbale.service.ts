@@ -103,5 +103,16 @@ export class VerbaleService {
         let params = new HttpParams().set('idVerbale', idVerbale.toString());
         return this.http.get<UtenteVO>(url, { params: params });
     }
+    
+    uploadImportiSogg(idVerbale:number, importoVerbale: number){
+       console.log(idVerbale)
+       
+        var url: string = this.config.getBEServer() + '/restfacade/verbale/modificaImportoSoggetti';
+        let params = new HttpParams()
+        .set('idVerbale', idVerbale.toString()).set('importoVerbale', importoVerbale.toString());
+    
+
+        return this.http.post(url,null, {params: params} );
+    }
 
 }

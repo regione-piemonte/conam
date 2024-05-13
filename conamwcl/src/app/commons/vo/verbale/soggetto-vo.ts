@@ -5,7 +5,7 @@ import { MinSoggettoVO } from "./min-soggetto-vo";
 export class SoggettoVO extends MinSoggettoVO {
 	public regioneResidenza: RegioneVO;
 	public comuneResidenza: ComuneVO;
-	public provinciaResidenza: ProvinciaVO; 
+	public provinciaResidenza: ProvinciaVO;
 	public indirizzoResidenza: string;
 	public cap: string;
 	public civicoResidenza: string;
@@ -24,6 +24,11 @@ export class SoggettoVO extends MinSoggettoVO {
 	public statoSoggettoOrdinanza: StatoSoggettoOrdinanzaVO;
 	public noteSoggetto: string;
 
+	////
+	public importoVerbale: number;
+	public importoResiduoVerbale: number;
+	///
+
 	public indirizzoResidenzaStas: string;
 	public civicoResidenzaStas: string;
 	public capStas: string;
@@ -31,7 +36,7 @@ export class SoggettoVO extends MinSoggettoVO {
 	public pianoRateizzazioneCreato: boolean;
 	public verbaleAudizioneCreato: boolean;
 	public idAllegatoVerbaleAudizione: number;
-	
+
 	public superatoIlMassimo:boolean;
 
 	public importoSpeseProcessuali: number;
@@ -53,18 +58,18 @@ export class SoggettoVO extends MinSoggettoVO {
 	}
 
 	static editSoggettoFromSoggetto(soggetto: SoggettoVO, data: SoggettoVO): SoggettoVO {
-		soggetto = data;
-		if (data.ruolo == null) soggetto.ruolo = new RuoloVO();
-		if (data.regioneResidenza == null) soggetto.regioneResidenza = new RegioneVO();
-		if (data.provinciaResidenza == null) soggetto.provinciaResidenza = new ProvinciaVO();
-		if (data.comuneResidenza == null) soggetto.comuneResidenza = new ProvinciaVO();
-		if (data.regioneNascita == null) soggetto.regioneNascita = new RegioneVO();
-		if (data.comuneNascita == null) soggetto.comuneNascita = new ComuneVO();
-		if (data.provinciaNascita == null) soggetto.provinciaNascita = new ProvinciaVO();
-		if (data.nazioneNascita == null) soggetto.nazioneNascita = new NazioneVO();
-		if (data.nazioneResidenza == null) soggetto.nazioneResidenza = new NazioneVO();
-		if (data.statoOrdinanza == null ) soggetto.statoOrdinanza = new StatoOrdinanzaVO();
-		return soggetto;
+		let updatedSoggetto = {...soggetto, ...data};
+		if (data.ruolo == null) updatedSoggetto.ruolo = new RuoloVO();
+		if (data.regioneResidenza == null) updatedSoggetto.regioneResidenza = new RegioneVO();
+		if (data.provinciaResidenza == null) updatedSoggetto.provinciaResidenza = new ProvinciaVO();
+		if (data.comuneResidenza == null) updatedSoggetto.comuneResidenza = new ProvinciaVO();
+		if (data.regioneNascita == null) updatedSoggetto.regioneNascita = new RegioneVO();
+		if (data.comuneNascita == null) updatedSoggetto.comuneNascita = new ComuneVO();
+		if (data.provinciaNascita == null) updatedSoggetto.provinciaNascita = new ProvinciaVO();
+		if (data.nazioneNascita == null) updatedSoggetto.nazioneNascita = new NazioneVO();
+		if (data.nazioneResidenza == null) updatedSoggetto.nazioneResidenza = new NazioneVO();
+		if (data.statoOrdinanza == null ) updatedSoggetto.statoOrdinanza = new StatoOrdinanzaVO();
+		return updatedSoggetto;
 	}
 
 }

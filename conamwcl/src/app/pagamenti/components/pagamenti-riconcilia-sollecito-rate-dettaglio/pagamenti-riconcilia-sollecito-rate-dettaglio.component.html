@@ -36,13 +36,13 @@
                         <shared-ordinanza-sentenza
                             *ngIf="idOrdinanzaVerbaleSoggetto!=null && idOrdinanzaVerbaleSoggetto.length>0"
                             [idOrdinanzaVerbaleSoggetto]="idOrdinanzaVerbaleSoggetto[0]">
-                        </shared-ordinanza-sentenza> 
+                        </shared-ordinanza-sentenza>
 
                         <!--div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <shared-riscossione-sollecito-dettaglio [sollecito]="sollecito"
                                 [flgModifica]="(isNuovo || modificabile)"></shared-riscossione-sollecito-dettaglio>
                         </div-->
-                        <shared-pagamenti-dettaglio-piano [piano]="piano"></shared-pagamenti-dettaglio-piano>
+                        <shared-pagamenti-dettaglio-piano *ngIf="isPagamentiRiconciliaSollecitoRateDettaglioComponent" [piano]="piano"></shared-pagamenti-dettaglio-piano>
 
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -113,4 +113,4 @@
             <div class="principal-div col-xs-12 col-sm-12 col-md-1 col-lg-1"></div>
         </div>
     </div>
-</div>  
+</div>

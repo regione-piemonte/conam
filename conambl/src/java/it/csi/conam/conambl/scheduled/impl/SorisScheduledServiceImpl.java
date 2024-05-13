@@ -83,8 +83,9 @@ public class SorisScheduledServiceImpl implements SorisScheduledService {
 						logger.info("cnmROrdinanzaVerbSog[id] :: " + cnmROrdinanzaVerbSog.getIdOrdinanzaVerbSog() + " trovata.");
 
 						CnmTOrdinanza cnmTOrdinanza = cnmTOrdinanzaRepository.findByIdOrdinanzaVerbSog(cnmROrdinanzaVerbSog.getIdOrdinanzaVerbSog());
-						if (cnmTOrdinanza != null && cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == 1 || cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == 2
-								|| cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == 3 || cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == 4) {
+						//	Issue 3 - Sonarqube
+						if (cnmTOrdinanza != null && (cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == 1 || cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == 2
+								|| cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == 3 || cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == 4)) {
 
 							// ************************** UPDATE STATO ORDINANZA
 							logger.info("update stato - cnmTOrdinanza[id] :: " + cnmTOrdinanza.getIdOrdinanza());

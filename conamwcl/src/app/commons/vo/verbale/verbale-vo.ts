@@ -1,5 +1,6 @@
 import { RiferimentiNormativiVO } from "./riferimenti-normativi-vo";
 import { EnteVO, StatoVerbaleVO, ComuneVO, ProvinciaVO, RegioneVO, IstruttoreVO } from "../../../commons/vo/select-vo";
+import { NotaVO } from "./nota-vo";
 
 export class VerbaleVO {
 
@@ -31,4 +32,5 @@ export class VerbaleVO {
     public id: number;
     public istruttoreAssegnato: IstruttoreVO;
     public istruttoreCreatore: IstruttoreVO;
+    public note: NotaVO[]
 }

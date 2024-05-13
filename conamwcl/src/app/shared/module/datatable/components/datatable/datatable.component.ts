@@ -153,9 +153,17 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
         },
         checkAll: () => {
             if (this.config.pagination && this.config.pagination.enable) {
-                this.data.filter((e, i) => this.pagination.showIndex(i))
+                //this.data.filter((e, i) => this.pagination.showIndex(i))
+                this.data.forEach((e, i) => {
+                    if (this.pagination.showIndex(i)) {
+                        // perform action
+                    }
+                });
             } else
-                this.data.map((e, i) => i);
+                //this.data.map((e, i) => i);
+                this.data.forEach((e, i) => {
+                    // perform action
+                });
         },
 
         _getUID: (e: any): number => e.__id,
@@ -353,7 +361,7 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
         // ENG per selezionare gli item sfuttiamo un metodo apposito
         this._setSelected();
 
-      
+
         // Copia dati originali
 
         this._recheckDefaults();
@@ -372,7 +380,7 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
     _setSelected(){
         if(this.config.comparatorField && this.dataSelected && this.dataSelected.length){
 
-            let intersection = this.data.filter(a => this.dataSelected.some(b => a[this.config.comparatorField] === b[this.config.comparatorField]));  
+            let intersection = this.data.filter(a => this.dataSelected.some(b => a[this.config.comparatorField] === b[this.config.comparatorField]));
 
             intersection.forEach(
                 item=>{
@@ -381,7 +389,7 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
             )
         }
     }
-    
+
 
     ngOnChanges(changes: SimpleChanges) {
         if (this.config && this.config.selection && this.config.selection.enable) {
@@ -389,16 +397,16 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
                 this._origData = this.data;
                 this.selection._resetSelection();
             }
-			
+
 			// ENG per per deselezionare dall'esterno
             if (changes['dataSelected']) {
-             
-                const current:any[] = changes['dataSelected'].currentValue as any[]; 
+
+                const current:any[] = changes['dataSelected'].currentValue as any[];
                 const prev:any[] = changes['dataSelected'].previousValue as any[];
                 if(current && prev && current.length<prev.length){
-                    // deselezione in corso da esterno 
+                    // deselezione in corso da esterno
                     let differences = prev.filter(x => !current.includes(x));
-                    let intersection = this.data.filter(a => differences.some(b => a[this.config.comparatorField] === b[this.config.comparatorField]));  
+                    let intersection = this.data.filter(a => differences.some(b => a[this.config.comparatorField] === b[this.config.comparatorField]));
                     intersection.forEach(
                         item=>{
                             // se selezionato deseleziono
@@ -462,7 +470,7 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
             this.selection._resetSelection();
     }
 
-    ngOnDestroy() { 
+    ngOnDestroy() {
     }
 
     constructor(

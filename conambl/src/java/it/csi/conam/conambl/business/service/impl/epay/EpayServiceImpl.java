@@ -4,8 +4,19 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.epay;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+
 import it.csi.conam.conambl.business.service.epay.EpayService;
 import it.csi.conam.conambl.business.service.ordinanza.AllegatoOrdinanzaService;
 import it.csi.conam.conambl.business.service.ordinanza.StatoPagamentoOrdinanzaService;
@@ -13,19 +24,25 @@ import it.csi.conam.conambl.business.service.pianorateizzazione.AllegatoPianoRat
 import it.csi.conam.conambl.business.service.sollecito.AllegatoSollecitoService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.common.Constants;
-import it.csi.conam.conambl.integration.entity.*;
-import it.csi.conam.conambl.integration.epay.from.*;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.entity.CnmDStatoOrdVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRSoggRata;
+import it.csi.conam.conambl.integration.entity.CnmTSollecito;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.epay.from.EsitoAggiornaPosizioniDebitorieRequest;
+import it.csi.conam.conambl.integration.epay.from.EsitoInserimentoListaDiCaricoRequest;
+import it.csi.conam.conambl.integration.epay.from.NotificaPagamentoType;
+import it.csi.conam.conambl.integration.epay.from.PosizioneDebitoriaType;
+import it.csi.conam.conambl.integration.epay.from.ResponseType;
+import it.csi.conam.conambl.integration.epay.from.TrasmettiNotifichePagamentoRequest;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoOrdVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRSoggRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.util.UtilsEpay;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author riccardo.bova
@@ -81,26 +98,23 @@ public class EpayServiceImpl implements EpayService {
 		List<String> codicePosizioneDebitoriaSollecitoList = new ArrayList<>();
 
 		for (PosizioneDebitoriaType e : posizioneDebitoriaTypeArray) {
-			if(e.getCodiceEsito()!=null && e.getCodiceEsito().equalsIgnoreCase("000")) {
-				String codicePosizioneDebitoria = e.getIdPosizioneDebitoria();
-				logger.info("codicePosizioneDebitoria from ePay: " + codicePosizioneDebitoria);
-				if (codicePosizioneDebitoria.contains(Constants.CODICE_PIANO_RATEIZZAZIONE)) {
-					codicePosizioneDebitoriaPianoRatList.add(codicePosizioneDebitoria);
-				} else if (codicePosizioneDebitoria.contains(Constants.CODICE_ORDINANZA)) {
-					codicePosizioneDebitoriaOrdinanzaList.add(codicePosizioneDebitoria);
-				} else if (codicePosizioneDebitoria.contains(Constants.CODICE_SOLLECITO)) {
-					codicePosizioneDebitoriaSollecitoList.add(codicePosizioneDebitoria);
-				} else {
-					logger.error("codicePosizioneDebitoria sconosciuto");
-				}
-			}else {
-				logger.warn("Ricevuto CodiceEsito ["+e.getCodiceEsito()+"] Desc ["+e.getDescrizioneEsito()+"] per PosizioneDebitoria ["+e.getIdPosizioneDebitoria()+"]");
+			String codicePosizioneDebitoria = e.getIdPosizioneDebitoria();
+			logger.info("codicePosizioneDebitoria from ePay: " + codicePosizioneDebitoria);
+			if (codicePosizioneDebitoria.contains(Constants.CODICE_PIANO_RATEIZZAZIONE)) {
+				codicePosizioneDebitoriaPianoRatList.add(codicePosizioneDebitoria);
+			} else if (codicePosizioneDebitoria.contains(Constants.CODICE_ORDINANZA)) {
+				codicePosizioneDebitoriaOrdinanzaList.add(codicePosizioneDebitoria);
+			} else if (codicePosizioneDebitoria.contains(Constants.CODICE_SOLLECITO)) {
+				codicePosizioneDebitoriaSollecitoList.add(codicePosizioneDebitoria);
+			} else {
+				logger.error("codicePosizioneDebitoria sconosciuto");
 			}
 		}
 
 		// PIANO RATEIZZAZIONE
 		if (!codicePosizioneDebitoriaPianoRatList.isEmpty()) {
 			List<CnmRSoggRata> cnmRSoggRataList = cnmRSoggRataRepository.findByCodPosizioneDebitoriaIn(codicePosizioneDebitoriaPianoRatList);
+			List<CnmRSoggRata> cnmRSoggRataListToCreate = new ArrayList<CnmRSoggRata>();
 			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArray) {
 				CnmRSoggRata cnmRSoggRata = Iterables.tryFind(cnmRSoggRataList, new Predicate<CnmRSoggRata>() {
 					@Override
@@ -120,14 +134,22 @@ public class EpayServiceImpl implements EpayService {
 					cnmRSoggRata.setCodAvviso(posizioneDebitoriaType.getCodiceAvviso());
 					logger.info("Esito inserimento lista di carico request - codiceAvviso restituito da Epay: " + posizioneDebitoriaType.getCodiceAvviso());
 				}
+
+				if(posizioneDebitoriaType.getCodiceEsito()!=null && posizioneDebitoriaType.getCodiceEsito().equalsIgnoreCase("000")) {
+					cnmRSoggRataListToCreate.add(cnmRSoggRata);
+				}else {
+					logger.warn("Ricevuto CodiceEsito ["+posizioneDebitoriaType.getCodiceEsito()+"] Desc ["+posizioneDebitoriaType.getDescrizioneEsito()+"] per PosizioneDebitoria ["+posizioneDebitoriaType.getIdPosizioneDebitoria()+"]");
+				}
 			}
 			cnmRSoggRataList = cnmRSoggRataRepository.save(cnmRSoggRataList);
-			allegatoPianoRateizzazioneService.creaBollettiniByCnmRSoggRata(cnmRSoggRataList);
+			if(cnmRSoggRataListToCreate.size() > 0)
+				allegatoPianoRateizzazioneService.creaBollettiniByCnmRSoggRata(cnmRSoggRataListToCreate);
 		}
 
 		// Ordinanza
 		if (!codicePosizioneDebitoriaOrdinanzaList.isEmpty()) {
 			List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCodPosizioneDebitoriaIn(codicePosizioneDebitoriaOrdinanzaList);
+			List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogListToCreate = new ArrayList<CnmROrdinanzaVerbSog>();
 			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArray) {
 				CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog = Iterables.tryFind(cnmROrdinanzaVerbSogList, new Predicate<CnmROrdinanzaVerbSog>() {
 
@@ -148,15 +170,23 @@ public class EpayServiceImpl implements EpayService {
 					cnmROrdinanzaVerbSog.setCodAvviso(posizioneDebitoriaType.getCodiceAvviso());
 					logger.info("Esito inserimento lista di carico request - codiceAvviso restituito da Epay: " + posizioneDebitoriaType.getCodiceAvviso());
 				}
+
+				if(posizioneDebitoriaType.getCodiceEsito()!=null && posizioneDebitoriaType.getCodiceEsito().equalsIgnoreCase("000")) {
+					cnmROrdinanzaVerbSogListToCreate.add(cnmROrdinanzaVerbSog);
+				}else {
+					logger.warn("Ricevuto CodiceEsito ["+posizioneDebitoriaType.getCodiceEsito()+"] Desc ["+posizioneDebitoriaType.getDescrizioneEsito()+"] per PosizioneDebitoria ["+posizioneDebitoriaType.getIdPosizioneDebitoria()+"]");
+				}
 			}
 			cnmROrdinanzaVerbSogList = (List<CnmROrdinanzaVerbSog>) cnmROrdinanzaVerbSogRepository.save(cnmROrdinanzaVerbSogList);
-			allegatoOrdinanzaService.creaBollettiniByCnmROrdinanzaVerbSog(cnmROrdinanzaVerbSogList);
+			if(cnmROrdinanzaVerbSogListToCreate.size() > 0)
+				allegatoOrdinanzaService.creaBollettiniByCnmROrdinanzaVerbSog(cnmROrdinanzaVerbSogListToCreate);
 		}
 
 		// sollecito
 		if (!codicePosizioneDebitoriaSollecitoList.isEmpty()) {
 
 			List<CnmTSollecito> cnmTSollecitoList = cnmTSollecitoRepository.findByCodPosizioneDebitoriaIn(codicePosizioneDebitoriaSollecitoList);
+			List<CnmTSollecito> cnmTSollecitoListToCreate = new ArrayList<CnmTSollecito>();
 			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArray) {
 				CnmTSollecito cnmTSollecito = Iterables.tryFind(cnmTSollecitoList, new Predicate<CnmTSollecito>() {
 					@Override
@@ -176,10 +206,16 @@ public class EpayServiceImpl implements EpayService {
 					cnmTSollecito.setCodAvviso(posizioneDebitoriaType.getCodiceAvviso());
 					logger.info("Esito inserimento lista di carico request - codiceAvviso restituito da Epay: " + posizioneDebitoriaType.getCodiceAvviso());
 				}
+
+				if(posizioneDebitoriaType.getCodiceEsito()!=null && posizioneDebitoriaType.getCodiceEsito().equalsIgnoreCase("000")) {
+					cnmTSollecitoListToCreate.add(cnmTSollecito);
+				}else {
+					logger.warn("Ricevuto CodiceEsito ["+posizioneDebitoriaType.getCodiceEsito()+"] Desc ["+posizioneDebitoriaType.getDescrizioneEsito()+"] per PosizioneDebitoria ["+posizioneDebitoriaType.getIdPosizioneDebitoria()+"]");
+				}
 			}
 			cnmTSollecitoList = (List<CnmTSollecito>) cnmTSollecitoRepository.save(cnmTSollecitoList);
 
-			for (CnmTSollecito cnmTSollecito : cnmTSollecitoList)
+			for (CnmTSollecito cnmTSollecito : cnmTSollecitoListToCreate)
 				allegatoSollecitoService.creaBollettiniByCnmTSollecito(cnmTSollecito);
 		}
 

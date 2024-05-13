@@ -54,7 +54,7 @@ export class RecidivitaDettaglioComponent implements OnInit, OnDestroy {
   }
 
   getVerbaliSoggetto(idSoggetto: number) {
-    
+
     this.verbaleService
       .getVerbaleSoggettoByIdSoggetto(idSoggetto)
       .subscribe((data) => {
@@ -72,7 +72,7 @@ export class RecidivitaDettaglioComponent implements OnInit, OnDestroy {
           this.soggettiVerbale = data.soggettiVerbale;
           this.loaded = true;
         } else {
-          this.soggettiVerbale;
+          //this.soggettiVerbale;
           this.loaded = true;
         }
       });
@@ -94,7 +94,7 @@ export class RecidivitaDettaglioComponent implements OnInit, OnDestroy {
           type: TypeAlert.SUCCESS,
           message: "Stati di recidività aggiornati con successo",
         });
-        this.getVerbaliSoggetto(this.idSoggetto);   
+        this.getVerbaliSoggetto(this.idSoggetto);
       },
       (err) => {
         this.manageMessage({

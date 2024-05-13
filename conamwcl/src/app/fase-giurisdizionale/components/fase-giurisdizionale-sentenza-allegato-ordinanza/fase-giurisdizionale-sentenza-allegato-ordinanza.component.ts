@@ -26,8 +26,8 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
     public subscribers: any = {};
 
     public loaded: boolean;
-    public loadedConfig: boolean;
     public loadedCategoriaAllegato: boolean;
+    public loadedConfig: boolean;
 
     public tipoAllegatoModel: Array<TipoAllegatoVO>;
 
@@ -37,8 +37,8 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
 
     //message
     public showMessageTop: boolean;
-    public typeMessageTop: string;
     public messageTop: string;
+    public typeMessageTop: string;
     private intervalIdS: number = 0;
     private alertWarning: string;
 
@@ -46,8 +46,8 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
         private logger: LoggerService,
         private router: Router,
         private activatedRoute: ActivatedRoute,
-        private sharedOrdinanzaService: SharedOrdinanzaService,
         private faseGiurisdizionaleUtilService: FaseGiurisdizionaleUtilService,
+        private sharedOrdinanzaService: SharedOrdinanzaService,
         private sharedVerbaleService: SharedVerbaleService,
         private fascicoloService: FascicoloService,
         private templateService: TemplateService
@@ -58,18 +58,15 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
         this.getIdOrdinanzaVerbaleSoggetto();
         if (this.idOrdinanzaVerbaleSoggetto) {
             this.loadTipoAllegato();
-            // setto il riferimento per la ricerca documento protocollato    
             this.fascicoloService.ref = this.router.url;
         }
         this.loadAlertWarning();
     }
-    
+
     loadAlertWarning() {
         this.subscribers.alertWarning = this.templateService.getMessage('PRODISPGIU').subscribe(data => {
             this.alertWarning = data.message;
-        }, err => {
-            this.logger.error("Errore nel recupero del messaggio");
-        });
+        }, err => {            this.logger.error("Errore nel recupero del messaggio");        });
     }
 
     //recupero le tipologie di allegato allegabili
@@ -82,12 +79,9 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
             this.tipoAllegatoModel = data;
             this.loadedCategoriaAllegato = true;
             this.loaded = true;
-            // setto il riferimento per la ricerca documento protocollato    
-            this.fascicoloService.tipoAllegatoModel = this.tipoAllegatoModel; 
+            this.fascicoloService.tipoAllegatoModel = this.tipoAllegatoModel;
         }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessage(err.type, err.message);
-            }
+            if (err instanceof ExceptionVO) {                this.manageMessage(err.type, err.message);            }
             this.logger.info("Errore nel recupero dei tipi di allegato");
             this.loadedCategoriaAllegato = true;
         });
@@ -96,37 +90,31 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
     ricercaProtocollo (ricerca: RicercaProtocolloRequest) {
         ricerca.idVerbale = this.idOrdinanza;
         this.loaded = false;
-        
+
         this.sharedVerbaleService.ricercaProtocolloSuACTA(ricerca).subscribe(data => {
             this.loaded = true;
-            let tipiAllegatoDuplicabili = []; 
-            if(!data.documentoProtocollatoVOList){
-                data.documentoProtocollatoVOList = [];
-            } else if(data.documentoProtocollatoVOList[0]){
-                tipiAllegatoDuplicabili = data.documentoProtocollatoVOList[0].tipiAllegatoDuplicabili;
+            let tipiAllegatoDuplicabili = [];
+            if(!data.documentoProtocollatoVOList){                data.documentoProtocollatoVOList = [];
+            } else if(data.documentoProtocollatoVOList[0]){tipiAllegatoDuplicabili = data.documentoProtocollatoVOList[0].tipiAllegatoDuplicabili;
             }
-            this.fascicoloService.categoriesDuplicated = tipiAllegatoDuplicabili; 
-            
-            // setto il numero di protocollo per la ricerca documento protocollato    
+            this.fascicoloService.categoriesDuplicated = tipiAllegatoDuplicabili;
+
+            // setto il numero di protocollo per la ricerca documento protocollato
             this.fascicoloService.searchFormRicercaProtocol = ricerca.numeroProtocollo;
-            // setto i dati per la ricerca documento protocollato    
+            // setto i dati per la ricerca documento protocollato
             this.fascicoloService.dataRicercaProtocollo = data.documentoProtocollatoVOList;
             this.fascicoloService.idOrdinanzaVerbaleSoggetto = this.idOrdinanzaVerbaleSoggetto;
 
             this.fascicoloService.successPage = Routing.FASE_GIURISDIZIONALE_SENTENZA_DETTAGLIO_ORDINANZA + this.idOrdinanza;
-            if (data.messaggio) {
-                this.fascicoloService.message = data.messaggio;
-            }else{
-                this.fascicoloService.message = null;
+            if (data.messaggio) {                this.fascicoloService.message = data.messaggio;
+            }else{                this.fascicoloService.message = null;
             }
             const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
             this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
 			this.fascicoloService.dataRicercaProtocolloNumResults = +data.totalLineResp;
-            this.router.navigateByUrl(Routing.FASCICOLO_ALLEGATO_DA_ACTA + this.idOrdinanza);   
+            this.router.navigateByUrl(Routing.FASCICOLO_ALLEGATO_DA_ACTA + this.idOrdinanza);
         }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessage(err.type, err.message);
-            }
+            if (err instanceof ExceptionVO) {                this.manageMessage(err.type, err.message);            }
             this.loaded = true;
             this.logger.error("Errore nel recupero dei documenti protocollati");
         });
@@ -143,9 +131,7 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
             this.loaded = true;
             this.manageMessage("SUCCESS","Disposizione del giudice caricata con successo");
         }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessage(err.type, err.message);
-            }
+            if (err instanceof ExceptionVO) {                this.manageMessage(err.type, err.message);            }
             this.logger.error("Errore nel salvataggio dell'allegato");
             this.loaded = true;
         });
@@ -154,8 +140,9 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
     getIdOrdinanzaVerbaleSoggetto() {
         this.idOrdinanzaVerbaleSoggetto = this.faseGiurisdizionaleUtilService.getIdOrdinanzaVerbaleSoggetto();
         this.idOrdinanza = this.faseGiurisdizionaleUtilService.getIdOrdinanza();
-        if (!this.idOrdinanzaVerbaleSoggetto)
+        if (!this.idOrdinanzaVerbaleSoggetto){
             this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_SENTENZA_RICERCA_ORDINANZA);
+        }
     }
 
     manageMessage(type: string, message: string) {
@@ -169,11 +156,12 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
         let seconds: number = 20//this.configService.getTimeoutMessagge();
         this.intervalIdS = window.setInterval(() => {
             seconds -= 1;
-            if (seconds === 0) {
-                this.resetMessageTop();
+            if (seconds === 0) {                this.resetMessageTop();
             }
         }, 1000);
     }
+
+    ngOnDestroy(): void {        this.logger.destroy(FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent.name);    }
 
     resetMessageTop() {
         this.showMessageTop = false;
@@ -182,8 +170,5 @@ export class FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent implements On
         clearInterval(this.intervalIdS);
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(FaseGiurisdizionaleSentenzaAllegatoOrdinanzaComponent.name);
-    }
 
 }

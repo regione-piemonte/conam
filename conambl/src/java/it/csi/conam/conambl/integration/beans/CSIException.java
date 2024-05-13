@@ -137,7 +137,7 @@ public class CSIException  extends org.apache.axis.AxisFault  implements java.io
     }
 
     // Type metadata
-    private static org.apache.axis.description.TypeDesc typeDesc =
+    protected static org.apache.axis.description.TypeDesc typeDesc =
         new org.apache.axis.description.TypeDesc(CSIException.class, true);
 
     static {

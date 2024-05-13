@@ -11,37 +11,29 @@ import { timer } from "rxjs/observable/timer";
     templateUrl: './fase-giurisdizionale-comparsa-verbale-riepilogo.component.html',
 })
 export class FaseGiurisdizionaleComparsaCostituzioneRispostaRiepilogoComponent implements OnInit, OnDestroy {
-
-    public subscribers: any = {};
-
     public idVerbale: number;
+    public subscribers: any = {};
     public allegatoEnable: boolean;
-
-
     constructor(
-        private logger: LoggerService,
         private router: Router,
-        private activatedRoute: ActivatedRoute,
+        private logger: LoggerService,
         private sharedVerbaleService: SharedVerbaleService,
-
+        private activatedRoute: ActivatedRoute,
     ) { }
 
     ngOnInit(): void {
         this.logger.init(FaseGiurisdizionaleComparsaCostituzioneRispostaRiepilogoComponent.name);
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idVerbale = +params['id'];
-            if (isNaN(this.idVerbale))
-                this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_INSERIMENTO_COMPARSA_RICERCA);
+            if (isNaN(this.idVerbale)) this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_INSERIMENTO_COMPARSA_RICERCA);
             this.isTipoAllegatoAllegabile();
 
             if (this.activatedRoute.snapshot.paramMap.get('action') == 'caricato')
                 this.manageMessageTop("Inserimento lettera comparsa di costituzione e risposta effettuato con successo", 'SUCCESS');
             else if(this.activatedRoute.snapshot.paramMap.get('action') == 'caricati')
             this.manageMessageTop("Inserimento lettera comparsa di costituzione e risposta con allegati effettuato con successo", 'SUCCESS');
-
         });
     }
-
 
     isTipoAllegatoAllegabile() {
         this.subscribers.riconcilia = this.sharedVerbaleService.isTipoAllegatoAllegabile(this.idVerbale, Constants.COMPARSA).subscribe(data => {
@@ -49,19 +41,16 @@ export class FaseGiurisdizionaleComparsaCostituzioneRispostaRiepilogoComponent i
         })
     }
 
-
     goToAggiugiControdeduzioni() {
         this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_INSERIMENTO_COMPARSA_ALLEGATO + this.idVerbale);
     }
-
-    //Messaggio top
-    public showMessageTop: boolean;
     public typeMessageTop: String;
+    public showMessageTop: boolean;
     public messageTop: String;
 
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
     }
 
@@ -73,6 +62,8 @@ export class FaseGiurisdizionaleComparsaCostituzioneRispostaRiepilogoComponent i
                 this.resetMessageTop();
         });
     }
+    ngOnDestroy(): void {        this.logger.destroy(FaseGiurisdizionaleComparsaCostituzioneRispostaRiepilogoComponent.name);
+    }
 
     resetMessageTop() {
         this.showMessageTop = false;
@@ -80,8 +71,5 @@ export class FaseGiurisdizionaleComparsaCostituzioneRispostaRiepilogoComponent i
         this.messageTop = null;
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(FaseGiurisdizionaleComparsaCostituzioneRispostaRiepilogoComponent.name);
-    }
 
 }

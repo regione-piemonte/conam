@@ -7,135 +7,27 @@
 
 package it.csi.conam.conambl.integration.epay.to;
 
-public class TestataListaCarico  implements java.io.Serializable {
-    private java.lang.String idMessaggio;
+public class TestataListaCarico extends TestataCommons {
 
-    private java.lang.String CFEnteCreditore;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -753518789757955414L;
 
-    private java.lang.String codiceVersamento;
-
-    private java.lang.Boolean multiBeneficiario;
-
-    private java.math.BigInteger numeroPosizioniDebitorie;
-
-    private java.math.BigDecimal importoTotaleListaDiCarico;
+	private java.math.BigDecimal importoTotaleListaDiCarico;
 
     public TestataListaCarico() {
     }
 
     public TestataListaCarico(
-           java.lang.String idMessaggio,
-           java.lang.String CFEnteCreditore,
-           java.lang.String codiceVersamento,
-           java.lang.Boolean multiBeneficiario,
-           java.math.BigInteger numeroPosizioniDebitorie,
-           java.math.BigDecimal importoTotaleListaDiCarico) {
-           this.idMessaggio = idMessaggio;
-           this.CFEnteCreditore = CFEnteCreditore;
-           this.codiceVersamento = codiceVersamento;
-           this.multiBeneficiario = multiBeneficiario;
-           this.numeroPosizioniDebitorie = numeroPosizioniDebitorie;
-           this.importoTotaleListaDiCarico = importoTotaleListaDiCarico;
-    }
-
-
-    /**
-     * Gets the idMessaggio value for this TestataListaCarico.
-     * 
-     * @return idMessaggio
-     */
-    public java.lang.String getIdMessaggio() {
-        return idMessaggio;
-    }
-
-
-    /**
-     * Sets the idMessaggio value for this TestataListaCarico.
-     * 
-     * @param idMessaggio
-     */
-    public void setIdMessaggio(java.lang.String idMessaggio) {
-        this.idMessaggio = idMessaggio;
-    }
-
-
-    /**
-     * Gets the CFEnteCreditore value for this TestataListaCarico.
-     * 
-     * @return CFEnteCreditore
-     */
-    public java.lang.String getCFEnteCreditore() {
-        return CFEnteCreditore;
-    }
-
-
-    /**
-     * Sets the CFEnteCreditore value for this TestataListaCarico.
-     * 
-     * @param CFEnteCreditore
-     */
-    public void setCFEnteCreditore(java.lang.String CFEnteCreditore) {
-        this.CFEnteCreditore = CFEnteCreditore;
-    }
-
-
-    /**
-     * Gets the codiceVersamento value for this TestataListaCarico.
-     * 
-     * @return codiceVersamento
-     */
-    public java.lang.String getCodiceVersamento() {
-        return codiceVersamento;
-    }
-
-
-    /**
-     * Sets the codiceVersamento value for this TestataListaCarico.
-     * 
-     * @param codiceVersamento
-     */
-    public void setCodiceVersamento(java.lang.String codiceVersamento) {
-        this.codiceVersamento = codiceVersamento;
-    }
-
-
-    /**
-     * Gets the multiBeneficiario value for this TestataListaCarico.
-     * 
-     * @return multiBeneficiario
-     */
-    public java.lang.Boolean getMultiBeneficiario() {
-        return multiBeneficiario;
-    }
-
-
-    /**
-     * Sets the multiBeneficiario value for this TestataListaCarico.
-     * 
-     * @param multiBeneficiario
-     */
-    public void setMultiBeneficiario(java.lang.Boolean multiBeneficiario) {
-        this.multiBeneficiario = multiBeneficiario;
-    }
-
-
-    /**
-     * Gets the numeroPosizioniDebitorie value for this TestataListaCarico.
-     * 
-     * @return numeroPosizioniDebitorie
-     */
-    public java.math.BigInteger getNumeroPosizioniDebitorie() {
-        return numeroPosizioniDebitorie;
-    }
-
-
-    /**
-     * Sets the numeroPosizioniDebitorie value for this TestataListaCarico.
-     * 
-     * @param numeroPosizioniDebitorie
-     */
-    public void setNumeroPosizioniDebitorie(java.math.BigInteger numeroPosizioniDebitorie) {
-        this.numeroPosizioniDebitorie = numeroPosizioniDebitorie;
+        java.lang.String idMessaggio,
+        java.lang.String CFEnteCreditore,
+        java.lang.String codiceVersamento,
+        java.lang.Boolean multiBeneficiario,
+        java.math.BigInteger numeroPosizioniDebitorie,
+        java.math.BigDecimal importoTotaleListaDiCarico) {
+            super(idMessaggio, CFEnteCreditore, codiceVersamento, multiBeneficiario, numeroPosizioniDebitorie);
+            this.importoTotaleListaDiCarico = importoTotaleListaDiCarico;
     }
 
 
@@ -162,7 +54,9 @@ public class TestataListaCarico  implements java.io.Serializable {
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof TestataListaCarico)) return false;
         TestataListaCarico other = (TestataListaCarico) obj;
-        if (obj == null) return false;
+        //	Issue 3 - Sonarqube
+        // Condition 'obj == null' is always 'false'
+        // if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
             return (__equalsCalc == obj);
@@ -171,23 +65,23 @@ public class TestataListaCarico  implements java.io.Serializable {
         boolean _equals;
         _equals = true && 
             ((this.idMessaggio==null && other.getIdMessaggio()==null) || 
-             (this.idMessaggio!=null &&
-              this.idMessaggio.equals(other.getIdMessaggio()))) &&
+            (this.idMessaggio!=null &&
+            this.idMessaggio.equals(other.getIdMessaggio()))) &&
             ((this.CFEnteCreditore==null && other.getCFEnteCreditore()==null) || 
-             (this.CFEnteCreditore!=null &&
-              this.CFEnteCreditore.equals(other.getCFEnteCreditore()))) &&
+            (this.CFEnteCreditore!=null &&
+            this.CFEnteCreditore.equals(other.getCFEnteCreditore()))) &&
             ((this.codiceVersamento==null && other.getCodiceVersamento()==null) || 
-             (this.codiceVersamento!=null &&
-              this.codiceVersamento.equals(other.getCodiceVersamento()))) &&
+            (this.codiceVersamento!=null &&
+            this.codiceVersamento.equals(other.getCodiceVersamento()))) &&
             ((this.multiBeneficiario==null && other.getMultiBeneficiario()==null) || 
-             (this.multiBeneficiario!=null &&
-              this.multiBeneficiario.equals(other.getMultiBeneficiario()))) &&
+            (this.multiBeneficiario!=null &&
+            this.multiBeneficiario.equals(other.getMultiBeneficiario()))) &&
             ((this.numeroPosizioniDebitorie==null && other.getNumeroPosizioniDebitorie()==null) || 
-             (this.numeroPosizioniDebitorie!=null &&
-              this.numeroPosizioniDebitorie.equals(other.getNumeroPosizioniDebitorie()))) &&
+            (this.numeroPosizioniDebitorie!=null &&
+            this.numeroPosizioniDebitorie.equals(other.getNumeroPosizioniDebitorie()))) &&
             ((this.importoTotaleListaDiCarico==null && other.getImportoTotaleListaDiCarico()==null) || 
-             (this.importoTotaleListaDiCarico!=null &&
-              this.importoTotaleListaDiCarico.equals(other.getImportoTotaleListaDiCarico())));
+            (this.importoTotaleListaDiCarico!=null &&
+            this.importoTotaleListaDiCarico.equals(other.getImportoTotaleListaDiCarico())));
         __equalsCalc = null;
         return _equals;
     }
@@ -221,9 +115,9 @@ public class TestataListaCarico  implements java.io.Serializable {
         return _hashCode;
     }
 
-    // Type metadata
-    private static org.apache.axis.description.TypeDesc typeDesc =
-        new org.apache.axis.description.TypeDesc(TestataListaCarico.class, true);
+    static {
+        typeDesc = new org.apache.axis.description.TypeDesc(TestataListaCarico.class, true);
+    }
 
     static {
         typeDesc.setXmlType(new javax.xml.namespace.QName("http://www.csi.it/epay/epaywso/enti2epaywso/types", "TestataListaCarico"));
@@ -265,36 +159,4 @@ public class TestataListaCarico  implements java.io.Serializable {
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);
     }
-
-    /**
-     * Return type metadata object
-     */
-    public static org.apache.axis.description.TypeDesc getTypeDesc() {
-        return typeDesc;
-    }
-
-    /**
-     * Get Custom Serializer
-     */
-    public static org.apache.axis.encoding.Serializer getSerializer(
-           java.lang.String mechType, 
-           java.lang.Class _javaType,  
-           javax.xml.namespace.QName _xmlType) {
-        return 
-          new  org.apache.axis.encoding.ser.BeanSerializer(
-            _javaType, _xmlType, typeDesc);
-    }
-
-    /**
-     * Get Custom Deserializer
-     */
-    public static org.apache.axis.encoding.Deserializer getDeserializer(
-           java.lang.String mechType, 
-           java.lang.Class _javaType,  
-           javax.xml.namespace.QName _xmlType) {
-        return 
-          new  org.apache.axis.encoding.ser.BeanDeserializer(
-            _javaType, _xmlType, typeDesc);
-    }
-
 }

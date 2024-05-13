@@ -1,30 +1,17 @@
-import {
-  Directive,
-  ViewContainerRef,
-  Component,
-  Input,
-  ViewChild,
-  OnInit,
-  Output,
-  EventEmitter,
-} from "@angular/core";
+import {  Component,  Input,    OnInit,  Output,  EventEmitter,} from "@angular/core";
 import { Observable } from "rxjs/Observable";
 import { Subject } from "rxjs";
 import { DestroySubscribers } from "../../../core/decorator/destroy-subscribers";
-import { LoggerService } from "../../../core/services/logger/logger.service";
-
-//Con bootstap va fatto cosi
+// x bootstap
 declare var jquery: any;
 declare var $: any;
-
 /*
 * IMPORTARE COMPONENTE IN PAGINA
 * AGGIUNGERE
 * @ViewChild(IrbaDialog) irbaDialog: IrbaDialog;
 * AZIONE DI SALVATAGGIO
 * this.irbaDialog.salva.subscribe(data=>{
-    
-    });
+   });
 * COME APRIRLO
   open() {
     this.irbaDialog.open();
@@ -53,14 +40,10 @@ export class SharedDialogComponent implements OnInit {
     if (!this.buttonConfirmText) this.buttonConfirmText = "Si";
   }
 
-  //APRE
-  public open() {
-    $("#" + this.id).modal("show");
-  }
-  //CHIUDE
-  public close() {
-    $("#" + this.id).modal("hide");
-  }
+  // APRE
+  public open() {    $("#" + this.id).modal("show");  }
+  // CHIUDE
+  public close() {    $("#" + this.id).modal("hide");  }
 
   //SUBJECT PER IL SALVATAGGIO -DA  EFFETTUARE IL SUBSCRIBE
   private saveSubject = new Subject<Boolean>();

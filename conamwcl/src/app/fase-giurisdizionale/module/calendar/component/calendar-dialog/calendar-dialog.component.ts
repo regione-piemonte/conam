@@ -30,7 +30,7 @@ declare var $: any;
 * @ViewChild(IrbaDialog) irbaDialog: IrbaDialog;
 * AZIONE DI SALVATAGGIO
 * this.irbaDialog.salva.subscribe(data=>{
-     
+
     });
 * COME APRIRLO
   open() {
@@ -159,6 +159,7 @@ export class CalendarDialogComponent implements OnInit {
 
   checkValue() {
     if (this.event) {
+      /*
       if (
         this.event.sendPromemoriaDocumentazione === undefined ||
         this.event.sendPromemoriaDocumentazione === undefined
@@ -168,6 +169,11 @@ export class CalendarDialogComponent implements OnInit {
         this.event.sendPromemoriaUdienza === undefined ||
         this.event.sendPromemoriaUdienza === undefined
       )
+        this.event.sendPromemoriaUdienza = false;
+        */
+      if (this.event.sendPromemoriaDocumentazione === undefined)
+        this.event.sendPromemoriaDocumentazione = false;
+      if (this.event.sendPromemoriaUdienza === undefined)
         this.event.sendPromemoriaUdienza = false;
       const ctrldataInizio = this.insertEditEventForm.get("dataInizio");
       const ctrldataFine = this.insertEditEventForm.get("dataFine");

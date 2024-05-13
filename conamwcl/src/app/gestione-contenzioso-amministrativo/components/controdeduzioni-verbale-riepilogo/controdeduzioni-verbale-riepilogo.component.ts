@@ -12,30 +12,24 @@ import { timer } from "rxjs/observable/timer";
 })
 export class ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent implements OnInit, OnDestroy {
 
+    public idVerbale: number;
     public subscribers: any = {};
 
-    public idVerbale: number;
     public allegatoEnable: boolean;
-
-
     constructor(
-        private logger: LoggerService,
         private router: Router,
-        private activatedRoute: ActivatedRoute,
+        private logger: LoggerService,
         private sharedVerbaleService: SharedVerbaleService,
-
+        private activatedRoute: ActivatedRoute,
     ) { }
 
     ngOnInit(): void {
         this.logger.init(ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent.name);
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idVerbale = +params['id'];
-            if (isNaN(this.idVerbale))
-                this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_INSERIMENTO_CONTRODEDUZIONI_RICERCA);
+            if (isNaN(this.idVerbale)) this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_INSERIMENTO_CONTRODEDUZIONI_RICERCA);
             this.isTipoAllegatoAllegabile();
-
-            if (this.activatedRoute.snapshot.paramMap.get('action') == 'caricato')
-                this.manageMessageTop("Controdeduzione allegata con successo", 'SUCCESS');
+            if (this.activatedRoute.snapshot.paramMap.get('action') == 'caricato') this.manageMessageTop("Controdeduzione allegata con successo", 'SUCCESS');
 
         });
     }
@@ -48,18 +42,15 @@ export class ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent imple
     }
 
 
-    goToAggiugiControdeduzioni() {
-        this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_INSERIMENTO_CONTRODEDUZIONI_ALLEGATO + this.idVerbale);
-    }
+    goToAggiugiControdeduzioni() { this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_INSERIMENTO_CONTRODEDUZIONI_ALLEGATO + this.idVerbale); }
 
-    //Messaggio top
     public showMessageTop: boolean;
-    public typeMessageTop: String;
     public messageTop: String;
+    public typeMessageTop: String;
 
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
     }
 
@@ -67,8 +58,7 @@ export class ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent imple
         this.showMessageTop = true;
         const source = timer(1000, 1000).take(31);
         this.subscribers.timer = source.subscribe(val => {
-            if (val == 30)
-                this.resetMessageTop();
+            if (val == 30)                this.resetMessageTop();
         });
     }
 
@@ -78,8 +68,6 @@ export class ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent imple
         this.messageTop = null;
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent.name);
-    }
+    ngOnDestroy(): void {this.logger.destroy(ControdeduzioniVerbaleRiepilogoGestContAmministrativComponent.name);}
 
 }

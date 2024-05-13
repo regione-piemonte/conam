@@ -5,19 +5,15 @@ import { Config } from "../../../shared/module/datatable/classes/config";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { SollecitoVO } from "../../../commons/vo/riscossione/sollecito-vo";
 import { SharedDialogComponent } from "../../../shared/component/shared-dialog/shared-dialog.component";
-import { UtilSubscribersService } from "../../../core/services/util-subscribers-service";
 import { RiscossioneService } from "../../services/riscossione.service";
 import { TableSoggettiOrdinanza } from "../../../commons/table/table-soggetti-ordinanza";
 import { Routing } from "../../../commons/routing";
 import { ExceptionVO } from "../../../commons/vo/exceptionVO";
-import { DatiSentenzaResponse } from "../../../commons/response/ordinanza/dati-sentenza-response";
 import { Constants } from "../../../commons/class/constants";
 import { saveAs } from "file-saver";
 import { SharedOrdinanzaDettaglio } from "../../../shared-ordinanza/component/shared-ordinanza-dettaglio/shared-ordinanza-dettaglio.component";
 import { SharedRiscossioneService } from "../../../shared-riscossione/services/shared-riscossione.service";
 import { CurrencyPipe } from "@angular/common";
-
-//JIRA - Gestione Notifica
 import { SalvaSollecitoRequest } from "../../../commons/request/riscossione/salva-sollecito-request";
 import { SharedRiscossioneSollecitoDettaglioComponent } from "../../../shared-riscossione/components/shared-riscossione-sollecito-dettaglio/shared-riscossione-sollecito-dettaglio.component";
 import { TemplateService } from "../../../template/services/template.service";
@@ -36,12 +32,12 @@ export class RiscossioneSollecitoDettaglioComponent
   @ViewChild(SharedRiscossioneSollecitoDettaglioComponent)
   sharedRiscossioneSollecitoDettaglioComponent: SharedRiscossioneSollecitoDettaglioComponent;
 
-  public subscribers: any = {};
-
   public loaded: boolean;
   public loadedAction: boolean = true;
 
   public idOrdinanzaVerbaleSoggetto: number[];
+
+  public subscribers: any = {};
 
   public sollecito: SollecitoVO;
   public soggettoSollecito: TableSoggettiOrdinanza[];
@@ -50,35 +46,33 @@ export class RiscossioneSollecitoDettaglioComponent
   public configSoggetti: Config;
   public configSolleciti: Config;
 
-  //Pop-up
+  // Pop up
   public buttonAnnullaText: string;
   public buttonConfirmText: string;
   public subMessages: Array<string>;
 
-  //Messaggio top
+  // Messaggio top
   private intervalTop: number = 0;
   public showMessageTop: boolean;
   public typeMessageTop: String;
   public messageTop: String;
 
-  //FLAG MODIFICA
+  // FLAG MODIFICA
   public isModifica: boolean;
   public modificabile: boolean;
 
-  //flag nuovo
+  // flag nuovo
   public isNuovo: boolean = true;
 
-
   //
-  public message: string; 
+  public message: string;
 
   constructor(
     private logger: LoggerService,
     private router: Router,
-    private riscossioneService: RiscossioneService,
     private sharedRiscossioneService: SharedRiscossioneService,
     private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
-    private utilSubscribersService: UtilSubscribersService,
+    private riscossioneService: RiscossioneService,
     private templateService: TemplateService
   ) {}
 
@@ -88,13 +82,10 @@ export class RiscossioneSollecitoDettaglioComponent
 
     this.soggettoSollecito = [];
     this.soggettoSollecito[0] = this.riscossioneService.soggettoSollecito;
-  
-    
-    this.templateService.getMessage('PROTLET01').subscribe(data => {
-    this.message= data.message
-    }, err => {
-        this.logger.error("Errore nel recupero del messaggio");
-    }); 
+
+
+    this.templateService.getMessage('PROTLET01').subscribe(data => {    this.message= data.message    }
+      , err => {        this.logger.error("Errore nel recupero del messaggio");    });
 
 
     //this.riscossioneService.soggettoSollecito = null;
@@ -112,12 +103,10 @@ export class RiscossioneSollecitoDettaglioComponent
       this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
     }
     this.riscossioneService.getMessaggioManualeByidOrdinanzaVerbaleSoggetto(this.idOrdinanzaVerbaleSoggetto[0]).subscribe(data => {
-      if(data){
-        this.manageMessageTop(data.message, data.type)
-      }  
+      if(data){        this.manageMessageTop(data.message, data.type)      }
     });
   }
-  
+
 
   loadSollecitiEsistenti() {
     this.loaded = false;
@@ -151,13 +140,17 @@ export class RiscossioneSollecitoDettaglioComponent
           this.loaded = true;
         },
         (err) => {
-          if (err instanceof ExceptionVO) {
-            this.manageMessageTop(err.message, err.type);
-          }
+          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
           this.logger.error("Errore durante il caricamento dei solleciti");
           this.loaded = true;
         }
       );
+  }
+  manageMessageTop(message: string, type: string) {
+    this.messageTop = message;
+    this.typeMessageTop = type;
+    this.scrollTopEnable = true;
+    this.timerShowMessageTop();
   }
 
   loadSollecitiEsistentiCopiaPerRichiestaBollettini() {
@@ -176,20 +169,18 @@ export class RiscossioneSollecitoDettaglioComponent
           );
         },
         (err) => {
-          if (err instanceof ExceptionVO) {
-            this.manageMessageTop(err.message, err.type);
-          }
+          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
           this.logger.error("Errore durante il caricamento dei solleciti");
           this.loaded = true;
         }
       );
   }
 
-  manageMessageTop(message: string, type: string) {
-    this.typeMessageTop = type;
-    this.messageTop = message;
-    this.scrollTopEnable = true;
-    this.timerShowMessageTop();
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.messageTop = null;
+    this.typeMessageTop = null;
+    clearInterval(this.intervalTop);
   }
 
   timerShowMessageTop() {
@@ -197,17 +188,8 @@ export class RiscossioneSollecitoDettaglioComponent
     let seconds: number = 10;
     this.intervalTop = window.setInterval(() => {
       seconds -= 1;
-      if (seconds === 0) {
-        this.resetMessageTop();
-      }
+      if (seconds === 0) {        this.resetMessageTop();      }
     }, 2000);
-  }
-
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalTop);
   }
 
   richiediEliminazioneSollecito() {
@@ -220,39 +202,21 @@ export class RiscossioneSollecitoDettaglioComponent
         this.eliminaSollecito(this.sollecito);
         this.sollecito = new SollecitoVO();
       },
-      (err) => {
-        this.logger.error(err);
-      }
+      (err) => {        this.logger.error(err);      }
     );
-    //premo "Annulla"
+    //"Annulla"
     this.subscribers.close = this.sharedDialog.closeAction.subscribe(
-      (data) => {
-        this.subMessages = new Array<string>();
-      },
-      (err) => {
-        this.logger.error(err);
-      }
-    );
-  }
-  
-  generaMessaggio() {
-    this.subMessages = new Array<string>();
-
-    this.subMessages.push("Si intende eliminare il sollecito selezionato?");
-    this.subMessages.push("Data Creazione: " + this.sollecito.dataScadenza);
-    this.subMessages.push(
-      "Importo da sollecitare: " + this.sollecito.importoSollecitato
+      (data) => {        this.subMessages = new Array<string>();      },
+      (err) => {        this.logger.error(err);      }
     );
   }
 
   creaSollecito() {
     this.loaded = false;
     //JIRA - Gestione Notifica
-    //----------------------
     let salvaSollecitoRequest: SalvaSollecitoRequest = new SalvaSollecitoRequest();
     salvaSollecitoRequest.sollecito = this.sollecito;
     salvaSollecitoRequest.notifica = this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject();
-    //------------------------
     //this.subscribers.salvataggio = this.riscossioneService.salvaSollecito(this.sollecito).subscribe(data => {
     this.subscribers.salvataggio = this.riscossioneService
       .salvaSollecito(salvaSollecitoRequest)
@@ -263,13 +227,19 @@ export class RiscossioneSollecitoDettaglioComponent
           );
         },
         (err) => {
-          if (err instanceof ExceptionVO) {
-            this.manageMessageTop(err.message, err.type);
-          }
+          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
           this.logger.error("Errore durante il salvataggio del sollecito");
           this.loaded = true;
         }
       );
+  }
+
+  generaMessaggio() {
+    this.subMessages = new Array<string>();
+
+    this.subMessages.push("Si intende eliminare il sollecito selezionato?");
+    this.subMessages.push("Data Creazione: " + this.sollecito.dataScadenza);
+    this.subMessages.push(      "Importo da sollecitare: " + this.sollecito.importoSollecitato    );
   }
 
   modificaVediSollecito(el: SollecitoVO) {
@@ -282,19 +252,9 @@ export class RiscossioneSollecitoDettaglioComponent
     }
     this.isModifica = true;
     this.isNuovo = false;
-    if(this.sharedRiscossioneSollecitoDettaglioComponent){
-      this.sharedRiscossioneSollecitoDettaglioComponent.aggiornaNotifica();
-    }
+    if(this.sharedRiscossioneSollecitoDettaglioComponent){      this.sharedRiscossioneSollecitoDettaglioComponent.aggiornaNotifica();    }
   }
 
-  annullaModifica() {
-    this.sollecito = new SollecitoVO();
-    this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
-    this.isModifica = false;
-    this.isNuovo = true;
-
-    this.loadSollecitiEsistenti();
-  }
 
   eliminaSollecito(el: SollecitoVO) {
     this.generaMessaggio();
@@ -308,15 +268,20 @@ export class RiscossioneSollecitoDettaglioComponent
           this.loaded = true;
         },
         (err) => {
-          if (err instanceof ExceptionVO) {
-            this.manageMessageTop(err.message, err.type);
-          }
+          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
           this.logger.error("Errore durante l'eliminazione del sollecito");
           this.loaded = true;
         }
       );
   }
 
+  annullaModifica() {
+    this.sollecito = new SollecitoVO();
+    this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
+    this.isNuovo = true;
+    this.isModifica = false;
+    this.loadSollecitiEsistenti();
+  }
   isDisabledCreaSollecito(): boolean {
     //JIRA - Gestione Notifica: non necessaria in questa sezione
     let checkNotifica: boolean = true;
@@ -325,30 +290,24 @@ export class RiscossioneSollecitoDettaglioComponent
       this.sharedRiscossioneSollecitoDettaglioComponent != undefined
     ) {
       if (
-        this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject() !=
-          null ||
-        this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject() !=
-          undefined
+        this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject() !=          null ||
+        this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject() !=          undefined
       ) {
         if (
-          this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject()
-            .importoSpeseNotifica == undefined ||
-          this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject()
-            .importoSpeseNotifica == null
+          this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject().importoSpeseNotifica == undefined ||
+          this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject().importoSpeseNotifica == null
         ) {
           checkNotifica = true;
         } else {
           checkNotifica = isNaN(
             Number(
-              this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject()
-                .importoSpeseNotifica
+              this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject().importoSpeseNotifica
             )
           );
         }
       }
     }
-    if (checkNotifica) return true;
-
+    if (checkNotifica) {return true;}
     return !this.sollecito.importoSollecitato;
   }
 
@@ -364,37 +323,26 @@ export class RiscossioneSollecitoDettaglioComponent
     this.configSolleciti = {
       selection: {
         enable: true,
-        isSelectable: (el: SollecitoVO) => {
-          console.log('prova',el)
-          return el.isCreatoDalloUserCorrente;
-        },
+        isSelectable: (el: SollecitoVO) => {          console.log('prova',el);          return el.isCreatoDalloUserCorrente;        },
       },
       columns: [
-        {
-          columnName: "numeroProtocollo",
-          displayName: "Numero Protocollo",
+        {          columnName: "numeroProtocollo",          displayName: "Numero Protocollo",
+        },
+        {          columnName: "dataScadenza",          displayName: "Data Scadenza",
         },
         {
-          columnName: "dataScadenza",
-          displayName: "Data Scadenza",
+          columnName: "importoSollecitatoString",          displayName: "Importo da sollecitare",
         },
         {
-          columnName: "importoSollecitatoString",
-          displayName: "Importo da sollecitare",
+          columnName: "maggiorazioneString",          displayName: "Maggiorazione",
         },
         {
-          columnName: "maggiorazioneString",
-          displayName: "Maggiorazione",
-        },
-        {
-          columnName: "statoSollecito.denominazione",
-          displayName: "Stato",
+          columnName: "statoSollecito.denominazione",          displayName: "Stato",
         },
       ],
     };
   }
 
-  scrollTopEnable: boolean;
   ngAfterViewChecked() {
     let scrollTop: HTMLElement = document.getElementById("scrollTop");
     if (this.scrollTopEnable && scrollTop != null) {
@@ -403,23 +351,7 @@ export class RiscossioneSollecitoDettaglioComponent
     }
   }
 
-  inviaRichiestaBollettini() {
-    this.loaded = false;
-    this.subscribers.inviaRichiestaBollettini = this.riscossioneService
-      .inviaRichiestaBollettiniSollecito(this.sollecito.idSollecito)
-      .subscribe(
-        (data) => {
-          this.loadSollecitiEsistentiCopiaPerRichiestaBollettini();
-        },
-        (err) => {
-          if (err instanceof ExceptionVO) {
-            this.manageMessageTop(err.message, err.type);
-          }
-          this.loaded = true;
-          this.logger.error("Errore durante il download del PDF");
-        }
-      );
-  }
+  scrollTopEnable: boolean;
 
   downloadBollettini() {
     this.loadedAction = false;
@@ -436,13 +368,31 @@ export class RiscossioneSollecitoDettaglioComponent
           this.loadedAction = true;
         },
         (err) => {
-          if (err instanceof ExceptionVO) {
-            this.manageMessageTop(err.message, err.type);
+          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);
           }
           this.loadedAction = true;
           this.logger.error("Errore durante il download del PDF");
         }
       );
+  }
+
+  inviaRichiestaBollettini() {
+    this.loaded = false;
+    this.subscribers.inviaRichiestaBollettini = this.riscossioneService
+      .inviaRichiestaBollettiniSollecito(this.sollecito.idSollecito)
+      .subscribe(
+        (data) => {          this.loadSollecitiEsistentiCopiaPerRichiestaBollettini();
+        },
+        (err) => {
+          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);
+          }
+          this.loaded = true;
+          this.logger.error("Errore durante il download del PDF");
+        }
+      );
+  }
+  goToCreaNotifica() {
+    this.router.navigateByUrl(      Routing.RISCOSSIONE_SOLLECITO_INS_NOTIFICA + this.sollecito.idSollecito    );
   }
 
   downloadLettera() {
@@ -467,32 +417,21 @@ export class RiscossioneSollecitoDettaglioComponent
       );
   }
 
-  goToCreaNotifica() {
-    this.router.navigateByUrl(
-      Routing.RISCOSSIONE_SOLLECITO_INS_NOTIFICA + this.sollecito.idSollecito
-    );
-  }
-
   goToVisualizzaNotifica() {
-    this.router.navigateByUrl(
-      Routing.RISCOSSIONE_SOLLECITO_VIEW_NOTIFICA + this.sollecito.idSollecito
-    );
+    this.router.navigateByUrl(      Routing.RISCOSSIONE_SOLLECITO_VIEW_NOTIFICA + this.sollecito.idSollecito    );
   }
 
+
+  ngOnDestroy(): void {
+    this.logger.destroy(RiscossioneSollecitoDettaglioComponent.name);
+  }
   onInfo(el: any | Array<any>) {
     if (el instanceof Array)
       throw Error("errore sono stati selezionati più elementi");
     else {
       let azione1: string = el.ruolo;
       let azione2: string = el.noteSoggetto;
-      this.router.navigate([
-        Routing.SOGGETTO_RIEPILOGO + el.idSoggetto,
-        { ruolo: azione1, nota: azione2 },
-      ]);
+      this.router.navigate([        Routing.SOGGETTO_RIEPILOGO + el.idSoggetto,        { ruolo: azione1, nota: azione2 },      ]);
     }
-  }
-
-  ngOnDestroy(): void {
-    this.logger.destroy(RiscossioneSollecitoDettaglioComponent.name);
   }
 }

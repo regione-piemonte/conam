@@ -25,17 +25,17 @@ public class NotificaVO extends ParentVO {
 	@JsonSerialize(using = CustomDateSerializer.class)
 	@JsonDeserialize(using = CustomDateDeserializer.class)
 	public LocalDate dataNotifica;
-	public BigDecimal importoSpeseNotifica;
-	public BigDecimal numeroRaccomandata;
+	private BigDecimal importoSpeseNotifica;
+	private BigDecimal numeroRaccomandata;
 	@JsonSerialize(using = CustomDateSerializer.class)
 	@JsonDeserialize(using = CustomDateDeserializer.class)
 	public LocalDate dataSpedizione;
-	public Boolean notificata;
-	public ModalitaNotificaVO modalita;
-	public Integer idOrdinanza;
-	public Integer idPiano;
-	public Integer idSollecito;
-	public boolean pregresso;
+	private Boolean notificata;
+	private ModalitaNotificaVO modalita;
+	private Integer idOrdinanza;
+	private Integer idPiano;
+	private Integer idSollecito;
+	private boolean pregresso;
     
     private SelectVO causale;
     private String numeroAccertamento;

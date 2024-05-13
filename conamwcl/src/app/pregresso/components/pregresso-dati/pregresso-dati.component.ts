@@ -2,18 +2,7 @@ import { Component, OnInit, OnDestroy, Inject, ViewChild } from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Routing } from "../../../commons/routing";
-import {
-  RegioneVO,
-  ProvinciaVO,
-  ComuneVO,
-  NormaVO,
-  ArticoloVO,
-  CommaVO,
-  LetteraVO,
-  EnteVO,
-  SelectVO,
-  AmbitoVO,
-} from "../../../commons/vo/select-vo";
+import {  RegioneVO,  ProvinciaVO,  ComuneVO,  NormaVO,  ArticoloVO,  CommaVO,  LetteraVO,  EnteVO,  SelectVO,  AmbitoVO,} from "../../../commons/vo/select-vo";
 import { RifNormativiService } from "../../services/rif-normativi.service";
 import { UserService } from "../../../core/services/user.service";
 import { VerbaleService } from "../../services/verbale.service";
@@ -26,6 +15,7 @@ import { NumberUtilsSharedService } from "../../../shared/service/number-utils-s
 import { SharedDialogComponent } from "../../../shared/component/shared-dialog/shared-dialog.component";
 import { UtilSubscribersService } from "../../../core/services/util-subscribers-service";
 import { PregressoVerbaleService } from "../../services/pregresso-verbale.service";
+import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
 
 declare var $: any;
 
@@ -38,11 +28,6 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
 
   public subscribers: any = {};
 
-  public loaded: boolean;
-  public loadedRegioni: boolean;
-  public loadedProvince: boolean;
-  public loadedComuni: boolean;
-
   public singoloEnte: boolean;
   public loadedAmbito: Array<boolean> = [];
   public loadedNorma: Array<boolean> = [];
@@ -53,6 +38,13 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
   public isVisible: Array<boolean> = [true];
 
   public verbale: VerbaleVO;
+
+  public loaded: boolean;
+  public loadedRegioni: boolean;
+  public loadedProvince: boolean;
+  public loadedComuni: boolean;
+
+  public idVerbale: number;
 
   public regioneModel: Array<RegioneVO>;
   public provinciaModel: Array<ProvinciaVO>;
@@ -66,24 +58,26 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
   public commaModel: Array<Array<CommaVO>> = [];
   public letteraModel: Array<Array<LetteraVO>> = [];
 
-  public idVerbale: number;
-
   private uIdCounter: number = 0;
-  public rifNormMessage: string =
-    "Impossibile inserire più Riferimenti Normativi identici";
+  public rifNormMessage: string = "Impossibile inserire più Riferimenti Normativi identici";
 
   private intervalIdS: number = 0;
   private intervalIdW: number = 0;
   public countSoggetti: number = 0;
-  //Messaggio top
-  public showMessageTop: boolean;
-  public typeMessageTop: String;
-  public messageTop: String;
 
   //warning meta pagina
   public typeWarning: string;
   public showWarning: boolean;
   public messageWarning: string;
+
+  //Messaggio top
+  public showMessageTop: boolean;
+  public typeMessageTop: String;
+  public messageTop: String;
+
+  public showAggiornaImportiSoggetto: boolean;
+
+  public showSoggetti: boolean = true;
 
   constructor(
     private logger: LoggerService,
@@ -96,10 +90,13 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     private pregressoVerbaleService: PregressoVerbaleService,
     private numberUtilsSharedService: NumberUtilsSharedService,
     private utilSubscribersService: UtilSubscribersService,
+    private sharedVerbaleService: SharedVerbaleService,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
+
+    this.showAggiornaImportiSoggetto = false;
     this.logger.init(PregressoDatiComponent.name);
 
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
@@ -110,38 +107,41 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
         (data) => {
           if (data != null) {
             this.loaded = false;
-            if (
-              this.activatedRoute.snapshot.paramMap.get("action") == "creazione"
-            )
-              this.manageMessageSuccess(
-                "Fascicolo creato con successo",
-                "SUCCESS"
-              );
-            if (
-              this.activatedRoute.snapshot.paramMap.get("action") ==
-              "salvato_con_warning"
-            )
+            if ( this.activatedRoute.snapshot.paramMap.get("action") == "creazione" ){
+              this.manageMessageSuccess("Fascicolo creato con successo","SUCCESS");
+            }
+            if ( this.activatedRoute.snapshot.paramMap.get("action") == "salvato_con_warning" ){
               this.manageMessageSuccess(
                 "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
-
+            }
             this.loadRegioni();
             this.comuniEnteValidInDate();
             this.loadEnti(data.entiAccertatore, data.entiLegge);
 
-            if (!this.idVerbale) this.nuovoVerbale();
-            else this.modificaVerbale();
+            if (!this.idVerbale) {
+              this.nuovoVerbale();
+            } else {
+              this.modificaVerbale();
+            }
+
+            if(this.idVerbale){
+	            this.subscribers.soggetto = this.sharedVerbaleService
+			      .getSoggettiByIdVerbale(this.idVerbale, true)
+			      .subscribe((data) => {
+			        if (data != null) {
+			        data.map((value) => {
+			        		console.log('value',value);
+			            this.showAggiornaImportiSoggetto = true;
+				      });
+    					}
+			      });
+            }
           }
         }
       );
     });
-  }
-
-  manageMessageSuccess(message: string, type: string) {
-    this.typeMessageTop = type;
-    this.messageTop = message;
-    this.timerShowMessageTop();
   }
 
   manageMessageWarning(message: string) {
@@ -150,21 +150,34 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     this.timerShowMessageWarning();
   }
 
-  manageMessage(err: ExceptionVO) {
-    this.typeMessageTop = err.type;
-    this.messageTop = err.message;
+  manageMessageSuccess(message: string, type: string) {
+    this.typeMessageTop = type;
+    this.messageTop = message;
     this.timerShowMessageTop();
   }
 
   timerShowMessageTop() {
     this.showMessageTop = true;
-    let seconds: number = 30; //this.configService.getTimeoutMessagge();
+    let seconds: number = 30;
     this.intervalIdS = window.setInterval(() => {
       seconds -= 1;
       if (seconds === 0) {
         this.resetMessageTop();
       }
     }, 1000);
+  }
+
+  manageMessage(err: ExceptionVO) {
+    this.typeMessageTop = err.type;
+    this.messageTop = err.message;
+    this.timerShowMessageTop();
+  }
+
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.typeMessageTop = null;
+    this.messageTop = null;
+    clearInterval(this.intervalIdS);
   }
 
   timerShowMessageWarning() {
@@ -178,20 +191,6 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalIdS);
-  }
-
-  resetMessageWarning() {
-    this.showWarning = false;
-    this.typeWarning = null;
-    this.messageWarning = null;
-    clearInterval(this.intervalIdW);
-  }
-
   nuovoVerbale() {
     this.verbale = new VerbaleVO();
     this.verbale.contestato = false;
@@ -201,7 +200,13 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     this.loaded = true;
   }
 
-  scrollEnable: boolean;
+  resetMessageWarning() {
+    this.showWarning = false;
+    this.typeWarning = null;
+    this.messageWarning = null;
+    clearInterval(this.intervalIdW);
+  }
+
   modificaVerbale() {
     this.subscribers.modificaVerbale = this.pregressoVerbaleService
       .getVerbaleById(this.idVerbale)
@@ -227,25 +232,23 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
       );
   }
 
-  goToVerbaleRiepilogo() {
-    this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO + this.idVerbale);
-  }
+  scrollEnable: boolean;
 
   goToVerbaleSoggetto() {
     this.router.navigateByUrl(Routing.PREGRESSO_SOGGETTO + this.idVerbale);
   }
 
-  goToVerbaleAllegato() {
-    this.router.navigateByUrl(Routing.PREGRESSO_ALLEGATO + this.idVerbale);
+  goToVerbaleRiepilogo() {
+    this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO + this.idVerbale);
   }
 
   creaFascicolo() {
-    //controllo che i riferimenti normativi siano validi
+    // controllo validita riferimenti normativi
     if (!this.validaRiferimenti()) {
       this.manageMessageWarning(this.rifNormMessage);
       return;
     }
-    //elimino i riferimenti rimossi
+    // elimino riferimenti rimossi
     this.cleanRiferimentiNormativi();
     this.loaded = false;
     this.subscribers.salvaVerbale = this.pregressoVerbaleService
@@ -269,26 +272,20 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
             );
           } else {
             this.idVerbale = data;
-            if (
-              this.isAfter(
-                this.verbale.dataOraViolazione,
-                this.verbale.dataOraAccertamento
-              )
-            )
+            if ( this.isAfter(this.verbale.dataOraViolazione, this.verbale.dataOraAccertamento) ){
               azione = "salvato_con_warning";
-            else azione = "modifica";
-
-            if (azione == "modifica")
-              this.manageMessageSuccess(
-                "Fascicolo modificato con successo",
-                "SUCCESS"
-              );
-            if (azione == "salvato_con_warning")
+            } else {
+              azione = "modifica";
+            }
+            if (azione == "modifica"){
+              this.manageMessageSuccess("Fascicolo modificato con successo","SUCCESS");
+            }
+            if (azione == "salvato_con_warning"){
               this.manageMessageSuccess(
                 "Il Fascicolo è stato salvato, ma la Data e ora processo verbale sono successive alla Data e ora accertamento",
                 "WARNING"
               );
-
+            }
             this.modificaVerbale();
           }
         },
@@ -297,10 +294,14 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
             this.loaded = true;
             this.manageMessage(err);
           }
-          this.logger.error("Errore nel salvataggio del verbale");
+          this.logger.error( "Errore nel salvataggio del verbale" );
           this.scrollEnable = true;
         }
       );
+  }
+
+  goToVerbaleAllegato() {
+    this.router.navigateByUrl(Routing.PREGRESSO_ALLEGATO + this.idVerbale);
   }
 
   validaRiferimenti(): boolean {
@@ -322,12 +323,38 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
             this.verbale.riferimentiNormativi[j].comma.id &&
           this.verbale.riferimentiNormativi[i].lettera.id ==
             this.verbale.riferimentiNormativi[j].lettera.id
-        )
-          flag = false;
+        ){          flag = false;        }
       }
     }
     return flag;
   }
+
+  uploadImportiSogg() {
+    this.showSoggetti = false;
+     console.log(this.verbale);
+     this.verbaleService
+       .uploadImportiSogg(this.verbale.id, this.verbale.importo)
+       .subscribe(
+         (data) => {
+           this.manageMessageSuccess("Importo aggiornato con successo","SUCCESS");
+           this.showSoggetti = true;
+         },
+         (err) => {
+           if (err instanceof ExceptionVO) {
+             this.loaded = true;
+             this.manageMessage(err);
+           }
+           this.logger.error("Errore nel'upload dati soggetto'");
+           this.scrollEnable = true;
+           this.showSoggetti = true;
+         }
+       );
+   }
+
+  // Messaggio di conferma eliminazione
+  public buttonAnnullaText: string;
+  public buttonConfirmText: string;
+  public subMessages: Array<string>;
 
   cleanRiferimentiNormativi() {
     let i: number,
@@ -340,21 +367,29 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     }
     this.verbale.riferimentiNormativi = arr;
   }
-
-  //Messaggio conferma eliminazione
-  public buttonAnnullaText: string;
-  public buttonConfirmText: string;
-  public subMessages: Array<string>;
-
   generaMessaggio() {
     this.subMessages = new Array<string>();
-
     let incipit: string = "Si intende eliminare il seguente fascicolo?";
-
     this.subMessages.push(incipit);
     this.subMessages.push("Numero verbale: " + this.verbale.numero);
     this.subMessages.push(
       "Data accertamento: " + this.verbale.dataOraAccertamento
+    );
+  }
+
+
+  loadRegioni() {
+    this.loadedRegioni = false;
+    this.subscribers.regioni = this.luoghiService.getRegioni().subscribe(
+      (data) => {
+        this.loadedProvince = true;
+        this.loadedComuni = true;
+        this.regioneModel = data;
+        this.loadedRegioni = true;
+      },
+      (err) => {
+        this.logger.error("Errore recupero regioni");
+      }
     );
   }
 
@@ -384,7 +419,7 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
               if (err instanceof ExceptionVO) {
                 this.loaded = true;
                 this.manageMessage(err);
-                this.logger.error("Errore nell'eliminazione del verbale");
+                this.logger.error("Errore eliminazione verbale");
               }
             }
           );
@@ -405,34 +440,6 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     );
   }
 
-  loadRegioni() {
-    this.loadedRegioni = false;
-    this.subscribers.regioni = this.luoghiService.getRegioni().subscribe(
-      (data) => {
-        this.loadedProvince = true;
-        this.loadedComuni = true;
-        this.regioneModel = data;
-        this.loadedRegioni = true;
-      },
-      (err) => {
-        this.logger.error("Errore nel recupero delle regioni");
-      }
-    );
-  }
-
-  comuniEnteValidInDate() {
-    this.subscribers.comuniEnteValidInDate = this.luoghiService
-      .getcomuniEnteValidInDate()
-      .subscribe(
-        (data) => {
-          this.comuneEnteModel = data;
-        },
-        (err) => {
-          this.logger.error("Errore nel recupero dei comuni Ente");
-        }
-      );
-  }
-
   loadProvinceByIdRegione(idRegione: number) {
     this.loadedProvince = false;
     if (this.verbale.dataOraAccertamento) {
@@ -447,7 +454,7 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
             this.loadedProvince = true;
           },
           (err) => {
-            this.logger.error("Errore nel recupero delle province");
+            this.logger.error("Errore recupero province");
           }
         );
     } else {
@@ -457,6 +464,19 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
       this.verbale.provincia = undefined;
       this.verbale.comune = undefined;
     }
+  }
+
+  comuniEnteValidInDate() {
+    this.subscribers.comuniEnteValidInDate = this.luoghiService
+      .getcomuniEnteValidInDate()
+      .subscribe(
+        (data) => {
+          this.comuneEnteModel = data;
+        },
+        (err) => {
+          this.logger.error("Errore recupero comuni Ente");
+        }
+      );
   }
 
   loadComuniByIdProvincia(idProvincia: number) {
@@ -469,12 +489,12 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
           this.loadedComuni = true;
         },
         (err) => {
-          this.logger.error("Errore nel recupero dei comuni");
+          this.logger.error("Errore recupero comuni");
         }
       );
   }
 
-  //chiamata solo nel modifica
+  // chiamata solo in modifica
   loadRiferimentiNormativiByIdEnte(idEnte: number) {
     let i: number,
       lenght: number = this.verbale.riferimentiNormativi.length;
@@ -503,21 +523,6 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadEnti(listEnteAccertatore: Array<EnteVO>, listEnteLegge: Array<EnteVO>) {
-    this.singoloEnte = false;
-    this.enteAccertatoreModel = listEnteAccertatore;
-    this.enteModel = listEnteLegge;
-    if (listEnteLegge.length == 1) {
-      this.singoloEnte = true;
-    } else {
-      this.loadedAmbito[0] = true;
-    }
-    this.loadedNorma[0] = true;
-    this.loadedArticolo[0] = true;
-    this.loadedComma[0] = true;
-    this.loadedLettera[0] = true;
-  }
-
   loadAmbitiByIdEnte(index: number, idEnte: number) {
     this.loadedAmbito[index] = false;
     const call = this.verbale.dataOraAccertamento
@@ -537,7 +542,52 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
         if (err instanceof ExceptionVO) {
           this.manageMessage(err);
         }
-        this.logger.error("Errore nel recupero degli ambiti");
+        this.logger.error("Errore recupero ambiti");
+      }
+    );
+  }
+
+  loadEnti(listEnteAccertatore: Array<EnteVO>, listEnteLegge: Array<EnteVO>) {
+    this.singoloEnte = false;
+    this.enteAccertatoreModel = listEnteAccertatore;
+    this.enteModel = listEnteLegge;
+    if (listEnteLegge.length == 1) {
+      this.singoloEnte = true;
+    } else {
+      this.loadedAmbito[0] = true;
+    }
+    this.loadedNorma[0] = true;
+    this.loadedArticolo[0] = true;
+    this.loadedComma[0] = true;
+    this.loadedLettera[0] = true;
+  }
+
+  loadArticoliByIdNormaAndIdEnte(index: number, idNorma: number, idEnte) {
+    this.loadedArticolo[index] = false;
+    const call = this.verbale.dataOraAccertamento
+      ? this.rifNormativiService.getArticoliByIdNormaAndIdEnte(
+          idNorma,
+          idEnte,
+          true,
+          true,
+          this.verbale.dataOraAccertamento
+        )
+      : this.rifNormativiService.getArticoliByIdNormaAndIdEnte(
+          idNorma,
+          idEnte,
+          true
+        );
+
+    this.subscribers.articoliByIdNorma = call.subscribe(
+      (data) => {
+        this.articoloModel[index] = data;
+        this.loadedArticolo[index] = true;
+      },
+      (err) => {
+        if (err instanceof ExceptionVO) {
+          this.manageMessage(err);
+        }
+        this.logger.error("Errore recupero articoli");
       }
     );
   }
@@ -568,37 +618,7 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
         if (err instanceof ExceptionVO) {
           this.manageMessage(err);
         }
-        this.logger.error("Errore nel recupero delle norme");
-      }
-    );
-  }
-
-  loadArticoliByIdNormaAndIdEnte(index: number, idNorma: number, idEnte) {
-    this.loadedArticolo[index] = false;
-    const call = this.verbale.dataOraAccertamento
-      ? this.rifNormativiService.getArticoliByIdNormaAndIdEnte(
-          idNorma,
-          idEnte,
-          true,
-          true,
-          this.verbale.dataOraAccertamento
-        )
-      : this.rifNormativiService.getArticoliByIdNormaAndIdEnte(
-          idNorma,
-          idEnte,
-          true
-        );
-
-    this.subscribers.articoliByIdNorma = call.subscribe(
-      (data) => {
-        this.articoloModel[index] = data;
-        this.loadedArticolo[index] = true;
-      },
-      (err) => {
-        if (err instanceof ExceptionVO) {
-          this.manageMessage(err);
-        }
-        this.logger.error("Errore nel recupero degli articoli");
+        this.logger.error("Errore recupero norme");
       }
     );
   }
@@ -622,9 +642,13 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
         if (err instanceof ExceptionVO) {
           this.manageMessage(err);
         }
-        this.logger.error("Errore nel recupero dei commi");
+        this.logger.error("Errore recupero commi");
       }
     );
+  }
+
+  changeVerbaleContestato(e) {
+    this.verbale.contestato = e;
   }
 
   loadLettereByIdComma(index: number, idComma: number) {
@@ -646,13 +670,9 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
         if (err instanceof ExceptionVO) {
           this.manageMessage(err);
         }
-        this.logger.error("Errore nel recupero delle lettere");
+        this.logger.error("Errore recupero lettere");
       }
     );
-  }
-
-  changeVerbaleContestato(e) {
-    this.verbale.contestato = e;
   }
 
   changeRegione(idRegione: number) {
@@ -662,16 +682,16 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     this.loadProvinceByIdRegione(idRegione);
   }
 
-  changeProvincia(idProvincia: number) {
-    this.verbale.comune = null;
-    this.loadComuniByIdProvincia(idProvincia);
-  }
-
   changeEnte(idEnte: number) {
     this.verbale.riferimentiNormativi = new Array<RiferimentiNormativiVO>();
     this.verbale.riferimentiNormativi.push(new RiferimentiNormativiVO());
     this.isVisible = [true];
     this.loadAmbitiByIdEnte(0, idEnte);
+  }
+
+  changeProvincia(idProvincia: number) {
+    this.verbale.comune = null;
+    this.loadComuniByIdProvincia(idProvincia);
   }
 
   changeAmbito(index: number, idAmbito: number) {
@@ -688,6 +708,13 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     );
   }
 
+  changeArticolo(index: number, idArticolo: number) {
+    this.verbale.riferimentiNormativi[index].comma = null;
+    this.verbale.riferimentiNormativi[index].lettera = null;
+    this.letteraModel[index] = null;
+    this.loadCommaByIdArticolo(index, idArticolo);
+  }
+
   changeNormativa(index: number, idNorma: number) {
     this.verbale.riferimentiNormativi[index].articolo = null;
     this.verbale.riferimentiNormativi[index].comma = null;
@@ -701,18 +728,6 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     );
   }
 
-  changeArticolo(index: number, idArticolo: number) {
-    this.verbale.riferimentiNormativi[index].comma = null;
-    this.verbale.riferimentiNormativi[index].lettera = null;
-    this.letteraModel[index] = null;
-    this.loadCommaByIdArticolo(index, idArticolo);
-  }
-
-  changeComma(index: number, idComma: number) {
-    this.verbale.riferimentiNormativi[index].lettera = null;
-    this.loadLettereByIdComma(index, idComma);
-  }
-
   isDisabledProvincia(): boolean {
     return (
       !this.verbale.regione ||
@@ -720,14 +735,12 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     );
   }
 
-  isDisabledComune(): boolean {
-    return (
-      !this.verbale.provincia ||
-      (this.verbale.provincia && !this.verbale.provincia.id)
-    );
+  changeComma(index: number, idComma: number) {
+    this.verbale.riferimentiNormativi[index].lettera = null;
+    this.loadLettereByIdComma(index, idComma);
   }
 
-  // solo il primo può essere disabled, nel caso in cui ci siano più enti e nessuno è stato ancora scelto
+  // solo il primo può essere disabled, se più enti e nessuno è stato ancora scelto
   isDisabledAmbito(index: number): boolean {
     return (
       index == 0 &&
@@ -736,11 +749,10 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     );
   }
 
-  isDisabledNorma(index: number): boolean {
+  isDisabledComune(): boolean {
     return (
-      !this.verbale.riferimentiNormativi[index].ambito ||
-      (this.verbale.riferimentiNormativi[index].ambito &&
-        !this.verbale.riferimentiNormativi[index].ambito.id)
+      !this.verbale.provincia ||
+      (this.verbale.provincia && !this.verbale.provincia.id)
     );
   }
 
@@ -752,11 +764,11 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     );
   }
 
-  isDisabledComma(index: number): boolean {
+  isDisabledNorma(index: number): boolean {
     return (
-      !this.verbale.riferimentiNormativi[index].articolo ||
-      (this.verbale.riferimentiNormativi[index].articolo &&
-        !this.verbale.riferimentiNormativi[index].articolo.id)
+      !this.verbale.riferimentiNormativi[index].ambito ||
+      (this.verbale.riferimentiNormativi[index].ambito &&
+        !this.verbale.riferimentiNormativi[index].ambito.id)
     );
   }
 
@@ -766,6 +778,25 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
       (this.verbale.riferimentiNormativi[index].comma &&
         !this.verbale.riferimentiNormativi[index].comma.id)
     );
+  }
+
+  isDisabledComma(index: number): boolean {
+    return (
+      !this.verbale.riferimentiNormativi[index].articolo ||
+      (this.verbale.riferimentiNormativi[index].articolo &&
+        !this.verbale.riferimentiNormativi[index].articolo.id)
+    );
+  }
+
+  isDisabledElimina(): boolean {
+    let count: number = 0;
+    this.isVisible.forEach((el) => {
+      if (el) count++;
+    });
+    return count <= 1;
+  }
+  isDisabledCreaFascicolo(valid: boolean): boolean {
+    return !valid || this.isDisabledAggiungi();
   }
 
   isDisabledAggiungi(): boolean {
@@ -786,18 +817,6 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     return flag;
   }
 
-  isDisabledElimina(): boolean {
-    let count: number = 0;
-    this.isVisible.forEach((el) => {
-      if (el) count++;
-    });
-    return count <= 1;
-  }
-
-  isDisabledCreaFascicolo(valid: boolean): boolean {
-    return !valid || this.isDisabledAggiungi();
-  }
-
   nuovoRiferimentoNormativo() {
     if (!this.validaRiferimenti()) {
       this.manageMessageWarning(this.rifNormMessage);
@@ -811,10 +830,10 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     });
     let newIndex = this.verbale.riferimentiNormativi.push(newElement) - 1;
     this.isVisible[newIndex] = true;
-    this.loadedArticolo[newIndex] = true;
     this.loadedComma[newIndex] = true;
-    this.loadedLettera[newIndex] = true;
+    this.loadedArticolo[newIndex] = true;
     this.loadedNorma[newIndex] = true;
+    this.loadedLettera[newIndex] = true;
     if (this.verbale.enteRiferimentiNormativi)
       this.loadAmbitiByIdEnte(
         newIndex,
@@ -822,10 +841,14 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
       );
   }
 
-  eliminaRiferimentoNormativo(index: number) {
-    if (this.isRiferimentoNormativoDuplicato(index)) this.showWarning = false;
 
-    if (this.verbale.riferimentiNormativi.length <= 1) return; //controllo aggiuntivo
+  eliminaRiferimentoNormativo(index: number) {
+    if (this.isRiferimentoNormativoDuplicato(index)) {
+      this.showWarning = false;
+    }
+    if (this.verbale.riferimentiNormativi.length <= 1) {
+      return; // controllo ulteriore
+    }
     this.isVisible[index] = false;
   }
 
@@ -835,15 +858,14 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     for (let i = 0; i < this.verbale.riferimentiNormativi.length; i++) {
       if (
         this.isVisible[i] &&
-        elemento.ambito != null &&
         this.verbale.riferimentiNormativi[i].ambito.id == elemento.ambito.id &&
-        elemento.norma != null &&
+        elemento.ambito != null &&
         this.verbale.riferimentiNormativi[i].norma.id == elemento.norma.id &&
+        elemento.norma != null &&
+        this.verbale.riferimentiNormativi[i].articolo.id == elemento.articolo.id &&
         elemento.articolo != null &&
-        this.verbale.riferimentiNormativi[i].articolo.id ==
-          elemento.articolo.id &&
-        elemento.comma != null &&
         this.verbale.riferimentiNormativi[i].comma.id == elemento.comma.id &&
+        elemento.comma != null &&
         elemento.lettera != null &&
         this.verbale.riferimentiNormativi[i].lettera.id == elemento.lettera.id
       )
@@ -852,13 +874,14 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
     return countDuplicati == 2 ? true : false;
   }
 
+  modelChangeFn(value: string){    this.verbale.dataOraViolazione = value  }
+
   manageDatePicker(event: any, i: number) {
-   
     var str: string = "#datetimepicker" + i.toString();
     if ($(str).length) {
       $(str).datetimepicker({
-        format: "DD/MM/YYYY, HH:mm",
         maxDate: new Date().setDate(new Date().getDate() + 1),
+        format: "DD/MM/YYYY, HH:mm",
         disabledDates: [new Date().setDate(new Date().getDate() + 1)],
       });
     }
@@ -873,77 +896,69 @@ export class PregressoDatiComponent implements OnInit, OnDestroy {
           break;
       }
     }
-   
   }
-  modelChangeFn(value: string){
-    this.verbale.dataOraViolazione = value
-  }
-  //restituisce true se la dataOra1 è successiva alla dataOra2
+
+  // true se dataOra1 successiva a dataOra2
   isAfter(dataOra1: string, dataOra2: string): boolean {
     let DD1, DD2, MM1, MM2, YYYY1, YYYY2, HH1, HH2, mm1, mm2: string;
-
-    YYYY1 = dataOra1.substring(6, 10);
     YYYY2 = dataOra2.substring(6, 10);
-
-    if (YYYY1 > YYYY2) return true;
-    else if (YYYY1 < YYYY2) return false;
-    else {
-      MM1 = dataOra1.substring(3, 5);
+    YYYY1 = dataOra1.substring(6, 10);
+    if (YYYY1 > YYYY2) {
+      return true;
+    } else if (YYYY1 < YYYY2) {
+      return false;
+    } else {
       MM2 = dataOra2.substring(3, 5);
-
-      if (MM1 > MM2) return true;
-      else if (MM1 < MM2) return false;
-      else {
-        DD1 = dataOra1.substring(0, 2);
+      MM1 = dataOra1.substring(3, 5);
+      if (MM1 > MM2) {
+        return true;
+      } else if (MM1 < MM2) {
+        return false;
+      } else {
         DD2 = dataOra2.substring(0, 2);
-
-        if (DD1 > DD2) return true;
-        else if (DD1 < DD2) return false;
-        else {
-          HH1 = dataOra1.substring(12, 14);
+        DD1 = dataOra1.substring(0, 2);
+        if (DD1 > DD2) {
+          return true;
+        } else if (DD1 < DD2) {
+          return false;
+        } else {
           HH2 = dataOra2.substring(12, 14);
-
-          if (HH1 > HH2) return true;
-          else if (HH1 < HH2) return false;
-          else {
-            mm1 = dataOra1.substring(15, 17);
+          HH1 = dataOra1.substring(12, 14);
+          if (HH1 > HH2) {
+            return true;
+          } else if (HH1 < HH2) {
+            return false;
+          } else {
             mm2 = dataOra2.substring(15, 17);
-
-            if (mm1 > mm2) return true;
+            mm1 = dataOra1.substring(15, 17);
+            if (mm1 > mm2) {
+              return true;
+            }
           }
         }
       }
     }
-
     return false;
   }
 
-  isKeyPressed(code: number): boolean {
-    return this.numberUtilsSharedService.numberValid(code);
-  }
+  trackByFn(index, item) {    return item.__id;  }
 
-  trackByFn(index, item) {
-    return item.__id;
-  }
-
-  byId(o1: SelectVO, o2: SelectVO) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
-  }
+  isKeyPressed(code: number): boolean {    return this.numberUtilsSharedService.numberValid(code);  }
 
   ngAfterViewChecked() {
     let i: number;
-    for (i = 1; i < 3; i++) this.manageDatePicker(null, i);
-
+    for (i = 1; i < 3; i++) {
+      this.manageDatePicker(null, i);
+    }
     let out: HTMLElement = document.getElementById("scrollTop");
     if (this.loaded && this.scrollEnable && out != null) {
       out.scrollIntoView();
       this.scrollEnable = false;
     }
   }
-  soggettoChange(countSoggetti: number): void {
-    this.countSoggetti = countSoggetti;
-  }
-  ngOnDestroy(): void {
-    this.logger.destroy(PregressoDatiComponent.name);
-  }
+  ngOnDestroy(): void {    this.logger.destroy(PregressoDatiComponent.name);  }
+
+  soggettoChange(countSoggetti: number): void {    this.countSoggetti = countSoggetti;  }
+
+  byId(o1: SelectVO, o2: SelectVO) {    return o1 && o2 ? o1.id === o2.id : o1 === o2;  }
 }

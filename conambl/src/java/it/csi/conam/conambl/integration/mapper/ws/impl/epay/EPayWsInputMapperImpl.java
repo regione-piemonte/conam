@@ -300,7 +300,8 @@ public class EPayWsInputMapperImpl implements EPayWsInputMapper {
 				}			
 			}			
 		}
-		posizioneDaInserireType.setComponentiImporto(componentiImportos.toArray(new ComponenteImportoType[0]) );
+		//	Issue 3 - Sonarqube
+		posizioneDaInserireType.setComponentiImporto(componentiImportos != null ? componentiImportos.toArray(new ComponenteImportoType[0]) : null);
 	}
 
 	@Override
@@ -324,7 +325,7 @@ public class EPayWsInputMapperImpl implements EPayWsInputMapper {
 			cnmCParametro = Iterables.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_OGGETTO_PAGAMENTO_SOLLECITO_RATE)).orNull();
 			List<CnmRSollecitoSoggRata> cnmRSollecitoSoggRataList = cnmRSollecitoSoggRataRepository.findByCnmTSollecito(cnmTSollecito);
 			if (cnmCParametro != null)
-//				descrizioneCausaleVersamento = cnmCParametro.getValoreString() + cnmRSollecitoSoggRataList.get(0).getCnmTRata().getCnmTPianoRate().getNumeroProtocollo();	// 20210427_LC  
+//				descrizioneCausaleVersamento = cnmCParametro.getValoreString() + cnmRSollecitoSoggRataList.get(0).getCnmTRata().getCnmTPianoRate().getNumeroProtocollo();	// 20210427_LC 
 //				descrizioneCausaleVersamento = String.format(cnmCParametro.getValoreString(), cnmRSollecitoSoggRataList.get(0).getCnmTRata().getCnmTPianoRate().getNumeroProtocollo(), cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());
 				// 20231102 PP - protocollo non piu presente nell'oggetto del sollecito
 				descrizioneCausaleVersamento = String.format(cnmCParametro.getValoreString(), cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());

@@ -61,9 +61,9 @@ public class DoquiService {
 	
 	
 	// 20200719_LC
-    public OauthHelper 	apiManagerOauth;
-    public String 		apiManagerUser;
-    public String 		apiManagerPassword;
+    private OauthHelper 	apiManagerOauth;
+    private String 		apiManagerUser;
+    private String 		apiManagerPassword;
     
     private String rootUrlApiManager;
     private String rootUrlApiManagerEnd;

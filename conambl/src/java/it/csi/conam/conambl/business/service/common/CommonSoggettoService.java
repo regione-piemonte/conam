@@ -16,6 +16,8 @@ public interface CommonSoggettoService {
 	SoggettoVO getSoggettoFromStas(MinSoggettoVO minSoggettoVO, String identita);
 
 	CnmTSoggetto updateSoggettoDBWithIdStas(CnmTSoggetto cnmTSoggetto, CnmTUser cnmTUser, SoggettoVO sogDb, SoggettoVO sogStas, SoggettoVO soggetto);
+	//	Issue 3 - Sonarqube
+	CnmTSoggetto updateSoggettoDBWithIdStas(CnmTUser cnmTUser, SoggettoVO sogDb, SoggettoVO sogStas, SoggettoVO soggetto);
 
 	CnmTSoggetto getSoggettoFromDb(MinSoggettoVO minSoggettoVO, boolean isRicerca);
 	

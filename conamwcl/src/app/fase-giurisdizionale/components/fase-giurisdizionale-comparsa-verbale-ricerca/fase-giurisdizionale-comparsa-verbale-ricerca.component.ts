@@ -8,7 +8,6 @@ import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { RicercaVerbaleRequest } from "../../../commons/request/verbale/ricerca-verbale-request";
 import { ConfigSharedService } from "../../../shared/service/config-shared.service";
 import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
-import { Constants } from "../../../commons/class/constants";
 import { SharedVerbaleRicercaComponent, ConfigVerbaleRicerca } from "../../../shared-verbale/component/shared-verbale-ricerca/shared-verbale-ricerca.component";
 
 @Component({
@@ -17,35 +16,34 @@ import { SharedVerbaleRicercaComponent, ConfigVerbaleRicerca } from "../../../sh
 })
 export class FaseGiurisdizionaleComparsaCostituzioneRispostaRicercaComponent implements OnInit, OnDestroy {
 
+    public configVerbaleRicerca: ConfigVerbaleRicerca = { showFieldStatoVerbale: true, tipoRicerca: 'GC' };
+
+    public loaded: boolean = true;
+    public verbali: Array<MinVerbaleVO>;
+    public config: Config;
+    public verbaleSel: MinVerbaleVO;
+
     public showTable: boolean;
 
-    public config: Config;
-    public verbali: Array<MinVerbaleVO>;
-    public verbaleSel: MinVerbaleVO;
-    public loaded: boolean = true;
-
     request: RicercaVerbaleRequest;
+
 
     @ViewChild(SharedVerbaleRicercaComponent)
     private sharedVerbaleRicercaComponent: SharedVerbaleRicercaComponent
 
-    public configVerbaleRicerca: ConfigVerbaleRicerca = { showFieldStatoVerbale: true, tipoRicerca: 'GC' };
-
     constructor(
-        private logger: LoggerService,
         private configSharedService: ConfigSharedService,
+        private logger: LoggerService,
         private sharedVerbaleService: SharedVerbaleService,
         private router: Router,
     ) { }
 
     ngOnInit(): void {
         this.logger.init(FaseGiurisdizionaleComparsaCostituzioneRispostaRicercaComponent.name);
-
         this.config = this.configSharedService.configRicercaVerbale;
         this.verbali = new Array();
     }
 
-    scrollEnable: boolean;
     ricercaFascicolo(ricercaVerbaleRequest: RicercaVerbaleRequest) {
         this.request = ricercaVerbaleRequest;
         this.showTable = false;
@@ -67,14 +65,6 @@ export class FaseGiurisdizionaleComparsaCostituzioneRispostaRicercaComponent imp
         );
     }
 
-    ngAfterContentChecked() {
-        let out: HTMLElement = document.getElementById("scrollBottom");
-        if (this.loaded && this.scrollEnable && this.showTable && out != null) {
-            out.scrollIntoView();
-            this.scrollEnable = false;
-        }
-    }
-
     onDettaglio(el: any | Array<any>) {
         this.verbaleSel = el;
         if (el instanceof Array)
@@ -83,13 +73,19 @@ export class FaseGiurisdizionaleComparsaCostituzioneRispostaRicercaComponent imp
         this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_INSERIMENTO_COMPARSA_RIEPILOGO + el.id)
     }
 
+    scrollEnable: boolean;
 
+    ngAfterContentChecked() {
+        let out: HTMLElement = document.getElementById("scrollBottom");
+        if (this.loaded && this.scrollEnable && this.showTable && out != null) {
+            out.scrollIntoView();
+            this.scrollEnable = false;
+        }
+    }
 
-    //Messaggio top
-    public showMessageTop: boolean;
-    public typeMessageTop: String;
-    public messageTop: String;
-    private intervalIdS: number = 0;
+    ngOnDestroy(): void {
+        this.logger.destroy(FaseGiurisdizionaleComparsaCostituzioneRispostaRicercaComponent.name);
+    }
 
     manageMessage(err: ExceptionVO) {
         this.typeMessageTop = err.type;
@@ -107,15 +103,16 @@ export class FaseGiurisdizionaleComparsaCostituzioneRispostaRicercaComponent imp
             }
         }, 1000);
     }
+    //Messaggio top
+    public messageTop: String;
+    public showMessageTop: boolean;
+    private intervalIdS: number = 0;
+    public typeMessageTop: String;
+
     resetMessageTop() {
         this.showMessageTop = false;
         this.typeMessageTop = null;
         this.messageTop = null;
         clearInterval(this.intervalIdS);
-    }
-
-
-    ngOnDestroy(): void {
-        this.logger.destroy(FaseGiurisdizionaleComparsaCostituzioneRispostaRicercaComponent.name);
     }
 }

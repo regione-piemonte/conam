@@ -4,9 +4,22 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web.provider;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+import org.hibernate.validator.method.MethodConstraintViolation;
+import org.hibernate.validator.method.MethodConstraintViolationException;
+import org.jboss.resteasy.spi.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+
 import it.csi.conam.conambl.business.SpringApplicationContextHelper;
 import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.exception.BollettinoException;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.exception.FileP7MNotSignedException;
 import it.csi.conam.conambl.common.exception.FileSizeException;
@@ -17,17 +30,6 @@ import it.csi.conam.conambl.integration.mapper.entity.MessaggioEntityMapper;
 import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDTipoMessaggioRepository;
 import it.csi.conam.conambl.vo.ExceptionVO;
-import org.hibernate.validator.method.MethodConstraintViolation;
-import org.hibernate.validator.method.MethodConstraintViolationException;
-import org.jboss.resteasy.spi.NotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
 @SuppressWarnings("deprecation")
 @Provider
@@ -47,6 +49,8 @@ public class ExceptionHandler implements ExceptionMapper<RuntimeException> {
 		// 20200907 PP
 		else if (exception instanceof FileP7MNotSignedException)
 			return handleFileP7MException((FileP7MNotSignedException) exception);
+		else if (exception instanceof BollettinoException)
+			return handleBollettinoException((BollettinoException) exception);
 		
 		else if (exception instanceof BusinessException)
 			return handleBusinessException((BusinessException) exception);
@@ -68,6 +72,12 @@ public class ExceptionHandler implements ExceptionMapper<RuntimeException> {
 	// 20200907 PP - restituisco messaggio in caso di P7M non firmato 
 	private Response handleFileP7MException(FileP7MNotSignedException ex) {
 		return Response.ok(new ExceptionVO("", ex.getMessage(), ErrorCode.ERROR_DANGER_DESC)).build();
+	}
+	
+	private Response handleBollettinoException(BollettinoException exception) {
+		CnmDMessaggio cnmDMessaggio = getCnmDMessaggioRepository().findByCodMessaggio(exception.getCodice());
+		cnmDMessaggio.setDescMessaggio(cnmDMessaggio.getDescMessaggio() + " " + exception.getCodiceEsito());
+		return Response.ok(getMessaggioEntityMapper().mapEntityToVO(cnmDMessaggio)).build();
 	}
 	
 	private Response handleBusinessException(BusinessException exception) {
@@ -95,7 +105,8 @@ public class ExceptionHandler implements ExceptionMapper<RuntimeException> {
 		if (exception.getConstraintViolations() != null && !exception.getConstraintViolations().isEmpty()) {
 			for (MethodConstraintViolation<?> method : exception.getConstraintViolations()) {
 				codice = method.getMessage();
-				break;
+				//	Issue 3 - Sonarqube
+				// break;
 			}
 		}
 		retrieveError(codice);

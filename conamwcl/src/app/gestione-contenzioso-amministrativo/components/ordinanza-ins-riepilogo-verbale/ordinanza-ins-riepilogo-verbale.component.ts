@@ -15,17 +15,15 @@ export class OrdinanzaInsVerbaleRiepilogoGestContAmministrativoComponent impleme
 
     public loaded: boolean;
     public idVerbale: number;
-    //Messaggio top
     public showMessageTop: boolean;
-    public typeMessageTop: String;
     public messageTop: String;
+    public typeMessageTop: String;
     private intervalIdS: number = 0;
 
     constructor(
-        private logger: LoggerService,
         private router: Router,
+        private logger: LoggerService,
         private activatedRoute: ActivatedRoute,
-        private userService: UserService,
         private sharedVerbaleService: SharedVerbaleService
     ) { }
 
@@ -33,19 +31,14 @@ export class OrdinanzaInsVerbaleRiepilogoGestContAmministrativoComponent impleme
         this.logger.init(OrdinanzaInsVerbaleRiepilogoGestContAmministrativoComponent.name);
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idVerbale = +params['id'];
-            if (isNaN(this.idVerbale))
-                this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_INS_ORDINANZA_RICERCA_VERBALE);
+            if (isNaN(this.idVerbale))  this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_INS_ORDINANZA_RICERCA_VERBALE);
             this.loaded = true;
         });
         this.sharedVerbaleService.getMessaggioManualeByIdVerbale(this.idVerbale).subscribe(data => {
-            if(data){
-              this.manageMessage(data.message, data.type)
-            }
-          
+            if(data){              this.manageMessage(data.message, data.type)            }
          });
 
     }
-
 
     goToCreaOrdinanza() {
         this.router.navigate([Routing.GESTIONE_CONT_AMMI_INS_ORDINANZA_CREA_ORDINANZA + this.idVerbale], { queryParams: { listaOrdinanze: true } });
@@ -56,25 +49,24 @@ export class OrdinanzaInsVerbaleRiepilogoGestContAmministrativoComponent impleme
     }
 
     manageMessage(message: string, type: String) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
     }
 
     timerShowMessageTop() {
         this.showMessageTop = true;
-        let seconds: number = 30//this.configService.getTimeoutMessagge();
+        let seconds: number = 30
         this.intervalIdS = window.setInterval(() => {
             seconds -= 1;
-            if (seconds === 0) {
-                this.resetMessageTop();
+            if (seconds === 0) {                this.resetMessageTop();
             }
         }, 1000);
     }
 
     resetMessageTop() {
-        this.showMessageTop = false;
         this.typeMessageTop = null;
+        this.showMessageTop = false;
         this.messageTop = null;
         clearInterval(this.intervalIdS);
     }

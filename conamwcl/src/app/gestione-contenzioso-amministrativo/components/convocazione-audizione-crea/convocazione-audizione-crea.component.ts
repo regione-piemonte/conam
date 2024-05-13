@@ -48,7 +48,7 @@ export class ConvocazioneAudizioneCreaGestContAmministrativoComponent implements
             if (isNaN(this.idVerbale))
                 this.router.navigateByUrl(Routing.GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_RICERCA);
         });
-        this.config = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(true, 1, this.isSelectable, false);
+        this.config = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(true, 1, this.isSelectable, false, false);
         this.soggettiArray = new Array();
         this.loaded = true;
         this.isVerbaleConvocazione = true;

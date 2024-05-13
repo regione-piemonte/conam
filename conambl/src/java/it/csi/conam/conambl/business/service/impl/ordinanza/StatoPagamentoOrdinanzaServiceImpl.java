@@ -142,7 +142,8 @@ public class StatoPagamentoOrdinanzaServiceImpl implements StatoPagamentoOrdinan
 
 	}
 
-	@Transactional
+	//	Issue 3 - Sonarqube
+//	@Transactional
 	private boolean verificaPagamentoSoggetti(List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogs) {
 		return Collections2.filter(cnmROrdinanzaVerbSogs, new Predicate<CnmROrdinanzaVerbSog>() {
 			@Override
@@ -157,7 +158,8 @@ public class StatoPagamentoOrdinanzaServiceImpl implements StatoPagamentoOrdinan
 		}).isEmpty();
 	}
 
-	@Transactional
+	//	Issue 3 - Sonarqube
+//	@Transactional
 	private boolean verificaPagamentoSoggetto(CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog) {
 		long idStatoOrdinanzaVerbSog = cnmROrdinanzaVerbSog.getCnmDStatoOrdVerbSog().getIdStatoOrdVerbSog();
 		return (idStatoOrdinanzaVerbSog == Constants.ID_STATO_ORDINANZA_VERB_SOGG_PAGATO_ONLINE //
@@ -167,7 +169,8 @@ public class StatoPagamentoOrdinanzaServiceImpl implements StatoPagamentoOrdinan
 		);
 	}
 
-	@Transactional
+	//	Issue 3 - Sonarqube
+//	@Transactional
 	private void estinguiSolleciti(CnmTUser cnmTUser, List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogs) {
 		// chiudo i solleciti aperti estinguendoli
 		List<Long> stati = Arrays.asList(Constants.ID_STATO_SOLLECITO_PAGATO_ONLINE, Constants.ID_STATO_SOLLECITO_PAGATO_OFFLINE);
@@ -188,7 +191,8 @@ public class StatoPagamentoOrdinanzaServiceImpl implements StatoPagamentoOrdinan
 		cnmTSollecitoRepository.save(cnmTSollecitos);
 	}
 
-	@Transactional
+	//	Issue 3 - Sonarqube
+//	@Transactional
 	private void estinguiSollecitiSoggetto(CnmTUser cnmTUser, CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog) {
 		// chiudo i solleciti aperti estinguendoli
 		List<Long> stati = Arrays.asList(Constants.ID_STATO_SOLLECITO_PAGATO_ONLINE, Constants.ID_STATO_SOLLECITO_PAGATO_OFFLINE);
@@ -209,7 +213,8 @@ public class StatoPagamentoOrdinanzaServiceImpl implements StatoPagamentoOrdinan
 		cnmTSollecitoRepository.save(cnmTSollecitos);
 	}
 
-	@Transactional
+	//	Issue 3 - Sonarqube
+//	@Transactional
 	private void estinguiRate(CnmTOrdinanza cnmTOrdinanza, CnmTUser cnmTUser) {
 		List<CnmDStatoRata> cnmDStatoRatas = (List<CnmDStatoRata>) cnmDStatoRataRepository.findAll(Arrays.asList(Constants.ID_STATO_RATA_PAGATO_OFFLINE, Constants.ID_STATO_RATA_PAGATO_ONLINE));
 		List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogs = cnmROrdinanzaVerbSogRepository.findByCnmTOrdinanza(cnmTOrdinanza);
@@ -226,7 +231,8 @@ public class StatoPagamentoOrdinanzaServiceImpl implements StatoPagamentoOrdinan
 		cnmRSoggRataRepository.save(cnmRSoggRatas);
 	}
 
-	@Transactional
+	//	Issue 3 - Sonarqube
+//	@Transactional
 	private void estinguiRateSoggetto(CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog, CnmTUser cnmTUser) {
 		List<CnmDStatoRata> cnmDStatoRatas = (List<CnmDStatoRata>) cnmDStatoRataRepository.findAll(Arrays.asList(Constants.ID_STATO_RATA_PAGATO_OFFLINE, Constants.ID_STATO_RATA_PAGATO_ONLINE));
 		List<CnmRSoggRata> cnmRSoggRatas = cnmRSoggRataRepository.findByCnmROrdinanzaVerbSogAndCnmDStatoRataNotIn(cnmROrdinanzaVerbSog, cnmDStatoRatas);
@@ -245,7 +251,8 @@ public class StatoPagamentoOrdinanzaServiceImpl implements StatoPagamentoOrdinan
 			this.verificaTerminePagamentoRate(cnmRSoggRatas.get(0), cnmDStatoOrdVerbSog, cnmTUser);
 	}
 
-	@Transactional
+	//	Issue 3 - Sonarqube
+//	@Transactional
 	private void aggiornaPagamentoOrdinanza(CnmTOrdinanza cnmTOrdinanza, CnmTUser cnmTUser1) {
 		Timestamp dataOraUpdate = utilsDate.asTimeStamp(LocalDateTime.now());
 		if (cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() != Constants.ID_STATO_ORDINANZA_PAGATA) {

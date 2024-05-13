@@ -29,6 +29,12 @@ public interface CnmRVerbaleSoggettoRepository extends JpaRepository<CnmRVerbale
 	@Query(value = "select sv.* from cnm_r_verbale_soggetto sv where sv.id_soggetto = ?1", nativeQuery = true)
 	List<CnmRVerbaleSoggetto> findVerbaleSoggettoByIdSoggetto(Integer idSoggetto);
 
+	@Query(value = "select sv.* from cnm_r_verbale_soggetto sv where sv.id_soggetto = ?1 and sv.id_verbale = ?2", nativeQuery = true)
+	CnmRVerbaleSoggetto findVerbaleSoggettoByIdSoggettoAndIdVerbale(Integer idSoggetto, Integer idVerbale);
+
+	@Query(value = "select sv.* from cnm_r_verbale_soggetto sv where sv.id_verbale = ?1", nativeQuery = true)
+	List<CnmRVerbaleSoggetto> findVerbaleSoggettoByIdVerbale(Integer idVerbale);
+	
 	@Query(value = "select sv.* from cnm_r_verbale_soggetto sv where sv.recidivo = true and sv.id_soggetto = ?1", nativeQuery = true)
 	List<CnmRVerbaleSoggetto> findVerbaleSoggettoRecidivoByIdSoggetto(Integer idSoggetto);
 
@@ -40,6 +46,9 @@ public interface CnmRVerbaleSoggettoRepository extends JpaRepository<CnmRVerbale
 	@Query(value = "select vs.id_verbale from cnm_r_verbale_soggetto as vs where vs.id_verbale_soggetto=?1", nativeQuery = true)
 	Integer findCnmTVerbaleByCnmRVerbaleSoggetto(Integer idVerbaleSoggetto);
 
+	@Query(value = "select vs.*_verbale from cnm_r_verbale_soggetto as vs where vs.id_verbale_soggetto=?1", nativeQuery = true)
+	CnmRVerbaleSoggetto findCnmTVerbaleByIdVerbaleSoggetto(Integer idVerbaleSoggetto);
+	
 	@Query("select vs.cnmTSoggetto from CnmRVerbaleSoggetto vs join vs.cnmTSoggetto s join vs.cnmTVerbale v join vs.cnmDRuoloSoggetto r where v.idVerbale=?1 and r.idRuoloSoggetto=?2")
 	List<CnmTSoggetto> findCnmTSoggettoByIdVerbaleAndIdRuoloSoggetto(Integer idVerbale, Long idRuoloSoggetto);
 

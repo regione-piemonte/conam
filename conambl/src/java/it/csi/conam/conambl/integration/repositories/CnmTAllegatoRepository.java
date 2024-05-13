@@ -4,6 +4,7 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.repositories;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -70,6 +71,11 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 	
 	// 20200708_LCs
 	List<CnmTAllegato> findByObjectidSpostamentoActa(String objectidSpostamentoActa);
+	
+
+	@Query(value = "select count(*) from cnm_t_allegato a " + //
+			"where a.numero_protocollo = ?1 and a.objectid_spostamento_acta is null", nativeQuery = true)
+	BigInteger findByNumeroProtocolloAndObjectidSpostamentoActaIsNullNative(String numeroProtocollo);
 	
 	// 20200728_LC
 	List<CnmTAllegato> findByNumeroProtocolloAndObjectidSpostamentoActaIsNull(String numeroProtocollo);

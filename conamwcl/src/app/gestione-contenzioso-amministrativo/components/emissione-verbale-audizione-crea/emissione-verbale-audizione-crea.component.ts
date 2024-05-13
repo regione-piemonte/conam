@@ -105,7 +105,8 @@ export class EmissioneVerbaleAudizioneCreaGestContAmministrativoComponent
         true,
         1,
         this.isSelectablePerAllegare,
-        false
+        false,
+          false
       );
       this.verbaleService
         .riepilogoVerbaleAudizione(this.idVerbale)
@@ -135,7 +136,8 @@ export class EmissioneVerbaleAudizioneCreaGestContAmministrativoComponent
         true,
         1,
         this.isSelectable,
-        false
+        false,
+          false
       );
       this.loaded = true;
     }

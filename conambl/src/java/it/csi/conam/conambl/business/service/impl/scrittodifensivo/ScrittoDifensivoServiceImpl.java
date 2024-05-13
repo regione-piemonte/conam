@@ -310,7 +310,7 @@ public class ScrittoDifensivoServiceImpl implements ScrittoDifensivoService {
 		} else {
 		
 			// UPDATE SCRITTO ESISTENTE ---------------------------------------
-			cnmTScrittoDifensivo = utilsScrittoDifensivo.validateAndGetCnmTScrittoDifensivo(scrittoDifensivoVO.getId().intValue());		
+			cnmTScrittoDifensivo = utilsScrittoDifensivo.validateAndGetCnmTScrittoDifensivo(scrittoDifensivoVO.getId());		
 			if (cnmTScrittoDifensivo.isFlagAssociato()) throw new IllegalArgumentException("scritto associato, impossibile modificare");	
 		
 			cnmTScrittoDifensivo = scrittoDifensivoEntityMapper.mapVOtoEntityUpdate(scrittoDifensivoVO, cnmTScrittoDifensivo); // update campi editati dall'utente (numVerbaleAccertamento e nomi e ambito)		

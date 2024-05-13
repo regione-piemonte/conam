@@ -12,37 +12,19 @@ import javax.validation.constraints.NotNull;
  * @author riccardo.bova
  * @date 19 nov 2018
  */
-public class TipologiaAllegabiliRequest extends ParentRequest {
+public class TipologiaAllegabiliRequest extends TipologiaAllegabiliCommonsRequest {
 
-	private static final long serialVersionUID = -3620699452083779279L;
+	private static final long serialVersionUID = -43299452083779279L;
 
 	@NotNull(message = "REQCON06")
 	private Integer id;
-	private String tipoDocumento;
-	private boolean aggiungiCategoriaEmail;
 
 	public Integer getId() {
 		return id;
 	}
 
-	public String getTipoDocumento() {
-		return tipoDocumento;
-	}
-
 	public void setId(Integer id) {
 		this.id = id;
-	}
-
-	public void setTipoDocumento(String tipoDocumento) {
-		this.tipoDocumento = tipoDocumento;
-	}
-
-	public boolean isAggiungiCategoriaEmail() {
-		return aggiungiCategoriaEmail;
-	}
-
-	public void setAggiungiCategoriaEmail(boolean aggiungiCategoriaEmail) {
-		this.aggiungiCategoriaEmail = aggiungiCategoriaEmail;
 	}
 
 	@Override

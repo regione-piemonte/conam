@@ -192,13 +192,14 @@ public class NotificaServiceImpl implements NotificaService {
 		   cnmTPianoRate.getCnmDStatoPianoRate().getIdStatoPianoRate() == Constants.ID_STATO_PIANO_PROTOCOLLATO)
 		) {
 				
-			if(notifica!=null && notifica.modalita!=null && notifica.modalita.getId()==null) {
-				notifica.modalita = null;
+			if(notifica!=null && notifica.getModalita()!=null && notifica.getModalita().getId()==null) {
+				notifica.setModalita(null);
 			}
-			if(notifica.modalita==null) {
+			if(notifica.getModalita()==null) {
 				// 20210415_LC stato invariato
 				//cnmTPianoRate.setCnmDStatoPianoRate(cnmDStatoPianoRateRepository.findOne(Constants.ID_STATO_PIANO_NON_NOTIFICATO));
-			} else if(notifica.modalita.getId().equals(Constants.ID_COMPIUTA_GIACENZA) || notifica.modalita.getId().equals(Constants.ID_CONSEGNA_A_MANI_PROPRIE)){
+			} else if(notifica.getModalita().getId().equals(Constants.ID_COMPIUTA_GIACENZA) || notifica.getModalita().getId().equals(Constants.ID_CONSEGNA_A_MANI_PROPRIE)
+					 || notifica.getModalita().getId().equals(Constants.ID_PEC)){
 				cnmTPianoRate.setCnmDStatoPianoRate(cnmDStatoPianoRateRepository.findOne(Constants.ID_STATO_PIANO_NOTIFICATO));
 			}else {
 				cnmTPianoRate.setCnmDStatoPianoRate(cnmDStatoPianoRateRepository.findOne(Constants.ID_STATO_PIANO_NON_NOTIFICATO));
@@ -239,13 +240,14 @@ public class NotificaServiceImpl implements NotificaService {
 		   cnmTSollecito.getCnmDStatoSollecito().getIdStatoSollecito() == Constants.ID_STATO_SOLLECITO_NOTIFICATO ||
 		   cnmTSollecito.getCnmDStatoSollecito().getIdStatoSollecito() == Constants.ID_STATO_SOLLECITO_PROTOCOLLATO)) 
 		{
-			if(notifica!=null && notifica.modalita!=null && notifica.modalita.getId()==null) {
-				notifica.modalita = null;
+			if(notifica!=null && notifica.getModalita()!=null && notifica.getModalita().getId()==null) {
+				notifica.setModalita(null);
 			}
-			if(notifica.modalita==null) {
+			if(notifica.getModalita()==null) {
 				// 20210415_LC stato invariato
 				//cnmTSollecito.setCnmDStatoSollecito(cnmDStatoSollecitoRepository.findOne(Constants.ID_STATO_SOLLECITO_NON_NOTIFICATO));
-			} else if(notifica.modalita.getId().equals(Constants.ID_COMPIUTA_GIACENZA) || notifica.modalita.getId().equals(Constants.ID_CONSEGNA_A_MANI_PROPRIE)){
+			} else if(notifica.getModalita().getId().equals(Constants.ID_COMPIUTA_GIACENZA) || notifica.getModalita().getId().equals(Constants.ID_CONSEGNA_A_MANI_PROPRIE)
+					 || notifica.getModalita().getId().equals(Constants.ID_PEC)){
 				cnmTSollecito.setCnmDStatoSollecito(cnmDStatoSollecitoRepository.findOne(Constants.ID_STATO_SOLLECITO_NOTIFICATO));
 			} else {
 				cnmTSollecito.setCnmDStatoSollecito(cnmDStatoSollecitoRepository.findOne(Constants.ID_STATO_SOLLECITO_NON_NOTIFICATO));
@@ -288,13 +290,14 @@ public class NotificaServiceImpl implements NotificaService {
 		   cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza()==Constants.ID_STATO_ORDINANZA_NON_NOTIFICATA)
 		){
 			
-			if(notifica!=null && notifica.modalita!=null && notifica.modalita.getId()==null) {
-				notifica.modalita = null;
+			if(notifica!=null && notifica.getModalita()!=null && notifica.getModalita().getId()==null) {
+				notifica.setModalita(null);
 			}
-			if(notifica.modalita==null) {
+			if(notifica.getModalita()==null) {
 				// 20210415_LC stato invariato
 				//cnmTOrdinanza.setCnmDStatoOrdinanza(cnmDStatoOrdinanzaRepository.findOne(Constants.ID_STATO_ORDINANZA_NON_NOTIFICATA));
-			} else if(notifica.modalita.getId().equals(Constants.ID_COMPIUTA_GIACENZA) || notifica.modalita.getId().equals(Constants.ID_CONSEGNA_A_MANI_PROPRIE)) {
+			} else if(notifica.getModalita().getId().equals(Constants.ID_COMPIUTA_GIACENZA) || notifica.getModalita().getId().equals(Constants.ID_CONSEGNA_A_MANI_PROPRIE)
+					 || notifica.getModalita().getId().equals(Constants.ID_PEC)) {
 				cnmTOrdinanza.setCnmDStatoOrdinanza(cnmDStatoOrdinanzaRepository.findOne(Constants.ID_STATO_ORDINANZA_NOTIFICATA));
 			} else {
 				cnmTOrdinanza.setCnmDStatoOrdinanza(cnmDStatoOrdinanzaRepository.findOne(Constants.ID_STATO_ORDINANZA_NON_NOTIFICATA));

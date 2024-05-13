@@ -608,9 +608,10 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
 		} else {
 			
 			datiCreazione.setAllegato(false);
-			datiCreazione.setParentFolderId(folderId);		
+			datiCreazione.setParentFolderId(folderId);
 
-			if(documentoElettronicoActa.getNumeroAllegati() > 0){
+			//	Issue 3 - Sonarqube
+			if(documentoElettronicoActa != null && documentoElettronicoActa.getNumeroAllegati() > 0){
 				GruppoAllegatiPropertiesType gruppoAllegati = new GruppoAllegatiPropertiesType();
 			    gruppoAllegati.setNumeroAllegati(documentoElettronicoActa.getNumeroAllegati());
 			    gruppoAllegati.setDataInizio(DateFormat.getCurrentDate());
@@ -618,7 +619,7 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
 			} else {
 				datiCreazione.setGruppoAllegati(null);
 			}
-			    
+
 		}
 		
 		datiDocumentoElettronico(datiCreazione, vitalRecordCodeType, idStatoDiEfficacia, idFormaDocumentaria, numeroProtocolloPadre, pkAllegato, documentoElettronicoActa, isProtocollazioneInUscitaSenzaDocumento);

@@ -78,6 +78,7 @@ public abstract class Constants {
 	public static final long FIELD_TYPE_ELENCO = 5;
 	public static final long FIELD_TYPE_DATA_ORA = 6;
 	public static final long FIELD_TYPE_ELENCO_SOGGETTI = 7;
+	public static final long FIELD_TYPE_ELENCO_SOGGETTI_COMPL = 8;
 
 	// ID FIELD CNM_C_FIELD
 	public static final long ID_FIELD_NUMERO_RACC_NOTIFICA = 1;
@@ -98,6 +99,7 @@ public abstract class Constants {
 	public static final long ID_FIELD_DATA_PAGAMENTO = 7;
 	public static final long ID_FIELD_IMPORTO_PAGATO = 8;
 	public static final long ID_FIELD_CONTO_CORRENTE_PAGAMENTO = 9;
+	public static final long ID_FIELD_SOGGETTO_PAGAMENTO = 21;
 
 	// DIMENSIONE ALLEGATI (10 mb)
 	public static final int ALLEGATO_MAX_SIZE = 10240000;
@@ -384,6 +386,7 @@ public abstract class Constants {
 	
 	//JIRA - Gestione Notifica
 	//MODALITA NOTIFICA
+	public static final Long ID_PEC = 5L;
 	public static final Long ID_COMPIUTA_GIACENZA = 2L;
 	public static final Long ID_IRREPERIBILE = 3L;
 	public static final Long ID_RIFIUTATA = 4L;

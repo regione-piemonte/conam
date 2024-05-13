@@ -5,10 +5,7 @@
 package it.csi.conam.conambl.integration.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Date;
+
 
 
 /**
@@ -18,36 +15,10 @@ import java.util.Date;
 @Entity
 @Table(name="cnm_r_sogg_rata")
 @NamedQuery(name="CnmRSoggRata.findAll", query="SELECT c FROM CnmRSoggRata c")
-public class CnmRSoggRata implements Serializable {
+public class CnmRSoggRata extends CnmRTCommons {
 	private static final long serialVersionUID = 1L;
-
 	@EmbeddedId
 	private CnmRSoggRataPK id;
-
-	@Column(name="cod_avviso")
-	private String codAvviso;
-
-	@Column(name="cod_esito_lista_carico")
-	private String codEsitoListaCarico;
-
-	@Column(name="cod_iuv")
-	private String codIuv;
-
-	@Column(name="cod_posizione_debitoria")
-	private String codPosizioneDebitoria;
-
-	@Column(name="data_ora_insert")
-	private Timestamp dataOraInsert;
-
-	@Column(name="data_ora_update")
-	private Timestamp dataOraUpdate;
-
-	@Temporal(TemporalType.DATE)
-	@Column(name="data_pagamento")
-	private Date dataPagamento;
-
-	@Column(name="importo_pagato")
-	private BigDecimal importoPagato;
 
 	//bi-directional many-to-one association to CnmDStatoRata
 	@ManyToOne
@@ -82,71 +53,7 @@ public class CnmRSoggRata implements Serializable {
 	}
 
 	public void setId(CnmRSoggRataPK id) {
-		this.id = id;
-	}
-
-	public String getCodAvviso() {
-		return this.codAvviso;
-	}
-
-	public void setCodAvviso(String codAvviso) {
-		this.codAvviso = codAvviso;
-	}
-
-	public String getCodEsitoListaCarico() {
-		return this.codEsitoListaCarico;
-	}
-
-	public void setCodEsitoListaCarico(String codEsitoListaCarico) {
-		this.codEsitoListaCarico = codEsitoListaCarico;
-	}
-
-	public String getCodIuv() {
-		return this.codIuv;
-	}
-
-	public void setCodIuv(String codIuv) {
-		this.codIuv = codIuv;
-	}
-
-	public String getCodPosizioneDebitoria() {
-		return this.codPosizioneDebitoria;
-	}
-
-	public void setCodPosizioneDebitoria(String codPosizioneDebitoria) {
-		this.codPosizioneDebitoria = codPosizioneDebitoria;
-	}
-
-	public Timestamp getDataOraInsert() {
-		return this.dataOraInsert;
-	}
-
-	public void setDataOraInsert(Timestamp dataOraInsert) {
-		this.dataOraInsert = dataOraInsert;
-	}
-
-	public Timestamp getDataOraUpdate() {
-		return this.dataOraUpdate;
-	}
-
-	public void setDataOraUpdate(Timestamp dataOraUpdate) {
-		this.dataOraUpdate = dataOraUpdate;
-	}
-
-	public Date getDataPagamento() {
-		return this.dataPagamento;
-	}
-
-	public void setDataPagamento(Date dataPagamento) {
-		this.dataPagamento = dataPagamento;
-	}
-
-	public BigDecimal getImportoPagato() {
-		return this.importoPagato;
-	}
-
-	public void setImportoPagato(BigDecimal importoPagato) {
-		this.importoPagato = importoPagato;
+		this.setId(id);
 	}
 
 	public CnmDStatoRata getCnmDStatoRata() {

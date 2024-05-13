@@ -3,7 +3,6 @@ import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Template05SollecitoPagamentoComponent } from "../../../template/components/template-05-sollecito-pagamento/template-05-sollecito-pagamento.component";
 import { DatiTemplateVO } from "../../../commons/vo/template/dati-template-vo";
 import { DatiTemplateCompilatiVO } from "../../../commons/vo/template/dati-template-compilati-vo";
-import { DomSanitizer } from "@angular/platform-browser";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TemplateService } from "../../../template/services/template.service";
 import { DatiTemplateRequest } from "../../../commons/request/template/dati-template-request";
@@ -12,7 +11,6 @@ import { Location } from "@angular/common";
 import { SharedRiscossioneService } from "../../../shared-riscossione/services/shared-riscossione.service";
 import { IsCreatedVO } from "../../../commons/vo/isCreated-vo";
 import { saveAs } from "file-saver";
-import { Routing } from "../../../commons/routing";
 
 @Component({
   selector: "riscossione-sollecito-template",
@@ -23,46 +21,43 @@ export class RiscossioneSollecitoTemplateComponent
   @ViewChild(Template05SollecitoPagamentoComponent)
   template: Template05SollecitoPagamentoComponent;
 
+
+  public datiTemplateModelStampa: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
+  public datiTemplateModel: DatiTemplateVO;
+  public datiCompilati: DatiTemplateCompilatiVO;
+
   public subscribers: any = {};
 
-  public loaded: boolean;
   public isAnteprima: boolean = false;
-  public isPrinted: boolean = false;
   public scrollEnable: boolean;
+  public loaded: boolean;
+  public isPrinted: boolean = false;
 
   public idSollecito: number;
 
-  public datiTemplateModel: DatiTemplateVO;
-  public datiTemplateModelStampa: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
-  public datiCompilati: DatiTemplateCompilatiVO;
+  //Messaggio Top
+  public typeMessageTop: String;
+  private intervalIdS: number = 0;
+  public showMessageTop: boolean;
+  public messageTop: String;
+
+  visualizzaAnteprimaValidTemplate: boolean;
+  visualizzaAnteprimaValidIntestazione: boolean;
 
   public url: string;
 
-  //Messaggio Top
-  public showMessageTop: boolean;
-  public typeMessageTop: String;
-  public messageTop: String;
-  private intervalIdS: number = 0;
-
-  visualizzaAnteprimaValidIntestazione: boolean;
-  visualizzaAnteprimaValidTemplate: boolean;
-
   constructor(
-    private logger: LoggerService,
-    private router: Router,
     private activatedRoute: ActivatedRoute,
-    private templateService: TemplateService,
+    private logger: LoggerService,
     private location: Location,
-    private sanitizer: DomSanitizer,
+    private templateService: TemplateService,
     private sharedRiscossioneService: SharedRiscossioneService
-  ) //private userService: UserService,
-  {}
+  ){}
 
   ngOnInit(): void {
     this.logger.init(RiscossioneSollecitoTemplateComponent.name);
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
       this.idSollecito = +params["id"];
-
       let request: DatiTemplateRequest = new DatiTemplateRequest();
       request.codiceTemplate = Constants.TEMPLATE_SOLLECITO_PAGAMENTO;
       request.idSollecito = this.idSollecito;
@@ -85,13 +80,6 @@ export class RiscossioneSollecitoTemplateComponent
     this.location.back();
   }
 
-  visualizzaAnteprima() {
-    this.datiTemplateModelStampa = this.template.getDatiCompilati();
-    this.isAnteprima = true;
-    this.template.setAnteprima(true);
-    this.scrollEnable = true;
-  }
-
   proseguiModifica() {
     this.isAnteprima = false;
     this.isStampa = false;
@@ -100,9 +88,18 @@ export class RiscossioneSollecitoTemplateComponent
     this.scrollEnable = true;
   }
 
-  public isStampa: boolean = false;
+
+  visualizzaAnteprima() {
+    this.datiTemplateModelStampa = this.template.getDatiCompilati();
+    this.isAnteprima = true;
+    this.template.setAnteprima(true);
+    this.scrollEnable = true;
+  }
+
   public isStampaProtocollata: boolean = false;
+  public isStampa: boolean = false;
   public loadedScarica: boolean = false;
+
   stampaPDF() {
     this.isPrinted = true;
     this.isStampa = true;
@@ -129,8 +126,8 @@ export class RiscossioneSollecitoTemplateComponent
               .subscribe(
                 (data) => {
                   //this.url = URL.createObjectURL(data);
-                  this.scrollEnable = true;
                   this.loadedScarica = true;
+                  this.scrollEnable = true;
                   this.isStampaProtocollata = true;
                   this.manageMessageTop(
                     "Lettera del sollecito creata con successo",
@@ -187,6 +184,7 @@ export class RiscossioneSollecitoTemplateComponent
     });
   }
 
+
   checkDatiTemplate(dati: DatiTemplateCompilatiVO): boolean {
     let flag: boolean = true;
     for (let field in dati) {
@@ -201,6 +199,19 @@ export class RiscossioneSollecitoTemplateComponent
     this.timerShowMessageTop();
   }
 
+
+
+  ngAfterViewChecked() {
+    let out: HTMLElement = document.getElementById("scrollTop");
+    if (this.loaded && this.scrollEnable && out != null) {
+      out.scrollIntoView();
+      this.scrollEnable = false;
+    }
+  }
+  setFormValidTemplate(event: boolean) {
+    this.visualizzaAnteprimaValidTemplate = event;
+  }
+
   timerShowMessageTop() {
     this.showMessageTop = true;
     let seconds: number = 20; //this.configService.getTimeoutMessagge();
@@ -212,6 +223,10 @@ export class RiscossioneSollecitoTemplateComponent
     }, 1000);
   }
 
+  ngOnDestroy(): void {
+    this.logger.init(RiscossioneSollecitoTemplateComponent.name);
+  }
+
   resetMessageTop() {
     this.showMessageTop = false;
     this.typeMessageTop = null;
@@ -219,19 +234,5 @@ export class RiscossioneSollecitoTemplateComponent
     clearInterval(this.intervalIdS);
   }
 
-  ngAfterViewChecked() {
-    let out: HTMLElement = document.getElementById("scrollTop");
-    if (this.loaded && this.scrollEnable && out != null) {
-      out.scrollIntoView();
-      this.scrollEnable = false;
-    }
-  }
 
-  setFormValidTemplate(event: boolean) {
-    this.visualizzaAnteprimaValidTemplate = event;
-  }
-
-  ngOnDestroy(): void {
-    this.logger.init(RiscossioneSollecitoTemplateComponent.name);
-  }
 }

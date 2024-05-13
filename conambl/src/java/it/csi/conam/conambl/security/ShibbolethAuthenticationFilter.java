@@ -23,7 +23,7 @@ public class ShibbolethAuthenticationFilter extends RequestHeaderAuthenticationF
 
 	private String shibbTestMode;
 
-	private Logger logger = LoggerFactory.getLogger(Constants.HANDLER_SECURITY);
+	private final Logger shiboletLogger = LoggerFactory.getLogger(Constants.HANDLER_SECURITY);
 
 	@Override
 	protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
@@ -33,7 +33,7 @@ public class ShibbolethAuthenticationFilter extends RequestHeaderAuthenticationF
 			token = TokenMock.DEMO20;
 //			token = "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/IPA/20230112174325/2/mEwUilVb05HxQQzJr3i/Sg==";
 		}
-		logger.info("[ShibbolethAuthenticationFilter::getPreAuthenticatedPrincipal] <" + request.getRequestURI() + "> (token::" + token + ")");
+		shiboletLogger.info("[ShibbolethAuthenticationFilter::getPreAuthenticatedPrincipal] <" + request.getRequestURI() + "> (token::" + token + ")");
 		principal.setIdentity(token);
 		return principal;
 	}

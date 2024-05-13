@@ -32,6 +32,8 @@ import { UtilSubscribersService } from "../../../core/services/util-subscribers-
 import { PregressoVerbaleService } from "../../services/pregresso-verbale.service";
 import { SoggettoPregressiVO } from "../../../commons/vo/verbale/soggetto-pregressi-vo";
 import { ResidenzaVO } from "../../../commons/vo/verbale/residenza-vo";
+import { SoggettoService } from "../../../soggetto/services/soggetto.service";
+import { VerbaleVO } from "../../../commons/vo/verbale/verbale-vo";
 
 declare var $: any;
 
@@ -85,6 +87,10 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
   public comuneEstero: boolean = false;
   public comuneEsteroDisabled: boolean = false;
 
+  //edit soggetto
+  public isModificaSoggetto: boolean;
+  public soggettoModifica: TableSoggettiVerbale;
+  
   //Messaggio top
   public showMessageTop: boolean;
   public typeMessageTop: String;
@@ -105,6 +111,8 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
 
   private intervalIdSBottom: number = 0;
 
+	public importo: number=0;
+	public importoVerbale: number=0;
   //RUOLO
   public loaderRuolo: boolean;
 
@@ -121,12 +129,30 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
     private pregressoVerbaleService: PregressoVerbaleService,
     private utilSubscribersService: UtilSubscribersService,
     private sharedVerbaleService: SharedVerbaleService,
-    private sharedVerbaleConfigService: SharedVerbaleConfigService
+    private sharedVerbaleConfigService: SharedVerbaleConfigService,
+    private soggettoService: SoggettoService
   ) {}
 
   ngOnInit(): void {
     this.logger.init(PregressoSoggettoComponent.name);
     
+    
+    //this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
+      //this.idVerbale = +params["id"];
+      //condizione di uscita
+      
+      if (!isNaN(this.idVerbale))
+        this.verbaleService.getVerbaleById(this.idVerbale).subscribe((data: VerbaleVO)=>{
+         
+          this.importo= data.importo;
+          this.importoVerbale= data.importo;
+ 
+      })
+    
+     
+    //});
+    
+        
     this.loadSoggettiAssociatiAVerbale();
     this.loadNazioni();
     this.loadRegioni();
@@ -134,6 +160,7 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
     this.manageDatePicker();
     this.pulisciFiltri();
     this.loadedSalvaRicerca = true;
+      
   }
 
   //PROVINCIA RESIDENZA
@@ -244,7 +271,8 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
       false,
       null,
       null,
-      true
+      true,
+          true
     );
     this.subscribers.soggetto = this.sharedVerbaleService
       .getSoggettiByIdVerbale(this.idVerbale, true)
@@ -426,18 +454,40 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
   }
 
   pulisciFiltri() {
+	  // pulisci dati pregresso
+    this.importo=this.importoVerbale;
+    
     this.comuneEstero = false;
     this.comuneEsteroDisabled = false;
-    this.soggetto = new SoggettoPregressiVO();
-    this.modalita = "R";
-    this.showResidenza = false;
-    this.soggetto.personaFisica = true;
-    this.indirizzo = null;
-    this.indirizzoEstero = null;
-    this.civico = null;
-    this.civicoEstero = null;
-    this.cap = null;
-    this.capEstero = null;
+  
+  if(!this.isModificaSoggetto){
+	    this.soggetto = new SoggettoPregressiVO();
+	    this.modalita = "R";
+	    this.showResidenza = false;
+	    this.soggetto.personaFisica = true;
+	    this.indirizzo = null;
+	    this.indirizzoEstero = null;
+	    this.civico = null;
+	    this.civicoEstero = null;
+	    this.cap = null;
+	    this.capEstero = null;
+	    this.soggetto.nazioneNascitaEstera = false;
+        this.soggetto.nazioneNascita.id = null;
+	      this.soggetto.regioneNascita.id = 0;
+	      this.soggetto.provinciaNascita.id = 0;
+	      this.soggetto.comuneNascita.id = 0;
+	 }else{
+		this.soggetto.personaFisica = true;
+		this.soggetto.nome = '';
+		this.soggetto.cognome = '';
+	    this.soggetto.personaFisica = true;
+	    this.modalita = "R";
+	    this.soggetto.dataNascita = null;
+	    this.soggetto.nazioneNascitaEstera = false;
+	      if(this.soggetto.regioneNascita) {this.soggetto.regioneNascita.id = 0;}
+	      if(this.soggetto.provinciaNascita) {this.soggetto.provinciaNascita.id = 0;}
+	      if(this.soggetto.comuneNascita) {this.soggetto.comuneNascita.id = 0;}
+    }
   }
 
   salvaSoggetto() {
@@ -456,6 +506,7 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
       this.soggetto.nazioneResidenza = null;
       this.soggetto.denomComuneResidenzaEstero = null;
     }
+    this.soggetto.importoVerbale =this.importo;
     // salvaverbale si aspetta come argomento un SoggettoVo
     const { residenzaList, ...soggettoVo } = this.soggetto;
 
@@ -464,11 +515,18 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
       .subscribe(
         (data) => {
           if (data.comuneNascitaValido) {
+	        if(this.isModificaSoggetto){          
+	          	this.soggetti.splice(this.soggetti.indexOf(this.soggettoModifica), 1);
+          	}
             this.soggetti.push(TableSoggettiVerbale.map(data));
             this.onSoggettoChange.emit(this.soggetti.length);
-            this.isAggiungiSoggetto = false;
             this.pulisciFiltri();
-            this.manageMessageTop("Soggetto aggiunto con successo", "SUCCESS");
+            
+            if(this.isModificaSoggetto){   
+            	this.manageMessageTop("Soggetto modificato con successo", "SUCCESS");
+            }else {
+            	this.manageMessageTop("Soggetto aggiunto con successo", "SUCCESS");
+            }
           } else {
             this.manageMessageTop(
               "Il luogo di nascita selezionato non è compatibile con la data di nascita del soggetto. Inserire una regione-provincia-comune validi alla data di nascita.",
@@ -476,14 +534,17 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
             );
           }
 
+            this.isAggiungiSoggetto = false;
+            this.isModificaSoggetto = false;
           this.loadedSalvaRicerca = true;
         },
         (err) => {
           if (err instanceof ExceptionVO) {
+            this.isModificaSoggetto = true;
             this.showResidenza = true;
             this.loadedSalvaRicerca = true;
             this.manageMessage(err);
-            this.logger.error("Errore nell'eliminazione del verbale");
+            this.logger.error("Errore nel salvataggio del soggetto");
           }
         }
       );
@@ -523,6 +584,7 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
                 "Soggetto eliminato con successo",
                 "SUCCESS"
               );
+              this.isModificaSoggetto = false;
             },
             (err) => {
               if (err instanceof ExceptionVO) {
@@ -607,4 +669,58 @@ export class PregressoSoggettoComponent implements OnInit, OnDestroy {
     if (type == "F") this.formFisicoValid = event;
     if (type == "G") this.formGiuridicoValid = event;
   }
+  
+  
+  //modifica soggetto
+  modifica(el: TableSoggettiVerbale) {
+	console.log('modifica');
+	console.log(el);
+          this.modalita = "E";
+	this.soggettoModifica = el; 
+    this.isModificaSoggetto = true;
+    this.isAggiungiSoggetto = false;
+	//this.loadedSalvaRicerca = true;
+	
+	/**
+	 * soggettoService.getSoggettoById(el.id,this.idVerbale).subscribe((data) => {
+     */
+    this.subscribers.soggetto = this.soggettoService.getSoggettoPregressoById(el.id,this.idVerbale).subscribe((data) => {
+        this.soggetto = data;
+		console.log(this.soggetto);
+          this.comuneEstero = true;
+          if (data.nazioneNascitaEstera && !data.denomComuneNascitaEstero)
+            this.comuneEsteroDisabled = false;
+          else this.comuneEsteroDisabled = true;
+          this.loadedSalvaRicerca = true;
+          this.soggetto = SoggettoPregressiVO.editSoggettoFromSoggetto(
+            this.soggetto,
+            data
+          );
+    	  this.importo = this.soggetto.importoVerbale;
+          if (this.soggetto.residenzaEstera) {
+            this.indirizzoEstero = this.soggetto.indirizzoResidenza;
+            this.civicoEstero = this.soggetto.civicoResidenza;
+            this.capEstero = this.soggetto.cap;
+            if (this.soggetto.idStas != null) {
+              this.indirizzo = this.soggetto.indirizzoResidenzaStas;
+              this.civico = this.soggetto.civicoResidenzaStas;
+              this.cap = this.soggetto.capStas;
+            }
+          } else {
+            this.indirizzo = this.soggetto.indirizzoResidenza;
+            this.civico = this.soggetto.civicoResidenza;
+            this.cap = this.soggetto.cap;
+          }
+          this.manageLuoghiBySoggetto();
+          this.showResidenza = true;
+    	//this.ricercaSoggetto(this.soggetto);
+    });
+    }
+    
+    annullaModifica(){
+     this.pulisciFiltri();
+     this.isModificaSoggetto = false;
+     this.isAggiungiSoggetto = false;
+     
+    }
 }

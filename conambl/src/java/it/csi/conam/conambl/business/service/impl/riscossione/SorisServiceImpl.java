@@ -378,7 +378,7 @@ public class SorisServiceImpl implements SorisService {
 		builder.append(StringUtils.leftPad("", 12, " "));
 
 		builder.append(StringUtils.leftPad("", 20, " "));
-		builder.append(StringUtils.leftPad("", 13, "0"));
+		builder.append(StringUtils.leftPad("", 13, " ")); // Issue 31 - Anomalia tracciato 290
 		builder.append(" ");
 		builder.append(StringUtils.leftPad("", 78, " "));
 

@@ -91,14 +91,27 @@ public class UtilsReportImpl implements UtilsReport {
 
 	private JasperPrint printJasper(String codReport, Map<String, Object> jasperParam) throws PrintException, IOException, SQLException, JRException {
 
-		// Datasource per connessione a DB
-		Connection connection = dataSource.getConnection();
+		//	Issue 3 - Sonarqube (add try catch)
 
-		JasperReport jasperReport = compileAndGetJasperFromDatabase(codReport);
+		Connection connection = null;
+		JasperPrint response = null;
 
-		// Generazione report da compilato
-		return JasperFillManager.fillReport(jasperReport, jasperParam, connection);
+		try {
+			// Datasource per connessione a DB
+			connection = dataSource.getConnection();
 
+			JasperReport jasperReport = compileAndGetJasperFromDatabase(codReport);
+
+			// Generazione report da compilato
+			response = JasperFillManager.fillReport(jasperReport, jasperParam, connection);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (connection != null) connection.close();
+		}
+
+		return response;
 	}
 
 	private JasperReport compileAndGetJasperFromDatabase(String codReport) throws PrintException, IOException, SQLException, JRException {

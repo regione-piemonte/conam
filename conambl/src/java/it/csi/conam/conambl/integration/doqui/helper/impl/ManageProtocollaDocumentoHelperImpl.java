@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 public class ManageProtocollaDocumentoHelperImpl  extends CommonManageDocumentoHelperImpl implements ManageProtocollaDocumentoHelper
@@ -386,9 +387,10 @@ public class ManageProtocollaDocumentoHelperImpl  extends CommonManageDocumentoH
 				boolean isDocSigned = DocumentUtils.isDocumentSigned(request.getDocumento().getFile(), nomeFile);
 				
 				String tipoDoc = isDocSigned?DoquiConstants.TIPO_DOCUMENTO_ACTA_SIGNED:DoquiConstants.TIPO_DOCUMENTO_ACTA;
-				if (request.getTipoDocumento() == DoquiConstants.TIPO_DOCUMENTO_CONAM_1) {
+				//	Issue 3 - Sonarqube
+				if (Objects.equals(request.getTipoDocumento(), DoquiConstants.TIPO_DOCUMENTO_CONAM_1)) {
 					tipoDoc = isDocSigned?DoquiConstants.TIPO_DOCUMENTO_CONAM_1_SIGNED:DoquiConstants.TIPO_DOCUMENTO_CONAM_1;
-				} else if (request.getTipoDocumento() == DoquiConstants.TIPO_DOCUMENTO_CONAM_2) {
+				} else if (Objects.equals(request.getTipoDocumento(), DoquiConstants.TIPO_DOCUMENTO_CONAM_2)) {
 					tipoDoc = isDocSigned?DoquiConstants.TIPO_DOCUMENTO_CONAM_2_SIGNED:DoquiConstants.TIPO_DOCUMENTO_CONAM_2;
 				}
 				request.setTipoDocumento(tipoDoc);

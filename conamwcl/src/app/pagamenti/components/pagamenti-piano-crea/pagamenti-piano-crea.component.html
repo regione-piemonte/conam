@@ -14,9 +14,10 @@
                         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <h4 class="border-title"><strong>Ricerca per:</strong></h4>
                         </div>
-                        <shared-ricerca-piano (ricerca)="ricerca($event)" [isRiconciliaPiano]="false" [ricercaPianoRequest]="request" 
+                        <!--<shared-ricerca-piano (ricerca)="ricerca($event)" [isRiconciliaPiano]="false" [ricercaPianoRequest]="request"
                         [enableCampiCreaPiano]="true" (messaggio)="messaggio($event)">
-                        </shared-ricerca-piano>
+                        </shared-ricerca-piano>--><shared-commons-ricerca-piano-rate (ricerca)="ricerca($event)" [isRiconciliaPiano]="false" [ricercaPianoRequest]="request"
+                        [enableCampiCreaPiano]="true" (messaggio)="messaggio($event)"></shared-commons-ricerca-piano-rate>
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <datatable [data]="soggetti" [config]="config" *ngIf="showTable"
                                 (dettaglio)="goCreaPiano($event)" (onInfo)="onInfo($event)">

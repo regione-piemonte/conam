@@ -41,7 +41,7 @@ public class ModuloRicercaWsInputMapperImpl implements ModuloRicercaWsInputMappe
 
 		// 20221103 Jira-228 - ricerca con lugoo di nascita (rimane estero)
 		if (!isNazioneNascitaEstera) {
-			if (vo.getComuneNascita() != null && vo.getProvinciaNascita() != null) {
+			if (vo.getComuneNascita() != null && vo.getComuneNascita().getId() != null && vo.getProvinciaNascita() != null&& vo.getProvinciaNascita().getId() != null) {
 				CnmDComune comune = cnmDComuneRepository.findOne(vo.getComuneNascita().getId());
 				CnmDProvincia provincia = cnmDProvinciaRepository.findOne(vo.getProvinciaNascita().getId());
 				LuogoNascitaFiltroRicerca lnfr = LuogoNascitaFiltroRicerca.creaLuogoNascitaNazionale(comune.getDenomComune().toUpperCase(), provincia.getDenomProvincia().toUpperCase());

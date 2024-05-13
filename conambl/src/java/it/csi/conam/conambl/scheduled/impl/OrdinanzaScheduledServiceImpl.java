@@ -344,7 +344,8 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 			
 			// 20201120_LC	traccia inserimento allegato su Acta
 			operationToTrace = cnmTAllegatoBollettino.isFlagDocumentoPregresso() ? TraceOperation.INSERIMENTO_ALLEGATO_PREGRESSO.getOperation() : TraceOperation.INSERIMENTO_ALLEGATO.getOperation();
-			utilsTraceCsiLogAuditService.traceCsiLogAudit(operationToTrace,Constants.OGGETTO_ACTA,"objectIdDocumento="+responseAggiungiAllegato.getObjectIdDocumento(), className+"."+Thread.currentThread().getStackTrace()[1].getMethodName(), cnmTAllegatoBollettino.getCnmDTipoAllegato().getDescTipoAllegato());
+			//	Issue 3 - Sonarqube
+			utilsTraceCsiLogAuditService.traceCsiLogAudit(operationToTrace,Constants.OGGETTO_ACTA,"objectIdDocumento="+ (responseAggiungiAllegato != null ? responseAggiungiAllegato.getObjectIdDocumento() : "null"), className+"."+Thread.currentThread().getStackTrace()[1].getMethodName(), cnmTAllegatoBollettino.getCnmDTipoAllegato().getDescTipoAllegato());
 			
 			cnmTAllegatos = new ArrayList<CnmTAllegato>();
 			cnmTAllegatos.add(cnmTAllegatoBollettino);
@@ -466,7 +467,8 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 			
 			// 20201120_LC	traccia inserimento allegato su Acta
 			operationToTrace = cnmTAllegatoBollettino.isFlagDocumentoPregresso() ? TraceOperation.INSERIMENTO_ALLEGATO_PREGRESSO.getOperation() : TraceOperation.INSERIMENTO_ALLEGATO.getOperation();
-			utilsTraceCsiLogAuditService.traceCsiLogAudit(operationToTrace,Constants.OGGETTO_ACTA,"objectIdDocumento="+responseAggiungiAllegato.getObjectIdDocumento(), className+"."+Thread.currentThread().getStackTrace()[1].getMethodName(), cnmTAllegatoBollettino.getCnmDTipoAllegato().getDescTipoAllegato());
+			//	Issue 3 - Sonarqube
+			utilsTraceCsiLogAuditService.traceCsiLogAudit(operationToTrace,Constants.OGGETTO_ACTA,"objectIdDocumento="+ (responseAggiungiAllegato != null ? responseAggiungiAllegato.getObjectIdDocumento() : "null"), className+"."+Thread.currentThread().getStackTrace()[1].getMethodName(), cnmTAllegatoBollettino.getCnmDTipoAllegato().getDescTipoAllegato());
 			
 			cnmTAllegatos = new ArrayList<CnmTAllegato>();
 			cnmTAllegatos.add(cnmTAllegatoBollettino);

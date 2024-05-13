@@ -119,7 +119,8 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
       //true,
      //this.isSelectable,
      ()=>true,
-      false
+      false,
+          false
     );
    /* let column:Column= {columnName: 'listaOrdinanze', displayName: 'Lista Ordinanze', link: {fileName:'str'}}
 this.config.columns.push(column)

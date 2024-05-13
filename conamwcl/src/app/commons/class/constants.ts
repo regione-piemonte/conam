@@ -11,6 +11,7 @@ export class Constants {
   public static FT_ELENCO: number = 5;
   public static FT_DATA_ORA: number = 6;
   public static FT_ELENCO_SOGG: number = 7;
+  public static FT_ELENCO_SOGG_COMPL: number = 8;
 
   //costanti per lo stato del soggetto legato ad un'ordinanza
   public static STATO_ORDINANZA_SOGGETTO_INGIUNZIONE: number = 1;

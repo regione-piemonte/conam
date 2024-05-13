@@ -81,8 +81,9 @@ public class AccontoServiceImpl implements AccontoService {
 		if (cnmTSoggetto != null) {
 			cnmTAcconto.setCnmTSoggetto(cnmTSoggetto);
 		}
-		
-		CnmTOrdinanza cnmTOrdinanza = cnmTOrdinanzaRepository.findOne(acconto.getIdOrdinanza().intValue());
+
+		//	Issue 3 - Sonarqube
+		CnmTOrdinanza cnmTOrdinanza = cnmTOrdinanzaRepository.findOne(acconto.getIdOrdinanza());
 		if (cnmTOrdinanza != null) {
 			cnmTAcconto.setCnmTOrdinanza(cnmTOrdinanza);
 		}

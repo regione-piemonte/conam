@@ -53,7 +53,7 @@ export class SharedVerbaleDettaglioSoggettiComponent
   modalLoaded = false;
   //pagina
   loaded: boolean;
-  listaOrdinanzeControl: boolean = false;  
+  listaOrdinanzeControl: boolean = false;
   
   public showMessage: boolean = false;
   public message: string;
@@ -116,7 +116,7 @@ export class SharedVerbaleDettaglioSoggettiComponent
           this.soggetti = data.map((value) => {
             return TableSoggettiVerbale.map(value);
           });
-		  
+          
           if(this.pregresso){
 	      	let soggettoSelezionabilePresente = false;
 	      	this.soggetti.forEach((el)=>{
@@ -129,10 +129,12 @@ export class SharedVerbaleDettaglioSoggettiComponent
 			    this.typeMessage = "warning";
 			}
 	      }
-		  
+          
           this.loaded = true;
         }
       });
+            
+      
     }
     this.soggettoSelected = false;
   }
@@ -188,7 +190,8 @@ export class SharedVerbaleDettaglioSoggettiComponent
                   true,
                   1,
                   (el: TableSoggettiVerbale) => false,
-                  false
+                  false,
+          		  false
                 );
 
               this.loaded = true;
@@ -205,6 +208,7 @@ export class SharedVerbaleDettaglioSoggettiComponent
   }
 
   vediTuttiISoggetti() {
+    console.log('vediTuttiISoggetti');
     this.loaded = false;
     this.soggettoSelected = false;
     this.sharedVerbaleService
@@ -219,7 +223,8 @@ export class SharedVerbaleDettaglioSoggettiComponent
               true,
               1,
               this.isSelectablePerAllegare,
-              false
+              false,
+          	  false
             );
 
           this.loaded = true;

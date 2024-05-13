@@ -3,20 +3,15 @@ import { LoggerService } from "../../../core/services/logger/logger.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Routing } from "../../../commons/routing";
 import { Config } from "../../../shared/module/datatable/classes/config";
-import { OrdinanzaVO } from "../../../commons/vo/ordinanza/ordinanza-vo";
-import { RicercaOrdinanzaRequest } from "../../../commons/request/ordinanza/ricerca-ordinanza-request";
 import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { ConfigSharedService } from "../../../shared/service/config-shared.service";
 import { SharedOrdinanzaService } from "../../../shared-ordinanza/service/shared-ordinanza.service";
-import { StatoOrdinanzaVO } from "../../../commons/vo/select-vo";
 import { PregressoVerbaleService } from "../../services/pregresso-verbale.service";
-import { RiepilogoVerbaleVO } from "../../../commons/vo/verbale/riepilogo-verbale-vo";
 import { SharedOrdinanzaRiepilogoComponent } from "../../../shared-ordinanza/component/shared-ordinanza-riepilogo/shared-ordinanza-riepilogo.component";
 import { SharedDialogComponent } from "../../../shared/component/shared-dialog/shared-dialog.component";
 import { TemplateService } from "../../../template/services/template.service";
 import { SalvaStatoOrdinanzaPregressiRequest } from "../../../commons/request/pregresso/salva-stato-ordinanza-pregressi.request";
 import { AzioneOrdinanzaPregressiResponse } from "../../../commons/response/pregresso/azione-ordinanza-pregressi-response";
-import { AzioneOrdinanzaRequest } from "../../../commons/request/ordinanza/azione-ordinanza-request";
 import { RicevutePagamentoVO } from "../../../commons/vo/ordinanza/ricevute-pagamento-vo";
 
 @Component({
@@ -25,34 +20,33 @@ import { RicevutePagamentoVO } from "../../../commons/vo/ordinanza/ricevute-paga
 })
 export class PregressoRicevuteRiepilogoComponent implements OnInit, OnDestroy {
 
+    public showTable: boolean;
+
     public subscribers: any = {};
     public idVerbale: number;
 
-    public showTable: boolean;
+    public ricevute: Array<RicevutePagamentoVO>;
 
     public config: Config;
     public loaded: boolean = true;
-    
-    public ricevute: Array<RicevutePagamentoVO>;
 
- 
-    idOrdinanza: number;
-    azione: AzioneOrdinanzaPregressiResponse;
-    loadedAction: boolean;
-    loadedOrdinanza: boolean = false;
-    isRichiestaBollettiniSent: boolean;
     isFirstDownloadBollettini: boolean;
+    azione: AzioneOrdinanzaPregressiResponse;
+    idOrdinanza: number;
+    loadedAction: boolean;
+    isRichiestaBollettiniSent: boolean;
+    loadedOrdinanza: boolean = false;
 
     @ViewChild(SharedOrdinanzaRiepilogoComponent)
     sharedOrdinanzaRiepilogo: SharedOrdinanzaRiepilogoComponent;
     @ViewChild(SharedDialogComponent) sharedDialogs: SharedDialogComponent;
 
-    salvaStatoOrdinanzaPregressiRequest: SalvaStatoOrdinanzaPregressiRequest = new SalvaStatoOrdinanzaPregressiRequest();
     statiOrdinanzaMessage: string;
+    salvaStatoOrdinanzaPregressiRequest: SalvaStatoOrdinanzaPregressiRequest = new SalvaStatoOrdinanzaPregressiRequest();
 
-    public buttonAnnullaTexts: string;
-    public buttonConfirmTexts: string;
     public subMessagess: Array<string>;
+    public buttonConfirmTexts: string;
+    public buttonAnnullaTexts: string;
     public alertWarning: string;
 
     constructor(
@@ -67,28 +61,26 @@ export class PregressoRicevuteRiepilogoComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.logger.init(PregressoRicevuteRiepilogoComponent.name);
-        this.config = this.configSharedService.configRicevute;    
+        this.config = this.configSharedService.configRicevute;
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idVerbale = +params['id'];
-            if (isNaN(this.idVerbale))
+            if (isNaN(this.idVerbale)){
                 this.router.navigateByUrl(Routing.PREGRESSO_DATI);
-            
+            }
             if(this.activatedRoute.snapshot.paramMap.get('idOrdinanza')){
-                // setto il riferimento per la ricerca documento protocollato    
+                // setto il riferimento per la ricerca documento protocollato
                 this.idOrdinanza = parseInt(this.activatedRoute.snapshot.paramMap.get('idOrdinanza'));
             }
-
-            if (isNaN(this.idOrdinanza))
+            if (isNaN(this.idOrdinanza)){
                 this.router.navigateByUrl(Routing.PREGRESSO_DATI);
-            
+            }
             this.load();
-
         });
     }
-    
+
     load():void{
         this.loaded = false;
-        this.pregressoVerbaleService.getRicevutePagamentoByIdOrdinanza(this.idOrdinanza).subscribe( 
+        this.pregressoVerbaleService.getRicevutePagamentoByIdOrdinanza(this.idOrdinanza).subscribe(
             data => {
                 this.resetMessageTop();
                 this.ricevute = data;
@@ -102,10 +94,9 @@ export class PregressoRicevuteRiepilogoComponent implements OnInit, OnDestroy {
                 }
                 this.logger.error("Errore nella ricerca dell'ordinanza");
             }
-        );   
+        );
     }
     scrollEnable: boolean;
-    
 
     ngAfterContentChecked() {
         let out: HTMLElement = document.getElementById("scrollBottom");
@@ -114,24 +105,30 @@ export class PregressoRicevuteRiepilogoComponent implements OnInit, OnDestroy {
             this.scrollEnable = false;
         }
     }
-    
-   
 
     messaggio(message: string){
         this.manageMessageTop(message,"DANGER");
     }
 
+
     //Messaggio top
-    public showMessageTop: boolean;
     public typeMessageTop: String;
-    public messageTop: String;
+    public showMessageTop: boolean;
     private intervalIdS: number = 0;
+    public messageTop: String;
 
     manageMessageTop(message: string, type: string) {
         this.typeMessageTop = type;
         this.messageTop = message;
         this.timerShowMessageTop();
         this.scrollTopEnable = true;
+    }
+
+    resetMessageTop() {
+        this.showMessageTop = false;
+        this.typeMessageTop = null;
+        this.messageTop = null;
+        clearInterval(this.intervalIdS);
     }
 
     timerShowMessageTop() {
@@ -145,14 +142,6 @@ export class PregressoRicevuteRiepilogoComponent implements OnInit, OnDestroy {
         }, 1000);
     }
 
-    resetMessageTop() {
-        this.showMessageTop = false;
-        this.typeMessageTop = null;
-        this.messageTop = null;
-        clearInterval(this.intervalIdS);
-    }
-
-    scrollTopEnable: boolean;
     ngAfterViewChecked() {
         let scrollTop: HTMLElement = document.getElementById("scrollTop");
         if (this.scrollTopEnable && scrollTop != null) {
@@ -160,13 +149,14 @@ export class PregressoRicevuteRiepilogoComponent implements OnInit, OnDestroy {
             this.scrollTopEnable = false;
         }
     }
+    scrollTopEnable: boolean;
+
+    goBack():void{
+        this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO_ORDINANZE + this.idVerbale);
+    }
 
     ngOnDestroy(): void {
         this.logger.destroy(PregressoRicevuteRiepilogoComponent.name);
     }
-    
-    goBack():void{
-        this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO_ORDINANZE + this.idVerbale);
-    }
- 
+
 }

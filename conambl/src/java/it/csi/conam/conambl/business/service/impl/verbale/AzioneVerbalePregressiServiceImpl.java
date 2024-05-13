@@ -414,26 +414,36 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale);
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(idVerbale);
 		String statoPrec = cnmTVerbale.getCnmDStatoVerbale().getDescStatoVerbale();
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "1");
+		
 		
 		if(Constants.STATO_PREGRESSO_IN_LAVORAZIONE != cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso()) {
 			throw new BusinessException(ErrorCode.STATO_VERBALE_INCOMPATIBILE);
 		}
 
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "2");
 		Date dataTerminePregresso = cnmCParametroRepository.findOne(Constants.ID_DATA_TERMINE_GESTIONE_PREGRESSO).getValoreDate();
-		if(new Date().after(dataTerminePregresso) && Constants.STATO_PREGRESSO_LAVORATO != idStato) {
+		//	Issue 3 - Sonarqube
+		if(new Date().after(dataTerminePregresso) && !Constants.STATO_PREGRESSO_LAVORATO.equals(idStato)) {
 			throw new BusinessException(ErrorCode.LAVORAZIONE_FASCICOLO_PREGRESSO_SCADUTA);
 		}
+
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "3");
 		List<Long> idStatiAvanzabili= getStatiAvanzabiliByCnmTVerbale(cnmTVerbale, userDetails);
 		if(idStato != Constants.STATO_VERBALE_FINE_PREGRESSO 
 				&& (idStatiAvanzabili == null || !idStatiAvanzabili.contains(idStato))) {
 			throw new SecurityException("Stato non permesso");
 		}
-		
+
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "4");
 		AzioneVO azioneVerbale = AzioneVerbalePregressi.getAzioneVerbaleByIdStato(idStato, cnmTVerbale.getNumVerbale(), cnmDMessaggioRepository);		
 
+
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "5");
 		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());
 		storicizzazioneVerbaleService.storicizzaStatoVerbale(cnmTVerbale, cnmTUser);
-		
+
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "6");
 		MessageVO responseMsg = null;
 
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
@@ -474,6 +484,7 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		} else
 			throw new IllegalArgumentException("azione non gestita");
 
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "7");
 		String statoSucc = cnmDStatoVerbale.getDescStatoVerbale();
 		// se la lista istruttori è presente controllo che sia valorizzato il
 		// funzionario
@@ -492,10 +503,14 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			}
 		} else {
 			if (cnmTVerbale.getNumeroProtocollo() == null) {
+				logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "7.1");
 				List<CnmRAllegatoVerbale> cnmRAllegatoVerbaleList = cnmRAllegatoVerbaleRepository.findByCnmTVerbale(cnmTVerbale);
+				logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "7.2");
 				if (!cnmRAllegatoVerbaleList.isEmpty()) {
 					try {
 						ResponseProtocollaDocumento response = commonAllegatoService.avviaProtocollazione(cnmRAllegatoVerbaleList, cnmTUser);
+
+						logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "7.3");
 						cnmTVerbale.setNumeroProtocollo(response.getProtocollo());
 						cnmTVerbale.setDataOraProtocollo(now);
 						
@@ -531,6 +546,7 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		cnmTVerbale.setDataOraUpdate(now);
 		cnmTVerbale.setCnmTUser1(cnmTUser);
 
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "8");
 		if (assegnaEnable) {
 			logger.info("Assegno il funzionario istruttore con id="+idFunzionario);
 			Boolean notUguale = Boolean.FALSE;
@@ -559,8 +575,10 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			}
 		}
 
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "9");
 		cnmTVerbaleRepository.save(cnmTVerbale);
 
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "10");
 		// TODO: aggiungere logAudit
 		// 20201124_LC qui il verbale è già creato, traccia solo su VerbaleServiceImpl.salvaVerbale
 
@@ -572,7 +590,8 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 				throw new SecurityException("Messaggio non trovato");
 			}
 		}
-		
+
+		logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "11");
 		return responseMsg;
 	}
 
@@ -609,8 +628,9 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 						&& !tipologiaAllegabili.isEmpty())
 					isAllegatiEnable = Boolean.TRUE;
 				else if(cnmRFunzionarioIstruttore == null && !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))) {
-						isAllegatiEnable = Boolean.TRUE;
-					}
+
+					isAllegatiEnable = Boolean.TRUE;
+				}
 			} else {
 				if (tipologiaAllegabili != null && !tipologiaAllegabili.isEmpty() && (cnmTVerbale.getCnmTUser2().getIdUser() == userDetails.getIdUser() || !Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED))))
 					isAllegatiEnable = Boolean.TRUE;

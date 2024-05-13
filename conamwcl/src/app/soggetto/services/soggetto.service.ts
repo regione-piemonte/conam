@@ -4,6 +4,7 @@ import { ConfigService } from "../../core/services/config.service";
 import { LoggerService } from "../../core/services/logger/logger.service";
 import { Observable } from "rxjs";
 import { SoggettoVO } from "../../commons/vo/verbale/soggetto-vo";
+import { SoggettoPregressiVO } from "../../commons/vo/verbale/soggetto-pregressi-vo";
 
 
 @Injectable()
@@ -17,5 +18,10 @@ export class SoggettoService {
         var url: string = this.config.getBEServer() + '/restfacade/soggetto/dettaglioSoggetto';
         let params = new HttpParams().set('idSoggetto', idSoggetto.toString()).set('idVerbale', idVerbale.toString());
         return this.http.get<SoggettoVO>(url, { params: params });
+    }
+    getSoggettoPregressoById(idSoggetto: number, idVerbale:number): Observable<SoggettoPregressiVO> {
+        var url: string = this.config.getBEServer() + '/restfacade/soggetto/dettaglioSoggetto';
+        let params = new HttpParams().set('idSoggetto', idSoggetto.toString()).set('idVerbale', idVerbale.toString());
+        return this.http.get<SoggettoPregressiVO>(url, { params: params });
     }
 }

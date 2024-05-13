@@ -20,25 +20,22 @@ export class FaseGiurisdizionaleAllegatoRicorsoOrdinanzaComponent implements OnI
 
     public subscribers: any = {};
 
-    public idOrdinanza: number;
-    public loaded: boolean;
-    public loadedConfig: boolean;
-    public loadedCategoriaAllegato: boolean;
-
     public tipoAllegatoModel: Array<TipoAllegatoVO>;
 
-    public showMessageTop: boolean;
+    public loadedCategoriaAllegato: boolean;
+    public idOrdinanza: number;
+    public loadedConfig: boolean;
+    public loaded: boolean;
+
     public typeMessageTop: string;
-    public messageTop: string;
+    public showMessageTop: boolean;
     private intervalIdS: number = 0;
+    public messageTop: string;
 
     constructor(
-        private logger: LoggerService,
-        private router: Router,
-        private activatedRoute: ActivatedRoute,
-        private sharedOrdinanzaService: SharedOrdinanzaService,
-        private sharedVerbaleService: SharedVerbaleService,
-        private fascicoloService: FascicoloService,
+        private router: Router,        private logger: LoggerService,
+        private activatedRoute: ActivatedRoute,        private sharedVerbaleService: SharedVerbaleService,
+        private sharedOrdinanzaService: SharedOrdinanzaService,        private fascicoloService: FascicoloService,
     ) { }
 
     ngOnInit(): void {
@@ -48,7 +45,7 @@ export class FaseGiurisdizionaleAllegatoRicorsoOrdinanzaComponent implements OnI
             this.idOrdinanza = +params['idOrdinanza'];
             if (isNaN(this.idOrdinanza))
                 this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_RICORSO_RICERCA_ORDINANZA);
-            // setto il riferimento per la ricerca documento protocollato    
+            // set riferimento x ricerca documento protocollato
             this.fascicoloService.ref = this.router.url;
             this.loadTipoAllegato();
         });
@@ -64,12 +61,10 @@ export class FaseGiurisdizionaleAllegatoRicorsoOrdinanzaComponent implements OnI
             this.tipoAllegatoModel = data;
             this.loadedCategoriaAllegato = true;
             this.loaded = true;
-            // setto il riferimento per la ricerca documento protocollato    
-            this.fascicoloService.tipoAllegatoModel = this.tipoAllegatoModel; 
+            // set riferimento x ricerca documento protocollato
+            this.fascicoloService.tipoAllegatoModel = this.tipoAllegatoModel;
         }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessage(err.type, err.message);
-            }
+            if (err instanceof ExceptionVO) {                this.manageMessage(err.type, err.message);            }
             this.logger.info("Errore nel recupero dei tipi di allegato");
             this.loadedCategoriaAllegato = true;
         });
@@ -80,33 +75,26 @@ export class FaseGiurisdizionaleAllegatoRicorsoOrdinanzaComponent implements OnI
         this.loaded = false;
         this.sharedVerbaleService.ricercaProtocolloSuACTA(ricerca).subscribe(data => {
             this.loaded = true;
-            let tipiAllegatoDuplicabili = []; 
-            if(!data.documentoProtocollatoVOList){
-                data.documentoProtocollatoVOList = [];
-            } else if(data.documentoProtocollatoVOList[0]){
-                tipiAllegatoDuplicabili = data.documentoProtocollatoVOList[0].tipiAllegatoDuplicabili;
+            let tipiAllegatoDuplicabili = [];
+            if(!data.documentoProtocollatoVOList){                data.documentoProtocollatoVOList = [];
+            } else if(data.documentoProtocollatoVOList[0]){                tipiAllegatoDuplicabili = data.documentoProtocollatoVOList[0].tipiAllegatoDuplicabili;
             }
-            this.fascicoloService.categoriesDuplicated = tipiAllegatoDuplicabili; 
-            
-            // setto il numero di protocollo per la ricerca documento protocollato    
+            this.fascicoloService.categoriesDuplicated = tipiAllegatoDuplicabili;
+            // set numero protocollo x ricerca documento protocollato
             this.fascicoloService.searchFormRicercaProtocol = ricerca.numeroProtocollo;
-            // setto i dati per la ricerca documento protocollato    
+            // set dati x ricerca documento protocollato
             this.fascicoloService.dataRicercaProtocollo = data.documentoProtocollatoVOList;
 
             this.fascicoloService.successPage = Routing.FASE_GIURISDIZIONALE_RICORSO_DETTAGLIO_ORDINANZA + this.idOrdinanza;
-            if (data.messaggio) {
-                this.fascicoloService.message = data.messaggio;
-            }else{
-                this.fascicoloService.message = null;
+            if (data.messaggio) {                this.fascicoloService.message = data.messaggio;
+            }else{                this.fascicoloService.message = null;
             }
             const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
             this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
 			this.fascicoloService.dataRicercaProtocolloNumResults = +data.totalLineResp;
-            this.router.navigateByUrl(Routing.FASCICOLO_ALLEGATO_DA_ACTA + this.idOrdinanza);   
+            this.router.navigateByUrl(Routing.FASCICOLO_ALLEGATO_DA_ACTA + this.idOrdinanza);
         }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessage(err.type, err.message);
-            }
+            if (err instanceof ExceptionVO) {                this.manageMessage(err.type, err.message);            }
             this.loaded = true;
             this.logger.error("Errore nel recupero dei documenti protocollati");
         });
@@ -114,18 +102,16 @@ export class FaseGiurisdizionaleAllegatoRicorsoOrdinanzaComponent implements OnI
 
     salvaAllegato(nuovoAllegato: SalvaAllegatoOrdinanzaRequest) {
         nuovoAllegato.idOrdinanza = this.idOrdinanza;
-        //mando il file al Back End
+        // file > Back End
         this.loaded = false;
         this.subscribers.salvaAllegato = this.sharedOrdinanzaService.salvaAllegatoOrdinanza(nuovoAllegato).subscribe(data => {
             this.loadTipoAllegato();
-            //reindirizzo alla pagina di successo
+            // reindirizzo pagina successo
             let azione = "allegato";
             this.router.navigate([Routing.FASE_GIURISDIZIONALE_RICORSO_DETTAGLIO_ORDINANZA + this.idOrdinanza, {action: azione}]);
             this.loaded = true;
         }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessage(err.type, err.message);
-            }
+            if (err instanceof ExceptionVO) {                this.manageMessage(err.type, err.message);            }
             this.logger.error("Errore nel salvataggio dell'allegato");
             this.loaded = true;
         });
@@ -139,12 +125,10 @@ export class FaseGiurisdizionaleAllegatoRicorsoOrdinanzaComponent implements OnI
 
     timerShowMessageTop() {
         this.showMessageTop = true;
-        let seconds: number = 20;//this.configService.getTimeoutMessagge();
+        let seconds: number = 20;
         this.intervalIdS = window.setInterval(() => {
             seconds -= 1;
-            if (seconds === 0) {
-                this.resetMessageTop();
-            }
+            if (seconds === 0) {                this.resetMessageTop();            }
         }, 1000);
     }
 

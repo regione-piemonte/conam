@@ -32,14 +32,10 @@ export class pagamentiRiconciliaManualePagamentoOrdinanzaComponent
   public request: RicercaOrdinanzaRequest;
 
   public max: boolean = false;
- 
 
   constructor(
-    private logger: LoggerService,
-    private router: Router,
-    private configSharedService: ConfigSharedService,
-    private sharedOrdinanzaService: SharedOrdinanzaService,
-    
+    private router: Router,    private logger: LoggerService,
+    private sharedOrdinanzaService: SharedOrdinanzaService,    private configSharedService: ConfigSharedService,
   ) {}
 
   ngOnInit(): void {
@@ -53,7 +49,9 @@ export class pagamentiRiconciliaManualePagamentoOrdinanzaComponent
   loadStatiOrdinanza() {
     this.loadedStatiOrdinanza = false;
     this.sharedOrdinanzaService.getStatiOrdinanza().subscribe((data) => {
-      if (data != null) this.statiOrdinanzaModel = data;
+      if (data != null) {
+        this.statiOrdinanzaModel = data;
+      }
       this.loadedStatiOrdinanza = true;
     });
   }
@@ -73,12 +71,9 @@ export class pagamentiRiconciliaManualePagamentoOrdinanzaComponent
       .ricercaOrdinanzaNonPagata(ricercaOrdinanzaRequest)
       .subscribe(
         (data) => {
-
           this.resetMessageTop();
           if (data.length == 1) {
-            data.map((value) => {
-              this.max = value.superatoIlMassimo;
-            });
+            data.map((value) => {              this.max = value.superatoIlMassimo;            });
           }
 
           if (this.max) {
@@ -127,7 +122,7 @@ export class pagamentiRiconciliaManualePagamentoOrdinanzaComponent
     this.manageMessageTop(message, "DANGER");
   }
 
-  //Messaggio top
+  // TOP Messaggio
   public showMessageTop: boolean;
   public typeMessageTop: String;
   public messageTop: String;
@@ -145,9 +140,7 @@ export class pagamentiRiconciliaManualePagamentoOrdinanzaComponent
     let seconds: number = 10;
     this.intervalIdS = window.setInterval(() => {
       seconds -= 1;
-      if (seconds === 0) {
-        this.resetMessageTop();
-      }
+      if (seconds === 0) {        this.resetMessageTop();      }
     }, 1000);
   }
 
@@ -168,8 +161,6 @@ export class pagamentiRiconciliaManualePagamentoOrdinanzaComponent
   }
 
   ngOnDestroy(): void {
-    this.logger.destroy(
-      pagamentiRiconciliaManualePagamentoOrdinanzaComponent.name
-    );
+    this.logger.destroy(      pagamentiRiconciliaManualePagamentoOrdinanzaComponent.name    );
   }
 }

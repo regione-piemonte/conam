@@ -1,19 +1,12 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
+import {  Component,
+  OnInit,  OnDestroy,
   Input,
-  Output,
-  EventEmitter,
-} from "@angular/core";
+  Output,  EventEmitter,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import {
-  EnteVO,
-  StatoVerbaleVO,
-  AmbitoVO,
-  NormaVO,
-  SelectVO,
-} from "../../../commons/vo/select-vo";
+  EnteVO,  StatoVerbaleVO,
+  AmbitoVO,  NormaVO,
+  SelectVO,} from "../../../commons/vo/select-vo";
 import { UserService } from "../../../core/services/user.service";
 import { RifNormativiService } from "../../../verbale/services/rif-normativi.service";
 import { SoggettoVerbaleRequest } from "../../../commons/request/verbale/soggetto-verbale-request";
@@ -29,7 +22,7 @@ import { Constants } from "../../../commons/class/constants";
 export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
   public subscribers: any = {};
 
-  //tab1
+  // tab 1
   public entiLegge: Array<EnteVO> = new Array<EnteVO>();
   public tabVerbale: boolean = false;
   public loadedStatoVerbale: boolean;
@@ -41,36 +34,34 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
   public normaModel = new Array<NormaVO>();
   public statoSelected: StatoVerbaleVO;
 
-  //tab2
+  // tab 2
   public tabTrasgressore: boolean = false;
   public isTrasgressorePersonaFisica: boolean = false;
-  public isTrasgressorePersonaGiuridica: boolean = false;
   public soggettoVerbaleTrasgressore: SoggettoVerbaleRequest;
+  public isTrasgressorePersonaGiuridica: boolean = false;
 
-  //tab3
+  // tab 3
   public tabObbligatoInSolido: boolean = false;
-  public isObbligatoInSolidoPersonaFisica: boolean = false;
   public soggettoVerbaleObbligato: SoggettoVerbaleRequest;
+  public isObbligatoInSolidoPersonaFisica: boolean = false;
   public isObbligatoInSolidoPersonaGiuridica: boolean = false;
 
-  //ricerca
+  // ricerca
   public ricercaVerbale: RicercaVerbaleRequest;
 
   @Output() onSearch = new EventEmitter<RicercaVerbaleRequest>();
   @Input() request: RicercaVerbaleRequest;
-
   @Input() config: ConfigVerbaleRicerca;
 
   constructor(
-    private logger: LoggerService,
     private sharedVerbaleService: SharedVerbaleService,
+    private logger: LoggerService,
+    private rifNormativiService: RifNormativiService,
     private userService: UserService,
-    private rifNormativiService: RifNormativiService
   ) {}
 
   ngOnInit(): void {
-    if (this.config == null) this.config = this.createDefaultConfig();
-
+    if (this.config == null) { this.config = this.createDefaultConfig();}
     this.loadedEnte = false;
     this.loadedAmbito = true;
     this.loadedNorma = true;
@@ -81,9 +72,7 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
         this.loadedEnte = true;
       }
     });
-
     this.setRequest();
-
     this.statoVerbale(this.config.tipoRicerca);
   }
 
@@ -92,11 +81,11 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
       this.tabVerbale = !this.tabVerbale;
       if (!this.tabVerbale) {
         this.ricercaVerbale.datiVerbale.ente = null;
-        this.ricercaVerbale.datiVerbale.numeroProtocollo = null;
         this.ricercaVerbale.datiVerbale.numeroVerbale = null;
+        this.ricercaVerbale.datiVerbale.numeroProtocollo = null;
         this.ricercaVerbale.datiVerbale.ambito = null;
-        this.ricercaVerbale.datiVerbale.norma = null;
         this.statoSelected = null;
+        this.ricercaVerbale.datiVerbale.norma = null;
       }
     },
     changeTrasgressore: () => {
@@ -104,11 +93,11 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
       if (!this.tabTrasgressore) {
         this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
         this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
+        this.isTrasgressorePersonaGiuridica = false;
         this.isTrasgressorePersonaFisica = false;
-        this.isTrasgressorePersonaGiuridica = false;
       } else {
-        this.isTrasgressorePersonaFisica = true;
         this.isTrasgressorePersonaGiuridica = false;
+        this.isTrasgressorePersonaFisica = true;
       }
     },
     changeObbligatoInSolido: () => {
@@ -116,43 +105,40 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
       if (!this.tabObbligatoInSolido) {
         this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
         this.soggettoVerbaleObbligato.tipoSoggetto = "O";
+        this.isObbligatoInSolidoPersonaGiuridica = false;
         this.isObbligatoInSolidoPersonaFisica = false;
-        this.isObbligatoInSolidoPersonaGiuridica = false;
       } else {
-        this.isObbligatoInSolidoPersonaFisica = true;
         this.isObbligatoInSolidoPersonaGiuridica = false;
+        this.isObbligatoInSolidoPersonaFisica = true;
       }
     },
     checkTrasgressorePersonaFisica: () => {
       this.isTrasgressorePersonaFisica = !this.isTrasgressorePersonaFisica;
       this.isTrasgressorePersonaGiuridica = false;
       this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
-      this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
       this.soggettoVerbaleTrasgressore.personaFisica = true;
+      this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
     },
     checkTrasgressorePersonaGiuridica: () => {
-      this.isTrasgressorePersonaGiuridica = !this
-        .isTrasgressorePersonaGiuridica;
+      this.isTrasgressorePersonaGiuridica = !this.isTrasgressorePersonaGiuridica;
       this.isTrasgressorePersonaFisica = false;
       this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
-      this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
       this.soggettoVerbaleTrasgressore.personaFisica = false;
+      this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
     },
     checkObbligatoInSolidoPersonaFisica: () => {
-      this.isObbligatoInSolidoPersonaFisica = !this
-        .isObbligatoInSolidoPersonaFisica;
       this.isObbligatoInSolidoPersonaGiuridica = false;
+      this.isObbligatoInSolidoPersonaFisica = !this.isObbligatoInSolidoPersonaFisica;
       this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
       this.soggettoVerbaleObbligato.tipoSoggetto = "O";
       this.soggettoVerbaleObbligato.personaFisica = true;
     },
     checkObbligatoInsolidoPersonaGiuridica: () => {
-      this.isObbligatoInSolidoPersonaGiuridica = !this
-        .isObbligatoInSolidoPersonaGiuridica;
+      this.isObbligatoInSolidoPersonaGiuridica = !this.isObbligatoInSolidoPersonaGiuridica;
       this.isObbligatoInSolidoPersonaFisica = false;
       this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
-      this.soggettoVerbaleObbligato.tipoSoggetto = "O";
       this.soggettoVerbaleObbligato.personaFisica = false;
+      this.soggettoVerbaleObbligato.tipoSoggetto = "O";
     },
   };
 
@@ -160,18 +146,16 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
     this.ricercaVerbale.soggettoVerbale = new Array<SoggettoVerbaleRequest>();
     if (this.tabTrasgressore) {
       this.soggettoVerbaleTrasgressore.personaFisica = this.isTrasgressorePersonaFisica;
-      this.ricercaVerbale.soggettoVerbale.push(
-        this.soggettoVerbaleTrasgressore
-      );
+      this.ricercaVerbale.soggettoVerbale.push(        this.soggettoVerbaleTrasgressore      );
     }
     if (this.tabObbligatoInSolido) {
       this.soggettoVerbaleObbligato.personaFisica = this.isObbligatoInSolidoPersonaFisica;
       this.ricercaVerbale.soggettoVerbale.push(this.soggettoVerbaleObbligato);
     }
 
-    if (this.statoSelected != null)
+    if (this.statoSelected != null){
       this.ricercaVerbale.datiVerbale.stato = [this.statoSelected];
-    else this.ricercaVerbale.datiVerbale.stato = this.statoVerbaleModel;
+    }    else { this.ricercaVerbale.datiVerbale.stato = this.statoVerbaleModel;}
     this.onSearch.emit(this.ricercaVerbale);
   }
 
@@ -200,9 +184,7 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
           }
           this.loadedStatoVerbale = true;
         },
-        (err) => {
-          this.logger.error("Errore nel recupero degli stati dei verbali");
-        }
+        (err) => {          this.logger.error("Errore nel recupero degli stati dei verbali");        }
       );
   }
 
@@ -215,8 +197,7 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
           this.ambitoModel = data;
           this.loadedAmbito = true;
         },
-        (err) => {
-          this.logger.error("Errore nel recupero degli ambiti");
+        (err) => {          this.logger.error("Errore nel recupero degli ambiti");
         }
       );
   }
@@ -234,8 +215,7 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
           this.normaModel = data;
           this.loadedNorma = true;
         },
-        (err) => {
-          this.logger.error("Errore nel recupero delle norme");
+        (err) => {this.logger.error("Errore nel recupero delle norme");
         }
       );
   }
@@ -257,13 +237,13 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
     this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
     this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
     this.soggettoVerbaleObbligato.tipoSoggetto = "O";
-    this.tabVerbale = false;
     this.tabObbligatoInSolido = false;
-    this.isObbligatoInSolidoPersonaFisica = false;
+    this.tabVerbale = false;
     this.isObbligatoInSolidoPersonaGiuridica = false;
+    this.isObbligatoInSolidoPersonaFisica = false;
     this.tabTrasgressore = false;
-    this.isTrasgressorePersonaFisica = false;
     this.isTrasgressorePersonaGiuridica = false;
+    this.isTrasgressorePersonaFisica = false;
     this.statoSelected = null;
   }
 
@@ -276,7 +256,7 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
       (!this.tabObbligatoInSolido ||
         (!this.isObbligatoInSolidoPersonaFisica &&
           !this.isObbligatoInSolidoPersonaGiuridica));
-    if (!validForm || condition) return true;
+    if (!validForm || condition) {return true;}
     return false;
   }
 
@@ -361,9 +341,7 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
     }
   }
 
-  isEmpty(str) {
-    return !str || 0 === str.length;
-  }
+  isEmpty(str) {    return !str || 0 === str.length;  }
 
   setRequest() {
     if (this.request == null) this.pulisciFiltri();
@@ -391,12 +369,12 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
           if (x.tipoSoggetto == "T") {
             this.soggettoVerbaleTrasgressore = x;
             this.tabTrasgressore = true;
-            if (x.personaFisica) this.isTrasgressorePersonaFisica = true;
-            else this.isTrasgressorePersonaGiuridica = true;
+            if (x.personaFisica) {this.isTrasgressorePersonaFisica = true;}
+            else {this.isTrasgressorePersonaGiuridica = true;}
           } else if (x.tipoSoggetto == "O") {
             this.soggettoVerbaleObbligato = x;
             this.tabObbligatoInSolido = true;
-            if (x.personaFisica) this.isObbligatoInSolidoPersonaFisica = true;
+            if (x.personaFisica) {this.isObbligatoInSolidoPersonaFisica = true;}
             else this.isObbligatoInSolidoPersonaGiuridica = true;
           }
         }
@@ -404,20 +382,15 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
     }
   }
 
-  compareFn(c1: SelectVO, c2: SelectVO): boolean {
-    return c1 && c2 ? c1.id === c2.id : c1 === c2;
-  }
+  compareFn(c1: SelectVO, c2: SelectVO): boolean {    return c1 && c2 ? c1.id === c2.id : c1 === c2;  }
 
-  ngOnDestroy(): void {
-    this.logger.destroy(SharedVerbaleRicercaComponent.name);
-  }
+  ngOnDestroy(): void {    this.logger.destroy(SharedVerbaleRicercaComponent.name);  }
 
-  private createDefaultConfig(): ConfigVerbaleRicerca {
-    return { showFieldStatoVerbale: true, tipoRicerca: "GF" }; //GF: Gestione Fascicolo
+  private createDefaultConfig(): ConfigVerbaleRicerca {    return { showFieldStatoVerbale: true, tipoRicerca: "GF" }; //GF: Gestione Fascicolo
   }
 }
 
-//aggiungere eventuali altre proprieta
+// aggiungere eventuali altre proprieta
 export interface ConfigVerbaleRicerca {
   showFieldStatoVerbale: boolean;
   tipoRicerca: string;

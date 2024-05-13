@@ -4,6 +4,16 @@
  ******************************************************************************/
 package it.csi.conam.conambl.vo.verbale;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 import it.csi.conam.conambl.vo.IstruttoreVO;
 import it.csi.conam.conambl.vo.ParentVO;
 import it.csi.conam.conambl.vo.leggi.EnteVO;
@@ -13,13 +23,6 @@ import it.csi.conam.conambl.vo.luoghi.ProvinciaVO;
 import it.csi.conam.conambl.vo.luoghi.RegioneVO;
 import it.csi.conam.conambl.web.serializer.CustomDateTimeDeserializer;
 import it.csi.conam.conambl.web.serializer.CustomDateTimeSerializer;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * @author riccardo.bova
@@ -44,6 +47,7 @@ public class VerbaleVO extends ParentVO {
 	private LocalDateTime dataOraAccertamento;
 	@NotNull(message = "VOCON04")
 	private Double importo;
+	private Double importoTotale;	
 	private Double importoResiduo;
 	private StatoVerbaleVO stato;
 	private ComuneVO comune;
@@ -63,6 +67,8 @@ public class VerbaleVO extends ParentVO {
 	private StatoManualeVO statoManuale;
 	
 	private ComuneVO comuneEnte;
+
+	List<NotaVO> note = new ArrayList<NotaVO>();
 	
 	public String getNumeroProtocollo() {
 		return numeroProtocollo;
@@ -235,6 +241,23 @@ public class VerbaleVO extends ParentVO {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	public List<NotaVO> getNote() {
+		return note;
+	}
+
+	public void setNote(List<NotaVO> note) {
+		this.note = note;
+	}
+
+	
+	public Double getImportoTotale() {
+		return importoTotale;
+	}
+
+	public void setImportoTotale(Double importoTotale) {
+		this.importoTotale = importoTotale;
 	}
 
 }

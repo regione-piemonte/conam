@@ -1,8 +1,6 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { LoggerService } from "../../core/services/logger/logger.service";
 import { Config } from "../../shared/module/datatable/classes/config";
-import { TableSoggettiRiscossione } from "../../commons/table/table-soggetti-riscossione";
-
 
 @Injectable()
 export class SharedOrdinanzaConfigService implements OnDestroy {
@@ -28,50 +26,18 @@ export class SharedOrdinanzaConfigService implements OnDestroy {
     }
 
     private configSoggettiOrdinanza: Config = {
-        pagination: {
-            enable: true,
-        },
-        sort: {
-            enable: true,
-        },
-        selection: {
-            enable: true,
-        },
-        buttonSelection: {
-            label: "",
-            enable: true,
-        },
-        info: {
-            enable: true,
-            hasInfo: (el: any) => {
-                return true;
-            }
-        },
+        pagination: {            enable: true,        },
+        sort: {            enable: true,        },
+        selection: {            enable: true,        },
+        buttonSelection: {            label: "",            enable: true,        },
+        info: {            enable: true,            hasInfo: (el: any) => {                return true;            }        },
         columns: [
-            {
-                columnName: 'numeroDeterminazione',
-                displayName: 'Numero determinazione'
-            },
-            {
-                columnName: 'identificativoSoggetto',
-                displayName: 'Identificativo Soggetto'
-            },
-            {
-                columnName: 'nomeCognomeRagioneSociale',
-                displayName: 'Cognome Nome/Ragione Sociale'
-            },
-            {
-                columnName: 'tipoSoggetto',
-                displayName: 'Tipo Soggetto'
-            },
-            {
-                columnName: 'ruolo',
-                displayName: 'Ruolo'
-            },
-            {
-                columnName: 'statoSoggettoOrdinanza.denominazione',
-                displayName: 'Posizione'
-            },
+            {                columnName: 'numeroDeterminazione',                displayName: 'Numero determinazione'            },
+            {                columnName: 'identificativoSoggetto',                displayName: 'Identificativo Soggetto'            },
+            {                columnName: 'nomeCognomeRagioneSociale',                displayName: 'Cognome Nome/Ragione Sociale'            },
+            {                columnName: 'tipoSoggetto',                displayName: 'Tipo Soggetto'            },
+            {                columnName: 'ruolo',                displayName: 'Ruolo'            },
+            {                columnName: 'statoSoggettoOrdinanza.denominazione',                displayName: 'Posizione'            },
         ]
     };
 
@@ -97,54 +63,19 @@ export class SharedOrdinanzaConfigService implements OnDestroy {
 
 
     private configSoggettiOrdinanzaSentenza: Config = {
-        pagination: {
-            enable: false
-        },
-        sort: {
-            enable: false,
-        },
-        selection: {
-            enable: true,
-        },
-        buttonSelection: {
-            label: "",
-            enable: true,
-        },
-        info: {
-            enable: true,
-            hasInfo: (el: any) => {
-                return true;
-            }
-        },
+        pagination: {            enable: false        },
+        sort: {            enable: false,        },
+        selection: {            enable: true,        },
+        buttonSelection: {            label: "",            enable: true,        },
+        info: {            enable: true,            hasInfo: (el: any) => {                return true;            }        },
         columns: [
-            {
-                columnName: 'identificativoSoggetto',
-                displayName: 'Identificativo Soggetto'
-            },
-            {
-                columnName: 'nomeCognomeRagioneSociale',
-                displayName: 'Cognome Nome/Ragione Sociale'
-            },
-            {
-                columnName: 'tipoSoggetto',
-                displayName: 'Tipo Soggetto'
-            },
-            {
-                columnName: 'ruolo',
-                displayName: 'Ruolo'
-            },
-            {
-                columnName: 'statoSoggettoOrdinanza.denominazione',
-                displayName: 'Posizione'
-            },
-            {
-                columnName: 'importoTitoloSanzione',
-                displayName: 'Importo titolo di sanzione'
-            },
-            {
-                columnName: 'importoSpeseProcessuali',
-                displayName: 'Importo spese processuali'
-            },
+            {                columnName: 'identificativoSoggetto',                displayName: 'Identificativo Soggetto'            },
+            {                columnName: 'nomeCognomeRagioneSociale',                displayName: 'Cognome Nome/Ragione Sociale'            },
+            {                columnName: 'tipoSoggetto',                displayName: 'Tipo Soggetto'            },
+            {                columnName: 'ruolo',                displayName: 'Ruolo'            },
+            {                columnName: 'statoSoggettoOrdinanza.denominazione',                displayName: 'Posizione'            },
+            {                columnName: 'importoTitoloSanzione',                displayName: 'Importo titolo di sanzione'            },
+            {                columnName: 'importoSpeseProcessuali',                displayName: 'Importo spese processuali'            },
         ]
     };
 
@@ -170,58 +101,20 @@ export class SharedOrdinanzaConfigService implements OnDestroy {
 
 
     private configSoggettiOrdinanzaCreaPiano: Config = {
-        pagination: {
-            enable: true
-        },
-        sort: {
-            enable: true,
-        },
-        selection: {
-            enable: true,
-        },
-        buttonSelection: {
-            label: "",
-            enable: true,
-        },
-        info: {
-            enable: true,
-            hasInfo: (el: any) => {
-                return true;
-            }
-        },
+        pagination: {            enable: true        },
+        sort: {            enable: true,        },
+        selection: {            enable: true,        },
+        buttonSelection: {            label: "",            enable: true,        },
+        info: {            enable: true,            hasInfo: (el: any) => {                return true;            }        },
         columns: [
-            {
-                columnName: 'numeroDeterminazione',
-                displayName: 'Numero Determinazione'
-            },
-            {
-                columnName: 'statoOrdinanza.denominazione',
-                displayName: 'Stato Ordinanza'
-            },
-            {
-                columnName: 'verbale.statoManuale.denominazione',
-                displayName: 'Etichetta stato'
-            },
-            {
-                columnName: 'identificativoSoggetto',
-                displayName: 'Identificativo Soggetto'
-            },
-            {
-                columnName: 'nomeCognomeRagioneSociale',
-                displayName: 'Cognome Nome/Ragione Sociale'
-            },
-            {
-                columnName: 'tipoSoggetto',
-                displayName: 'Tipo Soggetto'
-            },
-            {
-                columnName: 'ruolo',
-                displayName: 'Ruolo'
-            },
-            {
-                columnName: 'statoSoggettoOrdinanza.denominazione',
-                displayName: 'Posizione'
-            },
+            {                columnName: 'numeroDeterminazione',                displayName: 'Numero Determinazione'            },
+            {                columnName: 'statoOrdinanza.denominazione',                displayName: 'Stato Ordinanza'            },
+            {                columnName: 'verbale.statoManuale.denominazione',                displayName: 'Etichetta stato'            },
+            {                columnName: 'identificativoSoggetto',                displayName: 'Identificativo Soggetto'            },
+            {                columnName: 'nomeCognomeRagioneSociale',                displayName: 'Cognome Nome/Ragione Sociale'            },
+            {                columnName: 'tipoSoggetto',                displayName: 'Tipo Soggetto'            },
+            {                columnName: 'ruolo',                displayName: 'Ruolo'            },
+            {                columnName: 'statoSoggettoOrdinanza.denominazione',                displayName: 'Posizione'            },
         ]
     };
     public getConfigOrdinanzaSoggettiIstanza(selection: boolean,
@@ -243,63 +136,30 @@ export class SharedOrdinanzaConfigService implements OnDestroy {
     }
 
     private configSoggettiOrdinanzaIstanza: Config = {
-        pagination: {
-            enable: true,
-        },
-        sort: {
-            enable: true,
-        },
-        selection: {
-            enable: true,
-        },
-        buttonSelection: {
-            label: "",
-            enable: false,
-        },
-        info: {
-            enable: true,
-            hasInfo: (el: any) => {
-                return true;
-            }
-        },
+        pagination: {            enable: true,        },
+        sort: {            enable: true,        },
+        selection: {            enable: true,       },
+        buttonSelection: {            label: "",            enable: false,        },
+        info: {            enable: true,            hasInfo: (el: any) => {                return true;            }        },
         columns: [
-            {
-                columnName: 'hasMasterIstanzaStr',
-                displayName: 'Istanza Rateizzazione'
-            },
-            {
-                columnName: 'identificativoSoggetto',
-                displayName: 'Identificativo Soggetto'
-            },
-            {
-                columnName: 'nomeCognomeRagioneSociale',
-                displayName: 'Cognome Nome/Ragione Sociale'
-            },
-            {
-                columnName: 'tipoSoggetto',
-                displayName: 'Tipo Soggetto'
-            },
-            {
-                columnName: 'ruolo',
-                displayName: 'Ruolo'
-            },
-            {
-                columnName: 'numeroDeterminazione',
-                displayName: 'Numero determinazione'
-            },
-            {
-                columnName: 'statoSoggettoOrdinanza.denominazione',
-                displayName: 'Posizione'
-            },
+            {                columnName: 'hasMasterIstanzaStr',                displayName: 'Istanza Rateizzazione'            },
+            {                columnName: 'identificativoSoggetto',                displayName: 'Identificativo Soggetto'            },
+            {                columnName: 'nomeCognomeRagioneSociale',                displayName: 'Cognome Nome/Ragione Sociale'            },
+            {                columnName: 'tipoSoggetto',                displayName: 'Tipo Soggetto'            },
+            {                columnName: 'ruolo',                displayName: 'Ruolo'            },
+            {                columnName: 'numeroDeterminazione',                displayName: 'Numero determinazione'            },
+            {                columnName: 'statoSoggettoOrdinanza.denominazione',                displayName: 'Posizione'            },
         ]
     };
 
+
+    ngOnDestroy(): void {
+        this.logger.destroyService(SharedOrdinanzaConfigService.name);
+    }
 
     constructor(private logger: LoggerService) {
         this.logger.createService(SharedOrdinanzaConfigService.name);
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroyService(SharedOrdinanzaConfigService.name);
-    }
+
 }

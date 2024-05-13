@@ -74,6 +74,13 @@ public class AllegatoResource extends SpringSupportedResource {
 		List<SelectVO> select = allegatoDispatcher.getDecodificaSelectSoggettiAllegato(idverbale);
 		return Response.ok(select).build();
 	}
+
+	@GET
+	@Path("/getDecodificaSelectSoggettiAllegatoCompleto/{idverbale}")
+	public Response getDecodificaSelectSoggettiAllegatoCompleto(@Valid @PathParam("idverbale") @NotNull(message = "RESCON02") Integer idverbale) {
+		List<SelectVO> select = allegatoDispatcher.getDecodificaSelectSoggettiAllegatoCompleto(idverbale);
+		return Response.ok(select).build();
+	}
 	
 	@GET
 	@Path("/ricercaProtocolloSuACTA")

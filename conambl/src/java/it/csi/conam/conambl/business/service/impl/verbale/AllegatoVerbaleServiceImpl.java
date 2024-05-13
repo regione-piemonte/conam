@@ -4,10 +4,26 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.verbale;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
+
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.ordinanza.AllegatoOrdinanzaService;
@@ -23,11 +39,42 @@ import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
-import it.csi.conam.conambl.integration.entity.*;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
+import it.csi.conam.conambl.integration.entity.CnmDMessaggio;
+import it.csi.conam.conambl.integration.entity.CnmDStatoAllegato;
+import it.csi.conam.conambl.integration.entity.CnmDTipoAllegato;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbSogPK;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbalePK;
+import it.csi.conam.conambl.integration.entity.CnmRFunzionarioIstruttore;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRSoggRata;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTAllegatoField;
+import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.mapper.entity.AllegatoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.TipoAllegatoEntityMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoPianoRateRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbaleRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRFunzionarioIstruttoreRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRSoggRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoFieldRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTVerbaleRepository;
 import it.csi.conam.conambl.integration.specification.CnmDTipoAllegatoSpecification;
 import it.csi.conam.conambl.request.SalvaAllegatiMultipliRequest;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
@@ -38,20 +85,11 @@ import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.UploadUtils;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
-import it.csi.conam.conambl.vo.verbale.allegato.*;
-import org.apache.commons.lang3.StringUtils;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.NumberFormat;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoMultiploVO;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.RiepilogoAllegatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
 
 /**
  * @author riccardo.bova
@@ -338,11 +376,20 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		// 20210921 PP - consente di inserire ancora una ricevuta di pagamento se l'importo pagato e' inferiore all'importo del verbale
 		try {
 			if(tipo==null || tipo == TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE) {
+				
+				List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findVerbaleSoggettoByIdVerbale(idVerbale);
+				
+				// [Importo residuo totale] = (sommatoria di tutti gli importi in misura ridotta presenti su ogni soggetto) - tutti i pagamenti effettuati
+				BigDecimal importoTotale = new BigDecimal(0);				
+				for(CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmRVerbaleSoggettoList) {
+					importoTotale = importoTotale.add(cnmRVerbaleSoggetto.getImportoMisuraRidotta());
+				}
+				
 				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
 				if(importoPagato == null) {
 					importoPagato = new BigDecimal(0);
 				}
-				if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale())<0) {
+				if(importoPagato.compareTo(importoTotale)<0) {
 					TipoAllegatoVO ricevutaPagamentoVerbale = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId()));
 					while (listAllegabili.remove(ricevutaPagamentoVerbale)) {
 					}
@@ -359,7 +406,8 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 				listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.EMAIL_ISTRUTTORIA.getId())));
 			}
 		}
-		else if(controdeduzione.getId()==idTipoDocumento && aggiungiCategoriaEmail) {
+		//	Issue 3 - Sonarqube
+		else if(Objects.equals(controdeduzione.getId(), idTipoDocumento) && aggiungiCategoriaEmail) {
 			listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.EMAIL_ISTRUTTORIA.getId())));
 		}
 		
@@ -466,7 +514,8 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 				listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.EMAIL_ISTRUTTORIA.getId())));
 			}
 		}
-		else if(controdeduzione.getId()==idTipoDocumento && aggiungiCategoriaEmail) {
+		//	Issue 3 - Sonarqube
+		else if(Objects.equals(controdeduzione.getId(), idTipoDocumento) && aggiungiCategoriaEmail) {
 			listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.EMAIL_ISTRUTTORIA.getId())));
 		}
 		
@@ -563,6 +612,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		CnmTUser cnmTUser = cnmTUserRepository.findOne(idUser);
 		boolean nofile = false;
 		Integer idVerbaleSoggetto = null;
+		double money = 0;
 		if (fileName == null || idTipoAllegato == TipoAllegato.RELATA_NOTIFICA.getId()) {
 			String s = "";
 			for (AllegatoFieldVO all : configAllegato) {
@@ -574,7 +624,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 //					}
 				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_NUMERIC || all.getFieldType().getId() == Constants.FIELD_TYPE_ELENCO) {
 					NumberFormat n = NumberFormat.getCurrencyInstance(Locale.ITALY);
-					double money = 0;
+					
 					if(all.getNumberValue()!= null)
 						money = all.getNumberValue().doubleValue();					
 					String string = n.format(money);
@@ -588,7 +638,10 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_DATA) {
 					if(all.getDateValue()!=null)
 						s += "DATA PAGAMENTO: " + all.getDateValue().toString() + " ";
-				}	else if (all.getFieldType().getId() == Constants.FIELD_TYPE_ELENCO_SOGGETTI) {
+				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_ELENCO_SOGGETTI) {
+					if(all.getNumberValue()!= null)
+						idVerbaleSoggetto = all.getNumberValue().intValue();
+				} else if (all.getFieldType().getId() == Constants.FIELD_TYPE_ELENCO_SOGGETTI_COMPL) {
 					if(all.getNumberValue()!= null)
 						idVerbaleSoggetto = all.getNumberValue().intValue();
 				}
@@ -633,6 +686,16 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		// controllo regole allegati verbale
 		controllaRegoleFieldAllegatiVerbale(cnmTVerbale, idTipoAllegato, configAllegato);
 
+		// OB_206 - Salvataggio importo pagato su CnmRVerbaleSoggetto
+		if(idTipoAllegato == 7L) {
+			if(idVerbaleSoggetto != null && request.getIdVerbale() != null) {
+				CnmRVerbaleSoggetto cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.findCnmTVerbaleByIdVerbaleSoggetto(idVerbaleSoggetto);
+				// devo sommare eventuali pagamenti gia effettuati dall utente
+				cnmRVerbaleSoggetto.setImportoPagato(new BigDecimal(money).setScale(2, RoundingMode.HALF_UP).add(cnmRVerbaleSoggetto.getImportoPagato()));
+				cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
+			}
+		}
+		
 		// 20230227 - gestione tipo registrazione
 		boolean protocollazioneUscita = Constants.ALLEGATI_REGISTRAZIONE_IN_USCITA.contains(idTipoAllegato);
 		
@@ -859,11 +922,29 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 			throw new SecurityException("cnmTAllegato non esistente");
 		
 		if(cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() != TipoAllegato.RELATA_NOTIFICA.getId()) {
+			if(cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId()) {
+				Integer idVerbaleSoggetto = null;
+				BigDecimal valorePagato = null;
+				for (CnmTAllegatoField c : cnmTAllegato.getCnmTAllegatoFields()) {
+					if(c != null && c.getValoreNumber() != null) {
+						if (c.getCnmCField().getIdField() == Constants.ID_FIELD_SOGGETTO_PAGAMENTO)
+							idVerbaleSoggetto = c.getValoreNumber().intValue();
+						if (c.getCnmCField().getIdField() == Constants.ID_FIELD_IMPORTO_PAGATO)
+							valorePagato = c.getValoreNumber();
+					}
+				}
+				if(idVerbaleSoggetto != null && valorePagato != null) {
+					CnmRVerbaleSoggetto cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.findCnmTVerbaleByIdVerbaleSoggetto(idVerbaleSoggetto);
+					// devo sottrarre dai pagamenti gia effettuati dall utente
+					cnmRVerbaleSoggetto.setImportoPagato(cnmRVerbaleSoggetto.getImportoPagato().subtract(valorePagato));
+					cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
+				}
+			}
 			CnmRAllegatoVerbalePK cnmRAllegatoVerbalePK = new CnmRAllegatoVerbalePK();
 			cnmRAllegatoVerbalePK.setIdAllegato(cnmTAllegato.getIdAllegato());
 			cnmRAllegatoVerbalePK.setIdVerbale(idVerbale);
 			cnmRAllegatoVerbaleRepository.delete(cnmRAllegatoVerbalePK);
-		}else {
+		}else  {
 			List<CnmRAllegatoVerbSog> cnmRAllegatoVerbSogs = cnmRAllegatoVerbSogRepository.findByCnmTAllegato(cnmTAllegato);
 			
 			for(CnmRAllegatoVerbSog cnmRAllegatoVerbSog : cnmRAllegatoVerbSogs) {

@@ -36,78 +36,76 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
   @ViewChild(SharedDialogComponent) sharedDialog: SharedDialogComponent;
 
   //datatable
+  public config: Config;
   public soggetti: Array<TableSoggettiVerbale> =
     new Array<TableSoggettiVerbale>();
-  public config: Config;
 
   //global
+  public subscribers: any = {};
   public loadedSoggetti: boolean;
   public idVerbale: number;
-  public subscribers: any = {};
 
-  public loaderRegioni: boolean = false;
   public regioneModel: Array<RegioneVO> = new Array<RegioneVO>();
+  public loaderRegioni: boolean = false;
   public provinciaModel: Array<ProvinciaVO> = new Array<ProvinciaVO>();
-  public loaderProvince: boolean = true;
   public comuneModel: Array<ComuneVO> = new Array<ComuneVO>();
+  public loaderProvince: boolean = true;
   public loaderComuni: boolean = true;
-  public loaderNazioni: boolean;
   public nazioneResidenzaModel: Array<NazioneVO> = new Array<NazioneVO>();
+  public loaderNazioni: boolean;
 
-  private indirizzo: string;
   private civico: string;
-  private cap: string;
+  private indirizzo: string;
   private indirizzoEstero: string;
-  private civicoEstero: string;
+  private cap: string;
   private capEstero: string;
+  private civicoEstero: string;
 
+  public sesso: Array<ComboVO> = ComboForm.SESSO;
   //ruolo
   public ruoloModel = new Array<RuoloVO>();
-  public sesso: Array<ComboVO> = ComboForm.SESSO;
   //insert soggetto
-  public isAggiungiSoggetto: boolean;
   public soggetto: SoggettoVO;
+  public isAggiungiSoggetto: boolean;
   public modalita: string;
   public showResidenza: boolean = false;
   public loadedSalvaRicerca: boolean;
-  public comuneEstero: boolean = false;
   public comuneEsteroDisabled: boolean = false;
+  public comuneEstero: boolean = false;
 
   //Messaggio top
   public showMessageTop: boolean;
-  public typeMessageTop: String;
   public messageTop: String;
+  public typeMessageTop: String;
 
   private intervalIdS: number = 0;
-  private intervalIdW: number = 0;
 
   //Messaggio conferma eliminazione
-  public buttonAnnullaText: string;
   public buttonConfirmText: string;
+  public buttonAnnullaText: string;
   public subMessages: Array<string>;
-
-  //warning meta pagina
-  public showMessageBottom: boolean;
-  public typeMessageBottom: String;
-  public messageBottom: String;
 
   private intervalIdSBottom: number = 0;
 
+  //warning meta pagina
+  public typeMessageBottom: String;
+  public showMessageBottom: boolean;
+  public messageBottom: String;
+
+
+  //VALIDAZIONE
+  public formFisicoValid: boolean;
+  public formGiuridicoValid: boolean;
   //RUOLO
   public loaderRuolo: boolean;
 
-  //VALIDAZIONE
-  public formGiuridicoValid: boolean;
-  public formFisicoValid: boolean;
-
   constructor(
-    private logger: LoggerService,
     private router: Router,
+    private logger: LoggerService,
     private activatedRoute: ActivatedRoute,
-    private luoghiService: LuoghiService,
     private verbaleService: VerbaleService,
+    private luoghiService: LuoghiService,
     private utilSubscribersService: UtilSubscribersService,
-    private sharedVerbaleService: SharedVerbaleService,
     private sharedVerbaleConfigService: SharedVerbaleConfigService
   ) {}
 
@@ -122,13 +120,14 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
         this.router.navigateByUrl(
           Routing.GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_RICERCA
         );
-      this.soggetto = new SoggettoVO();
       this.soggetti = [];
+      this.soggetto = new SoggettoVO();
       this.config = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
         true,
         1,
         this.isSelectable,
-        false
+        false,
+          false
       );
       this.loadNazioni();
       this.loadRegioni();
@@ -151,18 +150,6 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
     return false;
   }
 
-  loadNazioni() {
-    this.loaderNazioni = false;
-    this.subscribers.nazioni = this.luoghiService.getNazioni().subscribe(
-      (data) => {
-        this.nazioneResidenzaModel = data;
-        this.loaderNazioni = true;
-      },
-      (err) => {
-        this.logger.error("Errore nel recupero delle nazioni");
-      }
-    );
-  }
 
   loadRegioni() {
     this.loaderRegioni = false;
@@ -177,6 +164,32 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
     );
   }
 
+  loadNazioni() {
+    this.loaderNazioni = false;
+    this.subscribers.nazioni = this.luoghiService.getNazioni().subscribe(
+      (data) => {
+        this.nazioneResidenzaModel = data;
+        this.loaderNazioni = true;
+      },
+      (err) => {
+        this.logger.error("Errore nel recupero delle nazioni");
+      }
+    );
+  }
+  loadComuni(id: number) {
+    this.loaderComuni = false;
+    this.subscribers.comuniByProvince = this.luoghiService
+      .getComuneByIdProvincia(id)
+      .subscribe(
+        (data) => {
+          this.comuneModel = data;
+          this.loaderComuni = true;
+        },
+        (err) => {
+          this.logger.error("Errore nel recupero dei comuni");
+        }
+      );
+  }
   loadProvince(id: number) {
     this.loaderProvince = false;
     this.subscribers.provinceByRegione = this.luoghiService
@@ -193,20 +206,6 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
       );
   }
 
-  loadComuni(id: number) {
-    this.loaderComuni = false;
-    this.subscribers.comuniByProvince = this.luoghiService
-      .getComuneByIdProvincia(id)
-      .subscribe(
-        (data) => {
-          this.comuneModel = data;
-          this.loaderComuni = true;
-        },
-        (err) => {
-          this.logger.error("Errore nel recupero dei comuni");
-        }
-      );
-  }
 
   manageLuoghiBySoggetto() {
     if (
@@ -223,6 +222,15 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
     }
   }
 
+
+  //CHANGE PERSONA
+  cambiaPersona(type: string) {
+    this.soggetto = new SoggettoVO();
+    this.soggetto.personaFisica = type == "G" ? false : true;
+    this.modalita = "R";
+    this.showResidenza = false;
+  }
+
   //RUOLI
   loadRuoli() {
     this.loaderRuolo = false;
@@ -236,20 +244,6 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
       }
     );
   }
-
-  //CHANGE PERSONA
-  cambiaPersona(type: string) {
-    this.soggetto = new SoggettoVO();
-    this.soggetto.personaFisica = type == "G" ? false : true;
-    this.modalita = "R";
-    this.showResidenza = false;
-  }
-
-  //CHANGE RESIDENZA
-  cambiaResidenza(type: string) {
-    this.soggetto.residenzaEstera = type == "I" ? false : true;
-  }
-
   ricerca(event: any, tipoPersona: string) {
     let min: MinSoggettoVO = MinSoggettoVO.constructrFromSoggetto(
       this.soggetto
@@ -277,6 +271,11 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
     } else {
       this.ricercaSoggetto(min);
     }
+  }
+
+  //CHANGE RESIDENZA
+  cambiaResidenza(type: string) {
+    this.soggetto.residenzaEstera = type == "I" ? false : true;
   }
 
   ricercaSoggetto(min: MinSoggettoVO) {
@@ -323,11 +322,6 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
       );
   }
 
-  manageMessage(err: ExceptionVO) {
-    this.typeMessageTop = err.type;
-    this.messageTop = err.message;
-    this.timerShowMessageTop();
-  }
 
   manageMessageTop(message: string, type: string) {
     this.typeMessageTop = type;
@@ -335,15 +329,10 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
     this.timerShowMessageTop();
   }
 
-  timerShowMessageTop() {
-    this.showMessageTop = true;
-    let seconds: number = 30; //this.configService.getTimeoutMessagge();
-    this.intervalIdS = window.setInterval(() => {
-      seconds -= 1;
-      if (seconds === 0) {
-        this.resetMessageTop();
-      }
-    }, 1000);
+  manageMessage(err: ExceptionVO) {
+    this.typeMessageTop = err.type;
+    this.messageTop = err.message;
+    this.timerShowMessageTop();
   }
 
   resetMessageTop() {
@@ -352,12 +341,18 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
     this.messageTop = null;
     clearInterval(this.intervalIdS);
   }
-
-  manageMessageBottom(message: string, type: string) {
-    this.typeMessageBottom = type;
-    this.messageBottom = message;
-    this.timerShowMessageBottom();
+  timerShowMessageTop() {
+    this.showMessageTop = true;
+    let seconds: number = 30;
+    this.intervalIdS = window.setInterval(() => {
+      seconds -= 1;
+      if (seconds === 0) {
+        this.resetMessageTop();
+      }
+    }, 1000);
   }
+
+
 
   timerShowMessageBottom() {
     this.showMessageBottom = true;
@@ -369,30 +364,35 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
       }
     }, 1000);
   }
+  manageMessageBottom(message: string, type: string) {
+    this.typeMessageBottom = type;
+    this.messageBottom = message;
+    this.timerShowMessageBottom();
+  }
 
+  addSogg() {
+    this.soggetti.push(TableSoggettiVerbale.map(this.soggetto));
+    this.pulisciFiltri();
+  }
   resetMessageBottom() {
     this.showMessageBottom = false;
     this.typeMessageBottom = null;
     this.messageBottom = null;
     clearInterval(this.intervalIdSBottom);
   }
-  addSogg() {
-    this.soggetti.push(TableSoggettiVerbale.map(this.soggetto));
-    this.pulisciFiltri();
-  }
   pulisciFiltri() {
     this.comuneEstero = false;
     this.comuneEsteroDisabled = false;
     this.soggetto = new SoggettoVO();
     this.modalita = "R";
-    this.showResidenza = false;
     this.soggetto.personaFisica = true;
+    this.showResidenza = false;
     this.indirizzo = null;
-    this.indirizzoEstero = null;
     this.civico = null;
+    this.indirizzoEstero = null;
     this.civicoEstero = null;
-    this.cap = null;
     this.capEstero = null;
+    this.cap = null;
   }
 
   salvaSoggetto() {
@@ -446,15 +446,15 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
       "Richiesta eliminazione del soggetto " + el.idVerbaleSoggetto
     );
     this.generaMessaggio(el);
-    this.buttonAnnullaText = "Annulla";
     this.buttonConfirmText = "Conferma";
+    this.buttonAnnullaText = "Annulla";
 
     //mostro un messaggio
     this.sharedDialog.open();
 
     //unsubscribe
-    this.utilSubscribersService.unsbscribeByName(this.subscribers, "save");
     this.utilSubscribersService.unsbscribeByName(this.subscribers, "close");
+    this.utilSubscribersService.unsbscribeByName(this.subscribers, "save");
 
     //premo "Conferma"
     this.subscribers.save = this.sharedDialog.salvaAction.subscribe(
@@ -511,17 +511,14 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
     this.subMessages.push(el.nomeCognomeRagioneSociale);
   }
 
-  //ROUTING
-  goToVerbaleRiepilogo() {
-    this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + this.idVerbale);
-  }
 
   goToVerbaleDati() {
     this.router.navigateByUrl(Routing.VERBALE_DATI + this.idVerbale);
   }
 
-  goToVerbaleAllegato() {
-    this.router.navigateByUrl(Routing.VERBALE_ALLEGATO + this.idVerbale);
+  //ROUTING
+  goToVerbaleRiepilogo() {
+    this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + this.idVerbale);
   }
 
   //DATEPICKER
@@ -533,11 +530,8 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
       });
     }
   }
-
-  ngOnDestroy(): void {
-    this.logger.destroy(
-      ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent.name
-    );
+  goToVerbaleAllegato() {
+    this.router.navigateByUrl(Routing.VERBALE_ALLEGATO + this.idVerbale);
   }
 
   isDisable(field: string) {
@@ -553,14 +547,22 @@ export class ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent
     return false;
   }
 
-  formDisabled(form: NgForm) {
-    if (this.soggetto.personaFisica)
-      return !(this.formFisicoValid && form.valid);
-    else return !(this.formGiuridicoValid && form.valid);
+  ngOnDestroy(): void {
+    this.logger.destroy(
+      ConvocazioneAudizioneCreaSoggettoGestContAmministrativoComponent.name
+    );
   }
 
   public setFormValid(event: boolean, type: string) {
     if (type == "F") this.formFisicoValid = event;
     if (type == "G") this.formGiuridicoValid = event;
   }
+
+  formDisabled(form: NgForm) {
+    if (this.soggetto.personaFisica)
+      return !(this.formFisicoValid && form.valid);
+    else return !(this.formGiuridicoValid && form.valid);
+  }
+
+
 }

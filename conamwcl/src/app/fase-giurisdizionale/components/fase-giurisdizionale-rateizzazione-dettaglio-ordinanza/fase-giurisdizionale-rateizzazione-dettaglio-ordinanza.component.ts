@@ -5,7 +5,6 @@ import { Routing } from "../../../commons/routing";
 import { Config } from "../../../shared/module/datatable/classes/config";
 import { TableSoggettiOrdinanza } from "../../../commons/table/table-soggetti-ordinanza";
 import { FaseGiurisdizionaleUtilService } from "../../services/fase-giurisdizionale-util.serivice";
-import { AzioneOrdinanzaRequest } from "../../../commons/request/ordinanza/azione-ordinanza-request";
 import { Constants } from "../../../commons/class/constants";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { ConfigSharedService } from "../../../shared/service/config-shared.service";
@@ -23,21 +22,19 @@ export class FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent impleme
 
     public loaded: boolean;
 
-    idOrdinanza: number;
     configSoggetti: Config;
-    configAllegati: Config;
+    idOrdinanza: number;
     aggiungiIstanzaDisabled: boolean = true;
-    aggiungiIstanza: boolean = true;
+    configAllegati: Config;
     aggiungiIstanzaAllegati: boolean = true;
-    aggiungiIstanzaMessageView: boolean = true;
+    aggiungiIstanza: boolean = true;
     aggiungiIstanzaMessage: string = '';
+    aggiungiIstanzaMessageView: boolean = true;
     aggiungiIstanzaSelected:Array<TableSoggettiOrdinanza>;
 
     isSelectable: (el: TableSoggettiOrdinanza) => boolean = (el: TableSoggettiOrdinanza) => {
-        if (el.statoSoggettoOrdinanza != null && el.statoSoggettoOrdinanza.id != Constants.STATO_ORDINANZA_SOGGETTO_INGIUNZIONE)
-            return false;
-        else
-            return true;
+        if (el.statoSoggettoOrdinanza != null && el.statoSoggettoOrdinanza.id != Constants.STATO_ORDINANZA_SOGGETTO_INGIUNZIONE)  return false;
+        else            return true;
     }
 
     showDetail: (arr: Array<TableSoggettiOrdinanza>) => boolean = (arr: Array<TableSoggettiOrdinanza>) => {
@@ -46,17 +43,15 @@ export class FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent impleme
             if (flag && el.statoSoggettoOrdinanza != null && el.statoSoggettoOrdinanza.id != Constants.STATO_ORDINANZA_SOGGETTO_INGIUNZIONE)
                 flag = false;
         });
-
         return flag;
     }
 
     constructor(
-        private logger: LoggerService,
         private router: Router,
-        private activatedRoute: ActivatedRoute,
+        private logger: LoggerService,
         private sharedOrdinanzaConfigService: SharedOrdinanzaConfigService,
+        private activatedRoute: ActivatedRoute,
         private faseGiurisdizionaleUtilService: FaseGiurisdizionaleUtilService,
-        private sharedOrdinanzaService: SharedOrdinanzaService,
         private configSharedService: ConfigSharedService,
         private templateService: TemplateService
     ) { }
@@ -64,14 +59,12 @@ export class FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent impleme
     ngOnInit(): void {
         this.logger.init(FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent.name);
         this.loaded = false;
-
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idOrdinanza = +params['idOrdinanza'];
             this.configSoggetti = this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggettiIstanza(true, 1, this.isSelectable, this.showDetail,(el: any)=>true);
             this.loadAggiungiIstanzaMessage();
             this.configAllegati = this.configSharedService.configDocumentiOrdinanza;
             this.loaded = true;
-            // Logica pulsante messaggio per selezionare i soggetti
             this.aggiungiIstanzaDisabled = true;
             this.aggiungiIstanza = true;
             this.aggiungiIstanzaAllegati = false;
@@ -85,9 +78,7 @@ export class FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent impleme
     loadAggiungiIstanzaMessage() {
         this.subscribers.alertWarning = this.templateService.getMessage('SOGGISTNOK').subscribe(data => {
             this.aggiungiIstanzaMessage = data.message;
-        }, err => {
-            this.logger.error("Errore nel recupero del messaggio");
-        });
+        }, err => {            this.logger.error("Errore nel recupero del messaggio");        });
     }
 
     goDettaglio() {
@@ -99,7 +90,7 @@ export class FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent impleme
         this.faseGiurisdizionaleUtilService.setId(ids, this.idOrdinanza);
         this.router.navigateByUrl(Routing.FASE_GIURISDIZIONALE_RATEIZZAZIONE_ALLEGATO_ORDINANZA);
     }
-    
+
     onSelected(event: Array<TableSoggettiOrdinanza>) {
         this.aggiungiIstanzaSelected = event;
         let disabled:boolean = false;
@@ -128,16 +119,16 @@ export class FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent impleme
         }
         this.aggiungiIstanzaDisabled = disabled;
     }
-    //Messaggio top
-    public showMessageTop: boolean;
     public typeMessageTop: String;
+    public showMessageTop: boolean;
     public messageTop: String;
 
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
     }
+    ngOnDestroy(): void {this.logger.destroy(FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent.name);}
 
     timerShowMessageTop() {
         this.showMessageTop = true;
@@ -154,8 +145,5 @@ export class FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent impleme
         this.messageTop = null;
     }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(FaseGiurisdizionaleRateizzazioneDettaglioOrdinanzaComponent.name);
-    }
 
 }

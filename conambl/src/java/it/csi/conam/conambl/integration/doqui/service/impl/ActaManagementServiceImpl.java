@@ -505,20 +505,23 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 			{
 				//Arrivo (Mittente)
 				log.debug(method + ". Running Servizio creaRegistrazioneInArrivoDaDocumentoLogicoEsistente...");
-				identificazioneRegistrazione = acarisOfficialBookService.creaRegistrazioneInArrivoDaDocumentoLogicoEsistente(repositoryId, principalId, identificatoreDocumento.getObjectIdClassificazione(), idStruttura, idNodo, idAOO, documentoActa);
+				//	Issue 3 - Sonarqube
+				identificazioneRegistrazione = acarisOfficialBookService.creaRegistrazioneInArrivoDaDocumentoLogicoEsistente(repositoryId, principalId, identificatoreDocumento != null ? identificatoreDocumento.getObjectIdClassificazione() : null, idStruttura, idNodo, idAOO, documentoActa);
 			}
 			else 
 			{
 				//Partenza (Destinatario)
 				log.debug(method + ". Running Servizio creaRegistrazioneInPartenzaDaDocumentoLogicoEsistente...");
-				identificazioneRegistrazione = acarisOfficialBookService.creaRegistrazioneInPartenzaDaDocumentoLogicoEsistente(repositoryId, principalId, identificatoreDocumento.getObjectIdClassificazione(), idStruttura, idNodo, idAOO, documentoActa);
+				//	Issue 3 - Sonarqube
+				identificazioneRegistrazione = acarisOfficialBookService.creaRegistrazioneInPartenzaDaDocumentoLogicoEsistente(repositoryId, principalId, identificatoreDocumento != null ? identificatoreDocumento.getObjectIdClassificazione() : null, idStruttura, idNodo, idAOO, documentoActa);
 			}
 			
 			if (identificazioneRegistrazione != null)
 				log.debug(method + ". identificazioneRegistrazione Numero = " + identificazioneRegistrazione.getNumero());
 			
 			//INSERIRE CODICE CHE REPERISCE INDICE CLASSIFICAZIONE
-			String indiceDiClassificazione = acarisObjectService.getIdIndiceClassificazione(repositoryId, principalId, identificatoreDocumento.getObjectIdClassificazione());
+			//	Issue 3 - Sonarqube
+			String indiceDiClassificazione = acarisObjectService.getIdIndiceClassificazione(repositoryId, principalId, identificatoreDocumento != null ? identificatoreDocumento.getObjectIdClassificazione() : null);
 			log.debug(method + ". ***********************************************************************indiceDiClassificazione: " + indiceDiClassificazione);
 			return ottengoKeyActa(documentoActa, UUIDDocumento, indiceDiClassificazione, identificazioneRegistrazione, identificatoreDocumento, idFolderToTrace);
 		}
@@ -559,7 +562,7 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 			log.debug(method + ". Running Servizio trasformaDocumentoPlaceholderInDocumentoElettronico...");
 			log.debug(method + ". idStatoDiEfficacia = " + idStatoDiEfficacia);
 
-			acarisDocumentService.trasformaDocumentoPlaceholderInDocumentoElettronico(repositoryId, principalId, documentoElettronicoActa, idStatoDiEfficacia.intValue());
+			acarisDocumentService.trasformaDocumentoPlaceholderInDocumentoElettronico(repositoryId, principalId, documentoElettronicoActa, idStatoDiEfficacia);
 			
 		}
 		finally
@@ -775,13 +778,15 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 			if (documentoElettronicoActa.getSoggettoActa().isMittente())
 			{
 				//Arrivo (Mittente)
-				identificazioneRegistrazione = acarisOfficialBookService.creaRegistrazioneInArrivoDaDocumentoElettronicoEsistente(repositoryId, principalId, identificatoreDocumentoFisico.getObjectIdClassificazione(), idStruttura, idNodo, idAOO, documentoElettronicoActa);
+				//	Issue 3 - Sonarqube
+				identificazioneRegistrazione = acarisOfficialBookService.creaRegistrazioneInArrivoDaDocumentoElettronicoEsistente(repositoryId, principalId, identificatoreDocumentoFisico != null ? identificatoreDocumentoFisico.getObjectIdClassificazione() : null, idStruttura, idNodo, idAOO, documentoElettronicoActa);
 			}
 			else
 			{
 				//Partenza (Destinatario)
 				log.debug(method + ". Running Servizio creaRegistrazioneInPartenzaDaDocumentoElettronicoEsistente...");
-				identificazioneRegistrazione = acarisOfficialBookService.creaRegistrazioneInPartenzaDaDocumentoElettronicoEsistente(repositoryId, principalId, identificatoreDocumentoFisico.getObjectIdClassificazione(), idStruttura, idNodo, idAOO, documentoElettronicoActa);
+				//	Issue 3 - Sonarqube
+				identificazioneRegistrazione = acarisOfficialBookService.creaRegistrazioneInPartenzaDaDocumentoElettronicoEsistente(repositoryId, principalId, identificatoreDocumentoFisico != null ? identificatoreDocumentoFisico.getObjectIdClassificazione() : null, idStruttura, idNodo, idAOO, documentoElettronicoActa);
 			}
 			
 			if (identificazioneRegistrazione != null){
@@ -1554,7 +1559,7 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 					
 						// 20200708_LC Jira CONAM-152 - recupera allegati solo se effettivametne presenti
 						// 20230301 non li processa tutti, ma solo gli allegati che stanno anche nella cnmTAllegato (scelti dall'utente)
-						if (gruppoAllegati!=null & numAllegatiEff>0) {
+						if (gruppoAllegati!=null && numAllegatiEff>0) {
 							
 							// recupera classificazioni allegati
 							ObjectIdType gruppoAllegatiObj = gruppoAllegati.getObjectId();
@@ -1811,7 +1816,7 @@ public class ActaManagementServiceImpl implements ActaManagementService {
 						}
 						
 						{
-						if (gruppoAllegati!=null & numAllegatiEff>0) {
+						if (gruppoAllegati!=null && numAllegatiEff>0) {
 							
 							documentiTotali=documentiTotali+numAllegatiEff;
 							

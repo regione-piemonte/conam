@@ -5,9 +5,7 @@
 package it.csi.conam.conambl.integration.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +17,7 @@ import java.util.List;
 @Entity
 @Table(name="cnm_t_sollecito")
 @NamedQuery(name="CnmTSollecito.findAll", query="SELECT c FROM CnmTSollecito c")
-public class CnmTSollecito implements Serializable {
+public class CnmTSollecito extends CnmRTCommons {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -27,37 +25,12 @@ public class CnmTSollecito implements Serializable {
 	@Column(name="id_sollecito")
 	private Integer idSollecito;
 
-	@Column(name="cod_avviso")
-	private String codAvviso;
-
-	@Column(name="cod_esito_lista_carico")
-	private String codEsitoListaCarico;
-
-	@Column(name="cod_iuv")
-	private String codIuv;
-
 	@Column(name="cod_messaggio_epay")
 	private String codMessaggioEpay;
-
-	@Column(name="cod_posizione_debitoria")
-	private String codPosizioneDebitoria;
-
-	@Column(name="data_ora_insert")
-	private Timestamp dataOraInsert;
-
-	@Column(name="data_ora_update")
-	private Timestamp dataOraUpdate;
-
-	@Temporal(TemporalType.DATE)
-	@Column(name="data_pagamento")
-	private Date dataPagamento;
 
 	@Temporal(TemporalType.DATE)
 	@Column(name="data_scadenza_rata")
 	private Date dataScadenzaRata;
-
-	@Column(name="importo_pagato")
-	private BigDecimal importoPagato;
 
 	@Column(name="importo_sollecito")
 	private BigDecimal importoSollecito;
@@ -131,29 +104,6 @@ public class CnmTSollecito implements Serializable {
 		this.idSollecito = idSollecito;
 	}
 
-	public String getCodAvviso() {
-		return this.codAvviso;
-	}
-
-	public void setCodAvviso(String codAvviso) {
-		this.codAvviso = codAvviso;
-	}
-
-	public String getCodEsitoListaCarico() {
-		return this.codEsitoListaCarico;
-	}
-
-	public void setCodEsitoListaCarico(String codEsitoListaCarico) {
-		this.codEsitoListaCarico = codEsitoListaCarico;
-	}
-
-	public String getCodIuv() {
-		return this.codIuv;
-	}
-
-	public void setCodIuv(String codIuv) {
-		this.codIuv = codIuv;
-	}
 
 	public String getCodMessaggioEpay() {
 		return this.codMessaggioEpay;
@@ -163,52 +113,12 @@ public class CnmTSollecito implements Serializable {
 		this.codMessaggioEpay = codMessaggioEpay;
 	}
 
-	public String getCodPosizioneDebitoria() {
-		return this.codPosizioneDebitoria;
-	}
-
-	public void setCodPosizioneDebitoria(String codPosizioneDebitoria) {
-		this.codPosizioneDebitoria = codPosizioneDebitoria;
-	}
-
-	public Timestamp getDataOraInsert() {
-		return this.dataOraInsert;
-	}
-
-	public void setDataOraInsert(Timestamp dataOraInsert) {
-		this.dataOraInsert = dataOraInsert;
-	}
-
-	public Timestamp getDataOraUpdate() {
-		return this.dataOraUpdate;
-	}
-
-	public void setDataOraUpdate(Timestamp dataOraUpdate) {
-		this.dataOraUpdate = dataOraUpdate;
-	}
-
-	public Date getDataPagamento() {
-		return this.dataPagamento;
-	}
-
-	public void setDataPagamento(Date dataPagamento) {
-		this.dataPagamento = dataPagamento;
-	}
-
 	public Date getDataScadenzaRata() {
 		return this.dataScadenzaRata;
 	}
 
 	public void setDataScadenzaRata(Date dataScadenzaRata) {
 		this.dataScadenzaRata = dataScadenzaRata;
-	}
-
-	public BigDecimal getImportoPagato() {
-		return this.importoPagato;
-	}
-
-	public void setImportoPagato(BigDecimal importoPagato) {
-		this.importoPagato = importoPagato;
 	}
 
 	public BigDecimal getImportoSollecito() {

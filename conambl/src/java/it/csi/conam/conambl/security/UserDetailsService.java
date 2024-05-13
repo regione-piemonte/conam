@@ -19,9 +19,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
+//import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+//import java.util.Random;
 
 /**
  * Classe che si occupa di cercare l'utente il cui CF viene restituito da Iride Carica inoltre i ruoli dell'utente
@@ -45,6 +47,11 @@ public class UserDetailsService implements ShibbolethDetailService {
 	@Autowired
 	private EnteEntityMapper enteDEntityMapper;
 
+	//	Issue 3 - Sonarqube
+	// private Random random = SecureRandom.getInstanceStrong();
+	public UserDetailsService() throws NoSuchAlgorithmException {
+	}
+
 	@Override
 	public UserDetails caricaUtenteDaIdentita(IdentityDetails identityDetails) throws UsernameNotFoundException {
 
@@ -57,9 +64,12 @@ public class UserDetailsService implements ShibbolethDetailService {
 		Long idGruppo = null;
 		List<EnteVO> entiAccertatore = null;
 		List<EnteVO> entiLegge = null;
+		logger.debug("[UserDetailsService::caricaUtenteDaIdentita] try to generateRay");
 		String ray = generateRay();
+		logger.debug("[UserDetailsService::caricaUtenteDaIdentita] ray ok! ["+ray+"]");
 		try {
-			identitaOrch = getIdentitaFromToken(identityDetails.getIdentity());
+			//	Issue 3 - Sonarqube
+			identitaOrch = getIdentitaFromToken(identityDetails != null ? identityDetails.getIdentity() : "");
 			CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(identitaOrch.getCodFiscale());
 			if (cnmTUser != null) {
 				id = cnmTUser.getIdUser();
@@ -73,13 +83,14 @@ public class UserDetailsService implements ShibbolethDetailService {
 			logger.error("Si e verificato un errore in fase di autenticazione", e);
 			throw new SecurityException(e);
 		}
-
+		
+		logger.debug("[UserDetailsService::caricaUtenteDaIdentita] END");
 		return this.createUserDetails(identitaOrch, auths, id, idGruppo, entiAccertatore, entiLegge, ray);
 	}
 
 	private String generateRay() {
-		Random random = new Random();
-		return String.valueOf(Double.valueOf(Math.floor(100000 + random.nextDouble() * 800000)).intValue());
+		return String.valueOf((int) ((Math.random() * (800000 - 100000)) + 100000));
+		//Eliminato per problemi di performance - return String.valueOf(random.nextInt(800000) + 100000);
 	}
 
 	private List<EnteVO> findEntiAccertatoreForUser(CnmTUser cnmTUser) {

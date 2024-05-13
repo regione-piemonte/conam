@@ -377,7 +377,10 @@ public class PianoRateizzazioneServiceImpl implements PianoRateizzazioneService 
 
 		BigDecimal saldo = piano.getImportoSanzione().add(piano.getImportoSpeseNotifica()).add(piano.getImportoSpeseProcessuali()).add(importoMaggiorazione);
 		BigDecimal totaleAggiuntivo = saldo.subtract(totaleRateCalcolate);
-		primaRata.setImportoRata(primaRata.getImportoRata().add(totaleAggiuntivo).setScale(2, RoundingMode.UP));
+		//	Issue 3 - Sonarqube
+		if (primaRata != null) {
+			primaRata.setImportoRata(primaRata.getImportoRata().add(totaleAggiuntivo).setScale(2, RoundingMode.UP));
+		}
 		piano.setRate(rate);
 		piano.setSaldo(saldo);
 		return piano;

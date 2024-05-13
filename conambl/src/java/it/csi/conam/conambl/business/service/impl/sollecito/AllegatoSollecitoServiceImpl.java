@@ -36,6 +36,7 @@ import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.Report;
 import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.TipoProtocolloAllegato;
+import it.csi.conam.conambl.common.exception.BollettinoException;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.integration.entity.CnmCParametro;
 import it.csi.conam.conambl.integration.entity.CnmDStatoAllegato;
@@ -379,9 +380,15 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 	public List<DocumentoScaricatoVO> dowloadBollettiniSollecito(Integer idSollecito) {
 		// 20200824_LC nuovo type per gestione documento multiplo
 		try {
-
+			
+			
 			// 20210402_LC bolelttini sollecito rate
 			CnmTSollecito cnmTSollecito = utilsSollecito.validateAndGetCnmTSollecito(idSollecito);
+			// TASK 23,24,25			
+			if(cnmTSollecito.getCodEsitoListaCarico()!=null && !cnmTSollecito.getCodEsitoListaCarico().equalsIgnoreCase("000")) {
+				throw new BollettinoException(ErrorCode.BOLLETTINI_ERRORE_GENERAZIONE, cnmTSollecito.getCodEsitoListaCarico());
+			}
+			
 			List<DocumentoScaricatoVO> encodedDocs = null;
 			if (cnmTSollecito.getCnmDTipoSollecito().getIdTipoSollecito() == Constants.ID_TIPO_SOLLECITO_RATE) {
 				encodedDocs = downloadAllegatoSollecito(idSollecito, TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO_RATE);
@@ -426,7 +433,6 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 				// 20210427_LC
 				CnmRAllegatoSollecito cnmRAllegatoSollecito = Iterables.tryFind(cnmRSollecitoSoggRataList.get(0).getCnmTSollecito().getCnmRAllegatoSollecitos(), UtilsTipoAllegato.findAllegatoInCnmRAllegatoSollecitoByTipoAllegato(TipoAllegato.LETTERA_SOLLECITO_RATE))
 						.orNull();
-
 //				oggettoPagamento = String.format(cnmCParametro.getValoreString(), cnmRAllegatoSollecito!=null?cnmRAllegatoSollecito.getCnmTAllegato().getNumeroProtocollo():null, cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());
 				// 20231102 PP - protocollo non piu presente nell'oggetto del sollecito
 				oggettoPagamento = String.format(cnmCParametro.getValoreString(), cnmTSollecito.getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione());

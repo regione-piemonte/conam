@@ -1,12 +1,8 @@
-import {
-  Component,
+import {  Component,
   OnInit,
-  OnDestroy,
-  Input,
-  Output,
+  Input,  Output,
   ViewChild,
-  EventEmitter,
-} from "@angular/core";
+  EventEmitter,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { UserService } from "../../../core/services/user.service";
 import { DatiTemplateCompilatiVO } from "../../../commons/vo/template/dati-template-compilati-vo";
@@ -25,61 +21,47 @@ declare var $: any;
 export class Template06ConvocazioneAudizioneComponent implements OnInit {
   //Variabili per il singolare/plurale
   public signoriaVostra: string;
-  public convocare: string;
   public comparire: string;
+  public convocare: string;
 
-  public dirigente: string; //user
   public dirigenteLettera: string
+  public dirigente: string; //user
   public sedeEnte: string;
   public subscribers: any = {};
 
   public funzionario: string;
 
-  //gestione anteprima
   public isAnteprima: boolean;
+  public infoEnteArray: string[]
+  public sedeEnteArray: string[]
   public isStampa: boolean;
-  public infoEnteArray: string[] 
-  public sedeEnteArray: string[] 
-  //dati precompilati
-  @Input()
-  data: DatiTemplateVO;
+  @Input()  data: DatiTemplateVO;
 
   denominazioneList: Array<String> = new Array<String>();
-  //output
-  @Output()
-  formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output()  formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
   formIntestazioneValid: boolean;
-
   public datiCompilati: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
-
-  //form view child
-  @ViewChild("formTemplate")
-  private formTemplate: NgForm;
-  @ViewChild(SharedTemplateIntestazioneComponent)
-  intestazione: SharedTemplateIntestazioneComponent;
+  @ViewChild("formTemplate")  private formTemplate: NgForm;
+  @ViewChild(SharedTemplateIntestazioneComponent)  intestazione: SharedTemplateIntestazioneComponent;
 
   constructor(
+    private userService: UserService,
     private logger: LoggerService,
-    private userService: UserService
   ) {}
 
   ngOnInit(): void {
     this.logger.init(Template06ConvocazioneAudizioneComponent.name);
     this.subscribers.userProfile = this.userService.profilo$.subscribe(
       (user) => {
-        if (user != null) {
-          this.funzionario = user.nome + " " + user.cognome;
+        if (user != null) {          this.funzionario = user.nome + " " + user.cognome;
         }
       }
     );
     this.subscribers.form = this.formTemplate.valueChanges.subscribe((data) => {
-      this.formValid.next(
-        this.formTemplate.valid && this.formIntestazioneValid
-      );
+      this.formValid.next(        this.formTemplate.valid && this.formIntestazioneValid      );
     });
 
-    this.datiCompilati.oggetto =
-      "Legge. 24.11.1981, n. 689, art. 18 - Richiesta di audizione a seguito di processi verbali n. ";
+    this.datiCompilati.oggetto =      "Legge. 24.11.1981, n. 689, art. 18 - Richiesta di audizione a seguito di processi verbali n. ";
     this.gestisciSingolariPlurali();
 
     this.dirigente = this.data.dirigente;
@@ -92,7 +74,6 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
     this.datiCompilati.sedeEnteRiga3 =  this.infoEnteArray[2] ? this.infoEnteArray[2] : ' '
     this.datiCompilati.sedeEnteRiga4 =  this.infoEnteArray[3] ? this.infoEnteArray[3] : ' '
     this.datiCompilati.sedeEnteRiga5 =  this.infoEnteArray[4] ? this.infoEnteArray[4] : ' '
-    //La richiesta Bertinetti riguarda solo l'ordinanza
     this.data.mailSettoreTributi = null;
   }
 
@@ -106,19 +87,13 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
     this.intestazione.setAnteprima(flag);
   }
 
-  setDatiCompilati(dati: DatiTemplateCompilatiVO) {
-    this.datiCompilati = dati;
-  }
-
-  getDatiCompilati(): DatiTemplateCompilatiVO {
-    return this.datiCompilati;
-  }
 
   setFormIntestazioneValid(event: boolean) {
     this.formIntestazioneValid = event;
     this.formValid.next(this.formTemplate.valid && this.formIntestazioneValid);
   }
-
+  getDatiCompilati(): DatiTemplateCompilatiVO {    return this.datiCompilati;  }
+  setDatiCompilati(dati: DatiTemplateCompilatiVO) {    this.datiCompilati = dati;  }
   ngAfterViewChecked() {
     this.manageDatePicker(null, 1, "DD");
     this.manageDatePicker(null, 2, "MM");
@@ -129,9 +104,7 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
   manageDatePicker(event: any, i: number, formatDate: string) {
     var str: string = "#datetimepicker" + i.toString();
     if ($(str).length && formatDate != null) {
-      $(str).datetimepicker({
-        format: formatDate,
-      });
+      $(str).datetimepicker({        format: formatDate,      });
     }
     if (event != null) {
       switch (i) {

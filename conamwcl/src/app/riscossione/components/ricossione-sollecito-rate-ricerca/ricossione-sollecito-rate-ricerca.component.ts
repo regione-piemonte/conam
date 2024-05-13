@@ -19,7 +19,7 @@ import { RiscossioneService } from "../../services/riscossione.service";
 export class RiscossioneSollecitoRateRicercaComponent implements OnInit, OnDestroy {
 
     public subscribers: any = {};
-  
+
     public config: Config;
     public loaded: boolean = true;
     public showTable: boolean = false;
@@ -81,9 +81,13 @@ export class RiscossioneSollecitoRateRicercaComponent implements OnInit, OnDestr
         });
     }
 
+    ngOnDestroy(): void {
+        this.logger.destroy(RiscossioneSollecitoRateRicercaComponent.name);
+    }
+
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.scrollTopEnable = true;
         this.timerShowMessageTop();
     }
@@ -99,14 +103,13 @@ export class RiscossioneSollecitoRateRicercaComponent implements OnInit, OnDestr
         }, 1000);
     }
 
+    scrollTopEnable: boolean;
     resetMessageTop() {
         this.showMessageTop = false;
         this.typeMessageTop = null;
         this.messageTop = null;
         clearInterval(this.intervalTop);
     }
-
-    scrollTopEnable: boolean;
     ngAfterViewChecked() {
         let scrollTop: HTMLElement = document.getElementById("scrollTop");
         if (this.scrollTopEnable && scrollTop != null) {
@@ -115,18 +118,13 @@ export class RiscossioneSollecitoRateRicercaComponent implements OnInit, OnDestr
         }
     }
 
-    messaggio(message: string){
-        this.manageMessageTop(message,"DANGER");
-    }
-
     dettaglioPiano(event: TableSoggettiOrdinanza) {
         this.riscossioneService.soggettoSollecito = event;
         this.router.navigateByUrl(Routing.RISCOSSIONE_SOLLECITO_DETTAGLIO_RATE);
     }
 
-   
-
-    ngOnDestroy(): void {
-        this.logger.destroy(RiscossioneSollecitoRateRicercaComponent.name);
+    messaggio(message: string){
+        this.manageMessageTop(message,"DANGER");
     }
+
 }

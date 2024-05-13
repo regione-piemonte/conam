@@ -16,6 +16,7 @@ public class SalvaAllegatoVerbaleRequest extends SalvaAllegatoRequest {
 	private static final long serialVersionUID = -3620699452083779279L;
 
 	private Integer idVerbale;
+
 	private Integer idVerbaleAudizione;
 
 	public Integer getIdVerbale() {

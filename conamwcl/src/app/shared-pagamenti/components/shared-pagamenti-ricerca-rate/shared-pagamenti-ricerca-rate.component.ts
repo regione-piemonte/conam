@@ -1,21 +1,7 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  Output,
-  EventEmitter,
-} from "@angular/core";
+import {  Component,  OnInit,  OnDestroy,  Input,  Output,  EventEmitter,} from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { RicercaPianoRateizzazioneRequest } from "../../../commons/request/piano-rateizzazione/ricerca-piano-rateizzazione-request";
-import {
-  StatoPianoVO,
-  StatoSentenzaVO,
-  SelectVO,
-  StatoOrdinanzaVO,
-} from "../../../commons/vo/select-vo";
-
-import { IfObservable } from "rxjs/observable/IfObservable";
+import {  StatoPianoVO,  StatoSentenzaVO,  SelectVO,  StatoOrdinanzaVO,} from "../../../commons/vo/select-vo";
 import { AllegatoSharedService } from "../../../shared/service/allegato-shared.service";
 import { Constants } from "../../../commons/class/constants";
 import { CalendarUtils } from "../../../fase-giurisdizionale/module/calendar/component/commons/calendar-utils";
@@ -51,18 +37,12 @@ export class SharedPagamentiRicercaRateComponent implements OnInit, OnDestroy {
   public dateStartSNP: string;
   public dateEndSNP: string;
 
-  @Input()
-  enableRicercaPiano: boolean;
-  @Input()
-  isRiconciliaPiano: boolean;
-  @Output()
-  ricerca: EventEmitter<RicercaPianoRateizzazioneRequest> = new EventEmitter();
-  @Input()
-  enableCampiCreaPiano: boolean;
-  @Input()
-  public ricercaPianoRequest: RicercaPianoRateizzazioneRequest;
-  @Output()
-  messaggio: EventEmitter<any> = new EventEmitter();
+  @Input()  enableRicercaPiano: boolean;
+  @Input()  isRiconciliaPiano: boolean;
+  @Output()  ricerca: EventEmitter<RicercaPianoRateizzazioneRequest> = new EventEmitter();
+  @Input()  enableCampiCreaPiano: boolean;
+  @Input()  public ricercaPianoRequest: RicercaPianoRateizzazioneRequest;
+  @Output()  messaggio: EventEmitter<any> = new EventEmitter();
 
   constructor(
     private logger: LoggerService,
@@ -80,7 +60,6 @@ export class SharedPagamentiRicercaRateComponent implements OnInit, OnDestroy {
 
   loadModels() {
     this.loadedSentenza = false;
-
     this.allegatoSharedService
       .getDecodificaSelectAllegato(Constants.ID_ELENCO_ESITO_SENTENZA)
       .subscribe((data) => {
@@ -99,63 +78,69 @@ export class SharedPagamentiRicercaRateComponent implements OnInit, OnDestroy {
   }
 
   byId(o1: SelectVO, o2: SelectVO) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
+    if (o1 && o2) {
+        return o1.id === o2.id;
+    } else {
+        return o1 === o2;
+    }
   }
 
   tabActions: any = {
-   
     changeRateizzazione: () => {
       this.tabRateizzazione = !this.tabRateizzazione;
       if (!this.tabRateizzazione) {
-        this.tabOrdinanza = true;
-        this.statoPianoSelezionato = null;
-        this.ricercaPianoRequest.statoPiano = null;
-        this.ricercaPianoRequest.numeroProtocolloPiano = null;
-        this.ricercaPianoRequest.dataCreazioneA = null;
-        this.ricercaPianoRequest.dataCreazioneDa = null;
-        this.dateStartSNP = null;
         this.dateEndSNP = null;
+        this.dateStartSNP = null;
+        this.ricercaPianoRequest.dataCreazioneDa = null;
+        this.ricercaPianoRequest.dataCreazioneA = null;
+        this.ricercaPianoRequest.numeroProtocolloPiano = null;
+        this.ricercaPianoRequest.statoPiano = null;
+        this.statoPianoSelezionato = null;
+        this.tabOrdinanza = true;
       } else {
-        this.tabOrdinanza = false;
-        this.tabSentenza = false;
-        this.ricercaPianoRequest.numeroProtocolloSentenza = null;
-        this.ricercaPianoRequest.statoSentenza = null;
-        this.ricercaPianoRequest.dataSentenzaA = null;
-        this.ricercaPianoRequest.dataSentenzaDa = null;
-        this.dateStartS = null;
-        this.dateEndS = null;
         this.ricercaPianoRequest.numeroDeterminazione = null;
+        this.dateEndS = null;
+        this.dateStartS = null;
+        this.ricercaPianoRequest.dataSentenzaDa = null;
+        this.ricercaPianoRequest.dataSentenzaA = null;
+        this.ricercaPianoRequest.statoSentenza = null;
+        this.ricercaPianoRequest.numeroProtocolloSentenza = null;
+        this.tabSentenza = false;
+        this.tabOrdinanza = false;
       }
     },
   };
 
   setRequest() {
-    if (this.ricercaPianoRequest == null) this.pulisciFiltri();
+    if (this.ricercaPianoRequest == null) {
+      this.pulisciFiltri()
+    };
     if (
       this.ricercaPianoRequest.numeroDeterminazione != null ||
       this.ricercaPianoRequest.dataNotificaDa != null
     ) {
-      this.tabOrdinanza = true;
-      this.dateStart = this.ricercaPianoRequest.dataNotificaDa;
       this.dateEnd = this.ricercaPianoRequest.dataNotificaA;
+      this.dateStart = this.ricercaPianoRequest.dataNotificaDa;
+      this.tabOrdinanza = true;
     } else if (
       this.ricercaPianoRequest.numeroProtocolloSentenza != null ||
       this.ricercaPianoRequest.statoSentenza != null ||
       this.ricercaPianoRequest.dataSentenzaA != null
     ) {
-      this.tabSentenza = true;
-      this.dateStartS = this.ricercaPianoRequest.dataSentenzaDa;
       this.dateEndS = this.ricercaPianoRequest.dataSentenzaA;
+      this.dateStartS = this.ricercaPianoRequest.dataSentenzaDa;
+      this.tabSentenza = true;
     } else if (
       this.ricercaPianoRequest.statoPiano != null ||
       this.ricercaPianoRequest.numeroProtocolloPiano != null ||
       this.ricercaPianoRequest.dataCreazioneA != null
     ) {
-      if (this.ricercaPianoRequest.statoPiano.length == 1)
+      if (this.ricercaPianoRequest.statoPiano.length == 1) {
         this.statoPianoSelezionato = this.ricercaPianoRequest.statoPiano[0];
-      this.tabRateizzazione = true;
+      }
       this.dateStartSNP = this.ricercaPianoRequest.dataCreazioneDa;
       this.dateEndSNP = this.ricercaPianoRequest.dataCreazioneA;
+      this.tabRateizzazione = true;
     }
   }
 
@@ -164,110 +149,108 @@ export class SharedPagamentiRicercaRateComponent implements OnInit, OnDestroy {
     this.sharedPagamentiService
       .getStatiPiano(this.isRiconciliaPiano)
       .subscribe((data) => {
-        this.statoRateizzazioneModel = data;
         this.loadedStatoRateizzazione = true;
+        this.statoRateizzazioneModel = data;
       });
   }
 
   manageDatePicker() {
     if ($("#datetimepicker1").length > 0) {
       $("#datetimepicker1").datetimepicker({
-        format: "DD/MM/YYYY",
-        locale: "it",
-        maxDate: new Date().setDate(new Date().getDate() + 1),
-        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
         widgetPositioning: {
           horizontal: "right",
           vertical: "top",
         },
+        locale: "it",
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        maxDate: new Date().setDate(new Date().getDate() + 1),
+        format: "DD/MM/YYYY",
       });
     }
     if ($("#datetimepicker2").length > 0) {
       $("#datetimepicker2").datetimepicker({
-        format: "DD/MM/YYYY",
-        locale: "it",
-        maxDate: new Date().setDate(new Date().getDate() + 1),
-        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
         widgetPositioning: {
           horizontal: "right",
           vertical: "top",
         },
+        format: "DD/MM/YYYY",
+        locale: "it",
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        maxDate: new Date().setDate(new Date().getDate() + 1),
       });
     }
     if ($("#datetimepicker3").length > 0) {
       $("#datetimepicker3").datetimepicker({
-        format: "DD/MM/YYYY",
-        locale: "it",
-        maxDate: new Date().setDate(new Date().getDate() + 1),
-        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
         widgetPositioning: {
           horizontal: "right",
           vertical: "top",
         },
+        locale: "it",
+        format: "DD/MM/YYYY",
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        maxDate: new Date().setDate(new Date().getDate() + 1),
       });
     }
     if ($("#datetimepicker4").length > 0) {
       $("#datetimepicker4").datetimepicker({
-        format: "DD/MM/YYYY",
-        locale: "it",
-        maxDate: new Date().setDate(new Date().getDate() + 1),
-        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
         widgetPositioning: {
           horizontal: "right",
           vertical: "top",
         },
+        locale: "it",
+        format: "DD/MM/YYYY",
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        maxDate: new Date().setDate(new Date().getDate() + 1),
       });
     }
     if ($("#datetimepicker5").length > 0) {
       $("#datetimepicker5").datetimepicker({
-        format: "DD/MM/YYYY",
-        locale: "it",
-        maxDate: new Date().setDate(new Date().getDate() + 1),
-        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
         widgetPositioning: {
           horizontal: "right",
           vertical: "top",
         },
+        locale: "it",
+        format: "DD/MM/YYYY",
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        maxDate: new Date().setDate(new Date().getDate() + 1),
       });
     }
     if ($("#datetimepicker6").length > 0) {
       $("#datetimepicker6").datetimepicker({
-        format: "DD/MM/YYYY",
-        locale: "it",
-        maxDate: new Date().setDate(new Date().getDate() + 1),
-        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
         widgetPositioning: {
           horizontal: "right",
           vertical: "top",
         },
+        locale: "it",
+        format: "DD/MM/YYYY",
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        maxDate: new Date().setDate(new Date().getDate() + 1),
       });
     }
   }
 
   setDate(date: string, param) {
     if (param == "start") {
-      this.dateStart = date;
       this.dateEnd = date;
+      this.dateStart = date;
       $("#datetimepicker1").datetimepicker({
         format: "DD/MM/YYYY",
       });
-
-      this.ricercaPianoRequest.dataNotificaDa = date;
       this.ricercaPianoRequest.dataNotificaA = date;
+      this.ricercaPianoRequest.dataNotificaDa = date;
     } else if (param == "end") {
       this.dateEnd = date;
       $("#datetimepicker2").datetimepicker({
         format: "DD/MM/YYYY",
       });
-
       this.ricercaPianoRequest.dataNotificaA = date;
       let flag: boolean = CalendarUtils.before(
         this.ricercaPianoRequest.dataNotificaDa,
         this.ricercaPianoRequest.dataNotificaA
       );
       if (!flag) {
-        this.ricercaPianoRequest.dataNotificaDa = date;
         this.dateStart = date;
+        this.ricercaPianoRequest.dataNotificaDa = date;
       }
     }
   }
@@ -279,34 +262,34 @@ export class SharedPagamentiRicercaRateComponent implements OnInit, OnDestroy {
       $("#datetimepicker3").datetimepicker({
         format: "DD/MM/YYYY",
       });
-      this.ricercaPianoRequest.dataSentenzaDa = date;
       this.ricercaPianoRequest.dataSentenzaA = date;
+      this.ricercaPianoRequest.dataSentenzaDa = date;
     } else if (param == "end") {
       this.dateEndS = date;
       $("#datetimepicker4").datetimepicker({
         format: "DD/MM/YYYY",
       });
-      this.ricercaPianoRequest.dataSentenzaA = date;
       let flag: boolean = CalendarUtils.before(
         this.ricercaPianoRequest.dataSentenzaDa,
         this.ricercaPianoRequest.dataSentenzaA
       );
+      this.ricercaPianoRequest.dataSentenzaA = date;
       if (!flag) {
-        this.ricercaPianoRequest.dataSentenzaDa = date;
         this.dateStartS = date;
+        this.ricercaPianoRequest.dataSentenzaDa = date;
       }
     }
   }
 
   setDateSNP(date: string, param) {
     if (param == "start") {
-      this.dateStartSNP = date;
       this.dateEndSNP = date;
+      this.dateStartSNP = date;
       $("#datetimepicker5").datetimepicker({
         format: "DD/MM/YYYY",
       });
-      this.ricercaPianoRequest.dataCreazioneA = date;
       this.ricercaPianoRequest.dataCreazioneDa = date;
+      this.ricercaPianoRequest.dataCreazioneA = date;
     } else if (param == "end") {
       this.dateEndSNP = date;
       $("#datetimepicker6").datetimepicker({
@@ -318,8 +301,8 @@ export class SharedPagamentiRicercaRateComponent implements OnInit, OnDestroy {
         this.ricercaPianoRequest.dataCreazioneA
       );
       if (!flag) {
-        this.ricercaPianoRequest.dataCreazioneDa = date;
         this.dateStartSNP = date;
+        this.ricercaPianoRequest.dataCreazioneDa = date;
       }
     }
   }
@@ -437,31 +420,22 @@ export class SharedPagamentiRicercaRateComponent implements OnInit, OnDestroy {
   }
 
   pulisciFiltri() {
-    this.ricercaPianoRequest = new RicercaPianoRateizzazioneRequest();
-    this.statoPianoSelezionato = null;
-    this.dateStart = null;
-    this.dateStartS = null;
-    this.dateStartSNP = null;
-    this.dateEnd = null;
-    this.dateEndS = null;
     this.dateEndSNP = null;
+    this.dateEndS = null;
+    this.dateEnd = null;
+    this.dateStartSNP = null;
+    this.dateStartS = null;
+    this.dateStart = null;
+    this.statoPianoSelezionato = null;
+    this.ricercaPianoRequest = new RicercaPianoRateizzazioneRequest();
   }
 
-  compareFn(c1: StatoPianoVO, c2: StatoPianoVO): boolean {
-    return c1 && c2 ? c1.id === c2.id : c1 === c2;
-  }
+  interceptor(event: Event) {    event.preventDefault();  }
 
-  ngAfterViewChecked() {
-    //this.manageDatePicker(null, 1);
-    //this.manageDatePicker(null, 2);
-    this.manageDatePicker();
-  }
+  ngOnDestroy(): void {    this.logger.destroy(SharedPagamentiRicercaRateComponent.name);  }
 
-  ngOnDestroy(): void {
-    this.logger.destroy(SharedPagamentiRicercaRateComponent.name);
-  }
+  ngAfterViewChecked() {    this.manageDatePicker();  }
 
-  interceptor(event: Event) {
-    event.preventDefault();
-  }
+  compareFn(c1: StatoPianoVO, c2: StatoPianoVO): boolean {    return c1 && c2 ? c1.id === c2.id : c1 === c2;  }
+
 }

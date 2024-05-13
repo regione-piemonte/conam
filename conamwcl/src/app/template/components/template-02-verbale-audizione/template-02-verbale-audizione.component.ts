@@ -1,11 +1,6 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Input,
-  Output,
-  ViewChild,
-  EventEmitter,
+import {  Component,  OnInit,
+  Input,  Output,
+  ViewChild,  EventEmitter,
 } from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { UserService } from "../../../core/services/user.service";
@@ -27,27 +22,22 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
 
   public funzionario: string;
 
-  //gestione anteprima
+  // anteprima
   public isAnteprima: boolean;
   public isStampa: boolean;
 
   //dati precompilati
-  @Input()
-  data: DatiTemplateVO;
-  public infoEnteArray: string[] 
+  @Input()  data: DatiTemplateVO;
+  public infoEnteArray: string[]
   denominazioneList: Array<String> = new Array<String>();
   //output
-  @Output()
-  formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output()  formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
   formIntestazioneValid: boolean;
 
   public datiCompilati: DatiTemplateCompilatiVO = new DatiTemplateCompilatiVO();
 
-  //form view child
-  @ViewChild("formTemplate")
-  private formTemplate: NgForm;
-  @ViewChild(SharedTemplateIntestazioneComponent)
-  intestazione: SharedTemplateIntestazioneComponent;
+  @ViewChild("formTemplate")  private formTemplate: NgForm;
+  @ViewChild(SharedTemplateIntestazioneComponent)  intestazione: SharedTemplateIntestazioneComponent;
 
   constructor(
     private logger: LoggerService,
@@ -58,9 +48,7 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
     this.logger.init(Template02VerbaleAudizioneComponent.name);
     this.subscribers.userProfile = this.userService.profilo$.subscribe(
       (user) => {
-        if (user != null) {
-          this.funzionario = user.nome + " " + user.cognome;
-        }
+        if (user != null) {          this.funzionario = user.nome + " " + user.cognome;        }
       }
     );
     this.subscribers.form = this.formTemplate.valueChanges.subscribe((data) => {
@@ -82,17 +70,16 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
     let size = this.data.listaSoggetti.length;
     for (let s of this.data.listaSoggetti) {
       let nome = s.personaFisica ? s.nome + " " + s.cognome : s.ragioneSociale;
-      if (size != this.denominazioneList.length + 1) nome = nome + ", ";
+      if (size != this.denominazioneList.length + 1) {
+        nome = nome + ", ";
+      }
       this.denominazioneList.push(nome);
-   
-     
     }
     this.datiCompilati.dichiarante = this.denominazioneList.join('');
     if(this.denominazioneList.length===1){
       this.datiCompilati.testoDichiarante= 'Il Dichiarante'
     }else{
       this.datiCompilati.testoDichiarante= 'I Dichiaranti'
-    
     }
   }
 
@@ -107,7 +94,6 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
   }
 
   getDatiCompilati(): DatiTemplateCompilatiVO {
-    
     return this.datiCompilati;
   }
 
@@ -180,11 +166,8 @@ export class Template02VerbaleAudizioneComponent implements OnInit {
       else this.comparizione = "sono comparsi i soggetti";
     }
     let assistito= this.denominazioneList.length==1 ? 'assistito da' : 'assistiti da'
-    this.datiCompilati.testoLibero = this.comparizione + ' ' +  this.denominazioneList.join('') + ' ' + assistito 
+    this.datiCompilati.testoLibero = this.comparizione + ' ' +  this.denominazioneList.join('') + ' ' + assistito
   }
 
-  /*
-    ngOnDestroy(): void {
-        this.logger.destroy(Template02VerbaleAudizioneComponent.name);
-    }*/
+
 }

@@ -18,28 +18,27 @@ import { SharedVerbaleService } from "../../../shared-verbale/service/shared-ver
 export class PregressoRicercaComponent implements OnInit, OnDestroy {
   public showTable: boolean;
 
-  public config: Config;
-  public verbali: Array<MinVerbaleVO>;
-  public verbaleSel: MinVerbaleVO;
-  public loaded: boolean = true;
-
   public request: RicercaVerbaleRequest;
 
+  public loaded: boolean = true;
+  public config: Config;
+  public verbaleSel: MinVerbaleVO;
+  public verbali: Array<MinVerbaleVO>;
+
   constructor(
-    private logger: LoggerService,
     private configSharedService: ConfigSharedService,
-    private sharedVerbaleService: SharedVerbaleService,
+    private logger: LoggerService,
     private router: Router,
+    private sharedVerbaleService: SharedVerbaleService,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
     this.logger.init(PregressoRicercaComponent.name);
-    this.config = this.configSharedService.configRicercaVerbale;
     this.verbali = new Array();
+    this.config = this.configSharedService.configRicercaVerbale;
   }
 
-  scrollEnable: boolean;
   ricercaFascicolo(ricercaVerbaleRequest: RicercaVerbaleRequest) {
     this.request = ricercaVerbaleRequest;
     this.showTable = false;
@@ -62,6 +61,14 @@ export class PregressoRicercaComponent implements OnInit, OnDestroy {
       }
     );
   }
+  scrollEnable: boolean;
+
+
+  //Messaggio top
+  private intervalIdS: number = 0;
+  public showMessageTop: boolean;
+  public messageTop: String;
+  public typeMessageTop: String;
 
   onDettaglio(el: any | Array<any>) {
     this.verbaleSel = el;
@@ -70,18 +77,6 @@ export class PregressoRicercaComponent implements OnInit, OnDestroy {
     else if (this.verbaleSel.modificabile)
       this.router.navigateByUrl(Routing.PREGRESSO_DATI + el.id);
     else this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO + el.id);
-  }
-
-  //Messaggio top
-  public showMessageTop: boolean;
-  public typeMessageTop: String;
-  public messageTop: String;
-  private intervalIdS: number = 0;
-
-  manageMessage(err: ExceptionVO) {
-    this.typeMessageTop = err.type;
-    this.messageTop = err.message;
-    this.timerShowMessageTop();
   }
 
   timerShowMessageTop() {
@@ -94,11 +89,14 @@ export class PregressoRicercaComponent implements OnInit, OnDestroy {
       }
     }, 1000);
   }
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalIdS);
+  manageMessage(err: ExceptionVO) {
+    this.typeMessageTop = err.type;
+    this.messageTop = err.message;
+    this.timerShowMessageTop();
+  }
+
+  ngOnDestroy(): void {
+    this.logger.destroy(PregressoRicercaComponent.name);
   }
 
   ngAfterContentChecked() {
@@ -108,8 +106,11 @@ export class PregressoRicercaComponent implements OnInit, OnDestroy {
       this.scrollEnable = false;
     }
   }
-
-  ngOnDestroy(): void {
-    this.logger.destroy(PregressoRicercaComponent.name);
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.messageTop = null;
+    this.typeMessageTop = null;
+    clearInterval(this.intervalIdS);
   }
+
 }

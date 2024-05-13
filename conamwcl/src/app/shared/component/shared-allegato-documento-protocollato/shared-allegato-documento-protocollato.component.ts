@@ -14,8 +14,6 @@ import { saveAs } from "file-saver";
 import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
 import { MyUrl } from "../../module/datatable/classes/url";
 
-
-
 @Component({
     selector: 'shared-allegato-documento-protocollato',
     templateUrl: './shared-allegato-documento-protocollato.component.html',
@@ -23,29 +21,14 @@ import { MyUrl } from "../../module/datatable/classes/url";
 })
 export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild(SharedDialogComponent) sharedDialogs: SharedDialogComponent;
-
-    @Input()
-    printNameFiles: boolean = true;
-
-    @Input()
-    multipleSelection: boolean = false;
-    @Input()
-    isPregresso: boolean = false;
-    @Input()
-    idVerbale: number;
-    @Input()
-    resetSelection: boolean = false;
-    
-    @Input()
-    allegatiProtocollati: DocumentoProtocollatoVO[] = [];
-
-
-
-    @Output()
-    onSelected = new EventEmitter<DocumentoProtocollatoVO | DocumentoProtocollatoVO[]>();
-
-    @Output()
-    onSearch = new EventEmitter<string>();
+    @Input() printNameFiles: boolean = true;
+    @Input() multipleSelection: boolean = false;
+    @Input() isPregresso: boolean = false;
+    @Input() idVerbale: number;
+    @Input() resetSelection: boolean = false;
+    @Input() allegatiProtocollati: DocumentoProtocollatoVO[] = [];
+    @Output() onSelected = new EventEmitter<DocumentoProtocollatoVO | DocumentoProtocollatoVO[]>();
+    @Output() onSearch = new EventEmitter<string>();
 
     public subscribers: any = {};
     public loaded: boolean;
@@ -69,7 +52,7 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
     numPages:number = null;
     currentPage: number = 0;
     numResults: number = null;
-    
+
     constructor(
         private logger: LoggerService,
         public configSharedService: ConfigSharedService,
@@ -81,8 +64,6 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
     ngOnInit(): void {
         this.logger.init(SharedAllegatoDocumentoProtocollatoComponent.name);
         this.loaded = true;
-
-
         this.configRicercaProtocollo = this.configSharedService.getConfigRicercaProtocollo(
             true,
             this.multipleSelection
@@ -91,8 +72,8 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
 
     ngOnChanges(changes: SimpleChanges) {
         this.logger.change(SharedAllegatoDocumentoProtocollatoComponent.name);
-        if(changes['resetSelection'] && 
-        !changes['resetSelection']['firstChange'] 
+        if(changes['resetSelection'] &&
+        !changes['resetSelection']['firstChange']
         ){
             if(this.dataRicercaProtocollo){
                 this.onSelected.emit(null);
@@ -108,11 +89,9 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
         }
       }
 
-    ngOnDestroy(): void {
-        this.logger.destroy(SharedAllegatoDocumentoProtocollatoComponent.name);
-    }
+    ngOnDestroy(): void { this.logger.destroy(SharedAllegatoDocumentoProtocollatoComponent.name); }
 
-    /* messaggi alert */
+    /* msg alert */
     manageMessage(mess: ExceptionVO | MessageVO) {
         this.typeMessageTop = mess.type;
         this.messageTop = mess.message;
@@ -121,7 +100,7 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
 
     timerShowMessageTop() {
         this.showMessageTop = true;
-        let seconds: number = 20; //this.configService.getTimeoutMessagge();
+        let seconds: number = 20;
         this.intervalIdS = window.setInterval(() => {
             seconds -= 1;
             if (seconds === 0) {
@@ -136,7 +115,7 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
         this.messageTop = null;
         clearInterval(this.intervalIdS);
     }
-    /* allegati */
+    /** allegati **/
     getAllegato(el: DocumentoProtocollatoVO) {
         const myFilename =
             typeof el.filename == "string" ? el.filename : el.filename.nomeFile;
@@ -165,14 +144,14 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
         this.buttonAnnullaTexts = "";
         this.buttonConfirmTexts = "Ok";
 
-        //mostro un messaggio
+        // mostro 1 messaggio
         this.sharedDialogs.open();
 
-        //unsubscribe
+        // faccio unsubscribe
         this.utilSubscribersService.unsbscribeByName(this.subscribers, "save");
         this.utilSubscribersService.unsbscribeByName(this.subscribers, "xclose");
 
-        //premo "Conferma"
+        //click "Conferma"
         this.subscribers.save = this.sharedDialogs.salvaAction.subscribe(
             (data) => {
                 this.subLinks = new Array<any>();
@@ -183,7 +162,7 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
             }
         );
 
-        //premo "Annulla"
+        //click "Annulla"
         this.subscribers.xclose = this.sharedDialogs.XAction.subscribe(
             (data) => {
                 this.subLinks = new Array<any>();
@@ -272,7 +251,7 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
             });
     }
 
-    
+
     pageChange(page:number){
         let ricercaProtocolloRequest:RicercaProtocolloRequest = new RicercaProtocolloRequest();
         ricercaProtocolloRequest.pageRequest = page;
@@ -280,10 +259,9 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
         this.ricercaProtocollo(ricercaProtocolloRequest);
     }
 
-    /* Ricerca */
+    /* cerca */
 
     ricercaProtocollo(ricerca: RicercaProtocolloRequest) {
-        //ricerca.idVerbale = this.idVerbale;
         if (this.idVerbale) {
             ricerca.idVerbale = this.idVerbale;
         }
@@ -316,11 +294,11 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
                 if (data.messaggio) {
                     this.manageMessage(data.messaggio);
                 }
-                
+
                 const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
                 this.numPages = numpages;
                 this.currentPage = +data.pageResp;
-                this.numResults = +data.totalLineResp; 
+                this.numResults = +data.totalLineResp;
 
                 this.loaded = true;
                 this.searchFormRicercaProtocol = ricerca.numeroProtocollo;
@@ -347,7 +325,7 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
         );
     }
 
-    /* sul seleziona della tabella passo alla componente padre i documenti selezionati */
+    /* seleziona della tabella > componente padre i documenti selezionati */
     private _onSelected(el: DocumentoProtocollatoVO | DocumentoProtocollatoVO[]) {
         if (Array.isArray(el)) {
             let elsTmp =[];
@@ -370,6 +348,6 @@ export class SharedAllegatoDocumentoProtocollatoComponent implements OnInit, OnD
             this.onSelected.emit(elTmp);
         }
 
-        
+
     }
 }

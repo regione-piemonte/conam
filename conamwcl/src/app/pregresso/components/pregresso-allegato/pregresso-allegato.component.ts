@@ -3,7 +3,6 @@ import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Routing } from "../../../commons/routing";
 import { TipoAllegatoVO, SelectVO } from "../../../commons/vo/select-vo";
-import { VerbaleService } from "../../services/verbale.service";
 import { Config } from "../../../shared/module/datatable/classes/config";
 import { RiepilogoAllegatoVO } from "../../../commons/vo/verbale/riepilogo-allegato-vo";
 import { ExceptionVO } from "../../../commons/vo/exceptionVO";
@@ -28,50 +27,50 @@ import { PregressoVerbaleService } from "../../services/pregresso-verbale.servic
 export class PregressoAllegatoComponent implements OnInit, OnDestroy {
   @ViewChild(SharedDialogComponent) sharedDialogs: SharedDialogComponent;
 
+  public idOrdinanza: number;
+  public idVerbale: number;
+  public numDeterminazione: string;
+  public loadedConfig: boolean;
+  public loaded: boolean;
+  public loadedCategoriaAllegato: boolean;
+  public loadedAllegato: boolean = true;
+
   public subscribers: any = {};
 
-  public idVerbale: number;
-  public idOrdinanza: number;
-  public numDeterminazione: string;
-  public loaded: boolean;
-  public loadedConfig: boolean;
-  public loadedAllegato: boolean = true;
-  public loadedCategoriaAllegato: boolean;
-
-  public allegatoModel: RiepilogoAllegatoVO = new RiepilogoAllegatoVO();
   public tipoAllegatoModel: Array<TipoAllegatoVO>;
+  public allegatoModel: RiepilogoAllegatoVO = new RiepilogoAllegatoVO();
 
-  public showMessageTop: boolean;
   public typeMessageTop: string;
-  public messageTop: string;
+  public showMessageTop: boolean;
   private intervalIdS: number = 0;
+  public messageTop: string;
 
-  public buttonModificaFlag: boolean;
   public allegaDocumentoFlag: boolean;
+  public buttonModificaFlag: boolean;
   public eliminaAllegatoFlag: boolean;
 
-  public buttonAnnullaTexts: string;
   public buttonConfirmTexts: string;
+  public buttonAnnullaTexts: string;
   public subMessagess: Array<string>;
-
-  public configVerb: Config;
-  public configIstr: Config;
-  public configGiurisd: Config;
-  public configRateizzazione: Config;
 
   scrollEnable: boolean;
 
+  public configIstr: Config;
+  public configVerb: Config;
+  public configRateizzazione: Config;
+  public configGiurisd: Config;
+
+
   constructor(
-    private logger: LoggerService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
+    private logger: LoggerService,
     private sharedVerbaleService: SharedVerbaleService,
-    private verbaleService: VerbaleService,
-    private pregressoVerbaleService: PregressoVerbaleService,
     private utilSubscribersService: UtilSubscribersService,
     private datatableService: DatatableService,
-    private configSharedService: ConfigSharedService,
+    private pregressoVerbaleService: PregressoVerbaleService,
     private fascicoloService: FascicoloService,
+    private configSharedService: ConfigSharedService,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
@@ -82,16 +81,16 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
       if (isNaN(this.idVerbale))
         this.router.navigateByUrl(Routing.VERBALE_DATI);
 
-      // setto il riferimento per la ricerca documento protocollato
+      // riferimento ricerca documento protocollato
       this.fascicoloService.ref = this.router.url;
       if (this.activatedRoute.snapshot.paramMap.get("ref")) {
-        // setto il riferimento per la ricerca documento protocollato
+        // riferimento ricerca documento protocollato
         this.fascicoloService.ref = this.activatedRoute.snapshot.paramMap.get(
           "ref"
         );
         this.fascicoloService.backPage = this.router.url;
       } else {
-        // setto il riferimento per la ricerca documento protocollato
+        // riferimento ricerca documento protocollato
         this.fascicoloService.ref = this.router.url;
       }
       if (this.activatedRoute.snapshot.paramMap.get("idOrdinanza")) {
@@ -101,7 +100,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
         );
       }
       if (this.activatedRoute.snapshot.paramMap.get("numDeterminazione")) {
-        // setto il riferimento per la ricerca documento protocollato
+        // set riferimento ricerca documento protocollato
         this.numDeterminazione = this.activatedRoute.snapshot.paramMap.get(
           "numDeterminazione"
         );
@@ -114,7 +113,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
           this.allegaDocumentoFlag = data.aggiungiAllegatoEnable;
           this.eliminaAllegatoFlag = data.eliminaAllegatoEnable;
 
-          //setto i config
+          // set  config
           this.configVerb = this.configSharedService.getConfigDocumentiVerbale(
             this.eliminaAllegatoFlag
           );
@@ -125,7 +124,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
           this.loadedConfig = true;
         });
 
-      //recupero gli allegati da mettere in tabella
+      // allegati da mettere in tabella
       this.subscribers.allegati = this.pregressoVerbaleService
         .getAllegatiByIdVerbale(this.idVerbale)
         .subscribe(
@@ -154,15 +153,9 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
     });
   }
 
-  manageMessage(type: string, message: string) {
-    this.typeMessageTop = type;
-    this.messageTop = message;
-    this.timerShowMessageTop();
-  }
-
   timerShowMessageTop() {
     this.showMessageTop = true;
-    let seconds: number = 20; //this.configService.getTimeoutMessagge();
+    let seconds: number = 20 ;
     this.intervalIdS = window.setInterval(() => {
       seconds -= 1;
       if (seconds === 0) {
@@ -170,15 +163,14 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
       }
     }, 1000);
   }
-
-  resetMessageTop() {
-    this.showMessageTop = false;
-    this.typeMessageTop = null;
-    this.messageTop = null;
-    clearInterval(this.intervalIdS);
+  manageMessage(type: string, message: string) {
+    this.typeMessageTop = type;
+    this.messageTop = message;
+    this.timerShowMessageTop();
   }
 
-  //recupero le tipologie di allegato allegabili
+
+  //tipologie di allegato allegabili
   loadTipoAllegato() {
     this.loadedCategoriaAllegato = false;
     let request = new TipologiaAllegabiliRequest();
@@ -189,7 +181,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
         (data) => {
           this.tipoAllegatoModel = data.sort((a, b) => a.id - b.id);
           this.loadedCategoriaAllegato = true;
-          // setto il riferimento per la ricerca documento protocollato
+          // set rif x  ricerca documento protocollato
           this.fascicoloService.tipoAllegatoModel = this.tipoAllegatoModel;
         },
         (err) => {
@@ -202,9 +194,16 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
       );
   }
 
+  resetMessageTop() {
+    this.showMessageTop = false;
+    this.typeMessageTop = null;
+    this.messageTop = null;
+    clearInterval(this.intervalIdS);
+  }
+
   salvaAllegato(nuovoAllegato: SalvaAllegatoVerbaleRequest) {
     nuovoAllegato.idVerbale = this.idVerbale;
-    //mando il file al Back End
+    //file > Back End
     this.loaded = false;
     this.subscribers.salvaAllegato = this.pregressoVerbaleService
       .salvaAllegatoVerbale(nuovoAllegato)
@@ -212,7 +211,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
         (data) => {
           if (nuovoAllegato.file != null) {
             data.theUrl = this.datatableService.creaUrl(nuovoAllegato.file);
-            //mostro il nuovo allegato in tabella
+            // mostro nuovo allegato in tabella
             if (data.idCategoria == 1) this.allegatoModel.verbale.push(data);
             if (data.idCategoria == 2)
               this.allegatoModel.istruttoria.push(data);
@@ -222,7 +221,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
               this.allegatoModel.rateizzazione.push(data);
           }
 
-          //recupero gli allegati da mettere in tabella
+          //recupero allegati da mettere in tabella
           this.subscribers.allegati = this.pregressoVerbaleService
             .getAllegatiByIdVerbale(this.idVerbale)
             .subscribe(
@@ -280,10 +279,10 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
         }
         this.fascicoloService.categoriesDuplicated = tipiAllegatoDuplicabili;
 
-        // setto il numero di protocollo per la ricerca documento protocollato
+        // set numero di protocollo per ricerca documento protocollato
         this.fascicoloService.searchFormRicercaProtocol =
           ricerca.numeroProtocollo;
-        // setto i dati per la ricerca documento protocollato
+        // set i dati per la ricerca documento protocollato
         this.fascicoloService.dataRicercaProtocollo =
           data.documentoProtocollatoVOList;
         this.fascicoloService.successPage =
@@ -293,7 +292,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
         }else{
           this.fascicoloService.message = null;
         }
-        
+
         const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
         this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
 		    this.fascicoloService.dataRicercaProtocolloNumResults = +data.totalLineResp;
@@ -328,14 +327,14 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
     this.buttonAnnullaTexts = "Annulla";
     this.buttonConfirmTexts = "Conferma";
 
-    //mostro un messaggio
+    //mostro messaggio
     this.sharedDialogs.open();
 
-    //unsubscribe
+    // unsubscribe
     this.utilSubscribersService.unsbscribeByName(this.subscribers, "save");
     this.utilSubscribersService.unsbscribeByName(this.subscribers, "close");
 
-    //premo "Conferma"
+    //click "Conferma"
     this.subscribers.save = this.sharedDialogs.salvaAction.subscribe(
       (data) => {
         this.loaded = false;
@@ -343,7 +342,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
           .eliminaAllegato(el.id, this.idVerbale)
           .subscribe(
             (data) => {
-              //elimina l'allegato
+              // elim allegato
               this.logger.info("Elimina elemento da tabella");
               this.allegatoModel.verbale.splice(
                 this.allegatoModel.verbale.indexOf(el),
@@ -371,20 +370,23 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
       }
     );
 
-    //premo "Annulla"
+    // click"Annulla"
     this.subscribers.close = this.sharedDialogs.closeAction.subscribe(
-      (data) => {
-        this.subMessagess = new Array<string>();
-      },
-      (err) => {
-        this.logger.error(err);
-      }
+      (data) => {        this.subMessagess = new Array<string>();      },
+      (err) => {        this.logger.error(err);      }
     );
+  }
+
+
+  generaMessaggio(el: AllegatoVO) {
+    this.subMessagess = new Array<string>();
+    let incipit: string = "Si intende eliminare il seguente allegato?";
+    this.subMessagess.push(incipit);
+    this.subMessagess.push(el.theUrl.nomeFile);
   }
 
   ngAfterViewChecked() {
     let out: HTMLElement = document.getElementById("scrollTop");
-
     if (
       this.loaded &&
       this.scrollEnable &&
@@ -397,36 +399,11 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
     }
   }
 
-  generaMessaggio(el: AllegatoVO) {
-    this.subMessagess = new Array<string>();
+  goToVerbaleDati() {    this.router.navigateByUrl(Routing.PREGRESSO_DATI + this.idVerbale);  }
+  goToVerbaleRiepilogo() {    this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO + this.idVerbale);  }
+  onLoadedAllegato(loaded: any) {    this.loadedAllegato = loaded;  }
+  ngOnDestroy(): void {    this.logger.destroy(PregressoAllegatoComponent.name);  }
+  byId(o1: SelectVO, o2: SelectVO) {    return o1 && o2 ? o1.id === o2.id : o1 === o2;  }
+  goToVerbaleSoggetto() {    this.router.navigateByUrl(Routing.PREGRESSO_SOGGETTO + this.idVerbale);  }
 
-    let incipit: string = "Si intende eliminare il seguente allegato?";
-
-    this.subMessagess.push(incipit);
-    this.subMessagess.push(el.theUrl.nomeFile);
-  }
-
-  goToVerbaleRiepilogo() {
-    this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO + this.idVerbale);
-  }
-
-  goToVerbaleDati() {
-    this.router.navigateByUrl(Routing.PREGRESSO_DATI + this.idVerbale);
-  }
-
-  goToVerbaleSoggetto() {
-    this.router.navigateByUrl(Routing.PREGRESSO_SOGGETTO + this.idVerbale);
-  }
-
-  byId(o1: SelectVO, o2: SelectVO) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
-  }
-
-  ngOnDestroy(): void {
-    this.logger.destroy(PregressoAllegatoComponent.name);
-  }
-
-  onLoadedAllegato(loaded: any) {
-    this.loadedAllegato = loaded;
-  }
 }

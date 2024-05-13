@@ -8,7 +8,7 @@ import { RicercaOrdinanzaRequest } from "../../../commons/request/ordinanza/rice
 import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { ConfigSharedService } from "../../../shared/service/config-shared.service";
 import { SharedOrdinanzaService } from "../../../shared-ordinanza/service/shared-ordinanza.service";
-import { StatoOrdinanzaVO, StatoPianoVO } from "../../../commons/vo/select-vo";
+import {  StatoPianoVO } from "../../../commons/vo/select-vo";
 import { PregressoVerbaleService } from "../../services/pregresso-verbale.service";
 import { RiepilogoVerbaleVO } from "../../../commons/vo/verbale/riepilogo-verbale-vo";
 import { SharedOrdinanzaRiepilogoComponent } from "../../../shared-ordinanza/component/shared-ordinanza-riepilogo/shared-ordinanza-riepilogo.component";
@@ -26,73 +26,67 @@ import { SalvaPianoPregressiRequest } from "../../../commons/request/pregresso/s
 })
 export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
 
-    public subscribers: any = {};
     public idVerbale: number;
+    public subscribers: any = {};
+
 
     public showTable: boolean;
-
-    public config: Config;
     public ordinanze: Array<OrdinanzaVO>;
-    public piani: Array<PianoRateizzazioneVO>;
+    public config: Config;
     public pianoSel: PianoRateizzazioneVO;
+    public piani: Array<PianoRateizzazioneVO>;
     public pianoSelSalvaStato : PianoRateizzazioneVO;
+
     public loaded: boolean = true;
-    
-    public riepilogoVerbale: RiepilogoVerbaleVO;
-    
-    public loadedStatiPiano  : boolean;
     public statiPianoModel: Array<StatoPianoVO>;
+
+    public loadedStatiPiano  : boolean;
+    public riepilogoVerbale: RiepilogoVerbaleVO;
     public nuovoStatoPiano: StatoPianoVO;
 
     public request: RicercaOrdinanzaRequest;
 
     public max: boolean = false;
 
-    idOrdinanza: number;
     idPiano: number;
+    idOrdinanza: number;
     azione: AzioneOrdinanzaPregressiResponse;
-    loadedAction: boolean;
     loadedPiano: boolean = false;
-    isRichiestaBollettiniSent: boolean;
+    loadedAction: boolean;
     isFirstDownloadBollettini: boolean;
+    isRichiestaBollettiniSent: boolean;
 
     @ViewChild(SharedOrdinanzaRiepilogoComponent)
     sharedOrdinanzaRiepilogo: SharedOrdinanzaRiepilogoComponent;
     @ViewChild(SharedDialogComponent) sharedDialogs: SharedDialogComponent;
 
-    salvaStatoOrdinanzaPregressiRequest: SalvaStatoOrdinanzaPregressiRequest = new SalvaStatoOrdinanzaPregressiRequest();
     statiPianoMessage: string;
+    salvaStatoOrdinanzaPregressiRequest: SalvaStatoOrdinanzaPregressiRequest = new SalvaStatoOrdinanzaPregressiRequest();
 
-    public buttonAnnullaTexts: string;
-    public buttonConfirmTexts: string;
-    public subMessagess: Array<string>;
     public alertWarning: string;
+    public buttonConfirmTexts: string;
+    public buttonAnnullaTexts: string;
+    public subMessagess: Array<string>;
 
     constructor(
-        private logger: LoggerService,
         private router: Router,
+        private logger: LoggerService,
         private configSharedService: ConfigSharedService,
-        private sharedOrdinanzaService: SharedOrdinanzaService,
-        private activatedRoute: ActivatedRoute,
         private pregressoVerbaleService: PregressoVerbaleService,
-        private templateService: TemplateService
+        private templateService: TemplateService,
+        private activatedRoute: ActivatedRoute,
     ) { }
 
     ngOnInit(): void {
         this.logger.init(PregressoPianiRiepilogoComponent.name);
-        this.config = this.configSharedService.configPiani;    
+        this.config = this.configSharedService.configPiani;
         this.subscribers.route = this.activatedRoute.params.subscribe(params => {
             this.idVerbale = +params['id'];
-            if (isNaN(this.idVerbale))
-                this.router.navigateByUrl(Routing.PREGRESSO_DATI);
-            
-            if(this.activatedRoute.snapshot.paramMap.get('idOrdinanza')){
-                // setto il riferimento per la ricerca documento protocollato    
-                this.idOrdinanza = parseInt(this.activatedRoute.snapshot.paramMap.get('idOrdinanza'));
-            }
+            if (isNaN(this.idVerbale))                this.router.navigateByUrl(Routing.PREGRESSO_DATI);
 
-            if (isNaN(this.idOrdinanza))
-                this.router.navigateByUrl(Routing.PREGRESSO_DATI);
+            if(this.activatedRoute.snapshot.paramMap.get('idOrdinanza')){                this.idOrdinanza = parseInt(this.activatedRoute.snapshot.paramMap.get('idOrdinanza'));            }
+
+            if (isNaN(this.idOrdinanza))                this.router.navigateByUrl(Routing.PREGRESSO_DATI);
 
             this.load();
         });
@@ -100,10 +94,9 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
 
     load():void{
         this.loaded = false;
-        this.pregressoVerbaleService.getPianiByOrdinanza(this.idOrdinanza).subscribe( 
+        this.pregressoVerbaleService.getPianiByOrdinanza(this.idOrdinanza).subscribe(
             data => {
                 this.resetMessageTop();
-                
                 this.piani = data;
                 this.showTable = true;
                 this.loaded = true;
@@ -115,7 +108,7 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
                 }
                 this.logger.error("Errore nella ricerca dell'ordinanza");
             }
-        );   
+        );
     }
 
     scrollEnable: boolean;
@@ -127,21 +120,17 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
         this.request.tipoRicerca = "RICERCA_ORDINANZA";
         this.request.soggettoVerbale = null;
         this.request.statoOrdinanza = null;
-        this.pregressoVerbaleService.ricercaOrdinanza(ricercaOrdinanzaRequest).subscribe( 
+        this.pregressoVerbaleService.ricercaOrdinanza(ricercaOrdinanzaRequest).subscribe(
             data => {
                 this.resetMessageTop();
                 if(data.length == 1){
-                    data.map(value => {
-                        this.max = value.superatoIlMassimo; 
-                    });
-                }                
+                    data.map(value => {                        this.max = value.superatoIlMassimo;                     });
+                }
 
                 if(this.max){
                     this.manageMessageTop("Il sistema può mostrare solo 100 risultati per volta. Ridurre l'intervallo di ricerca","WARNING");
                     this.ordinanze = new Array<OrdinanzaVO>();
-                } else{
-                    this.ordinanze = data;
-                }  
+                } else{                    this.ordinanze = data;                }
                 this.showTable = true;
                 this.loaded = true;
                 this.scrollEnable = true;
@@ -162,7 +151,7 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
             this.scrollEnable = false;
         }
     }
-    
+
     callAzioneOrdinanza() {
         let request: AzioneOrdinanzaRequest = new AzioneOrdinanzaRequest();
         request.id = this.idOrdinanza;
@@ -175,8 +164,7 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
          // TODO Controllare
         this.pianoSelSalvaStato = el;
         this.pianoSel = {...el};
-        if (el instanceof Array)
-            throw Error("errore sono stati selezionati più elementi");
+        if (el instanceof Array)            throw Error("errore sono stati selezionati più elementi");
         else{
             this.idPiano = el.id;
             this.loadedPiano = true;
@@ -186,26 +174,22 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
         }
 
     }
-    
+
     onChangeData(event:any){
-        if(event.reload){
-            this.load();
-        }
+        if(event.reload){            this.load();        }
     }
 
-    messaggio(message: string){
-        this.manageMessageTop(message,"DANGER");
+    messaggio(message: string){        this.manageMessageTop(message,"DANGER");
     }
 
-    //Messaggio top
-    public showMessageTop: boolean;
     public typeMessageTop: String;
-    public messageTop: String;
+    public showMessageTop: boolean;
     private intervalIdS: number = 0;
+    public messageTop: String;
 
     manageMessageTop(message: string, type: string) {
-        this.typeMessageTop = type;
         this.messageTop = message;
+        this.typeMessageTop = type;
         this.timerShowMessageTop();
         this.scrollTopEnable = true;
     }
@@ -215,8 +199,7 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
         let seconds: number = 10;
         this.intervalIdS = window.setInterval(() => {
             seconds -= 1;
-            if (seconds === 0) {
-                this.resetMessageTop();
+            if (seconds === 0) {                this.resetMessageTop();
             }
         }, 1000);
     }
@@ -236,10 +219,7 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
             this.scrollTopEnable = false;
         }
     }
-
-    ngOnDestroy(): void {
-        this.logger.destroy(PregressoPianiRiepilogoComponent.name);
-    }
+    ngOnDestroy(): void {        this.logger.destroy(PregressoPianiRiepilogoComponent.name);    }
 
     loadAlertWarning() {
         this.subscribers.alertWarning = this.templateService.getMessage('STORDPRWAR').subscribe(data => {
@@ -254,10 +234,11 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
         this.loadedStatiPiano = false;
         this.subscribers.statiPiano = this.pregressoVerbaleService.getStatiPiano(this.idPiano).subscribe(data => {
             this.statiPianoModel = data;
-            //this.statiPianoMessage = data.messaggio.message; 
+            //this.statiPianoMessage = data.messaggio.message;
             this.loadedStatiPiano = true;
         });
     }
+    goBack():void{this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO_ORDINANZE + this.idVerbale);}
 
     salvaStatoPiano() {
         this.loaded = false;
@@ -271,14 +252,10 @@ export class PregressoPianiRiepilogoComponent implements OnInit, OnDestroy {
             this.loadStatiPiano();
             this.load();
         }, err => {
-            if (err instanceof ExceptionVO) {
-                this.manageMessageTop(err.message, err.type);
+            if (err instanceof ExceptionVO) {                this.manageMessageTop(err.message, err.type);
             }
             this.logger.error("Errore durante il salvataggio del piano");
             this.loaded = true;
         });
-    }
-    goBack():void{
-        this.router.navigateByUrl(Routing.PREGRESSO_RIEPILOGO_ORDINANZE + this.idVerbale);
     }
 }

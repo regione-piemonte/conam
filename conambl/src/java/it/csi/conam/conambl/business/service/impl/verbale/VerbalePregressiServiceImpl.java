@@ -192,9 +192,8 @@ public class VerbalePregressiServiceImpl implements VerbalePregressiService {
 //		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO && !includeEliminati)
 //			throw new SecurityException("il verbale non è nello stato corretto per essere visualizzato");
 
-		filtraNormeScadute = false;
 		
-		return verbaleEntityMapper.mapEntityToVO(cnmTVerbale, filtraNormeScadute);
+		return verbaleEntityMapper.mapEntityToVO(cnmTVerbale, false);
 
 	}
 

@@ -8,6 +8,7 @@ import it.csi.conam.conambl.business.facade.StasServFacade;
 import it.csi.conam.conambl.business.service.common.CommonSoggettoService;
 import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
+import it.csi.conam.conambl.business.service.util.UtilsTraceCsiLogAuditService;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
 import it.csi.conam.conambl.business.service.verbale.SoggettoVerbaleService;
 import it.csi.conam.conambl.business.service.verbale.UtilsVerbale;
@@ -19,6 +20,7 @@ import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.integration.entity.*;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
+import it.csi.conam.conambl.integration.entity.CsiLogAudit.TraceOperation;
 import it.csi.conam.conambl.integration.mapper.entity.*;
 import it.csi.conam.conambl.integration.mapper.ws.stas.AnagraficaWsOutputMapper;
 import it.csi.conam.conambl.integration.repositories.*;
@@ -36,10 +38,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.Table;
 
 /**
  * @author riccardo.bova
@@ -48,6 +53,8 @@ import java.util.List;
 @Service
 public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 
+	@Autowired
+	private PersonaEntityMapper personaEntityMapper;
 	@Autowired
 	private CnmTUserRepository cnmTUserRepository;
 	@Autowired
@@ -112,6 +119,23 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 	@Autowired
 	private OrdinanzaEntityMapper ordinanzaEntityMapper;
 	
+	@Autowired
+	private UtilsTraceCsiLogAuditService utilsTraceCsiLogAuditService;
+	
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public void updateImportoVerbaleSoggetto(Integer id, Double importoVerbale, UserDetails userDetails) {
+
+		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
+		for(CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmTVerbale.getCnmRVerbaleSoggettos()) {
+			cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(importoVerbale).setScale(2, RoundingMode.HALF_UP));
+			cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
+			utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.AGGIORNAMENTO_IMPORTO_SOGGETTI.getOperation(),cnmRVerbaleSoggetto.getClass().getAnnotation(Table.class).name(),"id_verbale_soggetto="+cnmRVerbaleSoggetto.getIdVerbaleSoggetto(), Thread.currentThread().getStackTrace()[1].getMethodName(), cnmRVerbaleSoggetto.getCnmTVerbale().getNumVerbale());
+			
+		}
+	}
+	
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public SoggettoVO salvaSoggetto(Integer id, SoggettoVO soggetto, UserDetails userDetails) {
@@ -124,16 +148,16 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		if (!SecurityUtils.isEnteValido(cnmTVerbale.getCnmDEnte().getIdEnte()))
 			throw new SecurityException("non si ha i permessi per vedere il verbale");
 
-		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
-				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
-			throw new SecurityException("Il verbale non è in stato completo");
+//		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+//				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
+//			throw new SecurityException("Il verbale non è in stato completo");
 
 		CnmTSoggetto sogDb = commonSoggettoService.getSoggettoFromDb(soggetto, false);
 
 		// controllo soggetto gia associato
 		BigDecimal idStas = soggetto.getIdStas();
 		Integer idSoggettoDb = sogDb != null && sogDb.getIdSoggetto() != null ? sogDb.getIdSoggetto() : null;
-		if (idStas != null || idSoggettoDb != null) {
+		if ((idStas != null || idSoggettoDb != null) && soggetto.getIdSoggettoVerbale() == null) {
 			controllaSoggettoAssociato(cnmTVerbale, idStas, idSoggettoDb);
 		}
 
@@ -142,6 +166,16 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		// caso censito post inserimento db su stas
 		if (sogDb != null && idStas != null) {
 			cnmTSoggetto = commonSoggettoService.updateSoggettoDBWithIdStas(cnmTSoggetto, cnmTUser, soggettoEntityMapper.mapEntityToVO(sogDb), sogStas, soggetto);
+			// Task 34 - se sono in modifica e il soggetto è stas, creo una nuova occorrenza della CnmTPersona
+			soggettoEntityMapper.mapVOtoUpdateEntity(soggetto, sogDb);
+			if (soggetto.getIdSoggettoVerbale() != null) {
+				newPersona(sogDb, soggetto, cnmTUser, now);
+			}
+
+			cnmTSoggetto.setCnmTUser2(cnmTUser);
+			cnmTSoggetto.setDataOraInsert(now);
+			cnmTSoggetto = cnmTSoggettoRepository.save(cnmTSoggetto);
+
 		} else if (idStas != null) {
 			cnmTSoggetto = cnmTSoggettoRepository.findByIdStas(idStas);
 			if (cnmTSoggetto == null) {
@@ -212,7 +246,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		} else {
 
 			// 20210423 PP - Fix in caso di nascita estera (legata alla JIRA CONAM-131)
-			if (soggetto.getComuneNascita() != null && soggetto.getComuneNascita().getId() != null &&soggetto.getDataNascita() != null) {
+			if (soggetto.getComuneNascita() != null && soggetto.getComuneNascita().getId() != null && soggetto.getDataNascita() != null) {
 				CnmSComune comuneS = cnmSComuneRepository.findByidComuneAndDataNascita(soggetto.getComuneNascita().getId(), utilsDate.asDate(soggetto.getDataNascita()));
 				if (comuneS != null && comuneS.getCnmDProvincia() != null && comuneS.getCnmDProvincia().getIdProvincia() != soggetto.getProvinciaNascita().getId()) {
 					SoggettoVO sog = new SoggettoVO();
@@ -246,7 +280,13 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			cnmTSoggetto = cnmTSoggettoRepository.save(cnmTSoggetto);
 		}
 
-		CnmRVerbaleSoggetto cnmRVerbaleSoggetto = new CnmRVerbaleSoggetto();
+		// OB_207 - se sono in modifica ho gia idSoggettoVerbale
+		CnmRVerbaleSoggetto cnmRVerbaleSoggetto = null;
+		if (soggetto.getIdSoggettoVerbale() != null) {
+			cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.findOne(soggetto.getIdSoggettoVerbale());
+		} else {
+			cnmRVerbaleSoggetto = new CnmRVerbaleSoggetto();
+		}
 		cnmRVerbaleSoggetto.setCnmTVerbale(cnmTVerbale);
 		CnmDRuoloSoggetto cnmDRuoloSoggetto = cnmDRuoloSoggettoRepository.findOne(soggetto.getRuolo().getId());
 		cnmRVerbaleSoggetto.setCnmDRuoloSoggetto(cnmDRuoloSoggetto);
@@ -254,13 +294,15 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		cnmRVerbaleSoggetto.setCnmTSoggetto(cnmTSoggetto);
 		cnmRVerbaleSoggetto.setNote(soggetto.getNoteSoggetto());
 		cnmRVerbaleSoggetto.setDataOraInsert(now);
+		cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(soggetto.getImportoVerbale()).setScale(2, RoundingMode.HALF_UP));
 		cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
 
-		CnmTResidenza cnmTResidenza = cnmTResidenzaRepository.findByCnmTSoggetto(cnmTSoggetto);
+		CnmTResidenza cnmTResidenza = cnmTResidenzaRepository.findByCnmTSoggettoAndIdVerbale(cnmTSoggetto, id);
 		if (cnmTResidenza == null) {
 			cnmTResidenza = new CnmTResidenza();
 			cnmTResidenza.setCnmTUser2(cnmTUser);
 			cnmTResidenza.setDataOraInsert(now);
+			cnmTResidenza.setIdVerbale(id);
 		} else {
 			cnmTResidenza.setCnmTUser1(cnmTUser);
 			cnmTResidenza.setDataOraUpdate(now);
@@ -277,7 +319,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			cnmTResidenza.setResidenzaEstera(true);
 			cnmTResidenza.setCnmTSoggetto(cnmTSoggetto);
 			cnmTResidenzaRepository.save(cnmTResidenza);
-		} else if (idStas == null && soggetto != null && soggetto.getComuneResidenza() != null && soggetto.getComuneResidenza().getId() != null) {
+//		} else if (idStas == null && soggetto != null && soggetto.getComuneResidenza() != null && soggetto.getComuneResidenza().getId() != null) {
+		} else if (soggetto != null && soggetto.getComuneResidenza() != null && soggetto.getComuneResidenza().getId() != null) {
 			cnmTResidenza.setCnmDComune(cnmDComuneRepository.findOne(soggetto.getComuneResidenza().getId()));
 			cnmTResidenza.setIndirizzoResidenza(soggetto.getIndirizzoResidenza());
 			cnmTResidenza.setNumeroCivicoResidenza(soggetto.getCivicoResidenza());
@@ -295,13 +338,26 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		sog.setIdSoggettoVerbale(cnmRVerbaleSoggetto.getIdVerbaleSoggetto());
 		sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(cnmDRuoloSoggetto));
 		sog.setNoteSoggetto(soggetto.getNoteSoggetto());
+		sog.setImportoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
+		sog.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
 		if (soggetto.getNazioneNascitaEstera() != null && soggetto.getNazioneNascitaEstera()) {
 			sog.setNazioneNascita(soggetto.getNazioneNascita());
 			sog.setDenomComuneNascitaEstero(soggetto.getDenomComuneNascitaEstero());
 		}
 		return sog;
+    }
+
+	private void newPersona(CnmTSoggetto cnmTSoggetto, SoggettoVO soggetto, CnmTUser cnmTUser, Timestamp now) {
+		// crea una nuova tPersona, sganciando il soggetto da stas
+		CnmTPersona cnmTPersona = personaEntityMapper.mapVOtoEntity(soggetto);
+		cnmTPersona.setCnmTUser2(cnmTUser);
+		cnmTPersona.setDataOraInsert(now);
+		cnmTPersonaRepository.save(cnmTPersona);
+		cnmTSoggetto.setCnmTPersona(cnmTPersona);
+		cnmTSoggetto.setCnmTSocieta(null);
+		cnmTSoggetto.setIdStas(null);
 	}
-	
+
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public SoggettoVO salvaSoggettoPregressi(Integer id, SoggettoVO soggetto, UserDetails userDetails) {
@@ -314,16 +370,16 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		if (!SecurityUtils.isEnteValido(cnmTVerbale.getCnmDEnte().getIdEnte()))
 			throw new SecurityException("non si ha i permessi per vedere il verbale");
 
-		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
-				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
-			throw new SecurityException("Il verbale non è in stato completo");
+//		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO
+//				&& cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO)
+//			throw new SecurityException("Il verbale non è in stato completo");
 
 		CnmTSoggetto sogDb = commonSoggettoService.getSoggettoFromDb(soggetto, false);
 
 		// controllo soggetto gia associato
 		BigDecimal idStas = soggetto.getIdStas();
 		Integer idSoggettoDb = sogDb != null && sogDb.getIdSoggetto() != null ? sogDb.getIdSoggetto() : null;
-		if (idStas != null || idSoggettoDb != null) {
+		if ((idStas != null || idSoggettoDb != null) && soggetto.getIdSoggettoVerbale() == null) {
 			controllaSoggettoAssociato(cnmTVerbale, idStas, idSoggettoDb);
 		}
 
@@ -332,6 +388,15 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		// caso censito post inserimento db su stas
 		if (sogDb != null && idStas != null) {
 			cnmTSoggetto = commonSoggettoService.updateSoggettoDBWithIdStas(cnmTSoggetto, cnmTUser, soggettoEntityMapper.mapEntityToVO(sogDb), sogStas, soggetto);
+			// Task 34 - se sono in modifica e il soggetto è stas, creo una nuova occorrenza della CnmTPersona
+			soggettoEntityMapper.mapVOtoUpdateEntity(soggetto, sogDb);
+			if (soggetto.getIdSoggettoVerbale() != null) {
+				newPersona(sogDb, soggetto, cnmTUser, now);
+			}
+
+			cnmTSoggetto.setCnmTUser2(cnmTUser);
+			cnmTSoggetto.setDataOraInsert(now);
+			cnmTSoggetto = cnmTSoggettoRepository.save(cnmTSoggetto);
 		} else if (idStas != null) {
 			cnmTSoggetto = cnmTSoggettoRepository.findByIdStas(idStas);
 			if (cnmTSoggetto == null) {
@@ -435,7 +500,14 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			cnmTSoggetto = cnmTSoggettoRepository.save(cnmTSoggetto);
 		}
 
-		CnmRVerbaleSoggetto cnmRVerbaleSoggetto = new CnmRVerbaleSoggetto();
+		// OB_207 - se sono in modifica ho gia idSoggettoVerbale
+		CnmRVerbaleSoggetto cnmRVerbaleSoggetto = null;
+		if(soggetto.getIdSoggettoVerbale() != null) {
+			cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.findOne(soggetto.getIdSoggettoVerbale());
+		}else {
+			cnmRVerbaleSoggetto = new CnmRVerbaleSoggetto();
+		}
+		
 		cnmRVerbaleSoggetto.setCnmTVerbale(cnmTVerbale);
 		CnmDRuoloSoggetto cnmDRuoloSoggetto = cnmDRuoloSoggettoRepository.findOne(soggetto.getRuolo().getId());
 		cnmRVerbaleSoggetto.setCnmDRuoloSoggetto(cnmDRuoloSoggetto);
@@ -443,6 +515,11 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		cnmRVerbaleSoggetto.setCnmTSoggetto(cnmTSoggetto);
 		cnmRVerbaleSoggetto.setNote(soggetto.getNoteSoggetto());
 		cnmRVerbaleSoggetto.setDataOraInsert(now);
+		if(soggetto.getImportoVerbale()!=null) {
+			cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(soggetto.getImportoVerbale()));
+		}else {
+			cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(0));
+		}
 		cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
 
 		// 20200914 - PP - creo nuova residenza legata al verbale
@@ -525,6 +602,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		sog.setIdSoggettoVerbale(cnmRVerbaleSoggetto.getIdVerbaleSoggetto());
 		sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(cnmDRuoloSoggetto));
 		sog.setNoteSoggetto(soggetto.getNoteSoggetto());
+		sog.setImportoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
+		sog.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
 		if (soggetto.getNazioneNascitaEstera() != null && soggetto.getNazioneNascitaEstera()) {
 			sog.setNazioneNascita(soggetto.getNazioneNascita());
 			sog.setDenomComuneNascitaEstero(soggetto.getDenomComuneNascitaEstero());
@@ -562,7 +641,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findByCnmTVerbale(cnmTVerbale);
 		List<SoggettoVO> soggettoVOList = new ArrayList<>();
 		for (CnmRVerbaleSoggetto c : cnmRVerbaleSoggettoList) {
-			SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto());
+			SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto(), c.getImportoMisuraRidotta(), c.getImportoPagato());
 			
 			// 20200923 - PP - se e' pregresso, inserirsco sul soggetto la residenza legata al verbale e non quella stas
 			if(cnmTVerbale.getCnmDStatoPregresso() != null && cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != 1) {
@@ -612,7 +691,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findByCnmTVerbale(cnmTVerbale);
 		List<SoggettoVO> soggettoVOList = new ArrayList<>();
 		for (CnmRVerbaleSoggetto c : cnmRVerbaleSoggettoList) {
-			SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto());
+			SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto(), c.getImportoMisuraRidotta(), c.getImportoPagato());
 
 			sog = commonSoggettoService.attachResidenzaPregressi(sog, c.getCnmTSoggetto(), id);
 			
@@ -649,7 +728,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findByCnmTVerbale(cnmTVerbale);
 		List<SoggettoVO> soggettoVOList = new ArrayList<>();
 		for (CnmRVerbaleSoggetto c : cnmRVerbaleSoggettoList) {
-			SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto());
+			SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto(), c.getImportoMisuraRidotta(), c.getImportoPagato());
 			
 			// 20200923 - PP - se e' pregresso, inserirsco sul soggetto la residenza legata al verbale e non quella stas
 			if(cnmTVerbale.getCnmDStatoPregresso() != null && cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != 1) {
@@ -682,7 +761,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 
 		List<SoggettoVO> soggettoVOList = new ArrayList<>();
 		for (CnmRVerbaleSoggetto c : cnmRVerbaleSoggettoList) {
-			SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto());
+			SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto(), c.getImportoMisuraRidotta(), c.getImportoPagato());
 
 			// 20200923 - PP - se e' pregresso, inserirsco sul soggetto la residenza legata al verbale e non quella stas
 			if(c.getCnmTVerbale().getCnmDStatoPregresso() != null && c.getCnmTVerbale().getCnmDStatoPregresso().getIdStatoPregresso() != 1) {
@@ -777,6 +856,10 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		SoggettoVO soggettoDb = soggettoEntityMapper.mapEntityToVO(commonSoggettoService.getSoggettoFromDb(minSoggettoVO, false));
 
 		if (soggettoDb != null) {
+			// 20240109 PP - TASK 34 - in caso di soggetto con stesso CF già su db e senza idStas, significa che e' stato modificato e quindi lo restituisco
+			if(soggettoDb.getIdStas() == null){
+				return soggettoDb;
+			}
 			if (soggettoDb.getResidenzaEstera()) {
 				if (soggettoDb.getIdStas() != null) {
 					if (soggettoStas != null) {
@@ -792,7 +875,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			}
 			if (soggettoDb.getNazioneNascitaEstera() == null || soggettoDb.getNazioneNascitaEstera() == false) {
 				soggettoDb.setNazioneNascitaEstera(false);
-				if (soggettoDb.getIdStas() != null) {
+				//	Issue 3 - Sonarqube
+				if (soggettoDb.getIdStas() != null && soggettoStas != null) {
 					if (soggettoStas.getRegioneNascita() == null) {
 						soggettoStas.setRegioneNascita(soggettoDb.getRegioneNascita());
 						soggettoStas.setProvinciaNascita(soggettoDb.getProvinciaNascita());
@@ -801,7 +885,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 					}
 				}
 			} else if (soggettoDb.getNazioneNascitaEstera()) {
-				if (soggettoDb.getIdStas() != null) {
+				//	Issue 3 - Sonarqube
+				if (soggettoDb.getIdStas() != null && soggettoStas != null) {
 					soggettoStas.setDenomComuneNascitaEstero(soggettoDb.getDenomComuneNascitaEstero());
 					soggettoStas.setNazioneNascitaEstera(true);
 					if (soggettoStas.getNazioneNascita() == null)
