@@ -1,6 +1,6 @@
 -- Drop table
 
--- DROP TABLE conam.cnm_d_ambito_note;
+-- DROP TABLE cnm_d_ambito_note;
 
 CREATE TABLE cnm_d_ambito_note (
 	id_ambito_note numeric(2) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE cnm_d_ambito_note (
 
 -- Drop table
 
--- DROP TABLE conam.cnm_t_nota;
+-- DROP TABLE cnm_t_nota;
 
 CREATE TABLE cnm_t_nota (
 	id_nota serial NOT NULL,
