@@ -21,6 +21,7 @@ import java.util.List;
 @Repository
 public interface CnmRAllegatoOrdinanzaRepository extends CrudRepository<CnmRAllegatoOrdinanza, CnmRAllegatoOrdinanzaPK> {
 
+	@Query("select ao from CnmRAllegatoOrdinanza ao where ao.cnmTOrdinanza=?1 order by ao.cnmTAllegato.idAllegato asc")
 	List<CnmRAllegatoOrdinanza> findByCnmTOrdinanza(CnmTOrdinanza cnmTOrdinanza);
 
 	List<CnmRAllegatoOrdinanza> findByCnmTOrdinanzaIn(List<CnmTOrdinanza> cnmTOrdinanza);

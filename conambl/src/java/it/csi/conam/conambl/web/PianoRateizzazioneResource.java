@@ -4,12 +4,15 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web;
 
+import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.dispatcher.PianoRateizzazioneDispatcher;
 import it.csi.conam.conambl.request.pianorateizzazione.RicercaPianoRequest;
 import it.csi.conam.conambl.response.DocumentResponse;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.SpringSupportedResource;
+import it.csi.conam.conambl.vo.ExceptionVO;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.pianorateizzazione.MinPianoRateizzazioneVO;
 import it.csi.conam.conambl.vo.pianorateizzazione.PianoRateizzazioneVO;
@@ -147,8 +150,20 @@ public class PianoRateizzazioneResource extends SpringSupportedResource {
 	@POST
 	@Path("/inviaRichiestaBollettiniPiano/{idPiano}")
 	public Response inviaRichiestaBollettiniOrdinanza(@PathParam("idPiano") Integer idPiano) {
-		pianoRateizzazioneDispatcher.inviaRichiestaBollettiniByIdPiano(idPiano);
-		return Response.ok().build();
+		
+		try {
+			pianoRateizzazioneDispatcher.inviaRichiestaBollettiniByIdPiano(idPiano);
+		} catch(BusinessException e) {
+			ExceptionVO exception = new ExceptionVO(
+					ErrorCode.BOLLETTINI_ERRORE_GENERAZIONE,
+					e.getCodice(),
+					"danger"
+			);
+            
+			return Response.ok().entity(exception).build();
+        }      
+	       
+        return Response.ok().build();
 	}
 
 	@POST

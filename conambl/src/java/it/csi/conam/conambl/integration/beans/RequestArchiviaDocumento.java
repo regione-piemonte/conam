@@ -25,6 +25,8 @@ public abstract class RequestArchiviaDocumento implements  java.io.Serializable 
 	// Type metadata
 	protected static org.apache.axis.description.TypeDesc typeDesc = new org.apache.axis.description.TypeDesc(RequestArchiviaDocumento.class, true);
 	
+	protected java.lang.String oggetto;
+	protected java.lang.String origine;
 
     public RequestArchiviaDocumento() {
 
@@ -201,7 +203,25 @@ public abstract class RequestArchiviaDocumento implements  java.io.Serializable 
         return typeDesc;
     }
 
-    /**
+    
+    
+    public java.lang.String getOggetto() {
+		return oggetto;
+	}
+
+	public void setOggetto(java.lang.String oggetto) {
+		this.oggetto = oggetto;
+	}
+
+	public java.lang.String getOrigine() {
+		return origine;
+	}
+
+	public void setOrigine(java.lang.String origine) {
+		this.origine = origine;
+	}
+
+	/**
      * Get Custom Serializer
      */
     public static org.apache.axis.encoding.Serializer getSerializer(

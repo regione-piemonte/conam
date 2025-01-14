@@ -44,6 +44,8 @@ public class ErrorCode {
 
 	public static final String WARNING_VERBALE_VERIFICA_PAGAMENTO ="VERPWARN";
 	public static final String CONFIRM_VERBALE_VERIFICA_PAGAMENTO ="VERPCONF";
+
+	public static final String SOGGETTO_NON_SELEZIONATO = "SOGGNOSEL";
 	
 	// prontuario
 	public static final String INSERIMENTO_AMBITO = "INSAMB01";
@@ -110,6 +112,9 @@ public class ErrorCode {
 	
 	//SALVA VERBALE
 	public static final String ERRORE_COMUNE_ENTE = "ERRCOMENT";
+	
+	//RICERCA DOCUMENTI SU STILO
+	public static final String DOCUMENTI_NON_PRESENTI_IN_STILO = "DOCNOSTILO";
 
 
 }

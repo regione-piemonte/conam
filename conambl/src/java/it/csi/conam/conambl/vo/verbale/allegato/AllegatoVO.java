@@ -12,12 +12,13 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 
 /**
  * @author riccardo.bova
  * @date 16 nov 2018
  */
-public class AllegatoVO extends ParentVO {
+public class AllegatoVO extends ParentVO implements Comparable<AllegatoVO> {
 
 	private static final long serialVersionUID = -7714298531166937914L;
 
@@ -119,4 +120,24 @@ public class AllegatoVO extends ParentVO {
 		this.idActa = idActa;
 	}
 
+	@Override
+	public int compareTo(AllegatoVO o) {
+		return Comparators.DATA_CARICAMENTO.compare(this, o);
+	}
+
+	public static class Comparators {
+
+        public static Comparator<AllegatoVO> ID = new Comparator<AllegatoVO>() {
+            @Override
+            public int compare(AllegatoVO o1, AllegatoVO o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        };
+		public static Comparator<AllegatoVO> DATA_CARICAMENTO = new Comparator<AllegatoVO>() {
+            @Override
+            public int compare(AllegatoVO o1, AllegatoVO o2) {
+                return o1.getDataOraCaricamento().compareTo(o2.getDataOraCaricamento());
+            }
+        };
+    }
 }

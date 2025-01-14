@@ -7,6 +7,7 @@ package it.csi.conam.conambl.business.service.impl.verbale;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -165,9 +166,8 @@ public class AllegatoVerbaleSoggettoServiceImpl implements AllegatoVerbaleSogget
 		CnmTUser cnmTUser = cnmTUserRepository.findOne(user.getIdUser());
 		List<CnmTAllegato> allegatos = new ArrayList<>();
 		for (CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmRVerbaleSoggettoList) {
-			if (isAllegatoVerbaleSoggettoCreato(cnmRVerbaleSoggetto, TipoAllegato.CONVOCAZIONE_AUDIZIONE))
-				throw new SecurityException("convocazione audizione già  esistente");
-			else {
+			
+//		OBI37 creazione di più lettere di convocazione audizione per un soggetto/verbale.
 
 				if (allegatos != null && allegatos.size() == 0) {
 					List<CnmTSoggetto> cnmTSoggettoList = cnmTSoggettoRepository.findByCnmRVerbaleSoggettosIn(cnmRVerbaleSoggettoList);
@@ -176,7 +176,7 @@ public class AllegatoVerbaleSoggettoServiceImpl implements AllegatoVerbaleSogget
 					allegatos.add(salvaAllegatoVerbaleSoggetto(cnmRVerbaleSoggetto, file, cnmTUser, result, TipoAllegato.CONVOCAZIONE_AUDIZIONE, true, true, false, cnmTSoggettoList));
 				} else
 					salvaAllegatoVerbaleSoggetto(cnmRVerbaleSoggetto, allegatos.get(0), cnmTUser);
-			}
+
 		}
 		return allegatos;
 	}
@@ -233,7 +233,7 @@ public class AllegatoVerbaleSoggettoServiceImpl implements AllegatoVerbaleSogget
 		}
 
 		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
-				isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_USCITA_SENZA_ALLEGATI_GENERERATI, cnmTSoggettoList);
+				isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_USCITA_SENZA_ALLEGATI_GENERERATI, cnmTSoggettoList, null, null, null, null);
 
 		return cnmTAllegato;
 	}
@@ -264,7 +264,7 @@ public class AllegatoVerbaleSoggettoServiceImpl implements AllegatoVerbaleSogget
 		}
 
 		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
-				isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_USCITA_SENZA_ALLEGATI_GENERERATI, cnmTSoggettoList);
+				isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_USCITA_SENZA_ALLEGATI_GENERERATI, cnmTSoggettoList, null, null, null, null);
 
 		// aggiungo alla tabella
 		CnmRAllegatoVerbSogPK cnmRAllegatoVerbSogPK = new CnmRAllegatoVerbSogPK();
@@ -328,26 +328,38 @@ public class AllegatoVerbaleSoggettoServiceImpl implements AllegatoVerbaleSogget
 
 	@Override
 	public List<DocumentoScaricatoVO> downloadConvocazioneAudizione(List<Integer> idVerbaleSoggettoList) {
-		if (idVerbaleSoggettoList == null)
-			throw new IllegalArgumentException("idVerbaleSoggettoList ==null");
+	    if (idVerbaleSoggettoList == null)
+	        throw new IllegalArgumentException("idVerbaleSoggettoList ==null");
 
-		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = (List<CnmRVerbaleSoggetto>) cnmRVerbaleSoggettoRepository.findAll(idVerbaleSoggettoList);
-		if (cnmRVerbaleSoggettoList.isEmpty())
-			throw new IllegalArgumentException("cnmRVerbaleSoggettoList ==empty");
+	    List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = (List<CnmRVerbaleSoggetto>) cnmRVerbaleSoggettoRepository.findAll(idVerbaleSoggettoList);
+	    if (cnmRVerbaleSoggettoList.isEmpty())
+	        throw new IllegalArgumentException("cnmRVerbaleSoggettoList ==empty");
 
-		List<CnmRAllegatoVerbSog> cnmRAllegatoVerbSogs = cnmRAllegatoVerbSogRepository.findByCnmRVerbaleSoggettoIn(cnmRVerbaleSoggettoList);
-		if (cnmRAllegatoVerbSogs.isEmpty())
-			throw new IllegalArgumentException("cnmRAllegatoVerbSogs ==empty");
+	    List<CnmRAllegatoVerbSog> cnmRAllegatoVerbSogs = cnmRAllegatoVerbSogRepository.findByCnmRVerbaleSoggettoIn(cnmRVerbaleSoggettoList);
+	    if (cnmRAllegatoVerbSogs.isEmpty())
+	        throw new IllegalArgumentException("cnmRAllegatoVerbSogs ==empty");
 
-		for (CnmRAllegatoVerbSog avs : cnmRAllegatoVerbSogs) {
-			if (avs.getCnmTAllegato().getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.CONVOCAZIONE_AUDIZIONE.getId()) {
-				return commonAllegatoService.downloadAllegatoById(avs.getCnmTAllegato().getIdAllegato());
-			}
+	    // E6_2022 - 0B36
+	    Comparator<CnmRAllegatoVerbSog> idComparator = new Comparator<CnmRAllegatoVerbSog>() {
+	        @Override
+	        public int compare(CnmRAllegatoVerbSog avs1, CnmRAllegatoVerbSog avs2) {
+	            return avs1.getId().getIdAllegato() - avs2.getId().getIdAllegato();
+	        }
+	    };
 
-		}
-		return null;
+	    cnmRAllegatoVerbSogs.sort(idComparator.reversed());
 
+	    for (CnmRAllegatoVerbSog avs : cnmRAllegatoVerbSogs) {
+	        if (avs.getCnmTAllegato().getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.CONVOCAZIONE_AUDIZIONE.getId()) {
+	            return commonAllegatoService.downloadAllegatoById(avs.getCnmTAllegato().getIdAllegato());
+	        }
+	    }
+
+	    return null;
 	}
+
+	
+
 
 	@Override
 	public DatiTemplateVO nomeVerbaleAudizione(List<Integer> idVerbaleSoggettoList) {

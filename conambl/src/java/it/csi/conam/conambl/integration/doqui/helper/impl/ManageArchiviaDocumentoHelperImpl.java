@@ -408,6 +408,8 @@ public class ManageArchiviaDocumentoHelperImpl extends CommonManageDocumentoHelp
 			
 			//POJO
 			DocumentoElettronicoActa documentoActa = new DocumentoElettronicoActa();
+			documentoActa.setOggetto(request.getOggetto());
+			documentoActa.setOrigine(request.getOrigine());
 			documentoActa.setIdDocumento(cnmTDocumento.getIdentificativoArchiviazione());
 			documentoActa.setFolder(request.getFolder());
 			if(fruitoreActa != null) {

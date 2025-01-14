@@ -6,6 +6,8 @@ package it.csi.conam.conambl.request.verbale;
 
 import it.csi.conam.conambl.request.ParentRequest;
 import it.csi.conam.conambl.request.SoggettoRequest;
+import it.csi.conam.conambl.vo.ReportColumnVO;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
@@ -19,8 +21,11 @@ public class RicercaVerbaleRequest extends ParentRequest {
 	private static final long serialVersionUID = -3627336339314304078L;
 	
 	private DatiVerbaleRequest datiVerbale;
+
 	private List<SoggettoRequest> soggettoVerbale;
 	private Boolean statoManualeDiCompetenza;
+
+	List<ReportColumnVO> columnList;
 	
 	public Boolean getStatoManualeDiCompetenza() {
 		return statoManualeDiCompetenza;
@@ -46,6 +51,14 @@ public class RicercaVerbaleRequest extends ParentRequest {
 
 	public void setSoggettoVerbale(List<SoggettoRequest> soggettoVerbale) {
 		this.soggettoVerbale = soggettoVerbale;
+	}
+	
+	public List<ReportColumnVO> getColumnList() {
+		return columnList;
+	}
+
+	public void setColumnList(List<ReportColumnVO> columnList) {
+		this.columnList = columnList;
 	}
 
 	@Override

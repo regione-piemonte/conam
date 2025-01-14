@@ -4,14 +4,18 @@
  ******************************************************************************/
 package it.csi.conam.conambl.dispatcher;
 
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import it.csi.conam.conambl.common.security.AuthorizationRoles;
+import it.csi.conam.conambl.response.RicercaDocumentiStiloResponse;
 import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
+import it.csi.conam.conambl.vo.CampiRicercaFormVO;
 import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.ConfigAllegatoVO;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.util.List;
+import it.csi.conam.conambl.vo.verbale.allegato.DettaglioAllegatoFieldVO;
 
 /**
  * @author riccardo.bova
@@ -55,5 +59,19 @@ public interface AllegatoDispatcher {
 	// 20200827_LC
 	@PreAuthorize(value = AuthorizationRoles.UTENTE)
 	List<DocumentoScaricatoVO> getDocFisiciByObjectIdDocumento(String objectIdDocumento);
+	
+
+	//E19_2022 - OBI45
+	@PreAuthorize(value = AuthorizationRoles.UTENTE)
+	RicercaDocumentiStiloResponse ricercaDocumentiSuStilo(
+			CampiRicercaFormVO input, Integer pageRequest, Integer maxLineRequest);
+
+
+	@PreAuthorize(value = AuthorizationRoles.UTENTE)
+	List<ConfigAllegatoVO> getConfigAllegatiRicerca(Long idRicerca);
+
+	@PreAuthorize(value = AuthorizationRoles.UTENTE)
+	DettaglioAllegatoFieldVO getDettaglioFieldsByIdAllegato(Long idAllegato);
+
 
 }

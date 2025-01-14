@@ -42,5 +42,13 @@ public interface CnmTVerbaleRepository extends CrudRepository<CnmTVerbale, Integ
 	List<CnmTVerbale> findCnmTVerbalePending();
 
 
+	@Query(value = "select distinct v.* " + //
+			"from cnm_t_verbale v " + //
+			"join cnm_r_allegato_verbale r on r.id_verbale = v.id_verbale " + //
+			"join cnm_t_allegato a on a.id_allegato = r.id_allegato " + //
+			"where a.id_acta is null and a.id_tipo_allegato = 41 " + 
+			"and v.numero_protocollo is not null", nativeQuery = true)
+	List<CnmTVerbale> findCnmTVerbaleWithDocNoProtToMove();
+
 	
 }

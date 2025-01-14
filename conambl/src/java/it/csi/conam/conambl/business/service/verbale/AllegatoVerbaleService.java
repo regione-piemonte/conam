@@ -6,6 +6,7 @@ package it.csi.conam.conambl.business.service.verbale;
 
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
+import it.csi.conam.conambl.request.verbale.SalvaAllegatoVerbaleRequest;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
@@ -16,6 +17,7 @@ import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AllegatoVerbaleService {
 
@@ -29,7 +31,7 @@ public interface AllegatoVerbaleService {
 
 	List<TipoAllegatoVO> getTipologiaAllegatiVerbale(String tipoDocumento);
 
-	AllegatoVO salvaAllegato(List<InputPart> data, List<InputPart> file, UserDetails userDetails, boolean pregresso);
+	AllegatoVO salvaAllegato(List<InputPart> data, List<InputPart> file, Map<String, List<InputPart>> map, UserDetails userDetails, boolean pregresso);
 
 	void eliminaAllegato(Integer idVerbale, Integer idAllegato, UserDetails userDetails);
 
@@ -46,5 +48,7 @@ public interface AllegatoVerbaleService {
 
 	List<TipoAllegatoVO> getTipologiaAllegatiAllegabiliVerbalePregressi(Integer id, String tipoDocumento,
 			boolean aggiungiCategoriaEmail);
+
+	AllegatoVO modificaAllegato(Long idAllegato, SalvaAllegatoVerbaleRequest request, UserDetails userDetails, boolean pregresso);
 
 }

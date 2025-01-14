@@ -178,11 +178,13 @@ public class UtilsDoquiImpl implements UtilsDoqui {
 	public String getSoggettoActa(CnmTVerbale cnmTVerbale) {
 		List<String> nomeCognome = UtilsSoggetto.convertSoggettiToListString(cnmRVerbaleSoggettoRepository.findByCnmTVerbale(cnmTVerbale), Constants.VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID);
 		StringBuilder nome = new StringBuilder();
-		int size = nomeCognome.size();
-		for (int i = 0; i < size; i++) {
-			nome.append(nomeCognome.get(i));
-			if (i + 1 != size)
-				nome.append("/");
+		if(nomeCognome != null) {
+			int size = nomeCognome.size();
+			for (int i = 0; i < size; i++) {
+				nome.append(nomeCognome.get(i));
+				if (i + 1 != size)
+					nome.append("/");
+			}
 		}
 		return nome.toString();
 	}

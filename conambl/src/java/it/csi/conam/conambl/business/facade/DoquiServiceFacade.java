@@ -34,7 +34,7 @@ public interface DoquiServiceFacade {
 	ResponseEliminaDocumento eliminaDocumentoIndex(String idIndex);
 
 	ResponseAggiungiAllegato aggiungiAllegato(byte[] document, String nomeFile, String idArchivioAllegato, String idArchivioPadre, String idEntitaFruitore, String pkAllegato, String soggettoActa,
-			String rootActa, long tipoDocumento, String tipoDocActa, List<CnmTSoggetto> cnmTSoggettoList, Date dataTopica);
+			String rootActa, long tipoDocumento, String tipoDocActa, List<CnmTSoggetto> cnmTSoggettoList, Date dataTopica, String oggetto, String origine);
 	
 	ResponseRicercaDocumentoMultiplo recuperaDocumentoActa(String idDocumento);
 
@@ -47,7 +47,8 @@ public interface DoquiServiceFacade {
 			String soggettoActa, String rootActa, long tipoDocumento, String tipoDocActa, List<CnmTSoggetto> cnmTSoggettoList, String idDocumentoActa);
 
 	
-	ResponseArchiviaDocumento archiviaDocumentoFisico(byte[] file, String nomeFile, String folder, String rootActa, int numeroAllegati, String idEntitaFruitore, long tipoDocumento, boolean isMaster, String idIndex, String soggettoActa);
+	ResponseArchiviaDocumento archiviaDocumentoFisico(byte[] file, String nomeFile, String folder, String rootActa, int numeroAllegati, String idEntitaFruitore, long tipoDocumento, boolean isMaster, String idIndex, String soggettoActa
+			, String oggetto, String origine, Integer numAllegati);
 	
 	//20220321_SB modifica per gestione della paginazione nella ricerca
 	RicercaProtocolloSuActaResponse ricercaProtocolloSuACTA(String numProtocollo, int pagina, int numeroRigheMax);

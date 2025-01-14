@@ -96,16 +96,23 @@ public class EpayServiceImpl implements EpayService {
 		List<String> codicePosizioneDebitoriaPianoRatList = new ArrayList<>();
 		List<String> codicePosizioneDebitoriaOrdinanzaList = new ArrayList<>();
 		List<String> codicePosizioneDebitoriaSollecitoList = new ArrayList<>();
+		
+		List<PosizioneDebitoriaType> posizioneDebitoriaTypeArrayPianoRatList = new ArrayList<PosizioneDebitoriaType>();
+		List<PosizioneDebitoriaType> posizioneDebitoriaTypeArrayOrdinanzaList = new ArrayList<PosizioneDebitoriaType>();
+		List<PosizioneDebitoriaType> posizioneDebitoriaTypeArraySollecitoList = new ArrayList<PosizioneDebitoriaType>();
 
 		for (PosizioneDebitoriaType e : posizioneDebitoriaTypeArray) {
 			String codicePosizioneDebitoria = e.getIdPosizioneDebitoria();
 			logger.info("codicePosizioneDebitoria from ePay: " + codicePosizioneDebitoria);
 			if (codicePosizioneDebitoria.contains(Constants.CODICE_PIANO_RATEIZZAZIONE)) {
 				codicePosizioneDebitoriaPianoRatList.add(codicePosizioneDebitoria);
+				posizioneDebitoriaTypeArrayPianoRatList.add(e);
 			} else if (codicePosizioneDebitoria.contains(Constants.CODICE_ORDINANZA)) {
 				codicePosizioneDebitoriaOrdinanzaList.add(codicePosizioneDebitoria);
+				posizioneDebitoriaTypeArrayOrdinanzaList.add(e);
 			} else if (codicePosizioneDebitoria.contains(Constants.CODICE_SOLLECITO)) {
 				codicePosizioneDebitoriaSollecitoList.add(codicePosizioneDebitoria);
+				posizioneDebitoriaTypeArraySollecitoList.add(e);
 			} else {
 				logger.error("codicePosizioneDebitoria sconosciuto");
 			}
@@ -115,7 +122,7 @@ public class EpayServiceImpl implements EpayService {
 		if (!codicePosizioneDebitoriaPianoRatList.isEmpty()) {
 			List<CnmRSoggRata> cnmRSoggRataList = cnmRSoggRataRepository.findByCodPosizioneDebitoriaIn(codicePosizioneDebitoriaPianoRatList);
 			List<CnmRSoggRata> cnmRSoggRataListToCreate = new ArrayList<CnmRSoggRata>();
-			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArray) {
+			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArrayPianoRatList) {
 				CnmRSoggRata cnmRSoggRata = Iterables.tryFind(cnmRSoggRataList, new Predicate<CnmRSoggRata>() {
 					@Override
 					public boolean apply(CnmRSoggRata input) {
@@ -150,7 +157,7 @@ public class EpayServiceImpl implements EpayService {
 		if (!codicePosizioneDebitoriaOrdinanzaList.isEmpty()) {
 			List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCodPosizioneDebitoriaIn(codicePosizioneDebitoriaOrdinanzaList);
 			List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogListToCreate = new ArrayList<CnmROrdinanzaVerbSog>();
-			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArray) {
+			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArrayOrdinanzaList) {
 				CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog = Iterables.tryFind(cnmROrdinanzaVerbSogList, new Predicate<CnmROrdinanzaVerbSog>() {
 
 					@Override
@@ -179,7 +186,7 @@ public class EpayServiceImpl implements EpayService {
 			}
 			cnmROrdinanzaVerbSogList = (List<CnmROrdinanzaVerbSog>) cnmROrdinanzaVerbSogRepository.save(cnmROrdinanzaVerbSogList);
 			if(cnmROrdinanzaVerbSogListToCreate.size() > 0)
-				allegatoOrdinanzaService.creaBollettiniByCnmROrdinanzaVerbSog(cnmROrdinanzaVerbSogListToCreate);
+				allegatoOrdinanzaService.creaBollettiniByCnmROrdinanzaVerbSog(cnmROrdinanzaVerbSogListToCreate, false);
 		}
 
 		// sollecito
@@ -187,7 +194,7 @@ public class EpayServiceImpl implements EpayService {
 
 			List<CnmTSollecito> cnmTSollecitoList = cnmTSollecitoRepository.findByCodPosizioneDebitoriaIn(codicePosizioneDebitoriaSollecitoList);
 			List<CnmTSollecito> cnmTSollecitoListToCreate = new ArrayList<CnmTSollecito>();
-			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArray) {
+			for (PosizioneDebitoriaType posizioneDebitoriaType : posizioneDebitoriaTypeArraySollecitoList) {
 				CnmTSollecito cnmTSollecito = Iterables.tryFind(cnmTSollecitoList, new Predicate<CnmTSollecito>() {
 					@Override
 					public boolean apply(CnmTSollecito input) {
@@ -309,7 +316,7 @@ public class EpayServiceImpl implements EpayService {
 					cnmROrdinanzaVerbSog.setCnmDStatoOrdVerbSog(cnmDStatoOrdVerbSog);
 					cnmROrdinanzaVerbSog.setImportoPagato(notificaPagamentoType.getImportoPagato());
 					cnmROrdinanzaVerbSog.setDataPagamento(now);
-					cnmROrdinanzaVerbSog.setCnmTUser2(cnmTUser);
+					cnmROrdinanzaVerbSog.setCnmTUser1(cnmTUser);
 					cnmROrdinanzaVerbSog.setDataOraUpdate(now);
 					cnmROrdinanzaVerbSogRepository.save(cnmROrdinanzaVerbSog);
 					statoPagamentoOrdinanzaService.verificaTerminePagamentoOrdinanza(cnmROrdinanzaVerbSog, cnmTUser);

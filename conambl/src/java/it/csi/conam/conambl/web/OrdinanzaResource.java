@@ -4,6 +4,9 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web;
 
+import it.csi.conam.conambl.vo.ExceptionVO;
+import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.dispatcher.AccontoDispatcher;
 import it.csi.conam.conambl.dispatcher.OrdinanzaDispatcher;
@@ -186,10 +189,29 @@ public class OrdinanzaResource extends SpringSupportedResource {
 		return Response.ok().entity(lista).build();
 	}
 
+	//REQ68
 	@POST
 	@Path("/inviaRichiestaBollettiniOrdinanza/{idOrdinanza}")
 	public Response inviaRichiestaBollettiniOrdinanza(@PathParam("idOrdinanza") Integer idOrdinanza) {
-		ordinanzaDispatcher.inviaRichiestaBollettiniByIdOrdinanza(idOrdinanza);
+		try {
+			ordinanzaDispatcher.inviaRichiestaBollettiniByIdOrdinanza(idOrdinanza);
+		} catch(BusinessException e) {
+	        ExceptionVO exception = new ExceptionVO(
+	                ErrorCode.BOLLETTINI_ERRORE_GENERAZIONE,
+	                e.getCodice(),
+	                "danger"
+	        );
+	        return Response.ok().entity(exception).build();
+	    } 
+
+        return Response.ok().build();
+			
+	}
+
+	@POST
+	@Path("/protocollaLetteraSenzaBollettini/{idOrdinanza}")
+	public Response protocollaLetteraSenzaBollettini(@PathParam("idOrdinanza") Integer idOrdinanza) {
+		ordinanzaDispatcher.protocollaLetteraSenzaBollettini(idOrdinanza);
 		return Response.ok().build();
 	}
 

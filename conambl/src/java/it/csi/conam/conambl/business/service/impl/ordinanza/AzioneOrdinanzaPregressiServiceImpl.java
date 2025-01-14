@@ -73,13 +73,19 @@ public class AzioneOrdinanzaPregressiServiceImpl implements AzioneOrdinanzaPregr
 		if (listTipoAllegatiAllegabili != null && !listTipoAllegatiAllegabili.isEmpty())
 			isAllegatoEnable = Boolean.TRUE;
 
-		Date dataScadenza = cnmTOrdinanza.getDataScadenzaOrdinanza();
+		//Date dataScadenza = cnmTOrdinanza.getDataScadenzaOrdinanza();
 
 		long idTipoOrdinanza = cnmTOrdinanza.getCnmDTipoOrdinanza().getIdTipoOrdinanza();
 		boolean isRichiestaBollettiniInviata = allegatoOrdinanzaService.isRichiestaBollettiniInviata(cnmTOrdinanza);
 		Boolean isLetteraOrdinanzaCreata = allegatoOrdinanzaService.isLetteraOrdinanzaCreata(cnmTOrdinanza);
-		Boolean dowloadBollettiniEnable = isRichiestaBollettiniInviata && isLetteraOrdinanzaCreata && dataScadenza != null && idTipoOrdinanza != Constants.ID_TIPO_ORDINANZA_ARCHIVIATO;
-//		20201117_ET per le ordinanze pregresse non e' possibile generare i bollettini e lettere
+		//E10_2024 abilitato l'invio anche in caso di data scadenza nulla
+		//
+		//Boolean dowloadBollettiniEnable = isRichiestaBollettiniInviata && isLetteraOrdinanzaCreata && dataScadenza != null && idTipoOrdinanza != Constants.ID_TIPO_ORDINANZA_ARCHIVIATO;
+		// sostituito con:
+		Boolean dowloadBollettiniEnable = isRichiestaBollettiniInviata && isLetteraOrdinanzaCreata && idTipoOrdinanza != Constants.ID_TIPO_ORDINANZA_ARCHIVIATO;
+		
+		
+		//		20201117_ET per le ordinanze pregresse non e' possibile generare i bollettini e lettere
 		Boolean bollettiniDaInviareEnable = false;
 //		Boolean bollettiniDaInviareEnable = !isRichiestaBollettiniInviata && isLetteraOrdinanzaCreata && dataScadenza != null && idTipoOrdinanza != Constants.ID_TIPO_ORDINANZA_ARCHIVIATO;
 		azioneOrdinanzaResponse.setLetteraDaCompilareEnable(false);

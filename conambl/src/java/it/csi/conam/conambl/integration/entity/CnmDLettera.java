@@ -242,7 +242,7 @@ public class CnmDLettera implements Serializable {
 
 		return cnmRVerbaleIllecito;
 	}
-
+	
 //	public List<CnmRScrittoIllecito> getCnmRScrittoIllecitos() {
 //		return cnmRScrittoIllecitos;
 //	}

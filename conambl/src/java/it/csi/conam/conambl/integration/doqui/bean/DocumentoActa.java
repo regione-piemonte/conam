@@ -71,6 +71,8 @@ public class DocumentoActa implements Serializable {
 	private boolean 		documentoCartaceo;
 	private String 			collocazioneCartacea;
 	
+	private String 			oggetto;
+	private String 			origine;
 	
 	public int getNumeroAllegati() {
 		return numeroAllegati;
@@ -307,4 +309,21 @@ public class DocumentoActa implements Serializable {
 	public void setCollocazioneCartacea(String collocazioneCartacea) {
 		this.collocazioneCartacea = collocazioneCartacea;
 	}
+
+	public String getOggetto() {
+		return oggetto;
+	}
+
+	public void setOggetto(String oggetto) {
+		this.oggetto = oggetto;
+	}
+
+	public String getOrigine() {
+		return origine;
+	}
+
+	public void setOrigine(String origine) {
+		this.origine = origine;
+	}
+	
 }

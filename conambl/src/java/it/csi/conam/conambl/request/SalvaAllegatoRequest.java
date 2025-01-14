@@ -4,6 +4,7 @@
  ******************************************************************************/
 package it.csi.conam.conambl.request;
 
+import it.csi.conam.conambl.vo.verbale.SoggettoPagamentoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -21,6 +22,12 @@ public class SalvaAllegatoRequest extends ParentRequest {
 	private String filename;
 	private Long idTipoAllegato;
 	private List<AllegatoFieldVO> allegatoField;
+	//REQ_69 
+	private List<SoggettoPagamentoVO> soggettiPagamentoVO;
+	
+	//E18_2022
+	private List<AllegatiAlMaster> allegati;
+	
 
 	public String getFilename() {
 		return filename;
@@ -54,8 +61,22 @@ public class SalvaAllegatoRequest extends ParentRequest {
 		this.file = file;
 	}
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
+	public List<SoggettoPagamentoVO> getSoggettiPagamentoVO() {
+		return soggettiPagamentoVO;
 	}
+
+	public void setSoggettiPagamentoVO(List<SoggettoPagamentoVO> soggettiPagamentoVO) {
+		this.soggettiPagamentoVO = soggettiPagamentoVO;
+	}
+
+	public List<AllegatiAlMaster> getAllegati() {
+		return allegati;
+	}
+
+	public void setAllegati(List<AllegatiAlMaster> allegati) {
+		this.allegati = allegati;
+	}
+
+	
+
 }

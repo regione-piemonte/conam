@@ -61,6 +61,9 @@ public class DatiTemplateVO extends ParentVO {
 	private String sedeEnte;
 	private String infoOrganoAccertatore;
 	
+    // E2_2023 - OB35 
+	private String testoLibero2;	
+
 	// 20230110_PP
 	private String testoLibero;	
 	private String email;	
@@ -317,5 +320,14 @@ public class DatiTemplateVO extends ParentVO {
 	public void setSedeEnteTesto(String sedeEnteTesto) {
 		this.sedeEnteTesto = sedeEnteTesto;
 	}
+
+	public String getTestoLibero2() {
+		return testoLibero2;
+	}
+
+	public void setTestoLibero2(String testoLibero2) {
+		this.testoLibero2 = testoLibero2;
+	}
+	
 	
 }

@@ -19,8 +19,20 @@ public interface CnmRAllegatoVerbaleRepository extends CrudRepository<CnmRAllega
 
 	List<CnmRAllegatoVerbale> findByCnmTVerbale(CnmTVerbale cnmTVerbale);
 
+//	@Query("select av from CnmRAllegatoVerbale av where av.cnmTVerbale=?1 and av.cnmTAllegato.numeroProtocollo != null")
+//	List<CnmRAllegatoVerbale> findByCnmTVerbaleSoloProtocollati(CnmTVerbale cnmTVerbale);
+	
+	List<CnmRAllegatoVerbale> findByCnmTVerbaleAndCnmTAllegatoNumeroProtocolloIsNotNull(CnmTVerbale cnmTVerbale);
+
 	@Query("select av.cnmTAllegato from CnmRAllegatoVerbale av where av.cnmTVerbale=?1")
 	List<CnmTAllegato> findCnmTAllegatosByCnmTVerbale(CnmTVerbale cnmTVerbale);
+	
+
+	@Query("select av.cnmTAllegato from CnmRAllegatoVerbale av where av.cnmTVerbale=?1 and av.cnmTAllegato.cnmDTipoAllegato.idTipoAllegato in (41) and av.cnmTAllegato.idActa is null")
+	List<CnmTAllegato> findCnmTAllegatosByCnmTVerbaleNoProt(CnmTVerbale cnmTVerbale);	
+
+	@Query("select av.cnmTAllegato from CnmRAllegatoVerbale av where av.cnmTVerbale=?1 and av.cnmTAllegato.cnmDTipoAllegato.idTipoAllegato in (42) and av.cnmTAllegato.idActa is null and av.cnmTAllegato.idActaMaster=?2")
+	List<CnmTAllegato> findCnmTAllegatosByCnmTVerbaleAllegatoNoProt(CnmTVerbale cnmTVerbale, String idPadre);
 
 	CnmRAllegatoVerbale findByCnmTAllegato(CnmTAllegato cnmTAllegato);
 

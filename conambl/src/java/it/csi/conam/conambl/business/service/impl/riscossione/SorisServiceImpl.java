@@ -9,6 +9,7 @@ import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.integration.entity.*;
 import it.csi.conam.conambl.integration.repositories.CnmTRecordRepository;
+import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
 import it.csi.conam.conambl.web.serializer.CustomDateSerializer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,13 +43,35 @@ public class SorisServiceImpl implements SorisService {
 	private CnmTRecordRepository cnmTRecordRepository;
 
 	@Autowired
+	private CnmCParametroRepository cnmCParametroRepository;
+	
+	@Autowired
 	private UtilsDate utilsDate;
 
 	private BigDecimal HUNDRED = new BigDecimal("100");
 
+	private static final String CODE_5163 = "5163";
+	private static final String CODE_5496 = "5496";	
+	private static final String CODE_1G14  = "1G14 ";
+	
+	private static final Long ID_IMP_SPESE_PROC = new Long(43);
+	private static final Long ID_IMP_SPESE_NOTI = new Long(44);
+	private static final Long ID_ING_PAG_DET = new Long(45);
+
+
+	CnmCParametro cnmCParametroProc = null;
+	CnmCParametro cnmCParametroNoti = null;
+	CnmCParametro cnmCParametroIngD = null;
+	
 	@Override
 	@Transactional
 	public InputStream creaTracciato(CnmTFile cnmTFile) {
+		
+
+		cnmCParametroProc = cnmCParametroRepository.findOne(ID_IMP_SPESE_PROC);
+		cnmCParametroNoti = cnmCParametroRepository.findOne(ID_IMP_SPESE_NOTI);
+		cnmCParametroIngD = cnmCParametroRepository.findOne(ID_ING_PAG_DET);
+		
 		InputStream inputStream = null;
 		Integer n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0;
 		BigDecimal totale = BigDecimal.ZERO;
@@ -155,10 +178,15 @@ public class SorisServiceImpl implements SorisService {
 								for (Integer id : rigaN4) {
 									CnmTRecord eN4 = cnmTRecordRepository.findOne(id);
 									CnmTRecordN4 imposta = eN4.getCnmTRecordN4();
-									BigDecimal cImposta = imposta.getImposta().multiply(HUNDRED);
-									totale = totale.add(cImposta);
-									n4 = this.addRigaN4(builder, imposta, n4, df, eN4);
-									builder.append("\n");
+									// task 44
+									if((imposta.getCnmDTipoTributo().getCodTipoTributo().equalsIgnoreCase(CODE_5163)
+									|| imposta.getCnmDTipoTributo().getCodTipoTributo().equalsIgnoreCase(CODE_5496))
+									&& imposta.getImposta().compareTo(new BigDecimal(0))!= 0){
+										BigDecimal cImposta = imposta.getImposta().multiply(HUNDRED);
+										totale = totale.add(cImposta);
+										n4 = this.addRigaN4(builder, imposta, n4, df, eN4);
+										builder.append("\n");
+									}
 								}
 
 							}
@@ -191,7 +219,8 @@ public class SorisServiceImpl implements SorisService {
 			n5++;
 
 			// N9
-			Integer totaleN = n1 + n2 + n3 + n4 + n5;
+			// task 44 - aggiunti al conteggio i record N0 e N9
+			Integer totaleN = n1 + n2 + n3 + n4 + n5 + 2;
 			builder.append("N9");
 			builder.append("73348");
 			builder.append(StringUtils.leftPad("" + totaleN.toString(), 7, "0"));
@@ -368,7 +397,21 @@ public class SorisServiceImpl implements SorisService {
 		builder.append("00");
 		builder.append(StringUtils.leftPad(imposta.getDataDecorrenzaInteressi() != null ? imposta.getDataDecorrenzaInteressi() : "", 8, "0"));
 		builder.append("00");
-		builder.append(StringUtils.leftPad("", 75, " "));
+		
+		String info = "";
+				
+		if(imposta.getCnmDTipoTributo().getCodTipoTributo().equalsIgnoreCase(CODE_1G14)) {
+			info = cnmCParametroProc.getValoreString();
+		}else if(imposta.getCnmDTipoTributo().getCodTipoTributo().equalsIgnoreCase(CODE_5496)) {
+			info = cnmCParametroNoti.getValoreString();
+		}else if(imposta.getCnmDTipoTributo().getCodTipoTributo().equalsIgnoreCase(CODE_5163)) {
+			info = cnmCParametroIngD.getValoreString();
+			info +=e.getCnmTRiscossione().getCnmROrdinanzaVerbSog().getCnmTOrdinanza().getNumDeterminazione();
+		}
+
+		builder.append(info);
+		builder.append(StringUtils.leftPad("", 75 - info.length(), " "));
+		
 
 		builder.append("S");
 		builder.append("OR");

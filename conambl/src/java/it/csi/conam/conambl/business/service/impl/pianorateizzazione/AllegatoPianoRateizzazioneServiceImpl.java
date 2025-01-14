@@ -4,10 +4,27 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.pianorateizzazione;
 
+import java.io.FileNotFoundException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+
 import it.csi.conam.conambl.business.facade.EPayServiceFacade;
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
@@ -18,13 +35,47 @@ import it.csi.conam.conambl.business.service.pianorateizzazione.UtilsPianoRateiz
 import it.csi.conam.conambl.business.service.util.UtilsCodeWriter;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
 import it.csi.conam.conambl.business.service.util.UtilsDoqui;
-import it.csi.conam.conambl.common.*;
+import it.csi.conam.conambl.common.Constants;
+import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.Report;
+import it.csi.conam.conambl.common.TipoAllegato;
+import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BollettinoException;
 import it.csi.conam.conambl.common.exception.BusinessException;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmCParametro;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta;
+import it.csi.conam.conambl.integration.entity.CnmDStatoAllegato;
+import it.csi.conam.conambl.integration.entity.CnmDStatoPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRatePK;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRSoggRata;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmTRata;
+import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
+import it.csi.conam.conambl.integration.epay.rest.mapper.RestModelMapper;
+import it.csi.conam.conambl.integration.epay.rest.model.DebtPositionData;
+import it.csi.conam.conambl.integration.epay.rest.model.DebtPositionReference;
+import it.csi.conam.conambl.integration.epay.rest.util.RestUtils;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.ws.epay.EPayWsInputMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmCProprietaRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoPianoRateRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoPianoRateRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRSoggRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRVerbaleSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTPianoRateRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.jasper.BollettinoJasper;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.UtilsParametro;
@@ -33,21 +84,6 @@ import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.template.DatiTemplateVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.FileNotFoundException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author riccardo.bova
@@ -99,12 +135,19 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 
 	@Autowired
 	private CommonSoggettoService commonSoggettoService;
-	
+	@Autowired
+	private CnmCProprietaRepository cnmCProprietaRepository;
 	@Autowired
 	private CnmDStatoAllegatoRepository cnmDStatoAllegatoRepository;
 
 	@Autowired
 	private CnmTAllegatoRepository cnmTAllegatoRepository;
+	@Autowired
+	private RestUtils restUtils;
+	@Autowired
+	private RestModelMapper restModelMapper;
+
+
 	
 	@Override
 	@Transactional
@@ -120,21 +163,86 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 
 		List<CnmRSoggRata> cnmRSoggRataList = cnmRSoggRataRepository.findByCnmTRataIn(cnmTRataList);
 
-		for (CnmRSoggRata c : cnmRSoggRataList) {
-			CnmTSoggetto cnmTSoggetto = c.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto().getCnmTSoggetto();
-			String codiceFiscale = StringUtils.defaultString(cnmTSoggetto.getCodiceFiscale(), cnmTSoggetto.getCodiceFiscaleGiuridico());
-			String piva = cnmTSoggetto.getPartitaIva();
-			c.setCodPosizioneDebitoria(
-					commonBollettiniService.generaCodicePosizioneDebitoria(StringUtils.defaultString(codiceFiscale, piva), c.getCnmTRata().getNumeroRata(), Constants.CODICE_PIANO_RATEIZZAZIONE));
-		}
-		cnmRSoggRataList = cnmRSoggRataRepository.save(cnmRSoggRataList);
-
 		cnmTPianoRate.setCodMessaggioEpay(commonBollettiniService.generaCodiceMessaggioEpay(cnmTPianoRate.getIdPianoRate(), Constants.CODICE_PIANO_RATEIZZAZIONE));
 		cnmTPianoRateRepository.save(cnmTPianoRate);
+			
+		boolean isSOAP = cnmCParametroRepository.findByIdParametro(Long.parseLong(Constants.TIPO_COMUNICAZIONE_SOAP)).getValoreBoolean();
+		if(isSOAP) {
+			for (CnmRSoggRata c : cnmRSoggRataList) {
+				CnmTSoggetto cnmTSoggetto = c.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto().getCnmTSoggetto();
+				String codiceFiscale = StringUtils.defaultString(cnmTSoggetto.getCodiceFiscale(), cnmTSoggetto.getCodiceFiscaleGiuridico());
+				String piva = cnmTSoggetto.getPartitaIva();
+				c.setCodPosizioneDebitoria(
+						commonBollettiniService.generaCodicePosizioneDebitoria(StringUtils.defaultString(codiceFiscale, piva), c.getCnmTRata().getNumeroRata(), Constants.CODICE_PIANO_RATEIZZAZIONE));
+			}
+			cnmRSoggRataList = cnmRSoggRataRepository.save(cnmRSoggRataList);
 
-		ePayServiceFacade.inserisciListaDiCarico(ePayWsInputMapper.mapRateSoggettoToWsMapper(cnmRSoggRataList));
+			ePayServiceFacade.inserisciListaDiCarico(ePayWsInputMapper.mapRateSoggettoToWsMapper(cnmRSoggRataList));
+		}else {
+			
+			List<CnmRSoggRata> cnmRSoggRataListToCreate = new ArrayList<CnmRSoggRata>();
+
+			// REQ68 
+			CnmCProprieta uri = cnmCProprietaRepository.findOne(Constants.EPAY_REST_ENDPOINT); 
+			CnmCProprieta usr = cnmCProprietaRepository.findOne(Constants.EPAY_REST_USER); 
+			CnmCProprieta pass = cnmCProprietaRepository.findOne(Constants.EPAY_REST_PASS); 
+			
+			CnmCParametro organization = cnmCParametroRepository.findByIdParametro(Constants.ORGANIZATION);
+			CnmCParametro paymentType = cnmCParametroRepository.findByIdParametro(Constants.PAYMENT_TYPE);
+			
+
+			String uriSb = restUtils.generateUrl(uri.getValore(), organization.getValoreString(), paymentType.getValoreString());
+
+			
+			for (CnmRSoggRata cnmRSoggRata : cnmRSoggRataList) {				
+				
+				CnmTSoggetto cnmTSoggetto = cnmRSoggRata.getCnmROrdinanzaVerbSog().getCnmRVerbaleSoggetto().getCnmTSoggetto();
+				String codiceFiscale = StringUtils.defaultString(cnmTSoggetto.getCodiceFiscale(), cnmTSoggetto.getCodiceFiscaleGiuridico());
+				String piva = cnmTSoggetto.getPartitaIva();
+				cnmRSoggRata.setCodPosizioneDebitoria(
+						commonBollettiniService.generaCodicePosizioneDebitoria(StringUtils.defaultString(codiceFiscale, piva), cnmRSoggRata.getCnmTRata().getNumeroRata(), Constants.CODICE_PIANO_RATEIZZAZIONE));			
+				
+				DebtPositionData dpd = restModelMapper.mapRateSoggettoToDebtPositionData(cnmRSoggRata);
+				DebtPositionReference debtPositionReference =  restUtils.callCreateDebtPosition(uriSb, dpd, usr.getValore(), pass.getValore());	
+
+				
+				if(debtPositionReference.getCodiceEsito().equalsIgnoreCase("000")) {
+					//GESTIONE CHIAMATA ANDATA A BUON FINE
+					logger.info("Aggiornamento codIuv, codAvviso e codEsitoListaCarico per rSoggRata " + cnmRSoggRata.getId());
+					cnmRSoggRata.setCodIuv(debtPositionReference.getIuv());
+					logger.info("Esito inserimento lista di carico request - COD IUV restituito da Epay: " + debtPositionReference.getIuv());
+					cnmRSoggRata.setCodEsitoListaCarico(debtPositionReference.getCodiceEsito());
+					logger.info("Esito inserimento lista di carico request - codiceEsito restituito da Epay: " + debtPositionReference.getCodiceEsito());
+					cnmRSoggRata.setCodAvviso(debtPositionReference.getCodiceAvviso());
+					logger.info("Esito inserimento lista di carico request - codiceAvviso restituito da Epay: " + debtPositionReference.getCodiceAvviso());
+					cnmRSoggRataListToCreate.add(cnmRSoggRata);
+					
+				
+				} else {
+	            	logAndThrowException(uriSb, cnmRSoggRata, debtPositionReference);
+	            }
+				
+			}
+			cnmRSoggRataList = cnmRSoggRataRepository.save(cnmRSoggRataList);
+			if(cnmRSoggRataListToCreate.size() > 0)
+				creaBollettiniByCnmRSoggRata(cnmRSoggRataListToCreate);		
+
+		}
+	  
 
 	}
+
+	// REQ68
+	private void logAndThrowException(String url, CnmRSoggRata cnmRSoggRata, DebtPositionReference debtPositionReference) throws BusinessException {
+	    logger.error("Chiamata REST url:" + url 
+	    		+ " - DebtPositionData id: " 
+	    		+ debtPositionReference.getIdentificativoPagamento() 
+	    		+ " errore:" + debtPositionReference.getCodiceEsito() + " - " + debtPositionReference.getDescrizioneEsito()
+		);
+	    cnmRSoggRata.setCodEsitoListaCarico(debtPositionReference.getCodiceEsito());
+	    throw new BusinessException(debtPositionReference.getDescrizioneEsito());
+	}
+
 
 	@Override
 	@Transactional
@@ -350,10 +458,10 @@ public class AllegatoPianoRateizzazioneServiceImpl implements AllegatoPianoRatei
 		
 		
 			cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
-					isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList);
+					isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList, null, null, null, null);
 		} else {
 			cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
-					isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, null);
+					isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, null, null, null, null, null);
 			
 			if (tipoAllegato.getId() == TipoAllegato.BOLLETTINI_RATEIZZAZIONE.getId()||
 					tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO_RATE.getId()) {

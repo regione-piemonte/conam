@@ -4,11 +4,25 @@
  ******************************************************************************/
 package it.csi.conam.conambl.integration.entity;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 
 /**
@@ -69,7 +83,7 @@ public class CnmTVerbale implements Serializable {
 	private List<CnmRVerbaleIllecito> cnmRVerbaleIllecitos;
 
 	//bi-directional many-to-one association to CnmRVerbaleSoggetto
-	@OneToMany(mappedBy="cnmTVerbale")
+	@OneToMany(mappedBy="cnmTVerbale", fetch = FetchType.EAGER)
 	private List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettos;
 
 	//bi-directional many-to-one association to CnmSStatoVerbale

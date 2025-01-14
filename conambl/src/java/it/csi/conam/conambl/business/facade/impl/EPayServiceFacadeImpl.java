@@ -54,7 +54,7 @@ public class EPayServiceFacadeImpl implements EPayServiceFacade, InitializingBea
 	public void inserisciListaDiCarico(InserisciListaDiCaricoRequest inserisciListaDiCaricoRequest) {
 		ResponseType response;
 		try {
-
+ 
 			boolean isSecured = Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.EPAY_WSSECURED));
 			if(isSecured) {				
 				String wsUser= utilsCnmCProprietaService.getProprieta(PropKey.EPAY_WSUSER);

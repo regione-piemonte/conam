@@ -35,6 +35,18 @@ public class CnmTAcconto implements Serializable {
 	@JoinColumn(name = "id_soggetto")
 	private CnmTSoggetto cnmTSoggetto;
 
+	@Column(name = "tipologia_pagamento")
+	private String tipologiaPagamento;
+
+	@Column(name = "reversale_d_ordine")
+	private String reversaleDOrdine;
+
+	@Column(name = "pagatore")
+	private String pagatore;
+
+	@Column(name = "note")
+	private String note;
+
 	@Column(name = "conto_corrente_versamento")
 	private String contoCorrenteVersamento;
 
@@ -97,4 +109,38 @@ public class CnmTAcconto implements Serializable {
 	public void setCnmTSoggetto(CnmTSoggetto cnmTSoggetto) {
 		this.cnmTSoggetto = cnmTSoggetto;
 	}
+
+	public String getTipologiaPagamento() {
+		return tipologiaPagamento;
+	}
+
+	public void setTipologiaPagamento(String tipologiaPagamento) {
+		this.tipologiaPagamento = tipologiaPagamento;
+	}
+
+	public String getReversaleDOrdine() {
+		return reversaleDOrdine;
+	}
+
+	public void setReversaleDOrdine(String reversaleDOrdine) {
+		this.reversaleDOrdine = reversaleDOrdine;
+	}
+
+	public String getPagatore() {
+		return pagatore;
+	}
+
+	public void setPagatore(String pagatore) {
+		this.pagatore = pagatore;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+	}
+	
+	
 }

@@ -19,7 +19,7 @@ public class AmbitoNoteEntityMapperImpl implements AmbitoNoteEntityMapper {
 			return null;
 		SelectVO ambito = new SelectVO();
 		ambito.setDenominazione(dto.getDescAmbitoNote());
-		ambito.setId(dto.getIdAmbitoNote().longValue());
+		ambito.setId(dto.getIdAmbitoNote());
 		//ambito.setAcronimo(dto.getAcronimo());
 		return ambito;
 	}

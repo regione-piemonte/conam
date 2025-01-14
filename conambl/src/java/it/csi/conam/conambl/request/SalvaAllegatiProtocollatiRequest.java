@@ -5,6 +5,7 @@
 package it.csi.conam.conambl.request;
 
 import it.csi.conam.conambl.vo.verbale.DocumentoProtocollatoVO;
+import it.csi.conam.conambl.vo.verbale.SoggettoPagamentoVO;
 
 import java.util.List;
 
@@ -27,7 +28,9 @@ public class SalvaAllegatiProtocollatiRequest extends ParentRequest {
 	private List<SalvaAllegatoRequest> allegati;
 	
 	private List<Integer> idOrdinanzaVerbaleSoggetto;
-
+	
+	//REQ_69 
+	private List<SoggettoPagamentoVO> soggettiPagamentoVO;
 	
 
 	// 20200715_LC
@@ -83,6 +86,15 @@ public class SalvaAllegatiProtocollatiRequest extends ParentRequest {
 	public void setIdOrdinanza(Integer idOrdinanza) {
 		this.idOrdinanza = idOrdinanza;
 	}
+	
+	public List<SoggettoPagamentoVO> getSoggettiPagamentoVO() {
+		return soggettiPagamentoVO;
+	}
+
+	public void setSoggettiPagamentoVO(List<SoggettoPagamentoVO> soggettiPagamentoVO) {
+		this.soggettiPagamentoVO = soggettiPagamentoVO;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

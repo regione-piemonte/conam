@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2006 sp2 U (http://www.altova.com) by Administrator (EMBRACE) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="Lista">
+		<xs:annotation>
+			<xs:documentation>ROOT element dello schema. Lista con gli oggetti trovati dalla ricerca</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Riga" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Record con i dati di un oggetto trovato dalla ricerca</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Colonna" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Colonna/dato del record</xs:documentation>
+								</xs:annotation>
+								<xs:complexType mixed="true">
+									<xs:attribute name="Nro" type="xs:positiveInteger" use="required">
+										<xs:annotation>
+											<xs:documentation>Identifica la colonna (ad ogni n.ro è associato un preciso campo/significato)</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="NroTotaleRecord" use="required">
+				<xs:annotation>
+					<xs:documentation>N.ro totale di record che soddisfano i filtri di ricerca</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:integer">
+						<xs:minInclusive value="0"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="NroPagine" type="xs:integer">
+				<xs:annotation>
+					<xs:documentation>N.ro di pagine in cui sono distribuiti i record che sodisfano i filtri di ricerca (presente nel caso di estrazione pginata)</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

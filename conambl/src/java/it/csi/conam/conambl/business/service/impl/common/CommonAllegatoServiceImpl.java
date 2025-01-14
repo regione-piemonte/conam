@@ -8,6 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,6 +23,16 @@ import java.util.Map;
 
 import javax.persistence.Table;
 
+import com.google.common.collect.Iterables;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Font;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.ColumnText;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfStamper;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -32,16 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Iterables;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Font;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.ColumnText;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfStamper;
 
 import it.csi.conam.conambl.business.facade.DoquiServiceFacade;
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
@@ -60,6 +62,11 @@ import it.csi.conam.conambl.common.ErrorCode;
 import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BusinessException;
+import it.csi.conam.conambl.integration.auriga.exception.DocumentaleException;
+import it.csi.conam.conambl.integration.auriga.model.getDetermina.RequestGetDetermina;
+import it.csi.conam.conambl.integration.auriga.model.getDetermina.RequestGetDetermina.IDDetermina;
+import it.csi.conam.conambl.integration.auriga.model.getDetermina.RequestGetDetermina.SceltaFileRichiesti;
+import it.csi.conam.conambl.integration.auriga.service.AurigaService;
 import it.csi.conam.conambl.integration.beans.Documento;
 import it.csi.conam.conambl.integration.beans.ResponseArchiviaDocumento;
 import it.csi.conam.conambl.integration.beans.ResponseEliminaDocumento;
@@ -93,16 +100,19 @@ import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTAllegato;
 import it.csi.conam.conambl.integration.entity.CnmTAllegatoField;
 import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
 import it.csi.conam.conambl.integration.entity.CnmTScrittoDifensivo;
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTSollecito;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
-import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.entity.CsiLogAudit.TraceOperation;
+import it.csi.conam.conambl.integration.mapper.entity.AllegatoFieldEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.ConfigAllegatoEntityMapper;
+import it.csi.conam.conambl.integration.mapper.entity.ConfigAllegatoRicercaEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.ElementoElencoEntityMapper;
 import it.csi.conam.conambl.integration.repositories.CnmCFieldRepository;
+import it.csi.conam.conambl.integration.repositories.CnmCFieldRicercaRepository;
 import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDElementoElencoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
@@ -111,8 +121,8 @@ import it.csi.conam.conambl.integration.repositories.CnmDStatoOrdinanzaRepositor
 import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdVerbSogRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoOrdinanzaRepository;
-import it.csi.conam.conambl.integration.repositories.CnmRAllegatoSollecitoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoPianoRateRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoSollecitoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbSogRepository;
 import it.csi.conam.conambl.integration.repositories.CnmRAllegatoVerbaleRepository;
 import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
@@ -126,17 +136,23 @@ import it.csi.conam.conambl.request.ParentRequest;
 import it.csi.conam.conambl.request.SalvaAllegatiMultipliRequest;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
 import it.csi.conam.conambl.request.SalvaAllegatoRequest;
+import it.csi.conam.conambl.response.RicercaDocumentiStiloResponse;
 import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
 import it.csi.conam.conambl.util.UploadUtils;
 import it.csi.conam.conambl.util.UtilsTipoAllegato;
+import it.csi.conam.conambl.vo.CampiRicercaFormVO;
+import it.csi.conam.conambl.vo.CampiRicercaFormVO.SearchData;
 import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoProtocollatoVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
+import it.csi.conam.conambl.vo.verbale.DocumentoStiloVO;
+import it.csi.conam.conambl.vo.verbale.SoggettoPagamentoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoMultiploVO;
 import it.csi.conam.conambl.vo.verbale.allegato.ConfigAllegatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.DettaglioAllegatoFieldVO;
 
 /**
  * @author riccardo.bova
@@ -219,6 +235,10 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	private CnmTScrittoDifensivoRepository cnmTScrittoDifensivoRepository;
 	@Autowired
 	private CnmRVerbaleIllecitoRepository cnmRVerbaleIllecitoRepository;
+	@Autowired
+	private ConfigAllegatoRicercaEntityMapper configAllegatoRicercaEntityMapper;
+	@Autowired
+	private CnmCFieldRicercaRepository cnmCFieldRicercaRepository;
 
 	
 	@Autowired
@@ -232,6 +252,13 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	
 	@Autowired 
 	private CnmTSpostamentoActaRepository cnmTSpostamentoActaRepository;
+	
+	@Autowired
+	private AurigaService aurigaService;
+	
+	@Autowired
+	private AllegatoFieldEntityMapper allegatoFieldEntityMapper;
+	
 	
 	// 20201127_LC cache ricerca protocollo
 	//CRP    private Map<String, RicercaProtocolloSuActaResponse> cacheRicercaProtocollo = new HashMap<String, RicercaProtocolloSuActaResponse>();
@@ -397,10 +424,14 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 		int numeroAllegati,
 		Integer idVerbaleAudizione,
 		String tipoActa,
-		List<CnmTSoggetto> cnmTSoggettoList
+		List<CnmTSoggetto> cnmTSoggettoList,
+		String idArchivioPadre, 
+		String oggetto,
+		String origine, Integer numAllegati
 	) {
 		if(isDoquiDirect()) {
-			return salvaAllegato_Doqui(file, filename, idTipoAllegato, configAllegato, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster, protocollazioneInUscita, soggettoActa, rootActa, numeroAllegati, idVerbaleAudizione, tipoActa, cnmTSoggettoList);
+			return salvaAllegato_Doqui(file, filename, idTipoAllegato, configAllegato, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster, protocollazioneInUscita, soggettoActa, rootActa, numeroAllegati, idVerbaleAudizione, tipoActa, cnmTSoggettoList, 
+					idArchivioPadre, oggetto, origine, numAllegati);
 		}else {
 			return salvaAllegato_Stadoc(file, filename, idTipoAllegato, configAllegato, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster, protocollazioneInUscita, soggettoActa, rootActa, numeroAllegati, idVerbaleAudizione, tipoActa, cnmTSoggettoList);
 		}
@@ -511,7 +542,7 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 
 	private CnmTAllegato salvaAllegato_Doqui(byte[] file, String filename, Long idTipoAllegato, List<AllegatoFieldVO> configAllegato, CnmTUser cnmTUser, TipoProtocolloAllegato tipoProtocolloAllegato,
 			String folder, String idEntitaFruitore, boolean isMaster, boolean protocollazioneInUscita, String soggettoActa, String rootActa, int numeroAllegati, Integer idVerbaleAudizione,
-			String tipoActa, List<CnmTSoggetto> cnmTSoggettoList) {	
+			String tipoActa, List<CnmTSoggetto> cnmTSoggettoList, String idArchivioPadre, String oggetto, String origine, Integer numAllegati) {	
 		CnmDTipoAllegato cnmDTipoAllegato = cnmDTipoAllegatoRepository.findOne(idTipoAllegato);
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
 		String operationToTrace = null;
@@ -526,8 +557,12 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			if (folder == null)
 				throw new IllegalArgumentException("folder non valorizzato");
 			CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_PROTOCOLLATO);
+			long idTipoDoc = idTipoAllegato.longValue();
+			if(idTipoAllegato == TipoAllegato.VERBALE_ACCERTAMENTO_SEC.getId()) {
+				idTipoDoc = TipoAllegato.VERBALE_ACCERTAMENTO.getId();
+			}
 			ResponseProtocollaDocumento responseProtocollaDocumento = doquiServiceFacade.protocollaDocumentoFisico(folder, file, filename, idEntitaFruitore, 
-					isMaster, protocollazioneInUscita, soggettoActa, rootActa, idTipoAllegato.longValue(), tipoActa, cnmTSoggettoList, null);
+					isMaster, protocollazioneInUscita, soggettoActa, rootActa, idTipoDoc, tipoActa, cnmTSoggettoList, null);
 			cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegato);
 			cnmTAllegato.setIdActa(responseProtocollaDocumento.getIdDocumento());
 			
@@ -567,9 +602,12 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			cnmTAllegato.setIdIndex(responseSalvaDocumento.getIdDocumento());
 		} else if (tipoProtocolloAllegato.getId() == TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE.getId()) {
 			CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_NON_PROTOCOLLARE);
+			if(cnmDTipoAllegato.getIdTipoAllegato() == TipoAllegato.DOC_NON_PROTOCOLLARE.getId()) {
+				cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_MULTI_NON_PROTOCOLLARE);
+			}
 			if (isMaster) {
 				ResponseArchiviaDocumento responseArchiviaDocumento = doquiServiceFacade.archiviaDocumentoFisico(file, filename, folder, rootActa, numeroAllegati, idEntitaFruitore,
-						idTipoAllegato.longValue(), isMaster, null, null);
+						idTipoAllegato.longValue(), isMaster, null, null, oggetto, origine, numAllegati);
 				cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegato);
 				cnmTAllegato.setIdActa(responseArchiviaDocumento.getIdDocumento());
 				cnmTAllegato.setIdIndex(null);
@@ -585,6 +623,22 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 				cnmTAllegato.setIdActa(null);
 				cnmTAllegato.setIdIndex(responseSalvaDocumento.getIdDocumento());
 			}
+		} else if (tipoProtocolloAllegato.getId() == TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE_METADATI.getId()) {
+			CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_NON_PROTOCOLLARE);
+			
+			// capire dove mettere i dai -> oggetto, origine, numAllegati
+			ResponseSalvaDocumento responseSalvaDocumento = doquiServiceFacade.salvaDocumentoIndex(cnmDTipoAllegato.getDescTipoAllegato(), file, filename, "", cnmDTipoAllegato.getIndexType());
+			cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegato);
+			cnmTAllegato.setIdActa(null);
+			cnmTAllegato.setIdIndex(responseSalvaDocumento.getIdDocumento());
+			
+		} else if (tipoProtocolloAllegato.getId() == TipoProtocolloAllegato.NON_PROTOCOLLARE_ACTA.getId()) {
+			CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_ALLEGATO_NON_PROTOCOLLARE);
+			ResponseSalvaDocumento responseSalvaDocumento = doquiServiceFacade.salvaDocumentoIndex(cnmDTipoAllegato.getDescTipoAllegato(), file, filename, "", cnmDTipoAllegato.getIndexType());
+			cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegato);
+			cnmTAllegato.setIdActa(null);
+			cnmTAllegato.setIdActaMaster(idArchivioPadre);
+			cnmTAllegato.setIdIndex(responseSalvaDocumento.getIdDocumento());
 		}
 
 		cnmTAllegato.setCnmDTipoAllegato(cnmDTipoAllegato);
@@ -609,7 +663,7 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			cnmTAllegatoField.setDataOraInsert(now);
 			Long idField = c.getIdField();
 			if (idField == null)
-				throw new IllegalArgumentException("Errore field type non valorizzato");
+				throw new IllegalArgumentException("Errore field id non valorizzato");
 
 			CnmCField cnmCField = cnmCFieldRepository.findOne(idField);
 			cnmTAllegatoField.setCnmCField(cnmCField);
@@ -763,9 +817,14 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 					soggettoVO.setDenominazione(soggettoVerbale.getCnmTSoggetto().getCognome() + " " +soggettoVerbale.getCnmTSoggetto().getNome()+ 
 							" - CF " + soggettoVerbale.getCnmTSoggetto().getCodiceFiscale());
 				}
+				//REQ_69 tolgo importo residuo e importo in misura ridotta e metto il ruolo
+				/*
 				soggettoVO.setDenominazione(soggettoVO.getDenominazione()  +
 						" - Imp mis rid " +soggettoVerbale.getImportoMisuraRidotta() +
 						" - Imp residuo " +(soggettoVerbale.getImportoMisuraRidotta().subtract(soggettoVerbale.getImportoPagato()))); 
+				*/
+				soggettoVO.setDenominazione(soggettoVO.getDenominazione()  + " - "+ soggettoVerbale.getCnmDRuoloSoggetto().getDescRuoloSoggetto().toUpperCase());
+				
 				soggettoVO.setId(new Long(soggettoVerbale.getIdVerbaleSoggetto()));
 				soggettiRelataVO.add(soggettoVO);
 			}
@@ -964,7 +1023,10 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 				
 //				20201014_ET  JIRA CONAM-98 potrebbero esserci degli allegati che non sono associati al protocollo, sono quindi da protocollare
 				if(cnmTAllegatoTs.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO) {
-					
+					CnmDTipoAllegato tipoAllegato = cnmTAllegatoTs.getCnmDTipoAllegato();
+					if(tipoAllegato.getIdTipoAllegato() == TipoAllegato.VERBALE_ACCERTAMENTO_SEC.getId()) {
+						tipoAllegato = cnmDTipoAllegatoRepository.findOne(TipoAllegato.VERBALE_ACCERTAMENTO.getId());
+					}
 					ResponseProtocollaDocumento responseProtocollaDocumentoAllegato = doquiServiceFacade.protocollaDocumentoFisico(utilsDoqui.createOrGetfolder(cnmTVerbale), null, cnmTAllegatoTs.getNomeFile(),
 							utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegatoTs.getCnmDTipoAllegato()), false, protocollazioneUscita, utilsDoqui.getSoggettoActa(cnmTVerbale), utilsDoqui.getRootActa(cnmTVerbale),
 							cnmTAllegatoTs.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, null, cnmTAllegatoTs.getIdIndex());
@@ -1152,7 +1214,8 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			logger.debug("avviaProtocollazione_Doqui 7");
 			ResponseArchiviaDocumento responseArchiviaDocumento = doquiServiceFacade.archiviaDocumentoFisico(null, cnmTAllegato.getNomeFile(), utilsDoqui.createOrGetfolder(cnmTVerbale), 
 					utilsDoqui.getRootActa(cnmTVerbale), 0, utilsDoqui.createIdEntitaFruitore(cnmTVerbale, cnmTAllegato.getCnmDTipoAllegato()),
-					cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), true, cnmTAllegato.getIdIndex(), utilsDoqui.getSoggettoActa(cnmTVerbale));
+					cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), true, cnmTAllegato.getIdIndex(), utilsDoqui.getSoggettoActa(cnmTVerbale),
+					null, null, null);
 
 			logger.debug("avviaProtocollazione_Doqui 7.1");
 			responseProtocollaDocumento = new ResponseProtocollaDocumento();
@@ -2100,6 +2163,11 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 							cnmTAllegatoField.setValoreNumber(c.getNumberValue());
 						}
 					}
+					if (idFieldType == Constants.FIELD_TYPE_ELENCO_SOGGETTI_COMPL) {
+						if(c.getNumberValue()!= null)
+							idVerbaleSoggetto = c.getNumberValue().intValue();
+							cnmTAllegatoField.setValoreNumber(c.getNumberValue());
+					}
 					
 					cnmTAllegatoFieldList.add(cnmTAllegatoField);
 				}
@@ -2110,7 +2178,35 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 							
 				
 			}
-			
+			// recupero metadati per field 8 (lista valori pagati per soggetto) e 20 (lista idSoggettoVerbale)
+			if(request.getSoggettiPagamentoVO() != null && request.getSoggettiPagamentoVO().size() > 0) {
+				String valoriPagamento = "";
+				String valoriIdSoggettoVerbale = "";
+				for(SoggettoPagamentoVO soggetto : request.getSoggettiPagamentoVO()) {
+					valoriPagamento+=soggetto.getImportoPagato()+"+";
+					valoriIdSoggettoVerbale+=soggetto.getIdSoggettoVerbale()+"+";
+				}
+				CnmCField cnmCFieldImportoPagato = cnmCFieldRepository.findOne(Constants.ID_FIELD_IMPORTO_PAGATO);
+	
+				CnmTAllegatoField cnmTAllegatoField = new CnmTAllegatoField();
+				cnmTAllegatoField.setCnmTAllegato(cnmTAllegato);
+				cnmTAllegatoField.setCnmTUser2(cnmTUser);
+				cnmTAllegatoField.setDataOraInsert(now);
+				cnmTAllegatoField.setCnmCField(cnmCFieldImportoPagato);
+				cnmTAllegatoField.setValoreString(valoriPagamento);
+				cnmTAllegatoFieldList.add(cnmTAllegatoField);
+				
+	
+				CnmCField cnmCFieldIdSoggettoVerbale = cnmCFieldRepository.findOne(Constants.ID_FIELD_SOGGETTI_PAGAMENTO);
+	
+				CnmTAllegatoField cnmTAllegatoFieldIdSoggettoVerbale = new CnmTAllegatoField();
+				cnmTAllegatoFieldIdSoggettoVerbale.setCnmTAllegato(cnmTAllegato);
+				cnmTAllegatoFieldIdSoggettoVerbale.setCnmTUser2(cnmTUser);
+				cnmTAllegatoFieldIdSoggettoVerbale.setDataOraInsert(now);
+				cnmTAllegatoFieldIdSoggettoVerbale.setCnmCField(cnmCFieldIdSoggettoVerbale);
+				cnmTAllegatoFieldIdSoggettoVerbale.setValoreString(valoriIdSoggettoVerbale);
+				cnmTAllegatoFieldList.add(cnmTAllegatoFieldIdSoggettoVerbale);
+			}
 			if (!cnmTAllegatoFieldList.isEmpty())
 				cnmTAllegatoFieldRepository.save(cnmTAllegatoFieldList);
 			if(cnmDTipoAllegato.getIdTipoAllegato() == TipoAllegato.RELATA_NOTIFICA.getId()) {
@@ -2137,6 +2233,43 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 			
 			// 20200706_LC
 			response.add(cnmTAllegato);
+			
+			if(cnmDTipoAllegato.getIdTipoAllegato() == TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId() ||
+					cnmDTipoAllegato.getIdTipoAllegato() == TipoAllegato.PROVA_PAGAMENTO_VERBALE.getId()	) {
+				//REQ_69 rimosso logica sosttostante e aggiunta nuova logica
+				/*if(idVerbaleSoggetto != null && request.getIdVerbale() != null) {
+					CnmRVerbaleSoggetto cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.findCnmTVerbaleByIdVerbaleSoggetto(idVerbaleSoggetto);
+					// devo sommare eventuali pagamenti gia effettuati dall utente
+					cnmRVerbaleSoggetto.setImportoPagato(BigDecimal.valueOf(money).setScale(2, RoundingMode.HALF_UP).add(cnmRVerbaleSoggetto.getImportoPagato()));
+					cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
+				}*/
+				List<SoggettoPagamentoVO> soggettiPagamentoVOList = request.getSoggettiPagamentoVO();
+				if(soggettiPagamentoVOList == null) {
+					throw new  BusinessException(ErrorCode.SOGGETTO_NON_SELEZIONATO);
+				}
+				for(SoggettoPagamentoVO sog: soggettiPagamentoVOList) {
+					CnmRVerbaleSoggetto cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.findOne(sog.getIdSoggettoVerbale());
+					if(cnmRVerbaleSoggetto!=null) {
+						
+						if (sog.getImportoPagato() != null) {
+						    BigDecimal importoPagato = BigDecimal.valueOf(sog.getImportoPagato()).setScale(2, RoundingMode.HALF_UP);
+						    if (cnmRVerbaleSoggetto.getImportoPagato() != null) {
+						        cnmRVerbaleSoggetto.setImportoPagato(importoPagato.add(cnmRVerbaleSoggetto.getImportoPagato()));
+						    } else {
+						        cnmRVerbaleSoggetto.setImportoPagato(importoPagato);
+						    }
+						} else {
+						    if (cnmRVerbaleSoggetto.getImportoPagato() == null) {
+						        cnmRVerbaleSoggetto.setImportoPagato(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+						    }
+						}
+
+						cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
+					}		
+				}
+				
+			}
+			
 		}
 		
 		
@@ -2984,10 +3117,93 @@ public class CommonAllegatoServiceImpl implements CommonAllegatoService {
 	}
 
 	
-	
-	
-	
-	
-	
-	
+	//E19_2022 - OBI45
+		public RicercaDocumentiStiloResponse ricercaDocumentiSuStilo(CampiRicercaFormVO input, Integer pageRequest, Integer maxLineRequest) {
+			
+			if (input == null)
+				throw new IllegalArgumentException("filtri non valorizzati");
+
+			String anno = null;
+			String numero = null;
+			
+			for(SearchData data : input.getRicerca()) {
+				if(data.getIdField()==1L) {
+					numero = data.getValue();
+				}else if(data.getIdField()==2L){
+					anno = data.getValue();
+				}
+			}
+			
+			RicercaDocumentiStiloResponse response = new RicercaDocumentiStiloResponse();
+
+			utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.RICERCA_DOCUMENTO_STILO.getOperation(), "cnm_t_verbale", "", Thread.currentThread().getStackTrace()[1].getMethodName(), null);
+			List<DocumentoStiloVO> documentoStiloVOList = null;
+			try {
+				RequestGetDetermina determina = new RequestGetDetermina();
+				IDDetermina id = new IDDetermina();
+				id.setAnno(anno);
+				try {
+					id.setNumero(new BigInteger(numero));
+				}catch(Throwable t) {}
+				determina.setIDDetermina(id);
+				SceltaFileRichiesti scelta = new SceltaFileRichiesti();
+				scelta.setAllegatiNonParteIntegrante(false);
+				scelta.setAllegatiParteIntegranteSeparati(false);
+				scelta.setDispositivoAtto(true);
+				scelta.setVistoRegolaritaContabile(false);
+				determina.setSceltaFileRichiesti(scelta );
+				
+				documentoStiloVOList = aurigaService.searchDetermina(determina);
+			} catch (DocumentaleException e) {
+				throw new BusinessException(ErrorCode.DOCUMENTI_NON_PRESENTI_IN_STILO);
+			}catch (Exception e) {
+				throw new BusinessException(ErrorCode.DOCUMENTI_NON_PRESENTI_IN_STILO);
+			}
+			
+//			
+//			
+			if(documentoStiloVOList==null) {
+				throw new BusinessException(ErrorCode.DOCUMENTI_NON_PRESENTI_IN_STILO);
+				
+			} else {
+				response.setDocumentoStiloVOList(documentoStiloVOList);
+				// TODO - capire se gestire la paginazione
+			}
+//			
+//			// setta lista nella response ed i dati dalle paginazione
+//			response.setDocumentoStiloVOList(documentoStiloVOList);
+//			response.setLineRes(ricercaDocumentiStiloResponse.getLineRes());
+//			response.setMaxLineReq(ricercaDocumentiStiloResponse.getMaxLineReq());
+//			response.setPageReq(ricercaDocumentiStiloResponse.getPageReq());
+//			response.setPageResp(ricercaDocumentiStiloResponse.getPageResp());
+//			response.setTotalLineResp(ricercaDocumentiStiloResponse.getTotalLineResp());
+			
+			return response;
+		}
+		
+		@Override
+		public List<ConfigAllegatoVO> getConfigAllegatiRicerca(Long idRicerca) {
+			return configAllegatoRicercaEntityMapper.mapListEntityToListVO(cnmCFieldRicercaRepository.findAllByFineValidita(idRicerca));
+		}
+
+
+		@Override
+		public DettaglioAllegatoFieldVO getDettaglioFieldsByIdAllegato(Long idAllegato) {
+			
+			
+			CnmTAllegato allegato = cnmTAllegatoRepository.findOne(idAllegato.intValue());
+			
+			List<CnmTAllegatoField> allegatoFields = cnmTAllegatoFieldRepository.findByCnmTAllegato(allegato);
+			// TODO in caso di Prova pagamento (43) eliminare i field 8 e 20
+			List<AllegatoFieldVO> filds = allegatoFieldEntityMapper.mapListEntityToListVO(allegatoFields);
+
+			List<ConfigAllegatoVO> config = configAllegatoEntityMapper.mapListEntityToListVO(cnmCFieldRepository.findAllByFineValiditaAndCnmDTipoallegato(allegato.getCnmDTipoAllegato()));
+			
+			CnmTVerbale verbale = cnmRAllegatoVerbaleRepository.findByCnmTAllegato(allegato).getCnmTVerbale(); 
+			boolean edit = verbale.getCnmDStatoVerbale().getIdStatoVerbale()!=Constants.STATO_VERBALE_CONCILIATO;
+			
+			DettaglioAllegatoFieldVO dettaglioAllegatoFieldVO = new DettaglioAllegatoFieldVO(filds , config, edit);
+			return dettaglioAllegatoFieldVO;
+		}
+
 }

@@ -71,13 +71,18 @@ public class AllegatoOrdinanzaPregressiServiceImpl implements AllegatoOrdinanzaP
 				null // stato ordinanza
 				//cnmTOrdinanza.getCnmDStatoOrdinanza() 
 		)));
+		// Elimino prova pagamento acconto e sollecito
+		TipoAllegatoVO acconto = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.PROVA_PAGAMENTO_ACCONTO_ORDINANZA.getId()));
+		listAllegabili.remove(acconto);
+		TipoAllegatoVO sollecito = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.PROVA_PAGAMENTO_SOLLECITO_ORDINANZA.getId()));
+		listAllegabili.remove(sollecito);
 		
-
 		// 20201126 PP - aggiungo DISPOSIZIONE_DEL_GIUDICE solo se l'ordinanaza e' in stato RICORSO_IN_ATTO
 		if(cnmTOrdinanza.getCnmDStatoOrdinanza().getIdStatoOrdinanza() == Constants.ID_STATO_ORDINANZA_RICORSO_IN_ATTO) {
 			addTipoIfNotExists(listAllegabili, TipoAllegato.DISPOSIZIONE_DEL_GIUDICE.getId());
 		}
 		addTipoIfNotExists(listAllegabili, TipoAllegato.RICEVUTA_PAGAMENTO_ORDINANZA.getId());
+		addTipoIfNotExists(listAllegabili, TipoAllegato.PROVA_PAGAMENTO_ORDINANZA.getId());
 		addTipoIfNotExists(listAllegabili, TipoAllegato.LETTERA_RATEIZZAZIONE.getId());	
 		
 		List<TipoAllegatoVO> listAllegati = getTipologiaAllegatiOrdinanzaByCnmTOrdinanza(cnmTOrdinanza);

@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- edited with XMLSpy v2006 sp2 U (http://www.altova.com) by Administrator (EMBRACE) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:simpleType name="FlagSiNoType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="0|1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="UserType">
+		<xs:choice>
+			<xs:element name="IdInSistemaEsterno" type="IdInSistemaEsternoType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Id. dell'utente nell'applicazione che invoca il WS</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="IdInterno" type="xs:integer" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Id. dell'utente all'interno del sistema documentale</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="UsernameInterna" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Username con cui l'utente si autentica al sistema documentale</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Descrizione" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Descrizione dell'utente</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="NroMatricola" type="xs:string" minOccurs="0"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:simpleType name="LibreriaType">
+		<xs:annotation>
+			<xs:documentation>Nome che identifica una libreria contenente unità documentarie e fascicoli</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="100"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SiglaRegNumType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NumRegType">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1"/>
+			<xs:maxInclusive value="9999999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="EstremiRegNumType">
+		<xs:all>
+			<xs:element name="CategoriaReg" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Categoria di registrazione / numerazione; valori ammessi PG=Protocollo Generale; PP=Protocollo Particolare; R=Repertorio; E=Registrazione d'emergenza; A=Altra numerazione data esternamente al sistema documentale; I=Altra numerazione data internamente al sistema documentale</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="PG"/>
+						<xs:enumeration value="PP"/>
+						<xs:enumeration value="R"/>
+						<xs:enumeration value="E"/>
+						<xs:enumeration value="A"/>
+						<xs:enumeration value="I"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="SiglaReg" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="SiglaRegNumType"/>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="AnnoReg" type="AnnoType"/>
+			<xs:element name="NumReg" type="NumRegType"/>
+		</xs:all>
+	</xs:complexType>
+	<xs:simpleType name="OggettoFolderType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="1000"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NomeFolderType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="150"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="IdInSistemaEsternoType">
+		<xs:annotation>
+			<xs:documentation>Codice che identifica un oggetto in un sistema esterno</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="CriterioRicercaSuAttributoAddType">
+		<xs:sequence>
+			<xs:element name="Nome" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Nome identificativo dell'attributo cui è relativo il criterio di ricerca</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="OperatoreLogico">
+				<xs:annotation>
+					<xs:documentation>Operatore logico da utilizzare sul/i valori dell'attributo per imporre il filtro di ricerca</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="uguale"/>
+						<xs:enumeration value="simile a (case-sensitive)"/>
+						<xs:enumeration value="simile a (case-insensitive)"/>
+						<xs:enumeration value="minore"/>
+						<xs:enumeration value="maggiore o uguale"/>
+						<xs:enumeration value="minore"/>
+						<xs:enumeration value="minore o uguale"/>
+						<xs:enumeration value="compreso tra"/>
+						<xs:enumeration value="non valorizzato"/>
+						<xs:enumeration value="valorizzato"/>
+						<xs:enumeration value="spuntato"/>
+						<xs:enumeration value="non spuntato"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ValoreConfronto_1" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Va specificato se l'operatore logico prevede uno o 2 valori di confronto (dunque salvo se: valorizzato/non valorizzato, spuntato/non spuntato). Se l'attributo è numerico deve avere la virgola come separatore dei decimali, se è di tipo data o date e ora deve essere nei formati configurati a sistema per date e timestamp. </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ValoreConfronto_2" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Va specificato se l'operatore logico prevede 2 valori di confronto (dunque solo nl caso di "compreso tra"). Se l'attributo è numerico deve avere la virgola come separatore dei decimali, se è di tipo data o date e ora deve essere nei formati configurati a sistema per  date e timestamp. </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="OggDiTabDiSistemaType">
+		<xs:annotation>
+			<xs:documentation>Rappresenta un oggetto censito in una tabella di sistema del sistema documentale</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="CodId" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Identificativo del dato di sistema nella banca dati del sistema documentale</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Decodifica_Nome" type="xs:string"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:simpleType name="AnnoType">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1900"/>
+			<xs:maxInclusive value="2100"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="EstremiXIdentificazioneFolderType">
+		<xs:annotation>
+			<xs:documentation>Rappresenta un folder attraverso il suo path (a partire dalla libreria di appartenenza esclusa)+ nome o il suo identificativo</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="IdFolder" type="xs:integer" minOccurs="0"/>
+			<xs:sequence>
+				<xs:element name="Libreria" type="OggDiTabDiSistemaType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Libreria di appartenenza (obblligatorio indicarla se la repository ne contiene più di una e non ve n'è una definita come "default" e se l'utente può accedere a più di una di queste)</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Path_Nome" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>Path (escluso il nome dellla libreria di appartenenza) e nome del folder. Per i fascicoli di titolario il nome è dato da anno di apertura del fascicolo + livelli di classificazione + n.ro di fascicolo + eventuale n.ro di sottofasc. + eventuale n.ro di inserto</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="PaginazioneType">
+		<xs:sequence>
+			<xs:element name="NroPagina" type="xs:positiveInteger" default="1" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>E' il numero della pagina da estrarre. Se non valorizzato si intende pari a 1</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="NroRecordInPagina" type="xs:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Indica la dimensione (n.ro di record) della pagina da estrarre. Se non indicata viene settata pari ad una dimensione di default</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="TrovaDocFolder">
+		<xs:annotation>
+			<xs:documentation>ROOT element dello schema. Contiene i filtri di ricerca e l'indicazione se il risultato va paginato o meno</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<!-- ATTENZIONE: dei due elementi successivi almeno uno deve essere valorizzato -->
+				<xs:element name="FiltriPrincipali" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="TipoOggettiDaCercare" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Serve a restringere la ricerca ai soli documenti o ai soli folder</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:pattern value="D"/>
+										<xs:pattern value="F"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:sequence minOccurs="0">
+								<xs:element name="CercaInVistaUtente" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Vista utente in cui ricercare (BOZZE, PREFERITI, INVIATI, ELIMINATI, NEWS, WORK)</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:pattern value="BOZZE"/>
+											<xs:pattern value="PREFERITI"/>
+											<xs:pattern value="INVIATI"/>
+											<xs:pattern value="ELIMINATI"/>
+											<xs:pattern value="NEWS"/>
+											<xs:pattern value="WORK"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="CercaInFolder" minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>Folder a cui devono appartenere i documenti e/o folder da cercare</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="EstremiXIdentificazioneFolderType">
+												<xs:sequence>
+													<xs:element name="IncludiSubFolder" type="FlagSiNoType" default="1">
+														<xs:annotation>
+															<xs:documentation>Indica che la ricerca va estesa ai sub-folder di quello indicato</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+							<xs:element name="SoloRecenti" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Serve a restringere la ricerca ai documenti e folder lavorati di recente dall'utente (valore L) o visionati o lavorati di recente (valore V) o con file scaricati di recente (=D)</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:pattern value="V"/>
+										<xs:pattern value="L"/>
+										<xs:pattern value="D"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="SoloDaLeggere" fixed="1" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Serve, quando si cerca nelle NEWS dell'utente,  a restringere la ricerca ai documenti e folder non ancora letti, ovvero notificati/assegnati successivamente all'ultima presa viosione da parte dell'utente connesso</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="FiltroFullText" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Contienele informazioni per effettuare la ricerca full-text sugli attributi indicizzati dal motore di ricerca esterno </xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ListaParole" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>Lista di parole da ricercare</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="FlagTutteLeParole" type="FlagSiNoType">
+											<xs:annotation>
+												<xs:documentation>Indica se gli oggetti da trovare devono contenere tutte le parole specificate in ListaParole (AND quando vale 1) o almeno una (OR quando vale 0)</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="LimitaRiceraAdAttributo" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Nomi degli attributi indicizzati a cui si vuole restringere la ricerca full-text. Se nessuno è specificato il motore cerca su tutti gli attributi indicizzati. L'attributo #FILE indica il contenuto dei file elettronici indicizzati associati ai documenti.</xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:pattern value="#FILE"/>
+													<xs:pattern value="NOME"/>
+													<xs:pattern value="NOMINATIVI_ESTERNI"/>
+													<xs:pattern value="PAROLE_CHIAVE"/>
+													<xs:pattern value="DES_OGG"/>
+													<xs:pattern value="FILENAME"/>
+													<xs:pattern value="NOTE"/>
+													<xs:pattern value="ESTREMI_REG_NUM"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="FiltriAvanzati" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="NewsConNotificheCondivisione" type="FlagSiNoType" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Serve, quando si cerca nelle NEWS dell'utente,  a restringere la ricerca ai documenti e folder con notifiche di condivisione per l'utente connesso (se 1) o ad ignorare i documenti e folder che sono nelle news solo perchè vi sono notifiche di condivisione (se =0)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="NewsConNotificheAutomatiche" type="FlagSiNoType" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Serve, quando si cerca nelle NEWS dell'utente,  a restringere la ricerca ai documenti e folder con alert - generati in automatiico dal sistema - per l'utente connesso  (se 1) o ad ignorare i documenti e folder che sono nelle news solo perchè vi sono alert  generati in automatiico dal sistema (se =0)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="NewsConOsservazioni" type="FlagSiNoType" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Serve, quando si cerca nelle NEWS dell'utente,  a restringere la ricerca ai documenti e folder con osservazioni per l'utente connesso (se 1) o ad ignorare i documenti e folder che sono nelle news solo perchè vi sono osservazioni (se =0)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="TipoDocumento" type="OggDiTabDiSistemaType" minOccurs="0"/>
+							<xs:element name="TipoFolder" type="OggDiTabDiSistemaType" minOccurs="0"/>
+							<xs:element name="StatoDocumento" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="StatoPrincipale" type="OggDiTabDiSistemaType" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Stato/i principali che devono avere i documenti da ricercare (codici e valori da apposita dictionary entry)</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="StatoDettaglio" type="OggDiTabDiSistemaType" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Stato/i di dettaglio che devono avere i documenti da ricercare (codici e valori da apposita dictionary entry)</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="StatoFolder" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="StatoPrincipale" type="OggDiTabDiSistemaType" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Stato/i principali che devono avere i folder da ricercare (codici e valori da apposita dictionary entry)</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="StatoDettaglio" type="OggDiTabDiSistemaType" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Stato/i di dettaglio che devono avere i folder da ricercare (codici e valori da apposita dictionary entry)</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="DataAggiornamentoStatoDa" type="xs:date" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Inizio intervallo di ricerca sulla data in cui è stato settato lo stato attuale del documento/folder</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="DataAggiornamentoStatoA" type="xs:date" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Fine intervallo di ricerca sulla data in cui è stato settato lo stato attuale del documento/folder</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="SoloConLock" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Serve a restringere la ricerca ai soli documenti e folder con lock attivo (si intende solo un lock diretto, non su un folder/workspace contenitore)</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence minOccurs="0">
+										<xs:choice minOccurs="0">
+											<xs:element name="DaUtenteConnesso" fixed="1" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Serve a restringere la ricerca si soli documenti e folder con lock messo dall'utente connesso che invoca il web service</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+											<xs:element name="DaAltroUtente" type="UserType" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Serve a restringere la ricerca si soli documenti e folder con lock messo dall'utente i cui estremi sono specificati in questo tag</xs:documentation>
+												</xs:annotation>
+											</xs:element>
+										</xs:choice>
+										<xs:element name="DaAlmenoGiorni" type="xs:positiveInteger" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Serve a restringere la ricerca si soli documenti e folder con lock messo da un n.ro di giorni maggiore o uguale a quello qui specificato</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ApplicazionePropietaria" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Serve a restringere la ricerca ai soli documenti e folder caricati dalla data applicazione esterna o sua specifica istanza</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="CodApplicazione" type="xs:string" default="#BY_CONN_TKN">
+											<xs:annotation>
+												<xs:documentation>Codice dell'applicazione esterna da cui devono essere stati caricati i documenti e folder. Se pari a #BY_CONN_TKN si intende l'applicazione da cui si è loggato chi invoca il web service</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="CodIstanzaApplicazione" type="xs:string" default="#BY_CONN_TKN" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Codice dell'istanza di applicazione esterna da cui devono essere stati caricati i documenti e folder. Se pari a #BY_CONN_TKN si intende l'istanza di applicazione da cui si è loggato chi invoca il web service</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="RegistrazioneDoc" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Filtro sugli estremi di registrazione/numerazione dei documenti</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="CategoriaReg" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Categoria di registrazione / numerazione; valori ammessi PG=Protocollo Generale; PP=Protocollo Particolare; R=Repertorio; E=Registrazione d'emergenza; A=Altro</xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="PG"/>
+													<xs:enumeration value="PP"/>
+													<xs:enumeration value="R"/>
+													<xs:enumeration value="E"/>
+													<xs:enumeration value="A"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+										<xs:element name="SiglaReg" type="SiglaRegNumType" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Sigla che identifica il registro/tipo di numerazione</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="AnnoReg" type="AnnoType" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Anno di registrazione</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="NumRegDa" type="NumRegType" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Inizio intervallo di ricerca sul n.ro di registrazione</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="NumRegA" type="NumRegType" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Fine intervallo di ricerca sul n.ro di registrazione</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="DataRegDa" type="xs:date" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Inizio intervallo di ricerca sulla data di registrazione/numerazione</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="DataRegA" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Fine intervallo di ricerca sulla data di registrazione/numerazione</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="RuoloUtenteVsDocFolder" type="OggDiTabDiSistemaType" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Ruolo che l'utente connesso deve  avere rispetto ai documenti e/o folder da ricercare</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="AttributoAdd" type="CriterioRicercaSuAttributoAddType" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Criteri di ricerca sugli attributi custom di folder e documenti, tra cui ad esempio quelli specifici della data tipologia di documento/ folder. Se sono più di uno vengono applicati in AND. I criteri possono essere relativi solo agli attributi non strutturati.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<!-- i 5 elementi seguenti sono relativi al documento primario dell'unità documentaria-->
+				<!-- documenti allegati (con o senza file associato) -->
+				<!-- l'emento successivo serve ad indicare qual è l'unità documentaria precedente a quella da caricare (ad esempio quella di cui quella da caricare è la risposta) -->
+				<xs:element name="LimitaEstrazioneAlCampo" type="xs:positiveInteger" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>N.ro di un campo del resultset da estarre per i documenti e folder trovati. Se nessun campo è specificato vengono estratti tutti quelli disponibili. Per i valori possibili dei campi e relativi significati si veda la documentazione dei Web Service</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="EstraiAncheAttributoCustom" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Nome identificativo (ATTR_NAME) di un attributo custom semplice (cioè non strutturato) che si vuole venga restituito nel resultset: il suo valore verrà restituito nella colonna 100+i del resultset, dove i è il n.ro con cui l'attributo è specificato in questo xml (101-esima colonna il 1° attributo custom indicato, 102-esima il 2° ecc). Se l'attributo ha più valori i vari valori vengono restituiti tutti nella colonna 100+i del resultset, separati da |*|</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Ordinamento" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Contiene indicazioni sui campi per cui ordinare e sul relativo verso di ordinamento (crescente o decrescente)</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="PerCampo" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>N.ro di un campo del resultset per cui ordinare. Per i valori possibili dei campi e relativi significati si veda la documentazione dei Web Service</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:simpleContent>
+										<xs:extension base="xs:positiveInteger">
+											<xs:attribute name="VersoDecrescente" fixed="1">
+												<xs:annotation>
+													<xs:documentation>Indica se l'ordinamento per il campo deve essere decrescente anzichè crescente</xs:documentation>
+												</xs:annotation>
+											</xs:attribute>
+										</xs:extension>
+									</xs:simpleContent>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="EstrazionePaginata" type="PaginazioneType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Se presente il tag, allora l'estrazione è paginata, ovvero ogni chiamata al Web Service permette di estrarre un set-pagina di record che soddisfano i filtri.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Off-line" type="xs:int" fixed="1" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Se 1 indica che il We Service serve per un'estrazione dati off-line anzichè on-line per cui il limite massimo di record estraibili viene settato ad un valore più alto</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

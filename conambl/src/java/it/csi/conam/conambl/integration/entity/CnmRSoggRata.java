@@ -53,7 +53,7 @@ public class CnmRSoggRata extends CnmRTCommons {
 	}
 
 	public void setId(CnmRSoggRataPK id) {
-		this.setId(id);
+		this.id = id;
 	}
 
 	public CnmDStatoRata getCnmDStatoRata() {

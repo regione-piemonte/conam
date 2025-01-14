@@ -48,6 +48,11 @@ public class SollecitoVO extends ParentVO {
 	private LocalDate dataFineValidita;
 	private TipoSollecitoVO tipoSollecito;
 	
+	//E14 20240724 Pasqualini Genco
+	private String reversaledOrdine;
+	private String pagatore;
+	private String note;	
+	
 	
 
 	public String getImportoSollecitatoString() {
@@ -200,6 +205,30 @@ public class SollecitoVO extends ParentVO {
 
 	public void setTipoSollecito(TipoSollecitoVO tipoSollecito) {
 		this.tipoSollecito = tipoSollecito;
+	}
+
+	public String getPagatore() {
+		return pagatore;
+	}
+
+	public void setPagatore(String pagatore) {
+		this.pagatore = pagatore;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+	}
+
+	public String getReversaledOrdine() {
+		return reversaledOrdine;
+	}
+
+	public void setReversaledOrdine(String reversaledOrdine) {
+		this.reversaledOrdine = reversaledOrdine;
 	}
 	
 	

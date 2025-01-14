@@ -25,6 +25,7 @@ import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Paolo Piedeplaumbo
@@ -62,7 +63,7 @@ public interface VerbalePregressiDispatcher {
 	List<IstruttoreVO> getIstruttoreByVerbale(Integer idEnte, UserDetails userDetails);
 	
 	@PreAuthorize(value = AuthorizationRoles.INSERIMENTO_PREGRESSI)
-	AllegatoVO salvaAllegato(List<InputPart> list, List<InputPart> list2, UserDetails userDetails);
+	AllegatoVO salvaAllegato(List<InputPart> list, List<InputPart> list2, Map<String, List<InputPart>> map, UserDetails userDetails);
 
 	@PreAuthorize(value = AuthorizationRoles.INSERIMENTO_PREGRESSI)
 	AllegatoVO salvaAllegatiMultipli(List<InputPart> data, List<InputPart> file, UserDetails userDetails);

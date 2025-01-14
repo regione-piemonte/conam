@@ -125,6 +125,7 @@ public class SoggettoServiceImpl implements SoggettoService {
 			soggetto.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue()-cnmRVerbaleSoggetto.getImportoPagato().doubleValue());
 			soggetto.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(cnmRVerbaleSoggetto.getCnmDRuoloSoggetto()));
 			soggetto.setIdSoggettoVerbale(cnmRVerbaleSoggetto.getIdVerbaleSoggetto());
+			soggetto.setNoteSoggetto(cnmRVerbaleSoggetto.getNote());
 		}
 		soggetto = commonSoggettoService.attachResidenzaPregressi(soggetto, cnmTSoggetto, idVerbale);
 		soggetto = attachDatiRelataNotifica(soggetto, cnmTSoggetto, idVerbale);

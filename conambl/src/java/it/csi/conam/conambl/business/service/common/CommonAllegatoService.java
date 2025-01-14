@@ -4,19 +4,30 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.common;
 
+import java.util.List;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+
 import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.integration.beans.ResponseProtocollaDocumento;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
+import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.request.ParentRequest;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
+import it.csi.conam.conambl.response.RicercaDocumentiStiloResponse;
 import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
+import it.csi.conam.conambl.vo.CampiRicercaFormVO;
 import it.csi.conam.conambl.vo.common.SelectVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
 import it.csi.conam.conambl.vo.verbale.allegato.ConfigAllegatoVO;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-
-import java.util.List;
+import it.csi.conam.conambl.vo.verbale.allegato.DettaglioAllegatoFieldVO;
 
 public interface CommonAllegatoService {
 
@@ -42,7 +53,9 @@ public interface CommonAllegatoService {
 
 	CnmTAllegato salvaAllegato(byte[] file, String filename, Long idTipoAllegato, List<AllegatoFieldVO> configAllegato, CnmTUser cnmTUser, TipoProtocolloAllegato tipoProtocolloAllegato, String folder,
 			String idEntitaFruitore, boolean isMaster, boolean protocollazioneInUscita, String soggettoActa, String rootActa, int numeroAllegati, Integer idVerbaleAudizione, String tipoActa,
-			List<CnmTSoggetto> cnmTSoggettoList);
+			List<CnmTSoggetto> cnmTSoggettoList, String idArchivioPadre, 
+			String oggetto,
+			String origine, Integer numAllegati);
 	
 	// 20200903_LC gestione pregresso (nuova response)
 	//20220321_SB modifica per gestione della paginazione nella ricerca
@@ -79,8 +92,13 @@ public interface CommonAllegatoService {
 	// Per implementazione CR Jira_92 (riportare su allegati al master il numero di protocollo)
 	public ResponseProtocollaDocumento avviaProtocollazioneDocumentoEsistente(CnmTAllegato cnmTAllegato, CnmTUser cnmTUser, List<CnmTSoggetto> cnmTSoggettoList, boolean protocollazioneInUscita);
 	
-	
-	
-	
+	//E19_2022 - OBI45
+	RicercaDocumentiStiloResponse ricercaDocumentiSuStilo(CampiRicercaFormVO input, Integer pageRequest, Integer maxLineRequest);
+		
+	List<ConfigAllegatoVO> getConfigAllegatiRicerca(Long idRicerca);
+
+	DettaglioAllegatoFieldVO getDettaglioFieldsByIdAllegato(Long idAllegato);
+
+
 	
 }

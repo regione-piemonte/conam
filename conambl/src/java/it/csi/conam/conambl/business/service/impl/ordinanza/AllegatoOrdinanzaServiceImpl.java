@@ -5,12 +5,23 @@
 package it.csi.conam.conambl.business.service.impl.ordinanza;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +38,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import it.csi.conam.conambl.business.facade.EPayServiceFacade;
 import it.csi.conam.conambl.business.facade.StadocServiceFacade;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.common.CommonBollettiniService;
@@ -46,6 +56,7 @@ import it.csi.conam.conambl.common.TipoAllegato;
 import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BollettinoException;
 import it.csi.conam.conambl.common.exception.BusinessException;
+import it.csi.conam.conambl.integration.doqui.DoquiConstants;
 import it.csi.conam.conambl.integration.entity.CnmCParametro;
 import it.csi.conam.conambl.integration.entity.CnmDElementoElenco;
 import it.csi.conam.conambl.integration.entity.CnmDMessaggio;
@@ -66,11 +77,15 @@ import it.csi.conam.conambl.integration.entity.CnmTOrdinanza;
 import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
+import it.csi.conam.conambl.integration.epay.rest.mapper.RestModelMapper;
+import it.csi.conam.conambl.integration.epay.rest.model.DebtPositionData;
+import it.csi.conam.conambl.integration.epay.rest.model.DebtPositionReference;
+import it.csi.conam.conambl.integration.epay.rest.util.RestUtils;
 import it.csi.conam.conambl.integration.mapper.entity.AllegatoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.TipoAllegatoEntityMapper;
-import it.csi.conam.conambl.integration.mapper.ws.epay.EPayWsInputMapper;
 import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmCProprietaRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDElementoElencoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDMessaggioRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
@@ -109,6 +124,8 @@ import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoMultiploVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
+
+
 
 /**
  * @author riccardo.bova
@@ -152,10 +169,10 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 	private CnmTAllegatoFieldRepository cnmTAllegatoFieldRepository;
 	@Autowired
 	private CommonBollettiniService commonBollettiniService;
-	@Autowired
-	private EPayServiceFacade ePayServiceFacade;
-	@Autowired
-	private EPayWsInputMapper ePayWsInputMapper;
+//	@Autowired
+//	private EPayServiceFacade ePayServiceFacade;
+//	@Autowired
+//	private EPayWsInputMapper ePayWsInputMapper;
 	@Autowired
 	private CnmCParametroRepository cnmCParametroRepository;
 	@Autowired
@@ -178,9 +195,17 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 	private OrdinanzaService ordinanzaService;
 	@Autowired
 	private CnmDMessaggioRepository cnmDMessaggioRepository;
-
+	@Autowired
+	private CnmCProprietaRepository cnmCProprietaRepository;
 	@Autowired
 	private CommonSoggettoService commonSoggettoService;
+
+	@Autowired
+	private RestUtils restUtils;
+	@Autowired
+	private RestModelMapper restModelMapper;
+	
+	private static String CODMESS_NEWLETTERA= "NEWLET-";
 
 	private static final Logger logger = Logger.getLogger(AllegatoOrdinanzaServiceImpl.class);
 
@@ -339,7 +364,20 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 						Constants.ID_UTILIZZO_ALLEGATO_ORDINANZA_SOGGETTO, // utilizzo
 						null, // stato verbale
 						cnmTOrdinanza.getCnmDStatoOrdinanza() // stato ordinanza
-				)));
+				)));  // se listAllegabili.size()>0 allora non è stato inserito alcun allegato all'ordinanza di tipo "tipoDocumento"
+		
+		if(listAllegabili!=null && listAllegabili.size()>0) {
+			if(StringUtils.equals(tipoDocumento, TipoAllegato.RICEVUTA_PAGAMENTO_ORDINANZA.getTipoDocumento())) {
+				//se doc è di tipo RICPAGORD e la listaAllegabili ha almeno un elemento faccio inserire anche la prova
+				TipoAllegatoVO tipoAllegatoVO = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.PROVA_PAGAMENTO_ORDINANZA.getId())); 
+				listAllegabili.add(tipoAllegatoVO);
+			}else if(StringUtils.equals(tipoDocumento, TipoAllegato.PROVA_PAGAMENTO_ORDINANZA.getTipoDocumento())) {
+				TipoAllegatoVO tipoAllegatoVO = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RICEVUTA_PAGAMENTO_ORDINANZA.getId())); 
+				listAllegabili.add(tipoAllegatoVO);
+			}
+		
+			
+		}
 
 		if (tipoDocumento != null && tipoDocumento.equals(TipoAllegato.ISTANZA_RATEIZZAZIONE.getTipoDocumento())
 				&& aggiungiCategoriaEmail) {
@@ -391,7 +429,6 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 			listAllegabili.add(tipoAllegatoEntityMapper
 					.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.ISTANZA_ALLEGATO.getId())));
 		}
-
 		return listAllegabili;
 	}
 
@@ -480,7 +517,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 			throw new SecurityException("cnmROrdinanzaVerbSog non trovato");
 
 		// caso file fittizio
-		if (fileName == null) {
+		if (fileName == null){// && byteFile == null) {
 			String s = "";
 			for (AllegatoFieldVO all : configAllegato) {
 				if (all.getFieldType().getId() == Constants.FIELD_TYPE_BOOLEAN) {
@@ -534,7 +571,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 							cnmDTipoAllegatoRepository.findOne(idTipoAllegato)),
 					false, protocollazioneUscita, //
 					utilsDoqui.getSoggettoActa(cnmROrdinanzaVerbSogList.get(0)), //
-					utilsDoqui.getRootActa(cnmROrdinanzaVerbSogList.get(0)), 0, 0, null, null);
+					utilsDoqui.getRootActa(cnmROrdinanzaVerbSogList.get(0)), 0, 0, null, null, null, null, null, null);
 		} else {
 			List<CnmTSoggetto> cnmTSoggettoList = null;
 			if (cnmROrdinanzaVerbSogList == null || cnmROrdinanzaVerbSogList.size() == 0) {
@@ -556,7 +593,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 					false, protocollazioneUscita, //
 					utilsDoqui.getSoggettoActa(cnmROrdinanzaVerbSogList.get(0)), //
 					utilsDoqui.getRootActa(cnmROrdinanzaVerbSogList.get(0)), 0, 0,
-					StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, cnmTSoggettoList);
+					StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, cnmTSoggettoList, null, null, null, null);
 		}
 
 		if (pregresso) {
@@ -599,18 +636,24 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 						throw new RuntimeException("Lo stato ordinanza verbale soggetto non esiste sul db");
 				}
 			}
-			if (TipoAllegato.RICEVUTA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato()
-					.getIdTipoAllegato()) {
+			
+			CnmTAllegatoField dataPagamento = null;
+			CnmTAllegatoField importoPagato=null;
+			
+			if (TipoAllegato.RICEVUTA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato()) {
 				List<CnmTAllegatoField> cnmTAllegatoFieldList = cnmTAllegatoFieldRepository
 						.findByCnmTAllegato(cnmTAllegato);
-				CnmTAllegatoField dataPagamento = Iterables.tryFind(cnmTAllegatoFieldList,
+				dataPagamento = Iterables.tryFind(cnmTAllegatoFieldList,
 						UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(
 								Constants.ID_FIELD_DATA_PAGAMENTO_RICEVUTA_ORDINANZA))
 						.orNull();
-				CnmTAllegatoField importoPagato = Iterables.tryFind(cnmTAllegatoFieldList,
+				importoPagato= Iterables.tryFind(cnmTAllegatoFieldList,
 						UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(
 								Constants.ID_FIELD_IMPORTO_PAGATO_RICEVUTA_ORDINANZA))
 						.orNull();
+			}			
+			
+			if (TipoAllegato.RICEVUTA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() 	) {
 				if (importoPagato != null)
 					cnmROrdinanzaVerbSog.setImportoPagato(importoPagato.getValoreNumber() != null
 							? importoPagato.getValoreNumber().setScale(2, RoundingMode.HALF_UP)
@@ -625,6 +668,38 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 				if (!pregresso)
 					statoPagamentoOrdinanzaService.verificaTerminePagamentoOrdinanza(cnmROrdinanzaVerbSog, cnmTUser);
 			}
+			
+			if (TipoAllegato.PROVA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato()) {
+				List<CnmTAllegatoField> cnmTAllegatoFieldList = cnmTAllegatoFieldRepository
+						.findByCnmTAllegato(cnmTAllegato);
+				dataPagamento = Iterables.tryFind(cnmTAllegatoFieldList,
+						UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(
+								Constants.ID_FIELD_DATA_PAGAMENTO_PROVA_ORDINANZA))
+						.orNull();
+				importoPagato= Iterables.tryFind(cnmTAllegatoFieldList,
+						UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(
+								Constants.ID_FIELD_IMPORTO_PAGATO_PROVA_ORDINANZA))
+						.orNull();
+			}			
+			
+			//System.out.println("CMTALLEGATO "+cnmTAllegato.getCnmDTipoAllegato());
+			
+			if (TipoAllegato.PROVA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() 	) {
+				if (importoPagato != null)
+					cnmROrdinanzaVerbSog.setImportoPagato(importoPagato.getValoreNumber() != null
+							? importoPagato.getValoreNumber().setScale(2, RoundingMode.HALF_UP)
+							: null);
+				if (dataPagamento != null)
+					cnmROrdinanzaVerbSog.setDataPagamento(dataPagamento.getValoreData());
+				cnmROrdinanzaVerbSog.setCnmDStatoOrdVerbSog(
+						cnmDStatoOrdVerbSogRepository.findOne(Constants.ID_STATO_ORDINANZA_VERB_SOGG_PAGATO_OFFLINE));
+				cnmROrdinanzaVerbSog.setCnmTUser1(cnmTUser);
+				cnmROrdinanzaVerbSog.setDataOraUpdate(utilsDate.asTimeStamp(LocalDateTime.now()));
+				cnmROrdinanzaVerbSog = cnmROrdinanzaVerbSogRepository.save(cnmROrdinanzaVerbSog);
+				if (!pregresso)
+					statoPagamentoOrdinanzaService.verificaTerminePagamentoOrdinanza(cnmROrdinanzaVerbSog, cnmTUser);
+			}
+			
 			CnmRAllegatoOrdVerbSog cnmRAllegatoOrdVerbSog = new CnmRAllegatoOrdVerbSog();
 			CnmRAllegatoOrdVerbSogPK cnmRAllegatoOrdVerbSogPK = new CnmRAllegatoOrdVerbSogPK();
 			cnmRAllegatoOrdVerbSogPK.setIdAllegato(cnmTAllegato.getIdAllegato());
@@ -879,8 +954,9 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 			}
 
 		}
-
-		return eliminaDuplicati(finalAllegatiList);
+		finalAllegatiList = eliminaDuplicati(finalAllegatiList);
+		Collections.sort(finalAllegatiList);//, AllegatoVO.Comparators.DATA_CARICAMENTO);
+		return finalAllegatiList;
 	}
 
 	// 20210524_LC lotto2scenario6
@@ -922,7 +998,6 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 			}
 
 		}
-
 		return eliminaDuplicati(finalAllegatiList);
 	}
 
@@ -964,7 +1039,9 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		if (cnmTOrdinanza == null)
 			throw new IllegalArgumentException("cnmTOrdinanza ==null");
 
-		if (isLetteraOrdinanzaCreata(cnmTOrdinanza))
+		//E16_2023 - OBI38
+		long idTipoOrdinanza = cnmTOrdinanza.getCnmDTipoOrdinanza().getIdTipoOrdinanza();
+		if(idTipoOrdinanza != Constants.ID_TIPO_ORDINANZA_INGIUNZIONE && isLetteraOrdinanzaCreata(cnmTOrdinanza))
 			throw new SecurityException("lettera ordinanza esistente");
 
 		CnmTUser cnmTUser = cnmTUserRepository.findOne(user.getIdUser());
@@ -980,18 +1057,92 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		CnmDStatoAllegato cnmDStatoAllegato = cnmDStatoAllegatoRepository.findOne(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA);
 		for (CnmRAllegatoOrdinanza cnmRAllegatoOrdinanza : cnmRAllegatoOrdinanzaList) {
 			CnmTAllegato cnmTAllegatoT = cnmRAllegatoOrdinanza.getCnmTAllegato();
-			boolean letteraOrdinanza = cnmTAllegatoT.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_ORDINANZA.getId();
-			boolean statoDaProtocollareInIstanteSuccessivo = cnmTAllegatoT.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO;
-			if (!letteraOrdinanza && statoDaProtocollareInIstanteSuccessivo) {
-				cnmTAllegatoT.setDataOraUpdate(utilsDate.asTimeStamp(LocalDateTime.now()));
-				cnmTAllegatoT.setCnmDStatoAllegato(cnmDStatoAllegato);
-				cnmTAllegatoList.add(cnmTAllegatoT);
+			if(cnmTAllegatoT!=null) {
+				boolean letteraOrdinanza = cnmTAllegatoT.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_ORDINANZA.getId();
+				boolean statoDaProtocollareInIstanteSuccessivo = cnmTAllegatoT.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO;
+				if (!letteraOrdinanza && statoDaProtocollareInIstanteSuccessivo) {
+					cnmTAllegatoT.setDataOraUpdate(utilsDate.asTimeStamp(LocalDateTime.now()));
+					cnmTAllegatoT.setCnmDStatoAllegato(cnmDStatoAllegato);
+					cnmTAllegatoList.add(cnmTAllegatoT);
+				}
 			}
 		}
 
 		cnmTAllegatoList.add(cnmTAllegatoMaster);
 		cnmTAllegatoList = (List<CnmTAllegato>) cnmTAllegatoRepository.save(cnmTAllegatoList);
+			
+		
 
+		// E16_2023 - se esiste già uan lettera protocollata, recupero anche l'ordinanza e la salvo per associarla alla nuova lettera
+		if(idTipoOrdinanza == Constants.ID_TIPO_ORDINANZA_INGIUNZIONE) {
+			
+			boolean isfirst = true;
+			for (CnmRAllegatoOrdinanza cnmRAllegatoOrdinanza : cnmRAllegatoOrdinanzaList) {
+				CnmTAllegato cnmTAllegatoT = cnmRAllegatoOrdinanza.getCnmTAllegato();
+				if (cnmTAllegatoT.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_ORDINANZA.getId() 
+						&& cnmTAllegatoT.getNumeroProtocollo() != null) {
+					isfirst = false;
+					break;
+				}
+			}
+			
+			if(!isfirst) {
+				// cerco l'ordinanaza per recuperare il file da acta
+				Integer idAllegatoOrdinanaza = null;
+				for (CnmRAllegatoOrdinanza cnmRAllegatoOrdinanza : cnmRAllegatoOrdinanzaList) {
+					CnmTAllegato cnmTAllegatoT = cnmRAllegatoOrdinanza.getCnmTAllegato();
+					if (cnmTAllegatoT.getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO.getId() ) {
+						idAllegatoOrdinanaza = cnmTAllegatoT.getIdAllegato();
+					}
+				}
+				if(idAllegatoOrdinanaza != null) {
+					// recupero il file da Acta
+					List<DocumentoScaricatoVO> doc = commonAllegatoService.downloadAllegatoById(idAllegatoOrdinanaza);
+					
+					CnmTUser cnmTUserSys = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(DoquiConstants.USER_SCHEDULED_TASK);
+
+					// salvo allegato
+					CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(
+						doc.get(0).getFile(),
+						doc.get(0).getNomeFile(),
+						TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO.getId(),
+						null,//configAllegato,
+						cnmTOrdinanza.getCnmTUser2(), // task 72 - imposto utente creatore ordinanza
+						TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO,
+						null,
+						null,
+						false,
+						true,
+						null,
+						null,
+						0,
+						null,
+						null,
+						null,
+						null, null, null, null
+					);
+					
+					
+					// salvo relazione allegato ordinanza
+					CnmRAllegatoOrdinanza cnmRAllegatoOrdinanza = new CnmRAllegatoOrdinanza();
+					CnmRAllegatoOrdinanzaPK cnmRAllegatoOrdinanzaPK = new CnmRAllegatoOrdinanzaPK();
+					cnmRAllegatoOrdinanzaPK.setIdAllegato(cnmTAllegato.getIdAllegato());
+					cnmRAllegatoOrdinanzaPK.setIdOrdinanza(cnmTOrdinanza.getIdOrdinanza());
+					cnmRAllegatoOrdinanza.setCnmTUser(cnmTUser);
+					cnmRAllegatoOrdinanza.setDataOraInsert(new Timestamp(new Date().getTime()));
+					cnmRAllegatoOrdinanza.setId(cnmRAllegatoOrdinanzaPK);
+					cnmRAllegatoOrdinanzaRepository.save(cnmRAllegatoOrdinanza);
+					
+
+					CnmDStatoAllegato cnmDStatoAllegatoOrd = cnmDStatoAllegatoRepository.findOne(Constants.STATO_AVVIA_SPOSTAMENTO_ACTA);
+					cnmTAllegato.setCnmDStatoAllegato(cnmDStatoAllegatoOrd);
+					cnmTAllegatoRepository.save(cnmTAllegato);
+					
+					
+				}
+			}
+		}
+		
 		return Iterables
 				.tryFind(cnmTAllegatoList,
 						UtilsTipoAllegato.findCnmTAllegatoInCnmTAllegatosByTipoAllegato(TipoAllegato.LETTERA_ORDINANZA))
@@ -1020,7 +1171,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 				tipoAllegato.getId() == TipoAllegato.DISPOSIZIONE_DEL_GIUDICE.getId()) {
 			tipoActa = StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI;
 
-			// TODO OB-181 - Aggiungere anche LETTERA_SOLLECITO e LETTERA_SOLLECITO_RATE
+			// OB-181 - Aggiungere anche LETTERA_SOLLECITO e LETTERA_SOLLECITO_RATE
 			// poiche dovranno essere gestite sul batch, da protocollare con bollettino
 		} else if (tipoAllegato.getId() == TipoAllegato.LETTERA_ORDINANZA.getId()) {
 			tipoActa = StadocServiceFacade.TIPOLOGIA_DOC_ACTA_MASTER_USCITA_CON_ALLEGATI;
@@ -1057,21 +1208,25 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 			// 20210831 PP - CR_107 non devo protoollare il master se è LETTERA_ORDINANZA,
 			// poichè sarà fatto dal batch dopo aver aggiunto gli allegati
 
-			// TODO OB-181 - Aggiungere anche LETTERA_SOLLECITO e LETTERA_SOLLECITO_RATE
+			// OB-181 - Aggiungere anche LETTERA_SOLLECITO e LETTERA_SOLLECITO_RATE
 			// poiche dovranno essere gestite sul batch, da protocollare con bollettino
 			if (tipoAllegato.getId() == TipoAllegato.LETTERA_ORDINANZA.getId()) {
+				if(!StringUtils.isEmpty(cnmTOrdinanza.getCodMessaggioEpay())) {
+					cnmTOrdinanza.setCodMessaggioEpay(CODMESS_NEWLETTERA + cnmTOrdinanza.getCodMessaggioEpay());
+					cnmTOrdinanzaRepository.save(cnmTOrdinanza);
+				}
 				tipoProtocolloAllegato = TipoProtocolloAllegato.SALVA_MULTI_SENZA_PROTOCOLARE;
 			} 
 
 			cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), configAllegato,
 					cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster, isProtocollazioneInUscita,
-					soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList);
+					soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList, null, null, null, null);
 
 			
 		} else {
 			cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), configAllegato,
 					cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster, isProtocollazioneInUscita,
-					soggettoActa, rootActa, 0, 0, tipoActa, null);
+					soggettoActa, rootActa, 0, 0, tipoActa, null, null, null, null, null);
 			
 			if (tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO.getId()) {
 				// imposto lo stato del bollettino a STATO_AVVIA_SPOSTAMENTO_ACTA, in modo che venga preso in cariso dallo schedulatore
@@ -1099,44 +1254,107 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 	@Transactional
 	@Override
 	public void inviaRichiestaBollettiniByIdOrdinanza(Integer idOrdinanza) {
+	    if (idOrdinanza == null)
+	        throw new IllegalArgumentException("id ==null");
+	    CnmTOrdinanza cnmTOrdinanza = cnmTOrdinanzaRepository.findOne(idOrdinanza);
+	    if (cnmTOrdinanza == null)
+	        throw new IllegalArgumentException("cnmTOrdinanza ==null");
+
+	    List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository
+	            .findByCnmTOrdinanza(cnmTOrdinanza);
+
+	    List<CnmROrdinanzaVerbSog> soggettiBollettini = new ArrayList<>();
+	    for (CnmROrdinanzaVerbSog c : cnmROrdinanzaVerbSogList) {
+	        if (c.getCnmDStatoOrdVerbSog()
+	                .getIdStatoOrdVerbSog() != Constants.ID_STATO_ORDINANZA_VERB_SOGG_ARCHIVIATO) {
+	            CnmTSoggetto cnmTSoggetto = c.getCnmRVerbaleSoggetto().getCnmTSoggetto();
+	            String codiceFiscale = StringUtils.defaultString(cnmTSoggetto.getCodiceFiscale(),
+	                    cnmTSoggetto.getCodiceFiscaleGiuridico());
+	            String piva = cnmTSoggetto.getPartitaIva();
+	            c.setCodPosizioneDebitoria(commonBollettiniService.generaCodicePosizioneDebitoria(
+	                    StringUtils.defaultString(codiceFiscale, piva), BigDecimal.ONE, Constants.CODICE_ORDINANZA));
+	            soggettiBollettini.add(c);
+	        }
+	    }
+	    soggettiBollettini = (List<CnmROrdinanzaVerbSog>) cnmROrdinanzaVerbSogRepository.save(soggettiBollettini);
+
+	    cnmTOrdinanza.setCodMessaggioEpay(
+	            commonBollettiniService.generaCodiceMessaggioEpay(idOrdinanza, Constants.CODICE_ORDINANZA));
+	    cnmTOrdinanza = cnmTOrdinanzaRepository.save(cnmTOrdinanza);
+
+	    //E10_2024 rimosso il controllo che la data di scadenza debba essere valorizzata:
+	    //if (cnmTOrdinanza.getDataScadenzaOrdinanza() != null) {
+	        List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogListToCreate = new ArrayList<>();
+	        
+	        String uri = cnmCProprietaRepository.findOne(Constants.EPAY_REST_ENDPOINT).getValore(); 
+	        String usr = cnmCProprietaRepository.findOne(Constants.EPAY_REST_USER).getValore(); 
+	        String pass = cnmCProprietaRepository.findOne(Constants.EPAY_REST_PASS).getValore(); 
+	        
+	        CnmCParametro organization = cnmCParametroRepository.findByIdParametro(Constants.ORGANIZATION);
+			CnmCParametro paymentType = cnmCParametroRepository.findByIdParametro(Constants.PAYMENT_TYPE);
+			
+			String url = restUtils.generateUrl(uri, organization.getValoreString(), paymentType.getValoreString());
+			
+	        for (CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog : cnmROrdinanzaVerbSogList) {
+	            DebtPositionData dpd = restModelMapper.mapOrdinanzaToDebtPositionData(cnmROrdinanzaVerbSog);
+	            
+                DebtPositionReference debtPositionReference = restUtils.callCreateDebtPosition(url, dpd, usr, pass);
+            	
+            	if(debtPositionReference.getCodiceEsito().equalsIgnoreCase("000")) {
+ 	                logger.info("Aggiornamento codIuv, codAvviso e codEsitoListaCarico per ordinanzaVerbSog " + cnmROrdinanzaVerbSog.getIdOrdinanzaVerbSog());
+ 	                cnmROrdinanzaVerbSog.setCodIuv(debtPositionReference.getIuv());
+ 	                logger.info("Esito inserimento lista di carico request - COD IUV restituito da Epay: " + debtPositionReference.getIuv());
+ 	                cnmROrdinanzaVerbSog.setCodEsitoListaCarico(debtPositionReference.getCodiceEsito());
+ 	                logger.info("Esito inserimento lista di carico request - codiceEsito restituito da Epay: " + debtPositionReference.getCodiceEsito());
+ 	                cnmROrdinanzaVerbSog.setCodAvviso(debtPositionReference.getCodiceAvviso());
+ 	                logger.info("Esito inserimento lista di carico request - codiceAvviso restituito da Epay: " + debtPositionReference.getCodiceAvviso());
+ 	                cnmROrdinanzaVerbSogListToCreate.add(cnmROrdinanzaVerbSog);
+ 	            } else {
+ 	            	logAndThrowException(url, cnmROrdinanzaVerbSog, debtPositionReference);
+ 	            }
+	            
+	        }
+	        
+	        cnmROrdinanzaVerbSogList = (List<CnmROrdinanzaVerbSog>) cnmROrdinanzaVerbSogRepository.save(cnmROrdinanzaVerbSogList);
+	        if(cnmROrdinanzaVerbSogListToCreate.size() > 0)
+	            creaBollettiniByCnmROrdinanzaVerbSog(cnmROrdinanzaVerbSogListToCreate, false);
+	        
+	        
+	   // }
+
+	}
+	// REQ68
+	private void logAndThrowException(String url, CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog, DebtPositionReference debtPositionReference) throws BusinessException {
+	    logger.error("Chiamata REST url:" + url 
+	    		+ " - DebtPositionData id: " 
+	    		+ debtPositionReference.getIdentificativoPagamento() 
+	    		+ " errore:" + debtPositionReference.getCodiceEsito() + " - " + debtPositionReference.getDescrizioneEsito()
+		);
+	    cnmROrdinanzaVerbSog.setCodEsitoListaCarico(debtPositionReference.getCodiceEsito());
+	    throw new BusinessException(debtPositionReference.getDescrizioneEsito());
+	}
+	
+	
+	@Transactional
+	@Override
+	public void protocollaLetteraSenzaBollettini(Integer idOrdinanza) {
 		if (idOrdinanza == null)
 			throw new IllegalArgumentException("id ==null");
 		CnmTOrdinanza cnmTOrdinanza = cnmTOrdinanzaRepository.findOne(idOrdinanza);
 		if (cnmTOrdinanza == null)
 			throw new IllegalArgumentException("cnmTOrdinanza ==null");
-		if (StringUtils.isNotEmpty(cnmTOrdinanza.getCodMessaggioEpay()))
-			throw new SecurityException("Richiesta dei bollettini effettuata");
 
-		List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository
-				.findByCnmTOrdinanza(cnmTOrdinanza);
+		// OBI36 - verificare come far partire la protocollazione della lettera nello scheduler senza i bollettini
+		// ricreo i bolelttini
 
-		List<CnmROrdinanzaVerbSog> soggettiBollettini = new ArrayList<>();
-		for (CnmROrdinanzaVerbSog c : cnmROrdinanzaVerbSogList) {
-			if (c.getCnmDStatoOrdVerbSog()
-					.getIdStatoOrdVerbSog() != Constants.ID_STATO_ORDINANZA_VERB_SOGG_ARCHIVIATO) {
-				CnmTSoggetto cnmTSoggetto = c.getCnmRVerbaleSoggetto().getCnmTSoggetto();
-				String codiceFiscale = StringUtils.defaultString(cnmTSoggetto.getCodiceFiscale(),
-						cnmTSoggetto.getCodiceFiscaleGiuridico());
-				String piva = cnmTSoggetto.getPartitaIva();
-				c.setCodPosizioneDebitoria(commonBollettiniService.generaCodicePosizioneDebitoria(
-						StringUtils.defaultString(codiceFiscale, piva), BigDecimal.ONE, Constants.CODICE_ORDINANZA));
-				soggettiBollettini.add(c);
-			}
-		}
-
-		soggettiBollettini = (List<CnmROrdinanzaVerbSog>) cnmROrdinanzaVerbSogRepository.save(soggettiBollettini);
-
-		cnmTOrdinanza.setCodMessaggioEpay(
-				commonBollettiniService.generaCodiceMessaggioEpay(idOrdinanza, Constants.CODICE_ORDINANZA));
-		cnmTOrdinanza = cnmTOrdinanzaRepository.save(cnmTOrdinanza);
-
-		if (cnmTOrdinanza.getDataScadenzaOrdinanza() != null)
-			ePayServiceFacade.inserisciListaDiCarico(ePayWsInputMapper.mapRataSoggettiToWsMapper(soggettiBollettini));
+		cnmTOrdinanza.setCodMessaggioEpay(cnmTOrdinanza.getCodMessaggioEpay().replace(CODMESS_NEWLETTERA, ""));
+		cnmTOrdinanzaRepository.save(cnmTOrdinanza);
+		creaBollettiniByCnmROrdinanzaVerbSog(cnmROrdinanzaVerbSogRepository.findByCnmTOrdinanza(cnmTOrdinanza), true);
 
 	}
 
 	@Override
-	public void creaBollettiniByCnmROrdinanzaVerbSog(List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList) {
+	public void creaBollettiniByCnmROrdinanzaVerbSog(List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList, boolean soloLettera) {
 		if (cnmROrdinanzaVerbSogList == null || cnmROrdinanzaVerbSogList.isEmpty())
 			throw new IllegalArgumentException("cnmROrdinanzaVerbSogList is empty");
 
@@ -1152,16 +1370,38 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		String autorizzazione = "";
 		String infoEnte = "";
 		String settoreEnte = "";
+		
+		CnmTOrdinanza cnmTOrdinanza = cnmROrdinanzaVerbSogList.get(0).getCnmTOrdinanza();
+
+		
 		CnmCParametro cnmCParametro = Iterables
 				.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_NUMERO_CONTO_POSTALE))
 				.orNull();
 		if (cnmCParametro != null)
 			numeroContoPostale = cnmCParametro.getValoreString();
+		//E9 REQ5NF recupero valore di: ID_TIPO_OGGETTO_PAGAMENTO_ORDINANZA che indica se mostrare Oggetto pagamento ordinanza o Oggetto pagamento ordinanza variabile.
 		cnmCParametro = Iterables
-				.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_OGGETTO_PAGAMENTO_ORDINANZA))
+				.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_TIPO_OGGETTO_PAGAMENTO_ORDINANZA))
 				.orNull();
-		if (cnmCParametro != null)
-			oggettoPagamento = cnmCParametro.getValoreString();
+		if (cnmCParametro != null) {
+			String descParametro = cnmCParametro.getValoreString();
+			if(Constants.TIPO_OGGETTO_PAGAMENTO_ORDINANZA_FISSO.equals(descParametro)) {
+				cnmCParametro =  Iterables.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_OGGETTO_PAGAMENTO_ORDINANZA)).orNull();
+				if (cnmCParametro != null)
+					oggettoPagamento = cnmCParametro.getValoreString();
+				
+			}else {
+				//assumiamo di default che se non è fisso è variabile
+				//E9 2024 REQ4NF sostituita valorizzazione statico di oggettoPagamento: oggettoPagamento = cnmCParametro.getValoreString();
+				//con campo variabile:
+				cnmCParametro =  Iterables.tryFind(cnmCParametroList, UtilsParametro.findByIdParametro(Constants.ID_OGGETTO_PAGAMENTO_ORDINANZA_VARIABILE)).orNull();
+				if (cnmCParametro != null) {
+					descParametro = cnmCParametro.getValoreString();
+					oggettoPagamento = getCampoOrdinanza(cnmTOrdinanza, descParametro);
+				}
+			
+			}
+		}
 		cnmCParametro = Iterables.tryFind(cnmCParametroList,
 				UtilsParametro.findByIdParametro(Constants.ID_CODICE_FISCALE_ENTE_CREDITORE)).orNull();
 		if (cnmCParametro != null)
@@ -1193,8 +1433,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 
 		List<BollettinoJasper> bollettini = new ArrayList<>();
 
-		CnmTOrdinanza cnmTOrdinanza = cnmROrdinanzaVerbSogList.get(0).getCnmTOrdinanza();
-
+		
 		BigDecimal importNotifica = BigDecimal.ZERO;
 		if (cnmTOrdinanza.getCnmTNotificas() != null && !cnmTOrdinanza.getCnmTNotificas().isEmpty()) {
 			Iterator<CnmTNotifica> iterNotifica = cnmTOrdinanza.getCnmTNotificas().iterator();
@@ -1240,7 +1479,12 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 					.convertCodeToBufferImage(utilsCodeWriter.generateDataMatrixImage(textDataMatrix, 70, 70)));
 			bollettino.setNumRata1(BigDecimal.ONE);
 			bollettino.setImportoRata1(importo.add(importNotifica));
-			bollettino.setDataScadenzaRata1(utilsDate.asLocalDate(cnmTOrdinanza.getDataScadenzaOrdinanza()));
+			//E10_2024 la data scadenza può essere nulla:
+			if(cnmTOrdinanza.getDataScadenzaOrdinanza()!=null) {
+				bollettino.setDataScadenzaRata1(utilsDate.asLocalDate(cnmTOrdinanza.getDataScadenzaOrdinanza()));
+			}else {
+				bollettino.setDataScadenzaRata1(null);
+			}
 			bollettino.setCodiceAvvisoRata1(UtilsRata.formattaCodiceAvvisoPerLaVisualizzazione(codiceAvviso));
 			bollettino.setOggettoPagamento(oggettoPagamento);
 			bollettino.setCfEnteCreditore(cfEnteCreditore);
@@ -1270,8 +1514,12 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 
 		byte[] file = commonBollettiniService.printBollettini(bollettini,
 				Report.REPORT_STAMPA_BOLLETTINO_ORDINANZA_SOLLECITO);
-
+				
 		CnmTUser cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(Constants.CFEPAY);
+		
+		if(soloLettera)
+			cnmTUser = cnmTUserRepository.findByCodiceFiscaleAndFineValidita(Constants.CFSYSTEM);
+
 		if (cnmTUser == null)
 			logger.error("L'utente epay non è censito sul db ");
 
@@ -1284,7 +1532,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 	public List<DocumentoScaricatoVO> downloadBollettiniByIdOrdinanza(Integer idOrdinanza) {
 		// 20200824_LC nuovo type per gestione documento multiplo
 		try {
-			// TODO TASK 23,24,25			
+			// TASK 23,24,25			
 			List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmTOrdinanza(cnmTOrdinanzaRepository.findOne(idOrdinanza));
 			for(CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog : cnmROrdinanzaVerbSogList) {
 				if(cnmROrdinanzaVerbSog.getCodEsitoListaCarico()!=null && !cnmROrdinanzaVerbSog.getCodEsitoListaCarico().equalsIgnoreCase("000")) {
@@ -1323,7 +1571,18 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		Integer idAllegato = null;
 		List<CnmRAllegatoOrdinanza> cnmRAllegatoOrdinanzaList = cnmRAllegatoOrdinanzaRepository
 				.findByCnmTOrdinanza(cnmTOrdinanza);
+
 		if (cnmRAllegatoOrdinanzaList != null && !cnmRAllegatoOrdinanzaList.isEmpty()) {
+			// il tipoAllegato è TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO, allora verifico prima se la lettera è protocollata. 
+			// Questo per evitare di scaricare bollettini di lettere precedenti, se ho scelto di creare una nuova lettera
+			if(tipoAllegato == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO){
+				for (CnmRAllegatoOrdinanza allegato : cnmRAllegatoOrdinanzaList) {
+					if (allegato.getCnmTAllegato().getCnmDTipoAllegato().getIdTipoAllegato() == TipoAllegato.LETTERA_ORDINANZA.getId()
+						&& allegato.getCnmTAllegato().getNumeroProtocollo() == null)
+						throw new FileNotFoundException(Long.valueOf(tipoAllegato.getId()).toString());
+				}	
+			}
+
 			for (CnmRAllegatoOrdinanza allegato : cnmRAllegatoOrdinanzaList) {
 				if (allegato.getCnmTAllegato().getCnmDTipoAllegato().getIdTipoAllegato() == tipoAllegato.getId())
 					idAllegato = allegato.getCnmTAllegato().getIdAllegato();
@@ -1338,7 +1597,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 
 	@Override
 	public boolean isRichiestaBollettiniInviata(CnmTOrdinanza cnmTOrdinanza) {
-		return cnmTOrdinanza.getCodMessaggioEpay() != null;
+		return cnmTOrdinanza.getCodMessaggioEpay() != null && !cnmTOrdinanza.getCodMessaggioEpay().contains(CODMESS_NEWLETTERA);
 	}
 
 	@Override
@@ -1484,6 +1743,71 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 						throw new RuntimeException("Lo stato ordinanza verbale soggetto non esiste sul db");
 				}
 			}
+			
+
+			CnmTAllegatoField dataPagamento = null;
+			CnmTAllegatoField importoPagato=null;
+			
+			if (TipoAllegato.RICEVUTA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato()) {
+				List<CnmTAllegatoField> cnmTAllegatoFieldList = cnmTAllegatoFieldRepository
+						.findByCnmTAllegato(cnmTAllegato);
+				dataPagamento = Iterables.tryFind(cnmTAllegatoFieldList,
+						UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(
+								Constants.ID_FIELD_DATA_PAGAMENTO_RICEVUTA_ORDINANZA))
+						.orNull();
+				importoPagato= Iterables.tryFind(cnmTAllegatoFieldList,
+						UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(
+								Constants.ID_FIELD_IMPORTO_PAGATO_RICEVUTA_ORDINANZA))
+						.orNull();
+			}			
+			
+			if (TipoAllegato.RICEVUTA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() 	) {
+				if (importoPagato != null)
+					cnmROrdinanzaVerbSog.setImportoPagato(importoPagato.getValoreNumber() != null
+							? importoPagato.getValoreNumber().setScale(2, RoundingMode.HALF_UP)
+							: null);
+				if (dataPagamento != null)
+					cnmROrdinanzaVerbSog.setDataPagamento(dataPagamento.getValoreData());
+				cnmROrdinanzaVerbSog.setCnmDStatoOrdVerbSog(
+						cnmDStatoOrdVerbSogRepository.findOne(Constants.ID_STATO_ORDINANZA_VERB_SOGG_PAGATO_OFFLINE));
+				cnmROrdinanzaVerbSog.setCnmTUser1(cnmTUser);
+				cnmROrdinanzaVerbSog.setDataOraUpdate(utilsDate.asTimeStamp(LocalDateTime.now()));
+				cnmROrdinanzaVerbSog = cnmROrdinanzaVerbSogRepository.save(cnmROrdinanzaVerbSog);
+				if (!pregresso)
+					statoPagamentoOrdinanzaService.verificaTerminePagamentoOrdinanza(cnmROrdinanzaVerbSog, cnmTUser);
+			}
+			
+			if (TipoAllegato.PROVA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato()) {
+				List<CnmTAllegatoField> cnmTAllegatoFieldList = cnmTAllegatoFieldRepository
+						.findByCnmTAllegato(cnmTAllegato);
+				dataPagamento = Iterables.tryFind(cnmTAllegatoFieldList,
+						UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(
+								Constants.ID_FIELD_DATA_PAGAMENTO_PROVA_ORDINANZA))
+						.orNull();
+				importoPagato= Iterables.tryFind(cnmTAllegatoFieldList,
+						UtilsFieldAllegato.findCnmTAllegatoFieldInCnmTAllegatoFieldsByTipoAllegato(
+								Constants.ID_FIELD_IMPORTO_PAGATO_PROVA_ORDINANZA))
+						.orNull();
+			}			
+			
+			//System.out.println("CMTALLEGATO "+cnmTAllegato.getCnmDTipoAllegato());
+			
+			if (TipoAllegato.PROVA_PAGAMENTO_ORDINANZA.getId() == cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato() 	) {
+				if (importoPagato != null)
+					cnmROrdinanzaVerbSog.setImportoPagato(importoPagato.getValoreNumber() != null
+							? importoPagato.getValoreNumber().setScale(2, RoundingMode.HALF_UP)
+							: null);
+				if (dataPagamento != null)
+					cnmROrdinanzaVerbSog.setDataPagamento(dataPagamento.getValoreData());
+				cnmROrdinanzaVerbSog.setCnmDStatoOrdVerbSog(
+						cnmDStatoOrdVerbSogRepository.findOne(Constants.ID_STATO_ORDINANZA_VERB_SOGG_PAGATO_OFFLINE));
+				cnmROrdinanzaVerbSog.setCnmTUser1(cnmTUser);
+				cnmROrdinanzaVerbSog.setDataOraUpdate(utilsDate.asTimeStamp(LocalDateTime.now()));
+				cnmROrdinanzaVerbSog = cnmROrdinanzaVerbSogRepository.save(cnmROrdinanzaVerbSog);
+				if (!pregresso)
+					statoPagamentoOrdinanzaService.verificaTerminePagamentoOrdinanza(cnmROrdinanzaVerbSog, cnmTUser);
+			}
+			
 			CnmRAllegatoOrdVerbSog cnmRAllegatoOrdVerbSog = new CnmRAllegatoOrdVerbSog();
 			CnmRAllegatoOrdVerbSogPK cnmRAllegatoOrdVerbSogPK = new CnmRAllegatoOrdVerbSogPK();
 			cnmRAllegatoOrdVerbSogPK.setIdAllegato(cnmTAllegato.getIdAllegato());
@@ -1509,6 +1833,8 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 				throw new SecurityException("Messaggio non trovato");
 			}
 		}
+		
+		
 
 		return response;
 
@@ -1861,7 +2187,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, null, cnmTUser,
 				tipoProtocollazione, folder, fruitore, allegato.isMaster(), protocollazioneUscita, soggettoActa,
 				rootActa, numeroAllegati, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI,
-				soggetti);
+				soggetti, null, null, null, null);
 
 		// 20201021 PP - Imposto il flag pregresso sull'allegato
 		cnmTAllegato.setFlagDocumentoPregresso(pregresso);
@@ -1901,5 +2227,21 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 
 		return response;
 	}
+	
+	
+	public static String getCampoOrdinanza(CnmTOrdinanza ordinanza, String nomeCampo) {
+        if (ordinanza == null || nomeCampo == null || nomeCampo.isEmpty()) {
+            return null;
+        }
+        try {
+            Field field = CnmTOrdinanza.class.getDeclaredField(nomeCampo);
+            field.setAccessible(true); // Permette l'accesso ai campi privati
+            Object valore = field.get(ordinanza);
+            return valore != null ? valore.toString() : "";
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null; // Gestione di eventuali errori
+        }
+    }
 
 }

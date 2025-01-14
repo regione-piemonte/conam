@@ -16,6 +16,27 @@ public class OrdinanzaVO extends MinOrdinanzaVO {
 	private BigDecimal importoPagato;
 	private BigDecimal importoResiduo;
 	private List<AccontoVO> listaAcconti;
+	
+	// E25_2022 - OB28
+	private String trasgressori;
+	private String obbligati;
+
+	
+	public String getTrasgressori() {
+		return trasgressori;
+	}
+
+	public void setTrasgressori(String trasgressori) {
+		this.trasgressori = trasgressori;
+	}
+
+	public String getObbligati() {
+		return obbligati;
+	}
+
+	public void setObbligati(String obbligati) {
+		this.obbligati = obbligati;
+	}
 
 	public BigDecimal getImportoSpesaNotifica() {
 		return importoSpesaNotifica;

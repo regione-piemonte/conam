@@ -8,11 +8,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import it.csi.conam.conambl.business.facade.StasServFacade;
+import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.integration.entity.CnmTPersona;
 import it.csi.conam.conambl.integration.entity.CnmTResidenza;
 import it.csi.conam.conambl.integration.entity.CnmTSocieta;
@@ -29,6 +31,7 @@ import it.csi.conam.conambl.integration.mapper.ws.stas.AnagraficaWsOutputMapper;
 import it.csi.conam.conambl.integration.repositories.CnmTResidenzaRepository;
 import it.csi.conam.conambl.util.StringConamUtils;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.SoggettoPagamentoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
 
 @Component
@@ -80,10 +83,15 @@ public class SoggettoEntityMapperImpl implements SoggettoEntityMapper {
 		SoggettoVO soggettoVO = new SoggettoVO();
 		CnmTPersona cnmTPersona = dto.getCnmTPersona();
 		CnmTSocieta cnmTSocieta = dto.getCnmTSocieta();
-		CnmTResidenza cnmTResidenza = cnmTResidenzaRepository.findByCnmTSoggetto(dto);
+
+		// FIX issue 45
+		//CnmTResidenza cnmTResidenza = cnmTResidenzaRepository.findByCnmTSoggetto(dto);
+		CnmTResidenza cnmTResidenza = getLastResidenza(dto);
+		/*
 		if(cnmTResidenza == null){
 			cnmTResidenza = getLastResidenza(dto);
 		}
+		 */
 		SoggettoVO sogStas = new SoggettoVO();
 		
 		//dataFineValidita

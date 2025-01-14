@@ -720,10 +720,11 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 	// }
 	@Override
 	public ResponseAggiungiAllegato aggiungiAllegato(byte[] document, String nomeFile, String idArchivioAllegato, String idArchivioPadre, String idEntitaFruitore, String pkAllegato,
-			String soggettoActa, String rootActa, long tipoDocumento, String tipoDocActa, List<CnmTSoggetto> cnmTSoggettoList, Date dataCronica) {
+			String soggettoActa, String rootActa, long tipoDocumento, String tipoDocActa, List<CnmTSoggetto> cnmTSoggettoList, Date dataCronica, String oggetto, String origine) {
 
 		RequestAggiungiAllegato request = new RequestAggiungiAllegato();
-
+		request.setOggetto(oggetto);
+		request.setOrigine(origine);
 		// **********METADATI
 		MetadatiAllegato metadatiAllegato = new MetadatiAllegato();
 		metadatiAllegato.setIdEntitaFruitore(idEntitaFruitore);
@@ -831,6 +832,12 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
         	request.setDataTopica(DoquiConstants.LUOGO);
         	request.setDataCronica(new Date()); // 
         }
+        if (tipoDocumento == TipoAllegato.DOC_NON_PROTOCOLLARE.getId()
+				||tipoDocumento == TipoAllegato.ALLEGATO_DOC_NON_PROTOCOLLARE.getId()) {
+        	request.setDataCronica(new Date()); // 
+        	request.setAutoreGiuridico("NULL_VALUE");
+			request.setDestinatarioGiuridico("NULL_VALUE");
+        }
 
 
 		if (cnmTSoggettoList != null && cnmTSoggettoList.size() > 0)
@@ -879,7 +886,7 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 
 	@Override
 	public ResponseArchiviaDocumento archiviaDocumentoFisico(byte[] document, String nomeFile, String folder, String rootActa, int numeroAllegati, String idEntitaFruitore, long tipoDocumento, boolean isMaster
-			, String idIndex, String soggettoActa) {
+			, String idIndex, String soggettoActa, String oggetto, String origine, Integer numAllegati) {
 		if (folder == null)
 			throw new IllegalArgumentException("folder non valido");
 		if (document == null && StringUtils.isBlank(idIndex))
@@ -914,6 +921,13 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		ResponseArchiviaDocumento respose = null;
 
 		RequestArchiviaDocumentoFisico request = new RequestArchiviaDocumentoFisico();
+		
+		if(oggetto != null) {
+			request.setOggetto(oggetto);
+		}
+		if (origine != null) {
+			request.setOrigine(origine);
+		}
 		request.setCodiceFruitore(DoquiConstants.CODICE_FRUITORE);
 
 		request.setTipoDocumento(tipoDoc);
@@ -943,16 +957,19 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 			UserDetails user = SecurityUtils.getUser();
 			cnmTUser = cnmTUserRepository.findOne(user.getIdUser());
 		}
-
-		request.setAutoreGiuridico(AUTORE_REGIONE_PIEMONTE);
-		
+		if (tipoDocumento == TipoAllegato.DOC_NON_PROTOCOLLARE.getId()) {
+			request.setAutoreGiuridico("NULL_VALUE");
+			request.setDestinatarioGiuridico("NULL_VALUE");
+			request.setDestinatarioFisico("NULL_VALUE");
+		}else {
+			request.setAutoreGiuridico(AUTORE_REGIONE_PIEMONTE);
+			request.setDestinatarioGiuridico(TOPOLOGIA_SOGGETTO_TRASGRESSORE);
+			request.setDestinatarioFisico(TOPOLOGIA_SOGGETTO_TRASGRESSORE);
+		}
 		// eliminata valorizzazione autore fisico e originatore
 //		request.setOriginatore(cnmTUser.getNome() + " " + cnmTUser.getCognome());
 //		request.setAutoreFisico(cnmTUser.getNome() + " " + cnmTUser.getCognome());
 		
-
-		request.setDestinatarioGiuridico(TOPOLOGIA_SOGGETTO_TRASGRESSORE);
-		request.setDestinatarioFisico(TOPOLOGIA_SOGGETTO_TRASGRESSORE);
 
 		if (tipoDocumento == TipoAllegato.LETTERA_ORDINANZA.getId() ) {
 
@@ -997,7 +1014,10 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
 		Documento doc = new Documento();
 		doc.setFile(document);
 		doc.setNomeFile(nomeFile);
-		doc.setNumeroAllegati(MAX_NUMERO_ALLEGATI);
+		if(numAllegati != null)
+			doc.setNumeroAllegati(numAllegati);
+		else
+			doc.setNumeroAllegati(MAX_NUMERO_ALLEGATI);
 		request.setDocumento(doc);
 		
 		// 20200731_LC 
@@ -1021,7 +1041,10 @@ public class DoquiServiceFacadeImpl implements DoquiServiceFacade, InitializingB
         	request.setDataCronica(new Date()); // 
         }
 
-
+        if (tipoDocumento == TipoAllegato.DOC_NON_PROTOCOLLARE.getId()
+                || tipoDocumento == TipoAllegato.ALLEGATO_DOC_NON_PROTOCOLLARE.getId()) {
+        	request.setDataCronica(new Date()); // 
+        }
 		logger.info("[archiviaDocumentoFisico] -> " + "tipoDocumento :: " + tipoDocumento + " - REQUEST :: " + request);
 
 		try {

@@ -7,6 +7,7 @@ package it.csi.conam.conambl.dispatcher;
 import it.csi.conam.conambl.common.security.AuthorizationRoles;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
 import it.csi.conam.conambl.request.verbale.RicercaVerbaleRequest;
+import it.csi.conam.conambl.request.verbale.SalvaAllegatoVerbaleRequest;
 import it.csi.conam.conambl.request.verbale.SalvaAzioneRequest;
 import it.csi.conam.conambl.request.verbale.SalvaStatoManualeRequest;
 import it.csi.conam.conambl.request.verbale.SetRecidivoVerbaleSoggettoRequest;
@@ -25,6 +26,7 @@ import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author riccardo.bova
@@ -49,6 +51,12 @@ public interface VerbaleDispatcher {
 
 	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
 	List<SoggettoVO> getSoggettiByIdVerbale(Integer id, UserDetails userDetails, Boolean controlloUtente);
+
+	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
+	List<SoggettoPagamentoVO> getSoggettiTrasgressoriConResiduo(Integer idverbale,Integer idSoggettoPagatore, UserDetails utente, Boolean controlloUtente);
+	
+	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
+	List<SoggettoPagamentoVO> getSoggettiTrasgressoriConResiduo(Integer idverbale,Integer idSoggettoPagatore, Integer idAllegato, UserDetails utente, Boolean controlloUtente);
 	
 	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
 	List<SoggettoVO> getSoggettiByIdVerbaleConvocazione(Integer id, UserDetails userDetails, Boolean controlloUtente);
@@ -102,7 +110,7 @@ public interface VerbaleDispatcher {
 	AzioneVerbaleResponse getAzioniVerbale(Integer id, UserDetails userDetails);
 
 	@PreAuthorize(value = AuthorizationRoles.INSERIMENTO_ALLEGATI_VERBALE)
-	AllegatoVO salvaAllegato(List<InputPart> data, List<InputPart> file, UserDetails userDetails);
+	AllegatoVO salvaAllegato(List<InputPart> data, List<InputPart> file, Map<String, List<InputPart>> map, UserDetails userDetails);
 
 	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
 	void salvaAzioneVerbale(SalvaAzioneRequest salvaAzione, UserDetails userDetails);
@@ -179,5 +187,11 @@ public interface VerbaleDispatcher {
 
 	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
 	List<SelectVO> getAmbitiNote();
+
+	@PreAuthorize(value = AuthorizationRoles.CONSULTAZIONE_VARIAZIONE_VERBALI)
+    DocumentoScaricatoVO downloadReport(RicercaVerbaleRequest request, UserDetails userDetails);
+
+	@PreAuthorize(value = AuthorizationRoles.INSERIMENTO_ALLEGATI_VERBALE)
+	AllegatoVO modificaAllegato(Long idAllegato, SalvaAllegatoVerbaleRequest request, UserDetails userDetails);
 	
 }

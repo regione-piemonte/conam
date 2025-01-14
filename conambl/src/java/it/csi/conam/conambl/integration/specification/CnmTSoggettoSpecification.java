@@ -32,18 +32,19 @@ public class CnmTSoggettoSpecification {
 			public Predicate toPredicate(Root<CnmTSoggetto> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
 				List<Predicate> predicates = new ArrayList<>();
 
-				if (StringUtils.isNotEmpty(codFiscale))
+				if (StringUtils.isNotEmpty(codFiscale)) {
 					predicates.add(builder.equal(root.get("codiceFiscale"), codFiscale.toUpperCase()));
-				else {
+				} else {
 
-					if (StringUtils.isNotEmpty(cognome))
-						predicates.add(builder.equal(root.get("cognome"), cognome.toUpperCase()));
-					else
+					if (StringUtils.isNotEmpty(cognome)) {
+						predicates.add(builder.like(root.get("cognome"), "%" + cognome.toUpperCase() +"%"));
+						
+						if (StringUtils.isNotEmpty(nome))
+							predicates.add(builder.like(root.get("nome"), "%" + nome.toUpperCase() + "%"));
+						
+				    } else {
 						throw new RuntimeException("cognome non valorizzato");
-					if (StringUtils.isNotEmpty(nome))
-						predicates.add(builder.equal(root.get("nome"), nome.toUpperCase()));
-					else
-						throw new RuntimeException("nome non valorizzato");
+				    }
 
 					if (dataNascita != null || idComuneNascita != null || idNazioneNascita != null || sesso != null) {
 						final Join<CnmTSoggetto, CnmTPersona> cnmTPersonaJoin = root.join("cnmTPersona");

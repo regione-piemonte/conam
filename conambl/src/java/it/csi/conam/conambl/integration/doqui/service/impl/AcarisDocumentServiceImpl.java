@@ -37,6 +37,8 @@ import java.io.*;
 public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl implements AcarisDocumentService
 {
 
+private static final String ORIGINE_INTERNA = "Interna";
+
 //	public static final String LOGGER_PREFIX = DoquiConstants.LOGGER_PREFIX + ".integration";    
 //	private static Logger log = Logger.getLogger(LOGGER_PREFIX);	
 	private static Logger log = Logger.getLogger(AcarisDocumentServiceImpl.class);
@@ -719,9 +721,14 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
     	properties.setDatiPersonali(true);
     	properties.setDatiRiservati(false);
     	properties.setDatiSensibili(false);
-    	
+        	
     	//[Raffaella] parte da verificare: parole chiave e oggetto
     	properties.setParoleChiave(documentoElettronicoActa.getIdDocumento());	// 20200713_LC comprende già il PREFIX_PAROLA_CHIAVE
+    	
+    	//E14 va rimossa la parola chiave per i nuovi documenti
+    	if(properties.getOggetto()	!= null  && properties.getOggetto().contains(Constants.PROVA_DEL_PAGAMENTO_OGGETTO)) {
+    		properties.setParoleChiave("");	
+    	}
     	
     	//String[] listaAutore = {documentoElettronicoActa.getAutore()};	
     	//properties.setAutoreFisico(listaAutore);
@@ -779,65 +786,75 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
      	//20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
 //     	String intestazioneOggetto = "";
 //     	String descrizioneTipoLettera = "";
-     	 
-        if(documentoElettronicoActa.getSoggettoActa().isMittente()){ 
-          	properties.setOrigineInterna(false);
-            // SE IL CONTRIBUENTE � UNA PERSONA FISICA
-          	/*
-          	properties.setAutoreFisico(new String[]{(documentoElettronicoActa.getSoggettoActa().getNome()!=null || 
-          	documentoElettronicoActa.getSoggettoActa().getCognome()!=null) ? documentoElettronicoActa.getSoggettoActa().getNome() + " " + 
-          			documentoElettronicoActa.getSoggettoActa().getCognome() : ""});  
-            */
-            // SE IL CONTRIBUENTE � UNA PERSONA GIURIDICA
-          	
-          	//properties.setAutoreGiuridico(new String[]{documentoElettronicoActa.getSoggettoActa().getDenominazione()!=null ?  documentoElettronicoActa.getSoggettoActa().getDenominazione() : ""}); 
-      	    
-          	//properties.setDestinatarioGiuridico(new String[]{Constants.ENTE});
-      	    
-      	    properties.setFirmaElettronica(true); // questo valore non viene settato sulla console di acta perche abbiamo stato di efficacia 'perfetto efficacie ma non firmato'          	
-      	} else {
-      		
-      		//x conam
-      		log.debug(method + ". isProtocollazioneInUscitaSenzaDocumento"+isProtocollazioneInUscitaSenzaDocumento);
-      		
-      	//	20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
-//      		if(!isProtocollazioneInUscitaSenzaDocumento && documentoElettronicoActa.getMetadatiActa().getNumeroRegistrazionePrecedente() != null)
-//      			intestazioneOggetto = "RISPOSTA_AL_PROT_IN_" + documentoElettronicoActa.getMetadatiActa().getNumeroRegistrazionePrecedente() + "/" +documentoElettronicoActa.getMetadatiActa().getAnnoRegistrazionePrecedente()+" - ";
-      		
-      		properties.setOrigineInterna(true);
-      		
-      		//properties.setAutoreFisico(new String[]{Constants.DIRIGENTE});
-      		//properties.setAutoreGiuridico(new String[]{Constants.ENTE});
-      	    
-      	    if(documentoElettronicoActa.getMetadatiActa() != null){
-      	    	
-	      	    //UTENTE CHE STA LAVORANDO (QUELLO LOGGATO A STABOF)
-      	    	if(documentoElettronicoActa.getMetadatiActa().getScrittore() != null)
-      	    		properties.setScrittore(new String[]{documentoElettronicoActa.getMetadatiActa().getScrittore()});
+     	if(documentoElettronicoActa.getOrigine() != null) {
+        	properties.setDefinitivo(true);	
+        	properties.setRegistrato(false);
+        	properties.setModificabile(false);
+     		if(documentoElettronicoActa.getOrigine().equalsIgnoreCase(ORIGINE_INTERNA)) {
+     			properties.setOrigineInterna(true);
+     		}else {
+     			properties.setOrigineInterna(false);
+     		}
+     	}else {
+	        if(documentoElettronicoActa.getSoggettoActa().isMittente()){ 
+	          	properties.setOrigineInterna(false);
+	            // SE IL CONTRIBUENTE � UNA PERSONA FISICA
+	          	/*
+	          	properties.setAutoreFisico(new String[]{(documentoElettronicoActa.getSoggettoActa().getNome()!=null || 
+	          	documentoElettronicoActa.getSoggettoActa().getCognome()!=null) ? documentoElettronicoActa.getSoggettoActa().getNome() + " " + 
+	          			documentoElettronicoActa.getSoggettoActa().getCognome() : ""});  
+	            */
+	            // SE IL CONTRIBUENTE � UNA PERSONA GIURIDICA
+	          	
+	          	//properties.setAutoreGiuridico(new String[]{documentoElettronicoActa.getSoggettoActa().getDenominazione()!=null ?  documentoElettronicoActa.getSoggettoActa().getDenominazione() : ""}); 
 	      	    
-//	      	    properties.setDestinatarioFisico(new String[]{documentoElettronicoActa.getMetadatiActa().getDestinatarioFisico()}); // SE IL CONTRIBUENTE � UNA PERSONA FISICA
-//	      	    properties.setDestinatarioGiuridico(new String[]{documentoElettronicoActa.getMetadatiActa().getDestinatarioGiuridico()}); // SE IL CONTRIBUENTE � UNA PERSONA GIURIDICA
-	      	   
-	      	    //RAFFAELLA RIPRISTINATA LA FUNZIONALITA' DELLA PAROLA CHIAVE COME IDENTIFICATIVO UNIVOCO AGGIUNTA L'INFORMAZIONE SUL TIPO DI LETTERA NELL'OGGETTO COME DA ANALISI ARCHIVISTICA V09
-//	      	    String paroleChiave = properties.getParoleChiave() + (documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera()!=null?" - " +documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera():"");
-//	      	    properties.setParoleChiave(paroleChiave);
+	          	//properties.setDestinatarioGiuridico(new String[]{Constants.ENTE});
 	      	    
-	      	    //20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
-//	      	    descrizioneTipoLettera = documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera()!=null?" - " +documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera():"";
-      	    }     	    
-
-      	    //JIRA - Gestione Notifica
-      	    //properties.setDataDocTopica(DoquiConstants.LUOGO);      	    
-
-      	    properties.setFirmaElettronica(false);
- 
-      	    // 20200731_LC sostituito da nuova logica (fine del metodo):
-//      		//new param
-//      	  if(documentoElettronicoActa.getCollocazioneCartacea() != null)
-//      		  classificazionePropertiesType.setCollocazioneCartacea(documentoElettronicoActa.getCollocazioneCartacea());
-//      	  else
-//      		  classificazionePropertiesType.setCollocazioneCartacea(DoquiConstants.COLLOCAZIONE_CARTACEA);
-      	}
+	      	    properties.setFirmaElettronica(true); // questo valore non viene settato sulla console di acta perche abbiamo stato di efficacia 'perfetto efficacie ma non firmato'          	
+	      	} else {
+	      		
+	      		//x conam
+	      		log.debug(method + ". isProtocollazioneInUscitaSenzaDocumento"+isProtocollazioneInUscitaSenzaDocumento);
+	      		
+	      	//	20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
+	//      		if(!isProtocollazioneInUscitaSenzaDocumento && documentoElettronicoActa.getMetadatiActa().getNumeroRegistrazionePrecedente() != null)
+	//      			intestazioneOggetto = "RISPOSTA_AL_PROT_IN_" + documentoElettronicoActa.getMetadatiActa().getNumeroRegistrazionePrecedente() + "/" +documentoElettronicoActa.getMetadatiActa().getAnnoRegistrazionePrecedente()+" - ";
+	      		
+	      		properties.setOrigineInterna(true);
+	      		
+	      		//properties.setAutoreFisico(new String[]{Constants.DIRIGENTE});
+	      		//properties.setAutoreGiuridico(new String[]{Constants.ENTE});
+	      	    
+	      	    if(documentoElettronicoActa.getMetadatiActa() != null){
+	      	    	
+		      	    //UTENTE CHE STA LAVORANDO (QUELLO LOGGATO A STABOF)
+	      	    	if(documentoElettronicoActa.getMetadatiActa().getScrittore() != null)
+	      	    		properties.setScrittore(new String[]{documentoElettronicoActa.getMetadatiActa().getScrittore()});
+		      	    
+	//	      	    properties.setDestinatarioFisico(new String[]{documentoElettronicoActa.getMetadatiActa().getDestinatarioFisico()}); // SE IL CONTRIBUENTE � UNA PERSONA FISICA
+	//	      	    properties.setDestinatarioGiuridico(new String[]{documentoElettronicoActa.getMetadatiActa().getDestinatarioGiuridico()}); // SE IL CONTRIBUENTE � UNA PERSONA GIURIDICA
+		      	   
+		      	    //RAFFAELLA RIPRISTINATA LA FUNZIONALITA' DELLA PAROLA CHIAVE COME IDENTIFICATIVO UNIVOCO AGGIUNTA L'INFORMAZIONE SUL TIPO DI LETTERA NELL'OGGETTO COME DA ANALISI ARCHIVISTICA V09
+	//	      	    String paroleChiave = properties.getParoleChiave() + (documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera()!=null?" - " +documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera():"");
+	//	      	    properties.setParoleChiave(paroleChiave);
+		      	    
+		      	    //20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
+	//	      	    descrizioneTipoLettera = documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera()!=null?" - " +documentoElettronicoActa.getMetadatiActa().getDescrizioneTipoLettera():"";
+	      	    }     	    
+	
+	      	    //JIRA - Gestione Notifica
+	      	    //properties.setDataDocTopica(DoquiConstants.LUOGO);      	    
+	
+	      	    properties.setFirmaElettronica(false);
+	 
+	      	    // 20200731_LC sostituito da nuova logica (fine del metodo):
+	//      		//new param
+	//      	  if(documentoElettronicoActa.getCollocazioneCartacea() != null)
+	//      		  classificazionePropertiesType.setCollocazioneCartacea(documentoElettronicoActa.getCollocazioneCartacea());
+	//      	  else
+	//      		  classificazionePropertiesType.setCollocazioneCartacea(DoquiConstants.COLLOCAZIONE_CARTACEA);
+	      	}
+     	}        
         
         //nel caso ci sia un numero allegati maggiore di zero procedo a settare il doc allegato
         if(pkAllegato == null && documentoElettronicoActa.getNumeroAllegati() > 0){
@@ -959,20 +976,23 @@ public class AcarisDocumentServiceImpl extends CommonManagementServiceImpl imple
           	documenti[0].setContenutiFisici(contenuti);
           	
      	}
-     	
-     	if (documentoElettronicoActa.getMetadatiActa() != null){
-     		//20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
-//     		String oggetto = intestazioneOggetto + documentoElettronicoActa.getMetadatiActa().toString();
-     		String oggetto = documentoElettronicoActa.getMetadatiActa().toString();
-     		//20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
-//     		if(pkAllegato != null){
-//     			oggetto = oggetto + " - Allegato" + pkAllegato;
-//     		}     		
-//    		properties.setOggetto(oggetto + " " + (numeroProtocolloPadre!=null?" - " + numeroProtocolloPadre:"") + descrizioneTipoLettera);
-     		
-     		properties.setOggetto(oggetto);
-     	} else {
-    		properties.setOggetto(documentoElettronicoActa.getIdDocumento()); 
+     	if(documentoElettronicoActa.getOggetto() != null) {
+     		properties.setOggetto(documentoElettronicoActa.getOggetto());
+     	}else {
+	     	if (documentoElettronicoActa.getMetadatiActa() != null){
+	     		//20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
+	//     		String oggetto = intestazioneOggetto + documentoElettronicoActa.getMetadatiActa().toString();
+	     		String oggetto = documentoElettronicoActa.getMetadatiActa().toString();
+	     		//20201001_ET commentato perche CSI vuole che nell'oggetto ci sia SEMPRE solo la categoria documento
+	//     		if(pkAllegato != null){
+	//     			oggetto = oggetto + " - Allegato" + pkAllegato;
+	//     		}     		
+	//    		properties.setOggetto(oggetto + " " + (numeroProtocolloPadre!=null?" - " + numeroProtocolloPadre:"") + descrizioneTipoLettera);
+	     		
+	     		properties.setOggetto(oggetto);
+	     	} else {
+	    		properties.setOggetto(documentoElettronicoActa.getIdDocumento()); 
+	     	}
      	}
      	
      

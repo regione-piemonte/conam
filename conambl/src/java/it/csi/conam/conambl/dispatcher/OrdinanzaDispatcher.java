@@ -116,4 +116,6 @@ public interface OrdinanzaDispatcher {
 
 	@PreAuthorize(value = AuthorizationRoles.UTENTE)
 	List<SelectVO> getCausaleSelect();
+
+    void protocollaLetteraSenzaBollettini(Integer idOrdinanza);
 }

@@ -10,8 +10,15 @@ import it.csi.conam.conambl.vo.common.SelectVO;
  * @author riccardo.bova
  * @date 16 nov 2018
  */
-public class TipoAllegatoVO extends SelectVO {
+public class TipoAllegatoVO extends SelectVO implements Comparable<TipoAllegatoVO>{
 
 	private static final long serialVersionUID = 6632717616227124941L;
+
+	@Override
+	public int compareTo(TipoAllegatoVO o) {
+		return this.id.compareTo(o.id);
+	}
+	
+	
 
 }

@@ -65,6 +65,15 @@ public class CnmTSollecito extends CnmRTCommons {
 	@ManyToOne
 	@JoinColumn(name="id_ordinanza_verb_sog")
 	private CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog;
+	
+	@Column(name = "reversale_d_ordine")
+	private String reversaleDOrdine;
+
+	@Column(name = "pagatore")
+	private String pagatore;
+
+	@Column(name = "note")
+	private String note;
 
 	//bi-directional many-to-many association to CnmTNotifica
 	@ManyToMany
@@ -237,6 +246,30 @@ public class CnmTSollecito extends CnmRTCommons {
 
 	public void setCnmDTipoSollecito(CnmDTipoSollecito cnmDTipoSollecito) {
 		this.cnmDTipoSollecito = cnmDTipoSollecito;
+	}
+
+	public String getReversaleDOrdine() {
+		return reversaleDOrdine;
+	}
+
+	public void setReversaleDOrdine(String reversaleDOrdine) {
+		this.reversaleDOrdine = reversaleDOrdine;
+	}
+
+	public String getPagatore() {
+		return pagatore;
+	}
+
+	public void setPagatore(String pagatore) {
+		this.pagatore = pagatore;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
 	}
 	
 }

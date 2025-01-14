@@ -4,16 +4,20 @@
  ******************************************************************************/
 package it.csi.conam.conambl.dispatcher.impl;
 
-import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
-import it.csi.conam.conambl.dispatcher.AllegatoDispatcher;
-import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
-import it.csi.conam.conambl.vo.common.SelectVO;
-import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
-import it.csi.conam.conambl.vo.verbale.allegato.ConfigAllegatoVO;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
+import it.csi.conam.conambl.dispatcher.AllegatoDispatcher;
+import it.csi.conam.conambl.response.RicercaDocumentiStiloResponse;
+import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
+import it.csi.conam.conambl.vo.CampiRicercaFormVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
+import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.ConfigAllegatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.DettaglioAllegatoFieldVO;
 
 /**
  * @author riccardo.bova
@@ -83,8 +87,25 @@ public class AllegatoDispatcherImpl implements AllegatoDispatcher {
 	public List<DocumentoScaricatoVO> getDocFisiciByObjectIdDocumento(String objectIdDocumento) {
 		return commonAllegatoService.getDocFisiciByObjectIdDocumento(objectIdDocumento);
 	}
+
+	//E19_2022 - OBI45
+	@Override
+	public RicercaDocumentiStiloResponse ricercaDocumentiSuStilo(
+			CampiRicercaFormVO input, Integer pageRequest, Integer maxLineRequest
+			) {
+		return commonAllegatoService.ricercaDocumentiSuStilo(input, pageRequest, maxLineRequest);
+	}
 	
-	
+	@Override
+	public List<ConfigAllegatoVO> getConfigAllegatiRicerca(Long idRicerca) {
+		return commonAllegatoService.getConfigAllegatiRicerca(idRicerca);
+	}
+
+	@Override
+	public DettaglioAllegatoFieldVO getDettaglioFieldsByIdAllegato(Long idAllegato) {
+		return commonAllegatoService.getDettaglioFieldsByIdAllegato(idAllegato);
+	}
+
 	
 }
 

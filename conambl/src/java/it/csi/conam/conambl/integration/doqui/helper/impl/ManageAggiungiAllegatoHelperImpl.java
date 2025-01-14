@@ -298,6 +298,8 @@ public class ManageAggiungiAllegatoHelperImpl  extends CommonManageDocumentoHelp
 			
 			//POJO
 			DocumentoElettronicoActa documentoElettronicoActa = new DocumentoElettronicoActa();
+			documentoElettronicoActa.setOggetto(request.getOggetto());
+			documentoElettronicoActa.setOrigine(request.getOrigine());
 			documentoElettronicoActa.setIdDocumento(cnmTDocumento.getIdentificativoArchiviazione());
 			documentoElettronicoActa.setFolder(cnmTDocumento.getFolder());
 			documentoElettronicoActa.setDocumentoCartaceo(cnmDTipoDocumento.getCartaceo());

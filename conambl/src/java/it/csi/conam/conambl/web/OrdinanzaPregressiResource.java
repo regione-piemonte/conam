@@ -4,6 +4,8 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web;
 
+import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.dispatcher.OrdinanzaDispatcher;
 import it.csi.conam.conambl.dispatcher.OrdinanzaPregressiDispatcher;
@@ -14,6 +16,7 @@ import it.csi.conam.conambl.response.*;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.SpringSupportedResource;
 import it.csi.conam.conambl.vo.IsCreatedVO;
+import it.csi.conam.conambl.vo.ExceptionVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.ordinanza.StatoSoggettoOrdinanzaVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
@@ -154,11 +157,24 @@ public class OrdinanzaPregressiResource extends SpringSupportedResource {
 		return Response.ok().entity(lista).build();
 	}
 
+	//REQ68
 	@POST
 	@Path("/inviaRichiestaBollettiniOrdinanza/{idOrdinanza}")
 	public Response inviaRichiestaBollettiniOrdinanza(@PathParam("idOrdinanza") Integer idOrdinanza) {
-		ordinanzaDispatcher.inviaRichiestaBollettiniByIdOrdinanza(idOrdinanza);
-		return Response.ok().build();
+		
+		try {
+			ordinanzaDispatcher.inviaRichiestaBollettiniByIdOrdinanza(idOrdinanza);
+		} catch(BusinessException e) {
+			ExceptionVO exception = new ExceptionVO(
+					ErrorCode.BOLLETTINI_ERRORE_GENERAZIONE,
+					e.getCodice(),
+					"danger"
+			);
+            
+			return Response.ok().entity(exception).build();
+        }      
+	       
+        return Response.ok().build();
 	}
 
 	@GET

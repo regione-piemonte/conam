@@ -7,6 +7,7 @@ package it.csi.conam.conambl.business.service.verbale;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.RuoloSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.SoggettoPagamentoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoPregressiVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
 
@@ -29,6 +30,10 @@ public interface SoggettoVerbaleService {
 	List<RuoloSoggettoVO> getRuoliSoggetto();
 
 	List<SoggettoVO> getSoggettiByIdVerbale(Integer id, UserDetails userDetails, Boolean includiControlloUtenteProprietario);
+	
+	List<SoggettoPagamentoVO> getSoggettiTrasgressoriConResiduo(Integer idverbale,Integer idSoggettoPagatore, UserDetails userDetails, Boolean controlloUtente, Boolean isModfica);
+
+	List<SoggettoPagamentoVO> getSoggettiTrasgressoriConResiduo(Integer idverbale,Integer idSoggettoPagatore,Integer idAllegato, UserDetails userDetails, Boolean controlloUtente);
 	
 	List<SoggettoVO> getSoggettiByIdVerbalePregressi(Integer id, UserDetails userDetails, Boolean includiControlloUtenteProprietario);
 

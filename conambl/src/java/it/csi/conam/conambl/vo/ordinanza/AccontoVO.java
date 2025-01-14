@@ -25,6 +25,12 @@ public class AccontoVO extends ParentVO {
 	private LocalDate dataPagamento;
 	private BigDecimal importo;
 	private String contoCorrenteVersamento;
+	
+	//E14 20240724 Pasqualini Genco
+	private String tipologiaPagamento;
+	private String reversaledOrdine;
+	private String pagatore;
+	private String note;	
 
 	public Long getId() {
 		return id;
@@ -66,4 +72,31 @@ public class AccontoVO extends ParentVO {
 	public void setContoCorrenteVersamento(String contoCorrenteVersamento) {
 		this.contoCorrenteVersamento = contoCorrenteVersamento;
 	}
+	public String getTipologiaPagamento() {
+		return tipologiaPagamento;
+	}
+	public void setTipologiaPagamento(String tipologiaPagamento) {
+		this.tipologiaPagamento = tipologiaPagamento;
+	}
+
+	public String getPagatore() {
+		return pagatore;
+	}
+	public void setPagatore(String pagatore) {
+		this.pagatore = pagatore;
+	}
+	public String getNote() {
+		return note;
+	}
+	public void setNote(String note) {
+		this.note = note;
+	}
+	public String getReversaledOrdine() {
+		return reversaledOrdine;
+	}
+	public void setReversaledOrdine(String reversaledOrdine) {
+		this.reversaledOrdine = reversaledOrdine;
+	}
+	
+	
 }

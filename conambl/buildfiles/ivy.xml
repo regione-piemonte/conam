@@ -75,9 +75,17 @@
 	      <artifact name="spring-test-3.1.1.RELEASE" type="jar" />
 		  <artifact name="spring-orm-3.1.1.RELEASE" type="jar" />
 		  <artifact name="spring-context-support-3.1.1.RELEASE" type="jar" />
+	      <artifact name="spring-oxm-3.1.1.RELEASE" type="jar" />
 	    </dependency>
 	
 		
+		<!--springWS 
+		<dependency org="others" name="spring-ws-core" rev="2.0.5.RELEASE" transitive="false"/>
+-->
+
+		<!--springXML-->
+		<dependency org="others" name="spring-xml" rev="2.0.4.RELEASE" transitive="false"/>
+
 		<!--springSecurity -->
 		<dependency org="others" name="spring-security" rev="3.1.0.RELEASE" transitive="false">
 				<artifact name="spring-security-acl-3.1.0.RELEASE"></artifact>
@@ -111,7 +119,14 @@
 		<dependency org="google" name="zxing" rev="2.3.0"/>
 		<dependency org="others" name="itext" rev="2.1.7"/>
 		<dependency org="apache" name="commons-beanutils" rev="1.9.1"/>
-		<dependency org="apache" name="commons-collections" rev="3.2.2"/>
+		<dependency org="apache" name="commons-collections" rev="3.2.2">
+			<artifact name="commons-collections-3.2.2" type="jar" />
+		</dependency>
+		<!--
+		<dependency org="apache" name="commons-collections" rev="4.4.1">
+			<artifact name="commons-collections4-4.1" type="jar" />
+		</dependency>
+		-->
 		<dependency org="apache" name="commons-digester" rev="2.1"/>
 		<dependency org="krysalis" name="barcode4j" rev="2.1.0"/><!-- per generare datamatrix -->
 		<dependency org="apache" name="httpclient" rev="4.3.4"/><!-- ??? -->
@@ -254,8 +269,14 @@
 		<dependency org="others" name="dss-all" rev="5.1">
 			<artifact name="bcprov-jdk15on-1.58" type="jar" />
 			<artifact name="bcpkix-jdk15on-1.58" type="jar" />
-		</dependency>
-				
+		</dependency>				
+		
+		<!-- 20240201_PP reportistica xlsx -->
+		<dependency org="apache" name="poi" rev="3.9"/>
+		<dependency org="apache" name="xmlbeans" rev="3.0.1"/>
+		<!--dependency org="apache" name="commons-collections" rev="4.4.1"/-->
+
+		
 	</dependencies>
 
 </ivy-module>

@@ -6,6 +6,7 @@ package it.csi.conam.conambl.business.service.verbale;
 
 import it.csi.conam.conambl.request.verbale.RicercaVerbaleRequest;
 import it.csi.conam.conambl.security.UserDetails;
+import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
 import it.csi.conam.conambl.vo.verbale.MinVerbaleVO;
 import it.csi.conam.conambl.vo.verbale.StatoManualeVO;
 import it.csi.conam.conambl.vo.verbale.StatoVerbaleVO;
@@ -16,7 +17,9 @@ public interface RicercaVerbaleService {
 
 	List<StatoVerbaleVO> getStatiRicercaVerbale();
 
-	List<MinVerbaleVO> ricercaVerbale(RicercaVerbaleRequest request, UserDetails userDetails);
+	List<MinVerbaleVO> ricercaVerbale(RicercaVerbaleRequest request, UserDetails userDetails, boolean withDoc);
 
 	List<StatoManualeVO> getStatiManuali();
+
+    DocumentoScaricatoVO downloadReport(RicercaVerbaleRequest request, UserDetails userDetails);
 }

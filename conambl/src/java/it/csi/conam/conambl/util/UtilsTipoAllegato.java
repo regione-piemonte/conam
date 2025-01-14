@@ -4,6 +4,8 @@
  ******************************************************************************/
 package it.csi.conam.conambl.util;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import it.csi.conam.conambl.common.TipoAllegato;
@@ -39,6 +41,15 @@ public class UtilsTipoAllegato {
 			@Override
 			public boolean apply(CnmTAllegato input) {
 				return input.getCnmDTipoAllegato().getIdTipoAllegato() == tipoAllegato.getId();
+			}
+		};
+	}
+
+	public static Predicate<CnmTAllegato> findCnmTAllegatoInCnmTAllegatosByTipoAllegatoNonProt(TipoAllegato tipoAllegato) {
+		return new Predicate<CnmTAllegato>() {
+			@Override
+			public boolean apply(CnmTAllegato input) {
+				return input.getCnmDTipoAllegato().getIdTipoAllegato() == tipoAllegato.getId() && StringUtils.isEmpty(input.getNumeroProtocollo());
 			}
 		};
 	}

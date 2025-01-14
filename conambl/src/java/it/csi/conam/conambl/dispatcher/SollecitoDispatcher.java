@@ -11,6 +11,9 @@ import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.notifica.NotificaVO;
 import it.csi.conam.conambl.vo.sollecito.SollecitoVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
@@ -40,8 +43,8 @@ public interface SollecitoDispatcher {
 	@PreAuthorize(value = AuthorizationRoles.SOLLECITO_PAGAMENTO)
 	SollecitoVO getSollecitoById(Integer id);
 
-	@PreAuthorize(value = AuthorizationRoles.SOLLECITO_PAGAMENTO)
-	RiconciliaSollecitoResponse riconcilaSollecito(SollecitoVO sollecito, UserDetails user);
+//	@PreAuthorize(value = AuthorizationRoles.SOLLECITO_PAGAMENTO)
+//	RiconciliaSollecitoResponse riconcilaSollecito(SollecitoVO sollecito, UserDetails user);
 
 	@PreAuthorize(value = AuthorizationRoles.SOLLECITO_PAGAMENTO)
 	IsCreatedVO isLetteraSollecitoSaved(Integer idSollecito);
@@ -51,4 +54,11 @@ public interface SollecitoDispatcher {
 	
 	@PreAuthorize(value = AuthorizationRoles.SOLLECITO_PAGAMENTO)
 	List<SollecitoVO> getSollecitiByIdPianoRateizzazione(Integer idPianoRateizzazione);
+	
+	//E14 aggiunta 20240722 Genco Pasqualini
+	@PreAuthorize(value = AuthorizationRoles.SOLLECITO_PAGAMENTO)
+	RiconciliaSollecitoResponse riconciliaSollecito(List<InputPart> data, List<InputPart> file, UserDetails userDetails);
+
+	
+	
 }

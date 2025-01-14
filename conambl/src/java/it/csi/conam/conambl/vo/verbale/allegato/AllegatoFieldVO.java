@@ -36,6 +36,9 @@ public class AllegatoFieldVO extends ParentVO {
 	private LocalDateTime dateTimeValue;
 	private FieldTypeVO fieldType;
 	private Long idField;
+	
+
+	private String genericValue;
 
 	public Boolean getBooleanValue() {
 		return booleanValue;
@@ -91,6 +94,14 @@ public class AllegatoFieldVO extends ParentVO {
 
 	public void setDateTimeValue(LocalDateTime dateTimeValue) {
 		this.dateTimeValue = dateTimeValue;
+	}
+
+	public String getGenericValue() {
+		return genericValue;
+	}
+
+	public void setGenericValue(String genericValue) {
+		this.genericValue = genericValue;
 	}
 
 	@Override

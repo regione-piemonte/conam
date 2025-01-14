@@ -49,7 +49,7 @@ public interface AllegatoOrdinanzaService {
 	// 20200824_LC	-byte[]
 	List<DocumentoScaricatoVO> downloadLetteraOrdinanza(Integer idOrdinanza);
 
-	void creaBollettiniByCnmROrdinanzaVerbSog(List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList);
+	void creaBollettiniByCnmROrdinanzaVerbSog(List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList, boolean soloLettera);
 
 	// 20200824_LC	-byte[]
 	List<DocumentoScaricatoVO> downloadBollettiniByIdOrdinanza(Integer idOrdinanza);
@@ -74,4 +74,6 @@ public interface AllegatoOrdinanzaService {
 	List<TipoAllegatoVO> getTipologiaAllegatiCreaOrdinanzaAnnullamento(Integer idOrdinanzaAnnullata);
 
 	List<MessageVO> salvaAllegatiMultipli(List<InputPart> data, List<InputPart> file, UserDetails userDetails, boolean pregresso);
+
+    void protocollaLetteraSenzaBollettini(Integer idOrdinanza);
 }

@@ -22,7 +22,7 @@ import it.csi.conam.conambl.integration.repositories.CnmTNotificaRepository;
 import it.csi.conam.conambl.util.UtilsTipoAllegato;
 import it.csi.conam.conambl.vo.ordinanza.MinOrdinanzaVO;
 import it.csi.conam.conambl.vo.ordinanza.OrdinanzaVO;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -148,6 +148,30 @@ public class OrdinanzaEntityMapperImpl implements OrdinanzaEntityMapper {
 	
 	private OrdinanzaVO mapEntityToVOLocal(CnmTOrdinanza dto) {
 		OrdinanzaVO ordinanzaVO = new OrdinanzaVO();
+		
+	   // E25_2022 - Ob28
+        if (!dto.getCnmROrdinanzaVerbSogs().isEmpty()) {
+            StringBuilder ob = new StringBuilder();
+            StringBuilder tr = new StringBuilder();
+
+            for (CnmROrdinanzaVerbSog r : dto.getCnmROrdinanzaVerbSogs()) {
+                CnmTSoggetto s = r.getCnmRVerbaleSoggetto().getCnmTSoggetto();
+                String soggettoInfos = StringUtils.isNotBlank(s.getCodiceFiscale())? s.getNome() + " " + s.getCognome() : s.getRagioneSociale();
+
+                if (r.getCnmRVerbaleSoggetto().getCnmDRuoloSoggetto().getIdRuoloSoggetto() == Constants.VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID) {
+                	tr.append(StringUtils.isNotBlank(tr) ?"\n":"");
+                	tr.append(soggettoInfos);
+            	}
+	            else {
+	            	ob.append(StringUtils.isNotBlank(ob) ?"\n":"");
+	                ob.append(soggettoInfos);
+	            }
+            }
+
+            ordinanzaVO.setTrasgressori(tr.length() > 0 ? tr.toString():null);
+            ordinanzaVO.setObbligati(ob.length() > 0 ? ob.toString():null);
+        }
+        
 		ordinanzaVO.setDataDeterminazione(utilsDate.asLocalDate(dto.getDataDeterminazione()));
 		ordinanzaVO.setDataOrdinanza(utilsDate.asLocalDate(dto.getDataOrdinanza()));
 		ordinanzaVO.setDataProtocollo(utilsDate.asLocalDateTime(dto.getDataOraProtocollo()));
@@ -202,6 +226,35 @@ public class OrdinanzaEntityMapperImpl implements OrdinanzaEntityMapper {
 			String numVerbale = cnmROrdinanzaVerbSogList.get(0).getCnmRVerbaleSoggetto().getCnmTVerbale().getNumVerbale();
 			ordinanzaVO.setNumVerbale(numVerbale);
 		}
+
+		  if (!cnmROrdinanzaVerbSogList.isEmpty()) {
+	            StringBuilder ob = new StringBuilder();
+	            StringBuilder tr = new StringBuilder();
+
+	            for (CnmROrdinanzaVerbSog r : cnmROrdinanzaVerbSogList) {
+	                CnmRVerbaleSoggetto l = r.getCnmRVerbaleSoggetto();
+	                CnmTSoggetto s = l.getCnmTSoggetto();
+	                String soggettoInfos = "";
+	                if (StringUtils.isNotBlank(s.getRagioneSociale())) {
+	                	soggettoInfos = s.getRagioneSociale();
+	                }
+	                else {
+	                	soggettoInfos = StringUtils.isNotBlank(s.getNome()) ? s.getNome() + " " + s.getCognome() : s.getCognome();                	
+	                }
+	                
+	                if (l.getCnmDRuoloSoggetto().getIdRuoloSoggetto() == Constants.VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID) {
+	                    tr.append(StringUtils.isNotBlank(tr) ?"\n":"");
+		                tr.append(soggettoInfos);
+		            }
+	                else {
+	                	ob.append(StringUtils.isNotBlank(ob) ?"\n":"");
+		                ob.append(soggettoInfos);
+	                }
+	            }
+
+	            ordinanzaVO.setTrasgressori(tr.length() > 0 ? tr.toString():null);
+	            ordinanzaVO.setObbligati(ob.length() > 0 ? ob.toString():null);
+	        }
 
 		return ordinanzaVO;
 	}

@@ -83,7 +83,6 @@ public class SollecitoPregressiDispatcherImpl implements SollecitoPregressiDispa
 	@Override
 	public void inviaRichiestaBollettiniByIdSollecito(Integer idSollecito) {
 		allegatoSollecitoService.inviaRichiestaBollettiniByIdSollecito(idSollecito);
-
 	}
 
 	// 20200825_LC nuovo type per doc multiplo
@@ -101,7 +100,7 @@ public class SollecitoPregressiDispatcherImpl implements SollecitoPregressiDispa
 
 	@Override
 	public RiconciliaSollecitoResponse riconcilaSollecito(SollecitoVO sollecito, UserDetails user) {
-		return sollecitoService.riconcilaSollecito(sollecito, user);
+		return sollecitoService.riconciliaSollecito(sollecito, user);
 	}
 
 	@Override

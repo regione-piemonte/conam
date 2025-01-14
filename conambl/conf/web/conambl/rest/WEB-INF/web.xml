@@ -93,8 +93,24 @@
 		  <servlet-name>Epay</servlet-name>
 		  <url-pattern>/soap/epay</url-pattern>
 	</servlet-mapping>
-	
-	
+	<!-- Gestione Basic Auth per servizi PPAY -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Restrizioni a ruolo sicuro</web-resource-name>
+			<description>Protezione servizi</description>
+			<url-pattern>/soap/epay</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>epaysvclients</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>applications</realm-name>
+	</login-config>
+	<security-role>
+		<role-name>epaysvclients</role-name>
+	</security-role>
 	
 	<welcome-file-list>
 	  	<welcome-file>index.html</welcome-file>

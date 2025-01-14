@@ -48,7 +48,7 @@ public class StasServFacadeImpl implements StasServFacade {
 	public Anagrafica[] ricercaSoggettoCF(String cf, String token) {
 		try {
 			return serviziTauITF.ricercaSoggettoCF(cf, token);
-//			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00A11B000J/CSI PIEMONTE/DEMO 21/IPA/20231116103819/2/c9bYsZA4pa+zAgPKN3VoFw==");
+			//return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/IPA/20240718112953/2/WQy1EkBAB9KgxhySHhROow==");
 //			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/IPA/20240123113110/2/GO11x1uve660EC0QyPl4vQ==");
 //			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00B77B000F/CSI PIEMONTE/DEMO 20/IPA/20230112174325/2/mEwUilVb05HxQQzJr3i/Sg==");
 //			return serviziTauITF.ricercaSoggettoCF(cf, "AAAAAA00B77B000F/Csi Piemonte/Demo 20/IPA/20210311120727/2/Ev+zD2iSWVJZXUhr0ImBDw==");
@@ -56,13 +56,13 @@ public class StasServFacadeImpl implements StasServFacade {
 
 		} catch (CodiceFiscaleNonValidoCsiException | SoggettoNonTrovatoCsiException | GMSServizioIndisponibileException | UtenteNonAbilitatoCsiException e) {
 			if (e instanceof CodiceFiscaleNonValidoCsiException)
-				logger.info("Il codice fiscale non è valido ");
+				logger.info("Il codice fiscale non è valido - return null");
 			if (e instanceof SoggettoNonTrovatoCsiException)
-				logger.info("Il soggetto non è stato trovato su stas");
+				logger.info("Il soggetto non è stato trovato su stas - return null");
 			if (e instanceof GMSServizioIndisponibileException)
-				logger.error("Servizio non disponibile", e);
+				logger.error("Servizio non disponibile - return null", e);
 			if (e instanceof UtenteNonAbilitatoCsiException)
-				throw new RuntimeException("UtenteNonAbilitatoCsiException", e);
+				throw new RuntimeException("UtenteNonAbilitatoCsiException - return null", e);
 		}
 		return null;
 	}

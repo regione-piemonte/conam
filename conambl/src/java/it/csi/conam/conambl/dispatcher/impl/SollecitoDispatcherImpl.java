@@ -13,6 +13,9 @@ import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.notifica.NotificaVO;
 import it.csi.conam.conambl.vo.sollecito.SollecitoVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +48,6 @@ public class SollecitoDispatcherImpl implements SollecitoDispatcher {
 	@Override
 	public void inviaRichiestaBollettiniByIdSollecito(Integer idSollecito) {
 		allegatoSollecitoService.inviaRichiestaBollettiniByIdSollecito(idSollecito);
-
 	}
 
 	// 20200825_LC nuovo type per doc multiplo
@@ -65,10 +67,16 @@ public class SollecitoDispatcherImpl implements SollecitoDispatcher {
 		return sollecitoService.getSollecitoById(id);
 	}
 
+	//E14 rimossa 20240722 Genco Pasqualini
+//	@Override
+//	public RiconciliaSollecitoResponse riconcilaSollecito(SollecitoVO sollecito, UserDetails user) {
+//		return sollecitoService.riconcilaSollecito(sollecito, user);
+//	}
+	//aggiunta
 	@Override
-	public RiconciliaSollecitoResponse riconcilaSollecito(SollecitoVO sollecito, UserDetails user) {
-		return sollecitoService.riconcilaSollecito(sollecito, user);
-	}
+	public RiconciliaSollecitoResponse riconciliaSollecito(List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
+		return sollecitoService.riconciliaSollecito(data, file, userDetails);
+	};
 
 	@Override
 	public IsCreatedVO isLetteraSollecitoSaved(Integer idSollecito) {
@@ -84,5 +92,6 @@ public class SollecitoDispatcherImpl implements SollecitoDispatcher {
 	public List<SollecitoVO> getSollecitiByIdPianoRateizzazione(Integer idPianoRateizzazione) {
 		return sollecitoService.getSollecitiByIdPianoRateizzazione(idPianoRateizzazione);
 	}
+	
 	
 }

@@ -92,6 +92,13 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 			"where  a.id_tipo_allegato in (11,12,34,35, 21) and ao.id_ordinanza = ?1 ", nativeQuery = true)
 	List<CnmTAllegato> findAllegatiLetteraOrdinanza(Integer idOrdinanza);
 	
+	// 20210422_LC
+	@Query(value = "select a.* from cnm_t_allegato a " + //
+			"join cnm_r_allegato_ordinanza ao on ao.id_allegato = a.id_allegato " + //
+			"where  a.id_tipo_allegato in (11,12,34,35, 21) and ao.id_ordinanza = ?1 "+
+			"and a.numero_protocollo is null", nativeQuery = true)
+	List<CnmTAllegato> findAllegatiLetteraOrdinanzaNonProt(Integer idOrdinanza);
+
 	@Query(value = "select a.* from cnm_t_allegato a " + //
 			"join cnm_r_allegato_ord_verb_sog aovs on aovs.id_allegato = a.id_allegato " + //
 			"join cnm_r_ordinanza_verb_sog ovs on ovs.id_ordinanza_verb_sog = aovs.id_ordinanza_verb_sog " + //
@@ -128,4 +135,6 @@ public interface CnmTAllegatoRepository extends CrudRepository<CnmTAllegato, Int
 	List<CnmTAllegato> findAllegatiSollecitoByIdOrdVerbSog(Integer idOrdinanzaVerbaleSoggetto);
 
 	CnmTAllegato findByIdActa(String idActa);
+	
+	List<CnmTAllegato> findByIdActaMaster(String idActa);
 }

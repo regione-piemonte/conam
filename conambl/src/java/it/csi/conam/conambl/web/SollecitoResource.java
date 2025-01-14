@@ -4,15 +4,22 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web;
 
+import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.dispatcher.SollecitoDispatcher;
 import it.csi.conam.conambl.request.riscossione.SalvaSollecitoRequest;
 import it.csi.conam.conambl.response.DocumentResponse;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.SpringSupportedResource;
+import it.csi.conam.conambl.vo.ExceptionVO;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.sollecito.SollecitoVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.jboss.resteasy.spi.validation.ValidateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 @Path("sollecito")
 @Consumes({ MediaType.APPLICATION_JSON })
@@ -53,11 +61,24 @@ public class SollecitoResource extends SpringSupportedResource {
 		return Response.ok().build();
 	}
 
+	//REQ68
 	@POST
 	@Path("/inviaRichiestaBollettiniSollecito/{idSollecito}")
 	public Response inviaRichiestaBollettiniOrdinanza(@PathParam("idSollecito") Integer idSollecito) {
-		sollecitoDispatcher.inviaRichiestaBollettiniByIdSollecito(idSollecito);
-		return Response.ok().build();
+		
+		try {
+			sollecitoDispatcher.inviaRichiestaBollettiniByIdSollecito(idSollecito);
+		} catch(BusinessException e) {
+			ExceptionVO exception = new ExceptionVO(
+					ErrorCode.BOLLETTINI_ERRORE_GENERAZIONE,
+					e.getCodice(),
+					"danger"
+			);
+            
+			return Response.ok().entity(exception).build();
+        }      
+	       
+        return Response.ok().build();
 	}
 
 	@GET
@@ -109,11 +130,22 @@ public class SollecitoResource extends SpringSupportedResource {
 		return Response.ok().entity(response).build();
 	}
 
+	//Prima degli sviluppi della. E14
+//	@POST
+//	@Path("/riconciliaSollecito")
+//	public Response riconciliaSollecito(SollecitoVO sollecito) {
+//		UserDetails user = SecurityUtils.getUser();
+//		return Response.ok().entity(sollecitoDispatcher.riconcilaSollecito(sollecito, user)).build();
+//	}
+	
+	//E14 modificata per ricevere in input un allegato -  20240722 Genco Pasqualini
 	@POST
 	@Path("/riconciliaSollecito")
-	public Response riconciliaSollecito(SollecitoVO sollecito) {
+	@Consumes("multipart/form-data")
+	public Response riconciliaSollecito(MultipartFormDataInput input) {
 		UserDetails user = SecurityUtils.getUser();
-		return Response.ok().entity(sollecitoDispatcher.riconcilaSollecito(sollecito, user)).build();
+		Map<String, List<InputPart>> map = input.getFormDataMap();
+		return Response.ok(sollecitoDispatcher.riconciliaSollecito(map.get("data"), map.get("files"), user)).build();
 	}
 
 	@POST

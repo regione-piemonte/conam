@@ -135,6 +135,12 @@ public class OrdinanzaDispatcherImpl implements OrdinanzaDispatcher {
 		allegatoOrdinanzaService.inviaRichiestaBollettiniByIdOrdinanza(idOrdinanza);
 	}
 
+	
+	@Override
+	public void protocollaLetteraSenzaBollettini(Integer idOrdinanza) {
+		allegatoOrdinanzaService.protocollaLetteraSenzaBollettini(idOrdinanza);
+	}
+
 	// 20200825_LC nuovo type per doc multiplo
 	@Override
 	public List<DocumentoScaricatoVO> dowloadBollettiniOrdinanza(Integer idOrdinanza) {

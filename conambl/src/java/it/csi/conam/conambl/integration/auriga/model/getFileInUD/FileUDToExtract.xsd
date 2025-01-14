@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2018 rel. 2 sp1 (http://www.altova.com) by Valentina Martinucci (Engineering) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:complexType name="TimbroType">
+		<xs:sequence>
+			<xs:element name="Finalita" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Indica la finalità specifica del timbro. Se non indicata è un timbro che attesta solo la registrazione del documento a protocollo/repertorio</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="CONFORMITA_ORIG_CARTACEO"/>
+						<xs:enumeration value="CONFORMITA_ORIG_DIGITALE"/>
+						<xs:enumeration value="CERTIFICAZIONE_FIRMA"/>
+						<xs:enumeration value="VERS_STAMPA_PUBBLICAZIONE"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:choice>
+				<xs:element name="FlgBustaPdf" fixed="1">
+					<xs:annotation>
+						<xs:documentation>Se è uguale a 1 crea una busta Pdf timbrata avente i file del documento come allegati del pdf, se 0 il timbro viene apposto sul file originale 
+					</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:integer">
+								<xs:attribute name="VersPubblicabile" type="xs:boolean" use="optional" default="false">
+									<xs:annotation>
+										<xs:documentation>Se FlgBustaPdf=1 e se VersPubblicabile è true i file allegati al pdf sono le eventuali versioni con omissis per pubblicazione</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="OpzioniTimbro">
+					<xs:annotation>
+						<xs:documentation>Opzioni del timbro da apporre sui documenti. Vengono considerate solo se FlgBustaPdf non è impostato a 1</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="PosizioneTimbro">
+								<xs:annotation>
+									<xs:documentation>Posizione del timbro. Valori ammessi : ALTO_DX=in alto a destra;  ALTO_SN=in alto a sinistra; BASSO_SN=in basso a sinistra;  BASSO_DX=in basso a destra</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="ALTO_DX"/>
+										<xs:enumeration value="ALTO_SN"/>
+										<xs:enumeration value="BASSO_SN"/>
+										<xs:enumeration value="BASSO_DX"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+
+							<xs:element name="RotazioneTimbro">
+								<xs:annotation>
+									<xs:documentation>Rotazione del timbro.Valori ammessi : VERTICALE=verticale; ORIZZONTALE=orizontale </xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="VERTICALE"/>
+										<xs:enumeration value="ORIZZONTALE"/>
+									</xs:restriction>
+								</xs:simpleType>
+
+							</xs:element>
+							<xs:choice>
+								<xs:element name="PaginaTimbro">
+									<xs:annotation>
+										<xs:documentation>Pagine del documento sul quale apporre il timbro. Valori ammessi : PRIMA=prima; ULTIMA=ultima; TUTTE=tutte; INTERVALLO=intervallo</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:enumeration value="PRIMA"/>
+											<xs:enumeration value="ULTIMA"/>
+											<xs:enumeration value="TUTTE"/>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:element>
+								<xs:element name="IntervalloPagine" type="IntervalloPagineType">
+									<xs:annotation>
+										<xs:documentation>Intervallo di pagine sul quale apporre il timbro.</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:choice>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="IntervalloPagineType">
+		<xs:sequence>
+			<xs:annotation>
+				<xs:documentation>Intervallo : da - a</xs:documentation>
+			</xs:annotation>
+			<xs:element name="da" type="xs:positiveInteger"/>
+			<xs:element name="a" type="xs:positiveInteger"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="SiglaRegNumType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AnnoType">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1900"/>
+			<xs:maxInclusive value="2100"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NumRegType">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1"/>
+			<xs:maxInclusive value="9999999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="EstremiRegNumType">
+		<xs:all>
+			<xs:element name="CategoriaReg" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Categoria di registrazione / numerazione; valori ammessi PG=Protocollo Generale; PP=Protocollo Particolare; R=Repertorio; E=Registrazione d'emergenza; A=Altra numerazione data esternamente al sistema documentale; I=Altra numerazione data internamente al sistema documentale</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="PG"/>
+						<xs:enumeration value="PP"/>
+						<xs:enumeration value="R"/>
+						<xs:enumeration value="E"/>
+						<xs:enumeration value="A"/>
+						<xs:enumeration value="I"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="SiglaReg" type="SiglaRegNumType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Sigla che identifica il registro/tipo della numerazione specificata</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="AnnoReg" type="AnnoType"/>
+			<xs:element name="NumReg" type="NumRegType"/>
+		</xs:all>
+	</xs:complexType>
+	<xs:complexType name="OggDiTabDiSistemaType">
+		<xs:annotation>
+			<xs:documentation>Rappresenta un oggetto censito in una tabella di sistema del sistema documentale</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="CodId" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Identificativo del dato di sistema nella banca dati del sistema documentale</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Decodifica_Nome" type="xs:string"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="EstremiXIdentificazioneFileUDType">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="IdDoc" type="xs:integer">
+					<xs:annotation>
+						<xs:documentation>Id. del documento - primario o allegato cui è relativo il file da estrarre</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="FlagPrimario" fixed="1">
+					<xs:annotation>
+						<xs:documentation>Se valorizzato il file è relativo al documento primario dell'unità documentaria</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:annotation>
+						<xs:documentation>Dati per individuare l'allegato cui è relativo il file</xs:documentation>
+					</xs:annotation>
+					<xs:element name="NroAllegato" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>E' il n.ro di allegato cui è relativo il file</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:positiveInteger">
+								<xs:minInclusive value="1"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="TipoDocAllegato" type="OggDiTabDiSistemaType" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Tipo dell'allegato</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="DesAllegato" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Descrizione/oggetto dell'allegato (ricerca full-text; può essere anche una o più parole contenute nell'oggetto/descrizione)</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+				<xs:element name="NomeFile" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>Nome del file da estrarre (può essere anche una parte del nome file se si specifica carattere wildcard; la ricerca per questo campo è case-insensitive)</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+			<xs:element name="NroVersione" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Nro di versione del file; se non specificata si intende l'ultima visibile a chi richiede l'estrazione (e se il NomeFile è indicato è l'ultima versione visibile che soddisfa quel NomeFile)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:positiveInteger">
+						<xs:minInclusive value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EstremiXIdentificazioneUDType">
+		<xs:annotation>
+			<xs:documentation>Contiene i dati attraverso cui identificare univocamente un'unità documentaria</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="IdUD" type="xs:integer">
+				<xs:annotation>
+					<xs:documentation>Identificativo univoco dell'unità documentaria all'interno del sistema documentale</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="EstremiRegNum" type="EstremiRegNumType">
+				<xs:annotation>
+					<xs:documentation>Estremi di registrazione/numerazione attraverso cui identificare un'unità documentaria</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="EstremiXidentificazioneVerDocType">
+		<xs:sequence>
+			<xs:element name="EstremiXIdentificazioneUD" type="EstremiXIdentificazioneUDType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Estremi per identificare a quale unità documentaria e' relativo il file. Può non essere valorizzata se il file da estrarre viene indicato tramite IdDoc
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="EstremixIdentificazioneFileUD" type="EstremiXIdentificazioneFileUDType">
+				<xs:annotation>
+					<xs:documentation>Estremi per identificare qual'è il file della versione</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:choice>
+				<xs:element name="GetSbustato" type="xs:integer" fixed="1" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Se settato a 1 restituisce il file sbustato se è un p7m / tsd
+					</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Timbro" type="TimbroType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Parametri per la timbratura del documento. Se impostati viene restituito il file timbrato anzichè quello originale
+					</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="FileUDToExtract" type="EstremiXidentificazioneVerDocType">
+		<xs:annotation>
+			<xs:documentation>ROOT element. Contiene gli estremi per individuare il file da estrarre</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+</xs:schema>

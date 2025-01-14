@@ -160,14 +160,14 @@ public class RicercaOrdinanzaServiceImpl implements RicercaOrdinanzaService {
 		List<CnmTSoggetto> obbligatoInSolido = new ArrayList<>();
 		if (soggetti != null && !soggetti.isEmpty()) {
 			for (SoggettoRequest s : soggetti) {
-				CnmTSoggetto cnmTSoggetto = null;
+				List<CnmTSoggetto> cnmTSoggetto = null;
 				String tipo = s.getTipoSoggetto();
-				if ((cnmTSoggetto = commonSoggettoService.getSoggettoFromDb(new MinSoggettoVO(s), true)) == null)
+				if ((cnmTSoggetto = commonSoggettoService.getSoggettiFromDb(new MinSoggettoVO(s), true)) == null)
 					return ordinanzeList;
 				if (tipo != null && tipo.equals(Constants.TYPE_SOGGETTO_RICERCA_TRASGRESSORE))
-					trasgressore.add(cnmTSoggetto);
+					trasgressore.addAll(cnmTSoggetto);
 				if (tipo != null && tipo.equals(Constants.TYPE_SOGGETTO_RICERCA_OBBLIGATO_IN_SOLIDO))
-					obbligatoInSolido.add(cnmTSoggetto);
+					obbligatoInSolido.addAll(cnmTSoggetto);
 			}
 
 		}

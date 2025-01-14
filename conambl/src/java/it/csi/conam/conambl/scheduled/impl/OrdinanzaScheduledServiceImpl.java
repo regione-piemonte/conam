@@ -305,7 +305,8 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 				// Aggiunge allegato sul master
 				responseAggiungiAllegato = doquiServiceFacade.aggiungiAllegato(null, cnmTAllegatoBollettino.getNomeFile(), cnmTAllegatoBollettino.getIdIndex(), cnmTAllegatoMaster.getIdActa(),
 						utilsDoqui.createIdEntitaFruitore(cnmTSollecito, cnmTAllegatoBollettino.getCnmDTipoAllegato()), "", utilsDoqui.getSoggettoActa(cnmTSollecito),
-						utilsDoqui.getRootActa(cnmTSollecito), cnmTAllegatoBollettino.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegatoBollettino.getDataOraInsert().getTime()));
+						utilsDoqui.getRootActa(cnmTSollecito), cnmTAllegatoBollettino.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegatoBollettino.getDataOraInsert().getTime()),
+						null, null);
 			} catch (Exception e) {
 				logger.error("Non riesco ad aggiungere l'allegato al master", e);
 				cnmTAllegatoBollettino.setCnmDStatoAllegato(avviospostamentoActa);
@@ -428,7 +429,8 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 				// Aggiunge allegato sul master
 				responseAggiungiAllegato = doquiServiceFacade.aggiungiAllegato(null, cnmTAllegatoBollettino.getNomeFile(), cnmTAllegatoBollettino.getIdIndex(), cnmTAllegatoMaster.getIdActa(),
 						utilsDoqui.createIdEntitaFruitore(cnmTSollecito, cnmTAllegatoBollettino.getCnmDTipoAllegato()), "", utilsDoqui.getSoggettoActa(cnmTSollecito),
-						utilsDoqui.getRootActa(cnmTSollecito), cnmTAllegatoBollettino.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegatoBollettino.getDataOraInsert().getTime()));
+						utilsDoqui.getRootActa(cnmTSollecito), cnmTAllegatoBollettino.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegatoBollettino.getDataOraInsert().getTime()),
+						null, null);
 			} catch (Exception e) {
 				logger.error("Non riesco ad aggiungere l'allegato al master", e);
 				cnmTAllegatoBollettino.setCnmDStatoAllegato(avviospostamentoActa);
@@ -551,7 +553,8 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 			try {
 				responseAggiungiAllegato = doquiServiceFacade.aggiungiAllegato(null, cnmTAllegatoBollettino.getNomeFile(), cnmTAllegatoBollettino.getIdIndex(), cnmTAllegatoMaster.getIdActa(),
 						utilsDoqui.createIdEntitaFruitore(cnmTPianoRate, cnmTAllegatoBollettino.getCnmDTipoAllegato()), "", utilsDoqui.getSoggettoActa(cnmTPianoRate),
-						utilsDoqui.getRootActa(cnmTPianoRate), cnmTAllegatoBollettino.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegatoBollettino.getDataOraInsert().getTime()));
+						utilsDoqui.getRootActa(cnmTPianoRate), cnmTAllegatoBollettino.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegatoBollettino.getDataOraInsert().getTime()),
+						null, null);
 			} catch (Exception e) {
 				logger.error("Non riesco ad aggiungere l'allegato al master", e);
 				cnmTAllegatoBollettino.setCnmDStatoAllegato(avviospostamentoActa);
@@ -662,7 +665,8 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 					try {
 						responseAggiungiAllegato = doquiServiceFacade.aggiungiAllegato(null, cnmTAllegato.getNomeFile(), cnmTAllegato.getIdIndex(), cnmTAllegatoMasterIstanza.getIdActa(),
 								utilsDoqui.createIdEntitaFruitore(cnmTOrdinanza, cnmTAllegato.getCnmDTipoAllegato()), "", utilsDoqui.getSoggettoActa(cnmTOrdinanza),
-								utilsDoqui.getRootActa(cnmTOrdinanza), cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegato.getDataOraInsert().getTime()));
+								utilsDoqui.getRootActa(cnmTOrdinanza), cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegato.getDataOraInsert().getTime()),
+								null, null);
 					} catch (Exception e) {
 						logger.error("Non riesco ad aggiungere l'allegato al master", e);
 						cnmTAllegato.setCnmDStatoAllegato(avviospostamentoActa);
@@ -753,14 +757,14 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
 		String operationToTrace = null;
 		
-		CnmTAllegato cnmTAllegatoMaster = Iterables.tryFind(cnmTAllegatos, UtilsTipoAllegato.findCnmTAllegatoInCnmTAllegatosByTipoAllegato(TipoAllegato.LETTERA_ORDINANZA)).orNull();
+		CnmTAllegato cnmTAllegatoMaster = Iterables.tryFind(cnmTAllegatos, UtilsTipoAllegato.findCnmTAllegatoInCnmTAllegatosByTipoAllegatoNonProt(TipoAllegato.LETTERA_ORDINANZA)).orNull();
 		// GESTIONE ORDINANZE (11,12,34,35): se è presente la lettera già protocollata, allora bisogna spostare in acta il suo allegato (ordinanza)
 		if (cnmTAllegatoMaster != null && cnmTAllegatoMaster.getCnmDStatoAllegato().getIdStatoAllegato() == Constants.STATO_ALLEGATO_NON_PROTOCOLLARE) {
 			logger.info("Trovato allegato master (lettera) in stato protocollato");
 
 			// recupero allegati solo quelli del tipo giusto (11,12,34,35)
 			// TODO - aggiungere tipo allegtato 21 (bellettini)
-			List<CnmTAllegato> cnmTAllegatoList = cnmTAllegatoRepository.findAllegatiLetteraOrdinanza(cnmTOrdinanza.getIdOrdinanza());	
+			List<CnmTAllegato> cnmTAllegatoList = cnmTAllegatoRepository.findAllegatiLetteraOrdinanzaNonProt(cnmTOrdinanza.getIdOrdinanza());	
 			
 			// aggiorno in spostamento
 			cnmTAllegatoList = allegatoScheduledService.updateCnmDStatoAllegatoInCoda(cnmTAllegatoList);
@@ -773,7 +777,8 @@ public class OrdinanzaScheduledServiceImpl implements OrdinanzaScheduledService 
 					try {
 						responseAggiungiAllegato = doquiServiceFacade.aggiungiAllegato(null, cnmTAllegato.getNomeFile(), cnmTAllegato.getIdIndex(), cnmTAllegatoMaster.getIdActa(),
 								utilsDoqui.createIdEntitaFruitore(cnmTOrdinanza, cnmTAllegato.getCnmDTipoAllegato()), "", utilsDoqui.getSoggettoActa(cnmTOrdinanza),
-								utilsDoqui.getRootActa(cnmTOrdinanza), cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegato.getDataOraInsert().getTime()));
+								utilsDoqui.getRootActa(cnmTOrdinanza), cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato(), DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_ALLEGATI_AL_MASTER_USCITA, null, new Date(cnmTAllegato.getDataOraInsert().getTime()),
+								null, null);
 					} catch (Exception e) {
 						logger.error("Non riesco ad aggiungere l'allegato al master", e);
 						cnmTAllegato.setCnmDStatoAllegato(avviospostamentoActa);

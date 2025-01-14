@@ -134,8 +134,7 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 			}
 		} else {
 			if (isRicercaCodFiscaleOrPiva) {
-				cnmTSoggetto =
-					cnmTSoggettoRepository.findOne(
+				List<CnmTSoggetto> soggettoList = cnmTSoggettoRepository.findAll(
 						CnmTSoggettoSpecification.findSocietaByCodFiscaleOrPivaOrRagioneSociale(
 							minSoggettoVO.getCodiceFiscale(),
 							minSoggettoVO.getPartitaIva(),
@@ -143,6 +142,9 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 							isRicerca
 						)
 					);
+				if(soggettoList != null && soggettoList.size()>0) {
+					cnmTSoggetto = soggettoList.get(0);
+				}
 			} else {
 				
 				List<CnmTSoggetto> soggettoList = cnmTSoggettoRepository.findAll(
@@ -199,16 +201,17 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 			}
 		} else {
 			if (isRicercaCodFiscaleOrPiva) {
-				cnmTSoggettos.add(
-					cnmTSoggettoRepository.findOne(
-						CnmTSoggettoSpecification.findSocietaByCodFiscaleOrPivaOrRagioneSociale(
-							minSoggettoVO.getCodiceFiscale(),
-							minSoggettoVO.getPartitaIva(),
-							null,
-							isRicerca
-								)
-						)
-					);
+				List<CnmTSoggetto> soggettoList = cnmTSoggettoRepository.findAll(
+					CnmTSoggettoSpecification.findSocietaByCodFiscaleOrPivaOrRagioneSociale(
+						minSoggettoVO.getCodiceFiscale(),
+						minSoggettoVO.getPartitaIva(),
+						null,
+						isRicerca
+							)
+				);
+				if(soggettoList != null && soggettoList.size()>0) {
+					cnmTSoggettos = soggettoList;
+				}
 			} else {
 				
 				List<CnmTSoggetto> soggettoList = cnmTSoggettoRepository.findAll(
@@ -231,21 +234,25 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 	@Override
 	public CnmTSoggetto updateSoggettoDBWithIdStas(CnmTSoggetto cnmTSoggetto, CnmTUser cnmTUser, SoggettoVO sogDb, SoggettoVO sogStas, SoggettoVO soggetto) {
 		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
-		cnmTSoggetto = cnmTSoggettoRepository.findOne(sogDb.getId());
-		cnmTSoggetto.setIdStas(sogStas.getIdStas());
-		CnmTPersona cnmTPersona = cnmTSoggetto.getCnmTPersona();
-		CnmTSocieta cnmTSocieta = cnmTSoggetto.getCnmTSocieta();
-
-		if (cnmTPersona != null) {
-			cnmTPersonaRepository.delete(cnmTPersona);
-		} else if (cnmTSocieta != null) {
-			cnmTSocietaRepository.delete(cnmTSocieta);
+		CnmTSoggetto cnmTSoggettoNew = cnmTSoggettoRepository.findOne(sogDb.getId());
+		cnmTSoggettoNew.setIdStas(sogStas.getIdStas());
+		CnmTPersona cnmTPersona = null;
+		CnmTSocieta cnmTSocieta = null;
+		if(cnmTSoggetto != null){
+			cnmTPersona = cnmTSoggetto.getCnmTPersona();
+			cnmTSocieta = cnmTSoggetto.getCnmTSocieta();
+		
+			if (cnmTPersona != null) {
+				cnmTPersonaRepository.delete(cnmTPersona);
+			} else if (cnmTSocieta != null) {
+				cnmTSocietaRepository.delete(cnmTSocieta);
+			}
 		}
-		cnmTSoggetto.setCnmTPersona(null);
-		cnmTSoggetto.setCnmTSocieta(null);
-		cnmTSoggetto.setCnmTUser1(cnmTUser);
-		cnmTSoggetto.setDataOraUpdate(now);
-		cnmTSoggetto = cnmTSoggettoRepository.saveAndFlush(cnmTSoggetto);
+		cnmTSoggettoNew.setCnmTPersona(null);
+		cnmTSoggettoNew.setCnmTSocieta(null);
+		cnmTSoggettoNew.setCnmTUser1(cnmTUser);
+		cnmTSoggettoNew.setDataOraUpdate(now);
+		cnmTSoggettoNew = cnmTSoggettoRepository.saveAndFlush(cnmTSoggettoNew);
 
 		cnmTPersonaRepository.flush();
 		cnmTSocietaRepository.flush();
@@ -259,7 +266,7 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 			cnmTPersona.setCnmTUser2(cnmTUser);
 			cnmTPersona.setDataOraInsert(now);
 			cnmTPersonaRepository.save(cnmTPersona);
-			cnmTSoggetto.setCnmTPersona(cnmTPersona);
+			cnmTSoggettoNew.setCnmTPersona(cnmTPersona);
 		}
 
 		if (soggetto.getRegioneNascita().getId() != null && sogStas.getRegioneNascita() == null) {
@@ -268,10 +275,10 @@ public class CommonSoggettoServiceImpl implements CommonSoggettoService {
 			cnmTPersona.setCnmTUser2(cnmTUser);
 			cnmTPersona.setDataOraInsert(now);
 			cnmTPersonaRepository.save(cnmTPersona);
-			cnmTSoggetto.setCnmTPersona(cnmTPersona);
+			cnmTSoggettoNew.setCnmTPersona(cnmTPersona);
 		}
 
-		return cnmTSoggetto;
+		return cnmTSoggettoNew;
 	}
 	
 	@Override

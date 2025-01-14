@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.print.PrintException;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
 
 import it.csi.conam.conambl.business.service.TemplateService;
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
@@ -29,7 +29,7 @@ import it.csi.conam.conambl.business.service.util.UtilsReport;
 import it.csi.conam.conambl.business.service.verbale.AllegatoVerbaleSoggettoService;
 import it.csi.conam.conambl.common.Constants;
 import it.csi.conam.conambl.common.Report;
-import it.csi.conam.conambl.integration.beans.Soggetto;
+
 import it.csi.conam.conambl.integration.entity.CnmCParametro;
 import it.csi.conam.conambl.integration.entity.CnmDMessaggio;
 import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
@@ -48,10 +48,10 @@ import it.csi.conam.conambl.integration.repositories.CnmTSollecitoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
 import it.csi.conam.conambl.request.template.DatiTemplateRequest;
 import it.csi.conam.conambl.security.UserDetails;
-import it.csi.conam.conambl.util.UtilsParametro;
 import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.luoghi.ComuneVO;
 import it.csi.conam.conambl.vo.luoghi.ProvinciaVO;
+import it.csi.conam.conambl.vo.template.DatiSoggettoModificati;
 import it.csi.conam.conambl.vo.template.DatiTemplateCompilatiVO;
 import it.csi.conam.conambl.vo.template.DatiTemplateVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
@@ -96,34 +96,46 @@ public class TemplateServiceImpl implements TemplateService {
 	private CnmDMessaggioRepository cnmDMessaggioRepository;
 
 	@Override
-	public DatiTemplateVO getDatiTemplate(DatiTemplateRequest request, UserDetails userDetails ) {
+	public DatiTemplateVO getDatiTemplate(DatiTemplateRequest request, UserDetails userDetails) {
 		if (request.getCodiceTemplate() == null)
 			throw new IllegalArgumentException("codice template non valorizzato");
 
 		Report report = Report.getByCodiceFrontend(request.getCodiceTemplate());
 		DatiTemplateVO response = null;
-		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());	
-		
-		
+		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());
+
 		switch (report) {
 		case REPORT_CONVOCAZIONE_AUDIZIONE:
-			if(request.getIdVerbale() == null) {
+			if (request.getIdVerbale() == null) {
 				response = getDatiTemplateConvocazioneleAudizione(request.getIdVerbaleSoggettoList());
-			}else {
+			} else {
 				// 20210906 PP - Convocazione audizione utenti esterni
-				response = getDatiTemplateConvocazioneAudizioneEsterni(request.getIdVerbale(), request.getSoggettoList());
+				response = getDatiTemplateConvocazioneAudizioneEsterni(request.getIdVerbale(),
+						request.getSoggettoList());
 			}
 			break;
 		case REPORT_VERBALE_AUDIZIONE:
 			response = getDatiTemplateVerbaleAudizione(request.getIdVerbaleSoggettoList());
 			break;
-		case REPORT_LETTERA_ACCOMPAGNAMENTO_ARCHIVIAZIONE:			
-			response = getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza());		
-			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));					
+		case REPORT_LETTERA_ACCOMPAGNAMENTO_ARCHIVIAZIONE:
+			response = getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza());
+			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));
+			// E2_2023-0B35
+			CnmCParametro cnmCParametroTestoLibero2 = cnmCParametroRepository
+					.findByIdParametro(Constants.ID_TESTO_LIBERO_2_ARCHIVIAZIONE);
+			if (cnmCParametroTestoLibero2 != null)
+				response.setTestoLibero2(cnmCParametroTestoLibero2.getValoreString());
+			
+			// E2_2023-0B35
+			CnmCParametro oggettoLettera = cnmCParametroRepository
+					.findByIdParametro(Constants.ID_OGGETTO_LETTERA_ARCHIVIAZIONE);
+			if (oggettoLettera != null)
+				response.setOggettoLettera(oggettoLettera.getValoreString());
+			
 			break;
-		case REPORT_LETTERA_ACCOMPAGNAMENTO_INGIUNZIONE:			
-			response = getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza());		
-			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));		
+		case REPORT_LETTERA_ACCOMPAGNAMENTO_INGIUNZIONE:
+			response = getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza());
+			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));
 			// 20230110 PP
 			setTestiLiberiIngiunzione(response);
 			break;
@@ -133,28 +145,30 @@ public class TemplateServiceImpl implements TemplateService {
 		case REPORT_LETTERA_SOLLECITO:
 			response = getDatiTemplateSollecitoPagamento(request.getIdSollecito());
 			break;
-		case REPORT_LETTERA_ACCOMPAGNAMENTO_ANNULLAMENTO:			
-			response = getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza());			
-			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));	
+		case REPORT_LETTERA_ACCOMPAGNAMENTO_ANNULLAMENTO:
+			response = getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza());
+			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));
 			break;
 		case REPORT_LETTERA_SOLLECITO_RATE:
 			response = getDatiTemplateSollecitoPagamento(request.getIdSollecito());
-			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));		
+			response.setFunzionario(this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));
 			break;
 		default:
 			throw new IllegalArgumentException("codice report non trovato");
 		}
-		
 
 		// 20230605 - E9 - imposto dati sede ente su tutti i template
 		CnmCParametro cnmCParametroSe = cnmCParametroRepository.findByIdParametro(Constants.ID_SEDE_ENTE);
-		if(cnmCParametroSe != null) response.setSedeEnte(cnmCParametroSe.getValoreString());
+		if (cnmCParametroSe != null)
+			response.setSedeEnte(cnmCParametroSe.getValoreString());
 		CnmCParametro cnmCParametroSet = cnmCParametroRepository.findByIdParametro(Constants.ID_SEDE_ENTE_TESTO_WEB);
-		if(cnmCParametroSet != null) response.setSedeEnteTesto(cnmCParametroSet.getValoreString());
+		if (cnmCParametroSet != null)
+			response.setSedeEnteTesto(cnmCParametroSet.getValoreString());
 		// 20230605 - E8 - imposto dati sede ente su tutti i template
 		CnmCParametro cnmCParametroDir = cnmCParametroRepository.findByIdParametro(Constants.ID_DIRIGENTE_SETTORE);
-		if(cnmCParametroDir != null) response.setDirigenteLettera(cnmCParametroDir.getValoreString());
-		
+		if (cnmCParametroDir != null)
+			response.setDirigenteLettera(cnmCParametroDir.getValoreString());
+
 		return response;
 	}
 
@@ -163,7 +177,8 @@ public class TemplateServiceImpl implements TemplateService {
 		response.setEmail("XXXX@legalmail.it");
 		response.setEmailOrgano("YYYYYY@cert.regione.piemonte.it");
 		response.setIntestazioneConoscenza("e p.c.:");
-		response.setTestoLibero("Si tramette all'accertatore per conoscenza, senza richiedere ulteriori attività da parte sua.");		
+		response.setTestoLibero(
+				"Si tramette all'accertatore per conoscenza, senza richiedere ulteriori attività da parte sua.");
 	}
 
 	@Override
@@ -173,49 +188,61 @@ public class TemplateServiceImpl implements TemplateService {
 
 		Report report = Report.getByCodiceFrontend(request.getCodiceTemplate());
 
-		
 		byte[] response;
 		CnmTAllegato cnmTAllegato;
 		switch (report) {
 		case REPORT_CONVOCAZIONE_AUDIZIONE:
 			List<CnmTAllegato> cnmTAllegatos2;
-			if(request.getIdVerbale()==null) {
-				response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateConvocazioneleAudizione(request.getIdVerbaleSoggettoList()), user);
-				cnmTAllegatos2 = allegatoVerbaleSoggettoService.salvaConvocazioneAudizione(request.getIdVerbaleSoggettoList(), response, user);
-			}else {
+			if (request.getIdVerbale() == null) {
+				response = stampaTemplateByCodice(request, report.getCodiceDB(),
+						getDatiTemplateConvocazioneleAudizione(request.getIdVerbaleSoggettoList()), user);
+				cnmTAllegatos2 = allegatoVerbaleSoggettoService
+						.salvaConvocazioneAudizione(request.getIdVerbaleSoggettoList(), response, user);
+			} else {
 				// 20210906 PP - convocazione audizione soggetti esterni
-				response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateConvocazioneAudizioneEsterni(request.getIdVerbale(), request.getSoggettoList()), user);
-				cnmTAllegatos2 = allegatoVerbaleSoggettoService.salvaConvocazioneAudizioneEsterni(request.getIdVerbale(), request.getSoggettoList(), response, user);
+				response = stampaTemplateByCodice(request, report.getCodiceDB(),
+						getDatiTemplateConvocazioneAudizioneEsterni(request.getIdVerbale(), request.getSoggettoList()),
+						user);
+				cnmTAllegatos2 = allegatoVerbaleSoggettoService.salvaConvocazioneAudizioneEsterni(
+						request.getIdVerbale(), request.getSoggettoList(), response, user);
 			}
 			cnmTAllegato = cnmTAllegatos2.get(0);
 			break;
 		case REPORT_VERBALE_AUDIZIONE:
-			response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateVerbaleAudizione(request.getIdVerbaleSoggettoList()), user);
-			List<CnmTAllegato> cnmTAllegatos = allegatoVerbaleSoggettoService.salvaVerbaleAudizione(request.getIdVerbaleSoggettoList(), response, user);
+			response = stampaTemplateByCodice(request, report.getCodiceDB(),
+					getDatiTemplateVerbaleAudizione(request.getIdVerbaleSoggettoList()), user);
+			List<CnmTAllegato> cnmTAllegatos = allegatoVerbaleSoggettoService
+					.salvaVerbaleAudizione(request.getIdVerbaleSoggettoList(), response, user);
 			cnmTAllegato = cnmTAllegatos.get(0);
 			break;
 		case REPORT_LETTERA_ACCOMPAGNAMENTO_ARCHIVIAZIONE:
-			response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza()), user);
+			response = stampaTemplateByCodice(request, report.getCodiceDB(),
+					getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza()), user);
 			cnmTAllegato = allegatoOrdinanzaService.salvaLetteraOrdinanza(request.getIdOrdinanza(), response, user);
 			break;
 		case REPORT_LETTERA_ACCOMPAGNAMENTO_INGIUNZIONE:
-			response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza()), user);
+			response = stampaTemplateByCodice(request, report.getCodiceDB(),
+					getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza()), user);
 			cnmTAllegato = allegatoOrdinanzaService.salvaLetteraOrdinanza(request.getIdOrdinanza(), response, user);
 			break;
 		case REPORT_LETTERA_RATEIZZAZIONE:
-			response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateRateizzazione(request.getIdPiano()), user);
+			response = stampaTemplateByCodice(request, report.getCodiceDB(),
+					getDatiTemplateRateizzazione(request.getIdPiano()), user);
 			cnmTAllegato = allegatoPianoRateizzazioneService.salvaLetteraPiano(request.getIdPiano(), response, user);
 			break;
 		case REPORT_LETTERA_SOLLECITO:
-			response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateSollecitoPagamento(request.getIdSollecito()), user);
+			response = stampaTemplateByCodice(request, report.getCodiceDB(),
+					getDatiTemplateSollecitoPagamento(request.getIdSollecito()), user);
 			cnmTAllegato = allegatoSollecitoService.salvaLetteraSollecito(request.getIdSollecito(), response, user);
 			break;
-		case REPORT_LETTERA_ACCOMPAGNAMENTO_ANNULLAMENTO:	
-			response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza()), user);
+		case REPORT_LETTERA_ACCOMPAGNAMENTO_ANNULLAMENTO:
+			response = stampaTemplateByCodice(request, report.getCodiceDB(),
+					getDatiTemplateLetteraOrdinanza(request.getIdOrdinanza()), user);
 			cnmTAllegato = allegatoOrdinanzaService.salvaLetteraOrdinanza(request.getIdOrdinanza(), response, user);
 			break;
 		case REPORT_LETTERA_SOLLECITO_RATE:
-			response = stampaTemplateByCodice(request, report.getCodiceDB(), getDatiTemplateSollecitoPagamento(request.getIdSollecito()), user);
+			response = stampaTemplateByCodice(request, report.getCodiceDB(),
+					getDatiTemplateSollecitoPagamento(request.getIdSollecito()), user);
 			cnmTAllegato = allegatoSollecitoService.salvaLetteraSollecitoRate(request.getIdSollecito(), response, user);
 			break;
 		default:
@@ -224,7 +251,8 @@ public class TemplateServiceImpl implements TemplateService {
 
 		// 20210114 - JIRA 120 - non aggiunge numProtocollo se allegato pregresso
 		if (cnmTAllegato != null && !cnmTAllegato.isFlagDocumentoPregresso())
-			response = commonAllegatoService.addProtocolloToDocument(response, cnmTAllegato.getNumeroProtocollo(), cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato());
+			response = commonAllegatoService.addProtocolloToDocument(response, cnmTAllegato.getNumeroProtocollo(),
+					cnmTAllegato.getCnmDTipoAllegato().getIdTipoAllegato());
 
 		return response;
 
@@ -276,7 +304,7 @@ public class TemplateServiceImpl implements TemplateService {
 			throw new IllegalArgumentException("codice template non valorizzato");
 
 		Report report = Report.getByCodiceFrontend(request.getCodiceTemplate());
-		
+
 		List<DocumentoScaricatoVO> response = null;
 
 		switch (report) {
@@ -309,27 +337,27 @@ public class TemplateServiceImpl implements TemplateService {
 		}
 		return response;
 	}
-	
+
 	private String ricavaInizialiFunzionario(String nome, String Cognome) {
-		String iniziali= "";		
-		
-		if(nome == null || Cognome == null ||
-		   nome.isEmpty()|| Cognome.isEmpty()) {
+		String iniziali = "";
+
+		if (nome == null || Cognome == null || nome.isEmpty() || Cognome.isEmpty()) {
 			return iniziali;
-		}	
-		
-		//Gestione nominativo costituito da piu nomi		
-		String[] listaNomi = nome.split(" ");
-		for(String nomeItem : listaNomi) {
-			iniziali=iniziali.concat(nomeItem.substring(0, 1).toUpperCase());
 		}
-		
+
+		// Gestione nominativo costituito da piu nomi
+		String[] listaNomi = nome.split(" ");
+		for (String nomeItem : listaNomi) {
+			iniziali = iniziali.concat(nomeItem.substring(0, 1).toUpperCase());
+		}
+
 		iniziali = iniziali.concat(Cognome.substring(0, 1));
-		
+
 		return iniziali;
 	}
 
-	private byte[] stampaTemplateByCodice(DatiTemplateRequest request, String codice, DatiTemplateVO dati, UserDetails user) {
+	private byte[] stampaTemplateByCodice(DatiTemplateRequest request, String codice, DatiTemplateVO dati,
+			UserDetails user) {
 		DatiTemplateCompilatiVO datiTemplateCompilatiVO = request.getDatiTemplateCompilatiVO();
 		if (datiTemplateCompilatiVO == null)
 			throw new IllegalArgumentException("ddatiTemplateCompilatiVO = null");
@@ -349,42 +377,51 @@ public class TemplateServiceImpl implements TemplateService {
 		jasperParam.put("mailAvvocato", StringUtils.trimToEmpty(datiTemplateCompilatiVO.getMailAvvocato()));
 		jasperParam.put("studioAvvocato", StringUtils.trimToEmpty(datiTemplateCompilatiVO.getStudioAvvocato()));
 		jasperParam.put("scadenzaPagamento", StringUtils.trimToEmpty(datiTemplateCompilatiVO.getScadenzaPagamento()));
-		jasperParam.put("riferimentoNormativo", StringUtils.trimToEmpty(datiTemplateCompilatiVO.getRiferimentoNormativo()));
+		jasperParam.put("riferimentoNormativo",
+				StringUtils.trimToEmpty(datiTemplateCompilatiVO.getRiferimentoNormativo()));
 
 		troncaRagioneSociale(dati.getListaSoggetti());
 		// caricati da db
-		
-		
-		// 20210225_LC  (jira119 / Evolutiva E4) - CAP nei documenti creati da Conam	
-		// workaround (per non modificare template jasper): CAP concatenato prima del comuneResidenza
-		// 20210707_LC Jira 154 solo se comune e provincia presenti, altrimenti li istanzia vuoti (il report li vuole)
+
+		// 20210225_LC (jira119 / Evolutiva E4) - CAP nei documenti creati da Conam
+		// workaround (per non modificare template jasper): CAP concatenato prima del
+		// comuneResidenza
+		// 20210707_LC Jira 154 solo se comune e provincia presenti, altrimenti li
+		// istanzia vuoti (il report li vuole)
 		// 20211124_LC Jira 177 "" a posto di possibili null
 		for (SoggettoVO soggetto : dati.getListaSoggetti()) {
-			
+
 			if (soggetto.getComuneResidenza() != null) {
 				String cap = soggetto.getCap() != null ? soggetto.getCap() : "";
-				String comune = soggetto.getComuneResidenza().getDenominazione() != null ? soggetto.getComuneResidenza().getDenominazione() : "";
+				String comune = soggetto.getComuneResidenza().getDenominazione() != null
+						? soggetto.getComuneResidenza().getDenominazione()
+						: "";
 				soggetto.getComuneResidenza().setDenominazione(cap + " " + comune);
 			} else {
 				soggetto.setComuneResidenza(new ComuneVO());
-				soggetto.getComuneResidenza().setDenominazione(""); 
+				soggetto.getComuneResidenza().setDenominazione("");
 			}
-			
-			// 20210315_LC Jira 124 - corretta formattazione cap + comune + provincia: da denominazione proncia a "(SIGLA)"
+
+			// 20210315_LC Jira 124 - corretta formattazione cap + comune + provincia: da
+			// denominazione proncia a "(SIGLA)"
 			if (soggetto.getProvinciaResidenza() != null) {
-				String provincia = soggetto.getProvinciaResidenza().getSigla() != null ? soggetto.getProvinciaResidenza().getSigla() : "";
+				String provincia = soggetto.getProvinciaResidenza().getSigla() != null
+						? soggetto.getProvinciaResidenza().getSigla()
+						: "";
 				soggetto.getProvinciaResidenza().setDenominazione("(" + provincia + ")");
 			} else {
 				soggetto.setProvinciaResidenza(new ProvinciaVO());
 				soggetto.getProvinciaResidenza().setDenominazione("");
 			}
-			
-			// 20211128_LC Jira 177 - gestione civico null
-			if (soggetto.getCivicoResidenza() == null) soggetto.setCivicoResidenza(""); ;
-		}
 
+			// 20211128_LC Jira 177 - gestione civico null
+			if (soggetto.getCivicoResidenza() == null)
+				soggetto.setCivicoResidenza("");
+			
+		}
 		
 		jasperParam.put("listaSoggetti", new JRBeanCollectionDataSource(dati.getListaSoggetti()));
+		
 		jasperParam.put("importoTotale", dati.getImportoTotale());
 		jasperParam.put("numeroRate", dati.getNumeroRate());
 		jasperParam.put("scadenzaDefinita", dati.getScadenzaDefinita());
@@ -394,10 +431,10 @@ public class TemplateServiceImpl implements TemplateService {
 		jasperParam.put("importoUltimaRata", dati.getImportoUltimaRata());
 		jasperParam.put("dirigente", StringUtils.trimToEmpty(dati.getDirigente()));
 		jasperParam.put("classificazione", StringUtils.trimToEmpty(dati.getClassificazione()));
-		
-		CnmTUser cnmTUser = cnmTUserRepository.findOne(user.getIdUser());	
-		jasperParam.put("funzionario", this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));		
-		
+
+		CnmTUser cnmTUser = cnmTUserRepository.findOne(user.getIdUser());
+		jasperParam.put("funzionario", this.ricavaInizialiFunzionario(cnmTUser.getNome(), cnmTUser.getCognome()));
+
 		jasperParam.put("idMailSettoreTributi", dati.getMailSettoreTributi());
 
 		jasperParam.put("processiVerbali", StringUtils.trimToEmpty(datiTemplateCompilatiVO.getProcessiVerbali()));
@@ -410,32 +447,55 @@ public class TemplateServiceImpl implements TemplateService {
 		jasperParam.put("dichiara", StringUtils.trimToEmpty(datiTemplateCompilatiVO.getDichiara()));
 		jasperParam.put("intestazione", getIntestazioneSoggetti(dati.getListaSoggetti()));
 		jasperParam.put("comparizione", getComparizione(dati.getListaSoggetti()));
-		jasperParam.put("soggettiString", getSoggettiConcatenati(dati.getListaSoggetti()));
-		
+		jasperParam.put("soggettiString", getSoggettiConcatenati(dati.getListaSoggetti()));			
+
+
 		// 20210308_LC lotto2scenario7 lettera ordinanza annullamento
-		if (codice.equals(Report.REPORT_LETTERA_ACCOMPAGNAMENTO_ANNULLAMENTO.getCodiceDB())) {			
-							
+		if (codice.equals(Report.REPORT_LETTERA_ACCOMPAGNAMENTO_ANNULLAMENTO.getCodiceDB())) {
+
 			// editabili dall'utente - 20210330 se NULL : ""
-			jasperParam.put("direzioneLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDirezioneLettera()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDirezioneLettera() : "");	
-			jasperParam.put("settoreLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSettoreLettera()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSettoreLettera() : "");	
-			jasperParam.put("mailLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getMailLettera()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getMailLettera() : "");	
-			jasperParam.put("dataLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDataLettera()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDataLettera() : "");	
-			jasperParam.put("oggettoLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getOggettoLettera()) 
-					? request.getDatiTemplateCompilatiVO().getOggettoLettera() : "");	
-			jasperParam.put("corpoLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getCorpoLettera()) 
-					? request.getDatiTemplateCompilatiVO().getCorpoLettera() : "");			
-			jasperParam.put("salutiLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSalutiLettera()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSalutiLettera() : "");	
-			jasperParam.put("dirigenteLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDirigenteLettera()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDirigenteLettera() : "");	
-			jasperParam.put("bloccoFirmaOmessa", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getBloccoFirmaOmessa()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getBloccoFirmaOmessa() : "");	
-			jasperParam.put("inizialiLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getInizialiLettera()) 
-					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getInizialiLettera() : "");				
+			jasperParam.put("direzioneLettera", StringUtils
+					.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDirezioneLettera())
+							? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDirezioneLettera()
+							: "");
+			jasperParam.put("settoreLettera", StringUtils
+					.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSettoreLettera())
+							? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSettoreLettera()
+							: "");
+			jasperParam.put("mailLettera",
+					StringUtils.isNotBlank(
+							request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getMailLettera())
+									? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getMailLettera()
+									: "");
+			jasperParam.put("dataLettera",
+					StringUtils.isNotBlank(
+							request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDataLettera())
+									? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDataLettera()
+									: "");
+			jasperParam.put("oggettoLettera",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getOggettoLettera())
+							? request.getDatiTemplateCompilatiVO().getOggettoLettera()
+							: "");
+			jasperParam.put("corpoLettera",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getCorpoLettera())
+							? request.getDatiTemplateCompilatiVO().getCorpoLettera()
+							: "");
+			jasperParam.put("salutiLettera", StringUtils
+					.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSalutiLettera())
+							? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSalutiLettera()
+							: "");
+			jasperParam.put("dirigenteLettera", StringUtils
+					.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDirigenteLettera())
+							? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getDirigenteLettera()
+							: "");
+			jasperParam.put("bloccoFirmaOmessa", StringUtils.isNotBlank(
+					request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getBloccoFirmaOmessa())
+							? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getBloccoFirmaOmessa()
+							: "");
+			jasperParam.put("inizialiLettera", StringUtils
+					.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getInizialiLettera())
+							? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getInizialiLettera()
+							: "");
 //			jasperParam.put("sedeEnteRiga1", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga1()) 
 //					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga1() : "");	
 //			jasperParam.put("sedeEnteRiga2", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga2()) 
@@ -446,65 +506,98 @@ public class TemplateServiceImpl implements TemplateService {
 //					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga4() : "");	
 //			jasperParam.put("sedeEnteRiga3", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga5()) 
 //					? request.getDatiTemplateCompilatiVO().getDatiLetteraAnnullamento().getSedeEnteRiga5() : "");
-			
-			
-			jasperParam.put("indirizzoOrganoAccertatoreRiga1", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1()) 
-					? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1() : "");				
-			jasperParam.put("indirizzoOrganoAccertatoreRiga2", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2()) 
-					? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2() : "");				
-			jasperParam.put("indirizzoOrganoAccertatoreRiga3", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3()) 
-					? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3() : "");				
-			jasperParam.put("testoLibero", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getTestoLibero()) 
-					? request.getDatiTemplateCompilatiVO().getTestoLibero() : "");			
-			
-			if (StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1()) &&
-					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2()) &&
-					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3()) &&
-					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())) {
-				jasperParam.put("intestazioneOrganoAccertatore", "");				
-			} else {
-				jasperParam.put("intestazioneOrganoAccertatore", "e p.c.");		
-			}
-			// --
-			
-		}
-		
-		
-		// 20210326_LC lotto2scenarioC lettera ordinanza archiviazione
-		if (codice.equals(Report.REPORT_LETTERA_ACCOMPAGNAMENTO_ARCHIVIAZIONE.getCodiceDB())) {	
 
-			jasperParam.put("indirizzoOrganoAccertatoreRiga1", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1()) 
-					? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1() : "");				
-			jasperParam.put("indirizzoOrganoAccertatoreRiga2", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2()) 
-					? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2() : "");			
-			jasperParam.put("indirizzoOrganoAccertatoreRiga3", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3()) 
-					? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3() : "");				
-			jasperParam.put("testoLibero", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getTestoLibero()) 
-					? request.getDatiTemplateCompilatiVO().getTestoLibero() : "");			
-			
-			if (StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1()) &&
-					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2()) &&
-					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3()) &&
-					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())) {
-				jasperParam.put("intestazioneOrganoAccertatore", "");				
+			jasperParam.put("indirizzoOrganoAccertatoreRiga1",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1())
+							? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1()
+							: "");
+			jasperParam.put("indirizzoOrganoAccertatoreRiga2",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2())
+							? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2()
+							: "");
+			jasperParam.put("indirizzoOrganoAccertatoreRiga3",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3())
+							? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3()
+							: "");
+			jasperParam.put("testoLibero",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())
+							? request.getDatiTemplateCompilatiVO().getTestoLibero()
+							: "");
+
+			if (StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1())
+					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2())
+					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3())
+					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())) {
+				jasperParam.put("intestazioneOrganoAccertatore", "");
 			} else {
-				jasperParam.put("intestazioneOrganoAccertatore", "e p.c.");		
+				jasperParam.put("intestazioneOrganoAccertatore", "e p.c.");
 			}
 			// --
+
+		}
+
+		// 20210326_LC lotto2scenarioC lettera ordinanza archiviazione
+		if (codice.equals(Report.REPORT_LETTERA_ACCOMPAGNAMENTO_ARCHIVIAZIONE.getCodiceDB())) {
+
+			jasperParam.put("indirizzoOrganoAccertatoreRiga1",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1())
+							? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1()
+							: "");
+			jasperParam.put("indirizzoOrganoAccertatoreRiga2",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2())
+							? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2()
+							: "");
+			jasperParam.put("indirizzoOrganoAccertatoreRiga3",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3())
+							? request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3()
+							: "");
+			jasperParam.put("testoLibero",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())
+							? request.getDatiTemplateCompilatiVO().getTestoLibero()
+							: "");
 			
+			// E2_2023 - OB35
+			jasperParam.put("areaTestoLibero",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getAreaTestoLibero())
+					? request.getDatiTemplateCompilatiVO().getAreaTestoLibero()
+							: "");
+			jasperParam.put("testoLibero2",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getTestoLibero2())
+							? request.getDatiTemplateCompilatiVO().getTestoLibero2()
+							: "");
+
+			if (StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1())
+					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2())
+					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3())
+					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())) {
+				jasperParam.put("intestazioneOrganoAccertatore", "");
+			} else {
+				//jasperParam.put("intestazioneOrganoAccertatore", "e p.c.");
+				jasperParam.put("intestazioneOrganoAccertatore", "");
+			}
+			// --
+
 		}
 
 		// 20230110 PP Lett. Acc. Ordinanaza ingiunzione - testi liberi
-		if (codice.equals(Report.REPORT_LETTERA_ACCOMPAGNAMENTO_INGIUNZIONE.getCodiceDB())) {	
-			jasperParam.put("email", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getEmail()) 
-					? request.getDatiTemplateCompilatiVO().getEmail() : "");				
-			jasperParam.put("emailOrgano", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getEmailOrgano()) 
-					? request.getDatiTemplateCompilatiVO().getEmailOrgano() : "");			
-			jasperParam.put("intestazioneConoscenza", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIntestazioneConoscenza()) 
-					? request.getDatiTemplateCompilatiVO().getIntestazioneConoscenza() : "");				
-			jasperParam.put("testoLibero", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getTestoLibero()) 
-					? request.getDatiTemplateCompilatiVO().getTestoLibero() : "");			
-			
+		if (codice.equals(Report.REPORT_LETTERA_ACCOMPAGNAMENTO_INGIUNZIONE.getCodiceDB())) {
+			jasperParam.put("email",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getEmail())
+							? request.getDatiTemplateCompilatiVO().getEmail()
+							: "");
+			jasperParam.put("emailOrgano",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getEmailOrgano())
+							? request.getDatiTemplateCompilatiVO().getEmailOrgano()
+							: "");
+			jasperParam.put("intestazioneConoscenza",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getIntestazioneConoscenza())
+							? request.getDatiTemplateCompilatiVO().getIntestazioneConoscenza()
+							: "");
+			jasperParam.put("testoLibero",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())
+							? request.getDatiTemplateCompilatiVO().getTestoLibero()
+							: "");
+
 //			if (StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getEmail()) &&
 //					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2()) &&
 //					StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3()) &&
@@ -514,22 +607,25 @@ public class TemplateServiceImpl implements TemplateService {
 //				jasperParam.put("intestazioneOrganoAccertatore", "e p.c.");		
 //			}
 //			// --
-			
-		}
-		
-		// 20210401_LC lotto2scenario5 lettera sollecito rate
-		if (codice.equals(Report.REPORT_LETTERA_SOLLECITO_RATE.getCodiceDB())) {	
-			
-			jasperParam.put("oggettoLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getOggettoLettera()) 
-					? request.getDatiTemplateCompilatiVO().getOggettoLettera() : "");	
-			jasperParam.put("corpoLettera", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getCorpoLettera()) 
-					? request.getDatiTemplateCompilatiVO().getCorpoLettera() : "");		
-			
-			jasperParam.put("dirigenteLettera", dati.getDirigenteLettera());
-			
-		}		
 
-		
+		}
+
+		// 20210401_LC lotto2scenario5 lettera sollecito rate
+		if (codice.equals(Report.REPORT_LETTERA_SOLLECITO_RATE.getCodiceDB())) {
+
+			jasperParam.put("oggettoLettera",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getOggettoLettera())
+							? request.getDatiTemplateCompilatiVO().getOggettoLettera()
+							: "");
+			jasperParam.put("corpoLettera",
+					StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getCorpoLettera())
+							? request.getDatiTemplateCompilatiVO().getCorpoLettera()
+							: "");
+
+			jasperParam.put("dirigenteLettera", dati.getDirigenteLettera());
+
+		}
+
 		if (codice.equals(Report.REPORT_VERBALE_AUDIZIONE.getCodiceDB())) {
 			if (datiTemplateCompilatiVO.getTestoLibero() != null) {
 				jasperParam.put("testoLibero", datiTemplateCompilatiVO.getTestoLibero());
@@ -537,11 +633,12 @@ public class TemplateServiceImpl implements TemplateService {
 			if (datiTemplateCompilatiVO.getTestoDichiarante() != null) {
 				jasperParam.put("testoDichiarante", datiTemplateCompilatiVO.getTestoDichiarante());
 			}
-			if(datiTemplateCompilatiVO.getDichiarante() != null) {
-				jasperParam.put("dichiarante", datiTemplateCompilatiVO.getDichiarante());				
+			if (datiTemplateCompilatiVO.getDichiarante() != null) {
+				jasperParam.put("dichiarante", datiTemplateCompilatiVO.getDichiarante());
 			}
+	
 		}
-		
+
 		if (codice.equals(Report.REPORT_CONVOCAZIONE_AUDIZIONE.getCodiceDB())) {
 			if (dati.getListaSoggetti().size() > 1) {
 				jasperParam.put("sp1", "alle S.S.V.V.");
@@ -552,26 +649,51 @@ public class TemplateServiceImpl implements TemplateService {
 				jasperParam.put("sp2", " é convocata");
 				jasperParam.put("sp3", "la S.V. non comparisse");
 			}
-			
+
+			// E6_2022 - 0B36
+			jasperParam.put("destinatariAggiuntivi", request.getDatiTemplateCompilatiVO().getDestinatariAggiuntivi());
+			List<SoggettoVO> soggs = new ArrayList<>();
+			List<DatiSoggettoModificati> mod = request.getDatiTemplateCompilatiVO().getDestinatariSoggetti();
+			for (DatiSoggettoModificati row : mod) {
+				SoggettoVO sogg = new SoggettoVO();
+				sogg.setNome(row.getSoggRiga1());
+				sogg.setCognome(row.getSoggRiga2());
+				sogg.setIndirizzoResidenza(row.getSoggRiga3());
+				sogg.setCivicoResidenza(row.getSoggRiga4());
+				soggs.add(sogg);
+			}
+			jasperParam.put("listaSoggetti", new JRBeanCollectionDataSource(soggs));
+
 			CnmCParametro cnmCParametroSet = cnmCParametroRepository.findByIdParametro(Constants.ID_SEDE_ENTE_TESTO);
-			jasperParam.put("sedeEnteTesto", cnmCParametroSet!=null 
-				? cnmCParametroSet.getValoreString() : "");
+			jasperParam.put("sedeEnteTesto", cnmCParametroSet != null ? cnmCParametroSet.getValoreString() : "");
+			
 		}
-		
-		jasperParam.put("sedeEnteRiga1", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga1()) 
-			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga1() : "");	
-		jasperParam.put("sedeEnteRiga2", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga2()) 
-			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga2() : "");	
-		jasperParam.put("sedeEnteRiga3", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga3()) 
-			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga3() : "");	
-		jasperParam.put("sedeEnteRiga4", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga4()) 
-			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga4() : "");	
-		jasperParam.put("sedeEnteRiga5", StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga5()) 
-			? request.getDatiTemplateCompilatiVO().getSedeEnteRiga5() : "");
-		
+
+		jasperParam.put("sedeEnteRiga1",
+				StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga1())
+						? request.getDatiTemplateCompilatiVO().getSedeEnteRiga1()
+						: "");
+		jasperParam.put("sedeEnteRiga2",
+				StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga2())
+						? request.getDatiTemplateCompilatiVO().getSedeEnteRiga2()
+						: "");
+		jasperParam.put("sedeEnteRiga3",
+				StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga3())
+						? request.getDatiTemplateCompilatiVO().getSedeEnteRiga3()
+						: "");
+		jasperParam.put("sedeEnteRiga4",
+				StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga4())
+						? request.getDatiTemplateCompilatiVO().getSedeEnteRiga4()
+						: "");
+		jasperParam.put("sedeEnteRiga5",
+				StringUtils.isNotBlank(request.getDatiTemplateCompilatiVO().getSedeEnteRiga5())
+						? request.getDatiTemplateCompilatiVO().getSedeEnteRiga5()
+						: "");
+
 		CnmCParametro cnmCParametroDir = cnmCParametroRepository.findByIdParametro(Constants.ID_DIRIGENTE_SETTORE);
-		if(cnmCParametroDir != null) jasperParam.put("dirigenteLettera", cnmCParametroDir.getValoreString());
-				
+		if (cnmCParametroDir != null)
+			jasperParam.put("dirigenteLettera", cnmCParametroDir.getValoreString());
+
 		try {
 			report = utilsReport.printReportPDF(codice, jasperParam, null);
 		} catch (PrintException | IOException | SQLException | JRException e) {
@@ -591,7 +713,8 @@ public class TemplateServiceImpl implements TemplateService {
 		StringBuilder nome = new StringBuilder();
 		int count = 0;
 		for (SoggettoVO s : listaSoggetti) {
-			StringBuilder nomeLocal = new StringBuilder(s.getPersonaFisica() ? s.getNome() + " " + s.getCognome() : s.getRagioneSociale());
+			StringBuilder nomeLocal = new StringBuilder(
+					s.getPersonaFisica() ? s.getNome() + " " + s.getCognome() : s.getRagioneSociale());
 			if (size != count + 1)
 				nomeLocal.append(", ");
 			nome.append(nomeLocal);
@@ -691,7 +814,8 @@ public class TemplateServiceImpl implements TemplateService {
 		if (idVerbaleSoggettoList == null || idVerbaleSoggettoList.isEmpty())
 			throw new IllegalArgumentException("idVerbaleSoggettoList non valorizzato");
 
-		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = (List<CnmRVerbaleSoggetto>) cnmRVerbaleSoggettoRepository.findAll(idVerbaleSoggettoList);
+		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = (List<CnmRVerbaleSoggetto>) cnmRVerbaleSoggettoRepository
+				.findAll(idVerbaleSoggettoList);
 		return datiTemplateResponseEntityMapper.mapEntityToVO(cnmRVerbaleSoggettoList);
 	}
 
@@ -699,14 +823,16 @@ public class TemplateServiceImpl implements TemplateService {
 		if (idVerbaleSoggettoList == null || idVerbaleSoggettoList.isEmpty())
 			throw new IllegalArgumentException("idVerbaleSoggettoList non valorizzato");
 
-		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = (List<CnmRVerbaleSoggetto>) cnmRVerbaleSoggettoRepository.findAll(idVerbaleSoggettoList);
+		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = (List<CnmRVerbaleSoggetto>) cnmRVerbaleSoggettoRepository
+				.findAll(idVerbaleSoggettoList);
 		CnmCParametro parametro = cnmCParametroRepository.findByIdParametro(new Long(2));
 		DatiTemplateVO datiTemplate = datiTemplateResponseEntityMapper.mapEntityToVO(cnmRVerbaleSoggettoList);
 		datiTemplate.setDirigente(parametro.getValoreString());
 		return datiTemplate;
 	}
-	
-	private DatiTemplateVO getDatiTemplateConvocazioneAudizioneEsterni(Integer idVerbale, List<SoggettoVO> soggettoList) {
+
+	private DatiTemplateVO getDatiTemplateConvocazioneAudizioneEsterni(Integer idVerbale,
+			List<SoggettoVO> soggettoList) {
 		if (soggettoList == null || soggettoList.isEmpty())
 			throw new IllegalArgumentException("soggettoList non valorizzato");
 
@@ -720,11 +846,12 @@ public class TemplateServiceImpl implements TemplateService {
 	public MessageVO getMessaggioByCodice(String codice) {
 		CnmDMessaggio cnmDMessaggio = cnmDMessaggioRepository.findByCodMessaggio(codice);
 		MessageVO messaggioVO = null;
-		
-		if(cnmDMessaggio != null) {
-			messaggioVO = new MessageVO(cnmDMessaggio.getDescMessaggio(), cnmDMessaggio.getCnmDTipoMessaggio().getDescTipoMessaggio());
+
+		if (cnmDMessaggio != null) {
+			messaggioVO = new MessageVO(cnmDMessaggio.getDescMessaggio(),
+					cnmDMessaggio.getCnmDTipoMessaggio().getDescTipoMessaggio());
 		}
-		
+
 		return messaggioVO;
 	}
 }

@@ -18,8 +18,14 @@ public class DocumentoScaricatoVO extends ParentVO {
 	private String nomeFile;
 	private String objectIdDocumentoFisico;
 	
+	public DocumentoScaricatoVO() {
+    }
 	
-	public byte[] getFile() {
+	public DocumentoScaricatoVO(String fileName, byte[] file) {
+        this.nomeFile= fileName;
+		this.file = file;
+    }
+    public byte[] getFile() {
 		return file;
 	}
 	public void setFile(byte[] file) {

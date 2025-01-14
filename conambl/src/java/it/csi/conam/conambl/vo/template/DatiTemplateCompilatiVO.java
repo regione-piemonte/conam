@@ -4,6 +4,8 @@
  ******************************************************************************/
 package it.csi.conam.conambl.vo.template;
 
+import java.util.List;
+
 import it.csi.conam.conambl.vo.ParentVO;
 
 /**
@@ -42,6 +44,13 @@ public class DatiTemplateCompilatiVO extends ParentVO {
 	private String indirizzoOrganoAccertatoreRiga2;
 	private String indirizzoOrganoAccertatoreRiga3;	
 	private String testoLibero;	
+	// E2_2023 - 0B35
+	private String testoLibero2;	
+	private String areaTestoLibero;	
+	// E6_2022 - 0B36
+	private String destinatariAggiuntivi;
+	private List<DatiSoggettoModificati> destinatariSoggetti;
+
 	private String oggettoLettera;
 	private String corpoLettera;
 	
@@ -331,7 +340,41 @@ public class DatiTemplateCompilatiVO extends ParentVO {
 	public void setDichiarante(String dichiarante) {
 		this.dichiarante = dichiarante;
 	}
+	
+	public void getAreaTestoLibero(String areaTestoLibero) {
+		this.areaTestoLibero = areaTestoLibero;
+	}
+	
+	public String getAreaTestoLibero() {
+		return areaTestoLibero;
+	}
+	
+	public String getTestoLibero2() {
+		return testoLibero2;
+	}
 
-	
-	
+	public void setTestoLibero2(String testoLibero2) {
+		this.testoLibero2 = testoLibero2;
+	}
+
+	public List<DatiSoggettoModificati> getDestinatariSoggetti() {
+		return destinatariSoggetti;
+	}
+
+	public void setDestinatariSoggetti(List<DatiSoggettoModificati> destinatariSoggetti) {
+		this.destinatariSoggetti = destinatariSoggetti;
+	}
+
+	public void setAreaTestoLibero(String areaTestoLibero) {
+		this.areaTestoLibero = areaTestoLibero;
+	}
+
+	public String getDestinatariAggiuntivi() {
+		return destinatariAggiuntivi;
+	}
+
+	public void setDestinatariAggiuntivi(String destinatariAggiuntivi) {
+		this.destinatariAggiuntivi = destinatariAggiuntivi;
+	}
+
 }

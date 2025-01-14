@@ -5,6 +5,7 @@
 package it.csi.conam.conambl.business.service.impl.verbale;
 
 import it.csi.conam.conambl.business.facade.StasServFacade;
+import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.common.CommonSoggettoService;
 import it.csi.conam.conambl.business.service.util.UtilsCnmCProprietaService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
@@ -26,16 +27,26 @@ import it.csi.conam.conambl.integration.mapper.ws.stas.AnagraficaWsOutputMapper;
 import it.csi.conam.conambl.integration.repositories.*;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.StringConamUtils;
+import it.csi.conam.conambl.util.UtilsTipoAllegato;
 import it.csi.conam.conambl.vo.ordinanza.MinOrdinanzaVO;
+import it.csi.conam.conambl.vo.ordinanza.OrdinanzaVO;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.RuoloSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.SoggettoPagamentoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoPregressiVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
+import it.csi.conam.conambl.vo.verbale.allegato.DettaglioAllegatoFieldVO;
 import it.csi.gmscore.dto.Anagrafica;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Iterables;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -121,6 +132,21 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 	
 	@Autowired
 	private UtilsTraceCsiLogAuditService utilsTraceCsiLogAuditService;
+
+	@Autowired
+	private CnmRAllegatoOrdinanzaRepository cnmRAllegatoOrdinanzaRepository;
+
+	@Autowired
+	private CnmROrdinanzaFiglioRepository cnmROrdinanzaFiglioRepository;
+
+	@Autowired
+	private StatoOrdinanzaMapper statoOrdinanzaMapper;
+
+	@Autowired
+	private TipoOrdinanzaMapper tipoOrdinanzaMapper;
+	
+	@Autowired
+	private CommonAllegatoService commonAllegatoService;
 	
 
 	@Override
@@ -129,7 +155,10 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 
 		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(id);
 		for(CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmTVerbale.getCnmRVerbaleSoggettos()) {
-			cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(importoVerbale).setScale(2, RoundingMode.HALF_UP));
+			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+			if(!(Long.valueOf(cnmRVerbaleSoggetto.getCnmDRuoloSoggetto().getIdRuoloSoggetto()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID))){
+				cnmRVerbaleSoggetto.setImportoMisuraRidotta(BigDecimal.valueOf(importoVerbale).setScale(2, RoundingMode.HALF_UP));
+			}
 			cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
 			utilsTraceCsiLogAuditService.traceCsiLogAudit(TraceOperation.AGGIORNAMENTO_IMPORTO_SOGGETTI.getOperation(),cnmRVerbaleSoggetto.getClass().getAnnotation(Table.class).name(),"id_verbale_soggetto="+cnmRVerbaleSoggetto.getIdVerbaleSoggetto(), Thread.currentThread().getStackTrace()[1].getMethodName(), cnmRVerbaleSoggetto.getCnmTVerbale().getNumVerbale());
 			
@@ -177,7 +206,22 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			cnmTSoggetto = cnmTSoggettoRepository.save(cnmTSoggetto);
 
 		} else if (idStas != null) {
+			
 			cnmTSoggetto = cnmTSoggettoRepository.findByIdStas(idStas);
+			
+			// issue 34
+			if(cnmTSoggetto != null && soggetto.getId() != null) {
+				// sono in modifica
+				if(StringUtils.difference(cnmTSoggetto.getPartitaIva(), soggetto.getPartitaIva()) != null
+						|| StringUtils.difference(cnmTSoggetto.getCodiceFiscale(), soggetto.getCodiceFiscale()) != null 
+						|| StringUtils.difference(cnmTSoggetto.getRagioneSociale(), soggetto.getRagioneSociale()) != null) {
+					// se è stato modificato uno tra condFiscm piva o rag soc- devo creare una nuova occorrenza sganciata da idStas
+					cnmTSoggetto = null;
+					idStas = null;
+				}else {
+					// sono in inserimento
+				}
+			}
 			if (cnmTSoggetto == null) {
 				cnmTSoggetto = new CnmTSoggetto();
 				cnmTSoggetto.setIdStas(idStas);
@@ -294,7 +338,12 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		cnmRVerbaleSoggetto.setCnmTSoggetto(cnmTSoggetto);
 		cnmRVerbaleSoggetto.setNote(soggetto.getNoteSoggetto());
 		cnmRVerbaleSoggetto.setDataOraInsert(now);
-		cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(soggetto.getImportoVerbale()).setScale(2, RoundingMode.HALF_UP));
+		if(soggetto.getImportoVerbale()!=null) {
+			cnmRVerbaleSoggetto.setImportoMisuraRidotta(BigDecimal.valueOf(soggetto.getImportoVerbale()).setScale(2, RoundingMode.HALF_UP));
+		}
+		else {
+			cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(0));
+		}
 		cnmRVerbaleSoggetto = cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
 
 		CnmTResidenza cnmTResidenza = cnmTResidenzaRepository.findByCnmTSoggettoAndIdVerbale(cnmTSoggetto, id);
@@ -338,8 +387,15 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		sog.setIdSoggettoVerbale(cnmRVerbaleSoggetto.getIdVerbaleSoggetto());
 		sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(cnmDRuoloSoggetto));
 		sog.setNoteSoggetto(soggetto.getNoteSoggetto());
-		sog.setImportoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
-		sog.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
+		//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+		if(sog.getRuolo()!=null && Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID)) {
+			sog.setImportoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
+			sog.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue()-cnmRVerbaleSoggetto.getImportoPagato().doubleValue());
+		}else {
+			sog.setImportoVerbale(null);
+			sog.setImportoResiduoVerbale(null);
+			
+		}
 		if (soggetto.getNazioneNascitaEstera() != null && soggetto.getNazioneNascitaEstera()) {
 			sog.setNazioneNascita(soggetto.getNazioneNascita());
 			sog.setDenomComuneNascitaEstero(soggetto.getDenomComuneNascitaEstero());
@@ -399,6 +455,19 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			cnmTSoggetto = cnmTSoggettoRepository.save(cnmTSoggetto);
 		} else if (idStas != null) {
 			cnmTSoggetto = cnmTSoggettoRepository.findByIdStas(idStas);
+			// issue 35
+			if(cnmTSoggetto != null && soggetto.getId() != null) {
+				// sono in modifica
+				if(StringUtils.difference(cnmTSoggetto.getPartitaIva(), soggetto.getPartitaIva()) != null
+						|| StringUtils.difference(cnmTSoggetto.getCodiceFiscale(), soggetto.getCodiceFiscale()) != null 
+						|| StringUtils.difference(cnmTSoggetto.getRagioneSociale(), soggetto.getRagioneSociale()) != null) {
+					// se è stato modificato uno tra condFiscm piva o rag soc- devo creare una nuova occorrenza sganciata da idStas
+					cnmTSoggetto = null;
+					idStas = null;
+				}else {
+					// sono in inserimento
+				}
+			}
 			if (cnmTSoggetto == null) {
 				cnmTSoggetto = new CnmTSoggetto();
 				cnmTSoggetto.setIdStas(idStas);
@@ -516,7 +585,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		cnmRVerbaleSoggetto.setNote(soggetto.getNoteSoggetto());
 		cnmRVerbaleSoggetto.setDataOraInsert(now);
 		if(soggetto.getImportoVerbale()!=null) {
-			cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(soggetto.getImportoVerbale()));
+			cnmRVerbaleSoggetto.setImportoMisuraRidotta(BigDecimal.valueOf(soggetto.getImportoVerbale()));
 		}else {
 			cnmRVerbaleSoggetto.setImportoMisuraRidotta(new BigDecimal(0));
 		}
@@ -604,6 +673,13 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		sog.setNoteSoggetto(soggetto.getNoteSoggetto());
 		sog.setImportoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
 		sog.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
+		
+		//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+		if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+			sog.setImportoVerbale(null);
+			sog.setImportoResiduoVerbale(null);
+		}
+		
 		if (soggetto.getNazioneNascitaEstera() != null && soggetto.getNazioneNascitaEstera()) {
 			sog.setNazioneNascita(soggetto.getNazioneNascita());
 			sog.setDenomComuneNascitaEstero(soggetto.getDenomComuneNascitaEstero());
@@ -649,6 +725,13 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			}
 			
 			sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
+			
+			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+			if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+				sog.setImportoVerbale(null);
+				sog.setImportoResiduoVerbale(null);
+			}
+			
 			sog.setNoteSoggetto(c.getNote());
 			sog.setIdSoggettoVerbale(c.getIdVerbaleSoggetto());
 			List<CnmROrdinanzaVerbSog> ords = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggetto(c);	
@@ -673,6 +756,243 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		return soggettoVOList;
 
 	}
+	@Override
+	public List<SoggettoPagamentoVO> getSoggettiTrasgressoriConResiduo(Integer idverbale,Integer idSoggettoVerbalePagatore, Integer idAllegato, UserDetails userDetails, Boolean includiControlloUtenteProprietario)  {
+		
+		List<SoggettoPagamentoVO> soggettoVOList = getSoggettiTrasgressoriConResiduo(idverbale, idSoggettoVerbalePagatore, userDetails, includiControlloUtenteProprietario, true);
+		
+		// valorizzare gli importi per i soggetti gia' esistenti sull'allegato
+		
+		String soggList[] = null;
+		String pagamentoList[] = null;
+		DettaglioAllegatoFieldVO fields = commonAllegatoService.getDettaglioFieldsByIdAllegato(new Long(idAllegato));
+		for(AllegatoFieldVO field : fields.getAllegatoFields()) {
+			if(field.getIdField() == 20) {
+				soggList = field.getGenericValue().split("\\+");
+			}else if(field.getIdField() == 8) {
+				pagamentoList = field.getGenericValue().split("\\+");
+			}
+		}
+		if(soggList != null) {
+			for(SoggettoPagamentoVO soggettoVO : soggettoVOList) {
+				valorizeAmount(soggettoVO, soggList, pagamentoList);
+			}
+		}
+		return soggettoVOList;
+	}
+	
+	private void valorizeAmount(SoggettoPagamentoVO soggettoVO, String[] soggList, String[] pagamentoList) {
+		int i = 0;
+		for(String idSoggVerbale : soggList) {
+			if(soggettoVO.getIdSoggettoVerbale()== (Integer.parseInt(idSoggVerbale.replaceAll("\\+", "")))) {
+				soggettoVO.setImportoPagato(Double.valueOf(pagamentoList[i].replaceAll("\\+", "")));
+				break;
+			}
+			i++;
+		}
+	}
+
+	//REQ_69 
+	@Override
+	public List<SoggettoPagamentoVO> getSoggettiTrasgressoriConResiduo(Integer idverbale,Integer idSoggettoVerbalePagatore, UserDetails userDetails, Boolean includiControlloUtenteProprietario, Boolean isModifica)  {
+		List<SoggettoPagamentoVO> soggettoVOList = new ArrayList<>();
+		
+		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(idverbale);
+
+		includiControlloUtenteProprietario = includiControlloUtenteProprietario && Boolean.valueOf(utilsCnmCProprietaService.getProprieta(PropKey.CHECK_PROPRIETARIO_ENABLED));
+		
+		if (includiControlloUtenteProprietario == null)
+			throw new IllegalArgumentException("includiControlloUtenteProprietario is null");
+
+		SecurityUtils.verbaleSecurityView(cnmTVerbale, verbaleService.getEnteLeggeByCnmTVerbale(cnmTVerbale));
+
+		if (cnmTVerbale.getCnmTUser2().getIdUser() != userDetails.getIdUser() && includiControlloUtenteProprietario)
+			throw new RuntimeException("l'utente  non può accedere a questo verbale");
+
+		CnmRVerbaleSoggetto cnmRVerbaleSoggetto= cnmRVerbaleSoggettoRepository.findOne(idSoggettoVerbalePagatore);
+		
+		if(cnmRVerbaleSoggetto==null) {
+			return null;
+		}
+		
+		if (Long.valueOf(cnmRVerbaleSoggetto.getCnmDRuoloSoggetto().getIdRuoloSoggetto()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+			
+				
+			List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findVerbaleSoggettoByIdVerbale(idverbale);
+			
+			for (CnmRVerbaleSoggetto c : cnmRVerbaleSoggettoList) {
+				
+				if (Long.valueOf(c.getCnmDRuoloSoggetto().getIdRuoloSoggetto()).equals(Constants.VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID)) {
+					double importoResiduoVerbale= c.getImportoMisuraRidotta().doubleValue()-c.getImportoPagato().doubleValue();
+					if(importoResiduoVerbale>0 || isModifica) {
+						SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(c.getCnmTSoggetto(), c.getImportoMisuraRidotta(), c.getImportoPagato());
+	
+	 
+						
+						// 20200923 - PP - se e' pregresso, inserirsco sul soggetto la residenza legata al verbale e non quella stas
+						if(cnmTVerbale.getCnmDStatoPregresso() != null && cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != 1) {
+							sog = commonSoggettoService.attachResidenzaPregressi(sog, c.getCnmTSoggetto(), idverbale);
+						}
+						
+						sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
+						
+						//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+						if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+							sog.setImportoVerbale(null);
+							sog.setImportoResiduoVerbale(null);
+						}
+						
+						sog.setNoteSoggetto(c.getNote());
+						sog.setIdSoggettoVerbale(c.getIdVerbaleSoggetto());
+						List<CnmROrdinanzaVerbSog> ords = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggetto(c);	
+						CnmROrdinanzaVerbSog ord = ords.size()==1 ? ords.get(0) : null; // 20210504_LC Jira 138
+						sog.setIdSoggettoOrdinanza(ord != null ? ord.getIdOrdinanzaVerbSog() : null);
+						sog.setVerbaleAudizioneCreato(allegatoVerbaleSoggettoService.isAllegatoVerbaleSoggettoCreato(c, TipoAllegato.VERBALE_AUDIZIONE));
+						sog.setIdAllegatoVerbaleAudizione(allegatoVerbaleSoggettoService.getIdVerbaleAudizione(c, TipoAllegato.VERBALE_AUDIZIONE));
+						
+						List<MinOrdinanzaVO> listaOrdinanze = new ArrayList<MinOrdinanzaVO>();
+						for(CnmROrdinanzaVerbSog ordinanza : ords) {
+							CnmTOrdinanza cnmTOrdinanza = ordinanza.getCnmTOrdinanza();
+							//MinOrdinanzaVO minOrdinanzaVO = ordinanzaEntityMapper.mapEntityToVO(cnmTOrdinanza);
+							MinOrdinanzaVO minOrdinanzaVO = minOrdinanzaVOFromCnmTOrdinanza(cnmTOrdinanza);
+							minOrdinanzaVO.getTipo().setId(ordinanza.getCnmDStatoOrdVerbSog().getIdStatoOrdVerbSog());
+							minOrdinanzaVO.getTipo().setDenominazione(ordinanza.getCnmDStatoOrdVerbSog().getDescStatoOrdVerbSog());
+							listaOrdinanze.add(minOrdinanzaVO);
+						}
+						sog.setListaOrdinanze(listaOrdinanze);
+						
+						SoggettoPagamentoVO soggettoPagamentoVO = new SoggettoPagamentoVO();
+						
+						try {
+					        // Copia le proprietà comuni da SoggettoVO a SoggettoPagamentoVO
+					        BeanUtils.copyProperties(soggettoPagamentoVO, sog);						
+							soggettoVOList.add(soggettoPagamentoVO);
+							
+					    } catch (Exception e) {
+					        // Gestisci l'eccezione
+					        e.printStackTrace();
+					    }
+					}
+				}
+				
+			}
+		}else {
+			double importoResiduoVerbale= cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue()-cnmRVerbaleSoggetto.getImportoPagato().doubleValue();
+			if(importoResiduoVerbale>0 || isModifica) {
+				SoggettoVO sog = soggettoEntityMapper.mapEntityToVO(cnmRVerbaleSoggetto.getCnmTSoggetto(), cnmRVerbaleSoggetto.getImportoMisuraRidotta(), cnmRVerbaleSoggetto.getImportoPagato());
+				
+				// 20200923 - PP - se e' pregresso, inserirsco sul soggetto la residenza legata al verbale e non quella stas
+				if(cnmTVerbale.getCnmDStatoPregresso() != null && cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != 1) {
+					sog = commonSoggettoService.attachResidenzaPregressi(sog, cnmRVerbaleSoggetto.getCnmTSoggetto(), idverbale);
+				}
+				
+				sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(cnmRVerbaleSoggetto.getCnmDRuoloSoggetto()));
+				
+				//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+				if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+					sog.setImportoVerbale(null);
+					sog.setImportoResiduoVerbale(null);
+				}
+				
+				sog.setNoteSoggetto(cnmRVerbaleSoggetto.getNote());
+				sog.setIdSoggettoVerbale(cnmRVerbaleSoggetto.getIdVerbaleSoggetto());
+				List<CnmROrdinanzaVerbSog> ords = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggetto(cnmRVerbaleSoggetto);	
+				CnmROrdinanzaVerbSog ord = ords.size()==1 ? ords.get(0) : null; // 20210504_LC Jira 138
+				sog.setIdSoggettoOrdinanza(ord != null ? ord.getIdOrdinanzaVerbSog() : null);
+				sog.setVerbaleAudizioneCreato(allegatoVerbaleSoggettoService.isAllegatoVerbaleSoggettoCreato(cnmRVerbaleSoggetto, TipoAllegato.VERBALE_AUDIZIONE));
+				sog.setIdAllegatoVerbaleAudizione(allegatoVerbaleSoggettoService.getIdVerbaleAudizione(cnmRVerbaleSoggetto, TipoAllegato.VERBALE_AUDIZIONE));
+				
+				List<MinOrdinanzaVO> listaOrdinanze = new ArrayList<MinOrdinanzaVO>();
+				for(CnmROrdinanzaVerbSog ordinanza : ords) {
+					CnmTOrdinanza cnmTOrdinanza = ordinanza.getCnmTOrdinanza();
+					
+					MinOrdinanzaVO minOrdinanzaVO = minOrdinanzaVOFromCnmTOrdinanza(cnmTOrdinanza);
+					minOrdinanzaVO.getTipo().setId(ordinanza.getCnmDStatoOrdVerbSog().getIdStatoOrdVerbSog());
+					minOrdinanzaVO.getTipo().setDenominazione(ordinanza.getCnmDStatoOrdVerbSog().getDescStatoOrdVerbSog());
+					
+					listaOrdinanze.add(minOrdinanzaVO);
+				}
+				sog.setListaOrdinanze(listaOrdinanze);
+				
+				SoggettoPagamentoVO soggettoPagamentoVO = new SoggettoPagamentoVO();
+				
+				try {
+			        // Copia le proprietà comuni da SoggettoVO a SoggettoPagamentoVO
+			        BeanUtils.copyProperties(soggettoPagamentoVO, sog);						
+					soggettoVOList.add(soggettoPagamentoVO);
+					
+			    } catch (Exception e) {
+			        // Gestisci l'eccezione
+			        e.printStackTrace();
+			    }
+			}
+		}
+
+		return soggettoVOList;
+
+	}
+	
+	
+	private MinOrdinanzaVO minOrdinanzaVOFromCnmTOrdinanza (CnmTOrdinanza cnmTOrdinanza) {
+		MinOrdinanzaVO minOrdinanzaVO = new MinOrdinanzaVO();
+
+		minOrdinanzaVO.setDataDeterminazione(utilsDate.asLocalDate(cnmTOrdinanza.getDataDeterminazione()));
+		minOrdinanzaVO.setDataOrdinanza(utilsDate.asLocalDate(cnmTOrdinanza.getDataOrdinanza()));
+		minOrdinanzaVO.setDataProtocollo(utilsDate.asLocalDateTime(cnmTOrdinanza.getDataOraProtocollo()));
+		minOrdinanzaVO.setId(Long.valueOf(cnmTOrdinanza.getIdOrdinanza()));
+		minOrdinanzaVO.setNumDeterminazione(cnmTOrdinanza.getNumDeterminazione());
+		minOrdinanzaVO.setNumeroProtocollo(cnmTOrdinanza.getNumeroProtocollo());
+		minOrdinanzaVO.setStato(statoOrdinanzaMapper.mapEntityToVO(cnmTOrdinanza.getCnmDStatoOrdinanza()));
+		minOrdinanzaVO.setTipo(tipoOrdinanzaMapper.mapEntityToVO(cnmTOrdinanza.getCnmDTipoOrdinanza()));
+		minOrdinanzaVO.setImportoOrdinanza(cnmTOrdinanza.getImportoOrdinanza());
+		minOrdinanzaVO.setDataScadenza(utilsDate.asLocalDate(cnmTOrdinanza.getDataScadenzaOrdinanza()));
+		minOrdinanzaVO.setPregresso(cnmTOrdinanza.isFlagDocumentoPregresso());
+			
+		minOrdinanzaVO.setDataFineValidita(utilsDate.asLocalDate(cnmTOrdinanza.getDataFineValidita()));
+			
+			// 20210325 lotto2scenario7
+			List<CnmROrdinanzaFiglio> cnmROrdinanzaFiglioList = cnmROrdinanzaFiglioRepository.findByCnmTOrdinanzaFiglio(cnmTOrdinanza);
+			if (cnmROrdinanzaFiglioList != null && !cnmROrdinanzaFiglioList.isEmpty()) {
+				String numProt = cnmROrdinanzaFiglioList.get(0).getCnmTOrdinanza().getNumeroProtocollo();
+				String dettaglio = "";
+				if (numProt != null && StringUtils.isNotBlank(numProt)) {
+					dettaglio = "Determina n. " + cnmROrdinanzaFiglioList.get(0).getCnmTOrdinanza().getNumDeterminazione() + 
+							   " Protocollo n. " + cnmROrdinanzaFiglioList.get(0).getCnmTOrdinanza().getNumeroProtocollo();
+				} else {
+					dettaglio = "Determina n. " + cnmROrdinanzaFiglioList.get(0).getCnmTOrdinanza().getNumDeterminazione() + 
+							   " NON PROTOCOLLATA";
+				}
+				minOrdinanzaVO.setDettaglioOrdinanzaAnnullata(dettaglio);
+			}
+			
+			List<CnmRAllegatoOrdinanza> cnmRAllegatoOrdinanzaList = cnmRAllegatoOrdinanzaRepository.findByCnmTOrdinanza(cnmTOrdinanza);
+			CnmRAllegatoOrdinanza cnmRAllegatoOrdinanza = null;
+			if(cnmTOrdinanza.isFlagDocumentoPregresso()) {
+				// 20210304_LC ordinanza di annullamento non piò essere un documento pregresso
+				TipoAllegato tipoAllegato = cnmTOrdinanza.getCnmDTipoOrdinanza().getIdTipoOrdinanza() == Constants.ID_TIPO_ORDINANZA_INGIUNZIONE?TipoAllegato.ORDINANZA_INGIUNZIONE_PAGAMENTO:TipoAllegato.ORDINANZA_ARCHIVIAZIONE;
+				cnmRAllegatoOrdinanza = Iterables
+						.tryFind(cnmRAllegatoOrdinanzaList, UtilsTipoAllegato.findCnmRAllegatoOrdinanzaInCnmRAllegatoOrdinanzasByTipoAllegato(tipoAllegato)).orNull();
+			} else {
+				cnmRAllegatoOrdinanza = Iterables
+						.tryFind(cnmRAllegatoOrdinanzaList, UtilsTipoAllegato.findCnmRAllegatoOrdinanzaInCnmRAllegatoOrdinanzasByTipoAllegato(TipoAllegato.LETTERA_ORDINANZA)).orNull();
+			}
+			
+			if (cnmRAllegatoOrdinanza != null) {
+				CnmTAllegato cnmTAllegato = cnmRAllegatoOrdinanza.getCnmTAllegato();
+				minOrdinanzaVO.setNumeroProtocollo(cnmTAllegato.getNumeroProtocollo());
+				minOrdinanzaVO.setDataProtocollo(utilsDate.asLocalDateTime(cnmTAllegato.getDataOraProtocollo()));
+			}
+			
+			List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogList = cnmROrdinanzaVerbSogRepository.findByCnmTOrdinanza(cnmTOrdinanza);
+			if (cnmROrdinanzaVerbSogList != null && !cnmROrdinanzaVerbSogList.isEmpty() &&
+					cnmROrdinanzaVerbSogList.get(0).getCnmRVerbaleSoggetto() != null && 
+					cnmROrdinanzaVerbSogList.get(0).getCnmRVerbaleSoggetto().getCnmTVerbale() != null) {
+				String numVerbale = cnmROrdinanzaVerbSogList.get(0).getCnmRVerbaleSoggetto().getCnmTVerbale().getNumVerbale();
+				minOrdinanzaVO.setNumVerbale(numVerbale);
+			}
+		
+		return minOrdinanzaVO;
+	}
 
 	@Override
 	public List<SoggettoVO> getSoggettiByIdVerbalePregressi(Integer id, UserDetails userDetails, Boolean includiControlloUtenteProprietario) {
@@ -696,6 +1016,13 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			sog = commonSoggettoService.attachResidenzaPregressi(sog, c.getCnmTSoggetto(), id);
 			
 			sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
+			
+			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+			if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+				sog.setImportoVerbale(null);
+				sog.setImportoResiduoVerbale(null);
+			}
+			
 			sog.setNoteSoggetto(c.getNote());
 			sog.setIdSoggettoVerbale(c.getIdVerbaleSoggetto());
 			List<CnmROrdinanzaVerbSog> ords = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggetto(c);	
@@ -736,12 +1063,23 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			}
 			
 			sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
+			
+			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+			if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+				sog.setImportoVerbale(null);
+				sog.setImportoResiduoVerbale(null);
+			}
+			
 			sog.setNoteSoggetto(c.getNote());
 			sog.setIdSoggettoVerbale(c.getIdVerbaleSoggetto());
 			List<CnmROrdinanzaVerbSog> ords = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggetto(c);
 			CnmROrdinanzaVerbSog ord = ords.size()==1 ? ords.get(0) : null; // 20210504_LC Jira 138
 			sog.setIdSoggettoOrdinanza(ord != null ? ord.getIdOrdinanzaVerbSog() : null);
-			sog.setVerbaleAudizioneCreato(allegatoVerbaleSoggettoService.isAllegatoVerbaleSoggettoCreato(c, TipoAllegato.CONVOCAZIONE_AUDIZIONE));
+			
+			//OBI37 creazione di più lettere di convocazione audizione per un soggetto/verbale.
+			//sog.setVerbaleAudizioneCreato(allegatoVerbaleSoggettoService.isAllegatoVerbaleSoggettoCreato(c, TipoAllegato.CONVOCAZIONE_AUDIZIONE));
+			
+			sog.setVerbaleAudizioneCreato(false);
 			sog.setIdAllegatoVerbaleAudizione(allegatoVerbaleSoggettoService.getIdVerbaleAudizione(c, TipoAllegato.CONVOCAZIONE_AUDIZIONE));
 			soggettoVOList.add(sog);
 
@@ -769,6 +1107,13 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			}
 			
 			sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
+			
+			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
+			if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+				sog.setImportoVerbale(null);
+				sog.setImportoResiduoVerbale(null);
+			}
+			
 			sog.setNoteSoggetto(c.getNote());
 			sog.setIdSoggettoVerbale(c.getIdVerbaleSoggetto());
 			List<CnmROrdinanzaVerbSog> ords = cnmROrdinanzaVerbSogRepository.findByCnmRVerbaleSoggetto(c);
@@ -920,6 +1265,8 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		List<SoggettoVO> soggettoList = null;
 		if (stas != null && stas.length > 0)
 			soggettoList = anagraficaWsOutputMapper.mapArrayWsTypeToListVO(stas);
+		else
+			return ricercaSoggetto(minSoggettoVO, userDetails);
 		return soggettoList != null && soggettoList.size() > 0 ? soggettoList.get(0) : null;
 	}
 

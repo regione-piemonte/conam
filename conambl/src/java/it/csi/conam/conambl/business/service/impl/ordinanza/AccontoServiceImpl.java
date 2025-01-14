@@ -91,6 +91,10 @@ public class AccontoServiceImpl implements AccontoService {
 		cnmTAcconto.setImporto(acconto.getImporto());
 		cnmTAcconto.setDataPagamento(utilsDate.asDate(acconto.getDataPagamento()));
 		cnmTAcconto.setContoCorrenteVersamento(acconto.getContoCorrenteVersamento());
+		cnmTAcconto.setNote(acconto.getNote());
+		cnmTAcconto.setTipologiaPagamento(acconto.getTipologiaPagamento());
+		cnmTAcconto.setReversaleDOrdine(acconto.getReversaledOrdine());
+		cnmTAcconto.setPagatore(acconto.getPagatore());
 
 		request.setIdTipoAllegato(Constants.ALLEGATO_ACCONTO_ORDINANZA);
 		
@@ -158,7 +162,8 @@ public class AccontoServiceImpl implements AccontoService {
 				0,
 				0,
 				tipoActa,
-				cnmTSoggettoList
+				cnmTSoggettoList,
+				null, null, null, null
 			);
 
 			cnmTAllegatoRepository.save(cnmTAllegato);

@@ -11,7 +11,7 @@ public class RegoleAllegatiCambiamentoStato {
 	public static final Long[] STATO_VERBALE_ACQUISITO = { TipoAllegato.RAPPORTO_TRASMISSIONE.getId(), TipoAllegato.VERBALE_ACCERTAMENTO.getId() };
 	public static final Long[] STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO = { TipoAllegato.RAPPORTO_TRASMISSIONE.getId(), TipoAllegato.VERBALE_ACCERTAMENTO.getId() };
 	public static final Long[] STATO_VERBALE_ACQUISITO_CON_PAGAMENTO = { TipoAllegato.RAPPORTO_TRASMISSIONE.getId(), TipoAllegato.VERBALE_ACCERTAMENTO.getId(),
-			TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId() };
+			TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId(), TipoAllegato.PROVA_PAGAMENTO_VERBALE.getId() };
 	public static final Long[] STATO_VERBALE_ACQUISITO_CON_SCRITTI_DIFENSIVI = { TipoAllegato.RAPPORTO_TRASMISSIONE.getId(), TipoAllegato.VERBALE_ACCERTAMENTO.getId(),
 			TipoAllegato.SCRITTI_DIFENSIVI.getId() };
 	public static final Long STATO_VERBALE_ARCHIVIAZIONE = TipoAllegato.ISTANZA_AUTOTUTELA.getId();

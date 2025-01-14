@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2018 rel. 2 sp1 (http://www.altova.com) by Valentina Martinucci (Engineering) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="ResponseGetDetermina">
+		<xs:annotation>
+			<xs:documentation>Root element della response di GetDetermina</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="Determina">
+					<xs:annotation>
+						<xs:documentation>Dati della determina. Tag presente solo se esitoRequest = OK</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="IDProposta">
+								<xs:annotation>
+									<xs:documentation>Estremi della proposta di detrmina</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Numero">
+											<xs:annotation>
+												<xs:documentation>N.ro di proposta</xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:positiveInteger">
+													<xs:totalDigits value="7"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+										<xs:element name="TsRegistrazione" type="xs:dateTime">
+											<xs:annotation>
+												<xs:documentation>Data e ora di registrazione della proposta</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Autore" type="AutoreType">
+											<xs:annotation>
+												<xs:documentation>Dati di chi ha avviato la proposta</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="IDAttoDefinitivo" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Estremi dell'atto definitivo se è stato adottato</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Numero">
+											<xs:annotation>
+												<xs:documentation>N.ro di atto definitivo</xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:positiveInteger">
+													<xs:totalDigits value="7"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+										<xs:element name="TsRegistrazione" type="xs:dateTime">
+											<xs:annotation>
+												<xs:documentation>Data e ora di adozione</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="RifAttiPrecedenti" type="xs:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Riferimenti ad eventuali atti precedenti collegati</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="OggettoPubbl">
+								<xs:annotation>
+									<xs:documentation>Oggetto della determina (coperto da eventuali omissis se presenti)</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string"/>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="CIG" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+							<xs:element name="ConRilevanzaContabile">
+								<xs:annotation>
+									<xs:documentation>Indica se è un atto con o senza rilevanza contabile</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="SI"/>
+										<xs:enumeration value="NO"/>
+										<xs:enumeration value="SI, SENZA VALIDAZIONE/RILASCIO IMPEGNI"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="RegContSuParteCorrente" type="xs:boolean">
+								<xs:annotation>
+									<xs:documentation>Presenza di registrazioni contabili  su parte corrente</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="RegContInContoCapitale" type="xs:boolean">
+								<xs:annotation>
+									<xs:documentation>Presenza di registrazioni contabili in conto capitale</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="Specificita" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Specificità della determina</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="a contrarre tramite gara "/>
+										<xs:enumeration value="aggiudicazione di gara"/>
+										<xs:enumeration value="rimodulazione spesa gara aggiudicata"/>
+										<xs:enumeration value="spese di personale"/>
+										<xs:enumeration value="riaccertamento"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="StrutturaProponente" type="StrutturaType">
+								<xs:annotation>
+									<xs:documentation>Struttura che ha proposto la determina</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="Adottante" type="FirmatarioType">
+								<xs:annotation>
+									<xs:documentation>Dati di chi ha adottato l'atto</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="ResponsabiliDiConcerto" type="FirmatarioType" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Nominativi e visti/firme di eventuali responsabili di concerto</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="ResponsabiliPEG" type="FirmatarioType" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Responsabile/i dei capitoli di spesa (se determina con rilevanza contabile)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="RdP" type="FirmatarioType">
+								<xs:annotation>
+									<xs:documentation>Responsabile di procedimento</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="RUP" type="FirmatarioType" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Responsabile Unico Provvedimento</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="PreverificaRagioneria" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Dati dell passaggio di verifica della Ragioneria prima della firma di adozione (ultimo passaggio se ci sono più iterazioni)</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="TsInizio" type="xs:dateTime">
+											<xs:annotation>
+												<xs:documentation>Data e ora di inizio</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="TsCompletamento" type="xs:dateTime" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Data e ora di completamento</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="TipoEsito" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Tipo di esito: positivo (OK) o negativo (KO) o positivo con avvertimenti (W)</xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="OK"/>
+													<xs:enumeration value="KO"/>
+													<xs:enumeration value="W"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="VistoRegolaritaContabile" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Visto di regolarità contabile (se previsto e già rilasciato)</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="TsRilascio" type="xs:dateTime">
+											<xs:annotation>
+												<xs:documentation>Data e ora di rilascio del visto di reg. contabile</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Firmatario" type="FirmatarioRestrictedType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Pubblicazione" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Periodo di pubblicazione</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="DataInizio" type="xs:date"/>
+										<xs:element name="DataTermine" type="xs:date" minOccurs="0"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="AttachmentFiles" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Dati sui file dell'atto restituiti in attachment alla response</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="File" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="DisplayFilename" type="xs:string">
+														<xs:annotation>
+															<xs:documentation>Nome logico del file comprensivo di estensione</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="TipoologiaDoc" type="xs:string" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Tipologia documentale se specificata</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="Descrizione" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Descrizione del file</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="Dimensione" type="xs:positiveInteger">
+														<xs:annotation>
+															<xs:documentation>Dimensione del file in bytes</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="Digest">
+														<xs:annotation>
+															<xs:documentation>Impronta del file con relativo algoritmo di calcolo</xs:documentation>
+														</xs:annotation>
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:string">
+																	<xs:attribute name="algoritmo" use="required">
+																		<xs:simpleType>
+																			<xs:restriction base="xs:string">
+																				<xs:enumeration value="SHA-1"/>
+																				<xs:enumeration value="SHA-256"/>
+																			</xs:restriction>
+																		</xs:simpleType>
+																	</xs:attribute>
+																	<xs:attribute name="encoding">
+																		<xs:simpleType>
+																			<xs:restriction base="xs:string">
+																				<xs:enumeration value="hex"/>
+																				<xs:enumeration value="base64"/>
+																			</xs:restriction>
+																		</xs:simpleType>
+																	</xs:attribute>
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+													<xs:element name="Mimetype" type="xs:string">
+														<xs:annotation>
+															<xs:documentation>Formato del file (tolte eventuali buste firma)</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="Firmato">
+														<xs:annotation>
+															<xs:documentation>Indica se il file è firmato digitalmente</xs:documentation>
+														</xs:annotation>
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:boolean">
+																	<xs:attribute name="tipoFirma">
+																		<xs:annotation>
+																			<xs:documentation>Tipo di firma della busta di firma più esterna (in caso di firme innestate)</xs:documentation>
+																		</xs:annotation>
+																		<xs:simpleType>
+																			<xs:restriction base="xs:string">
+																				<xs:pattern value="CAdES"/>
+																				<xs:pattern value="PAdES"/>
+																				<xs:pattern value="XAdES"/>
+																			</xs:restriction>
+																		</xs:simpleType>
+																	</xs:attribute>
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+												<xs:attribute name="nroAttachment" type="xs:positiveInteger" use="required">
+													<xs:annotation>
+														<xs:documentation>N.ro di attachment  corrispondente al file (da 1 in su)</xs:documentation>
+													</xs:annotation>
+												</xs:attribute>
+												<xs:attribute name="rappresenta" use="required">
+													<xs:annotation>
+														<xs:documentation>Indica se il file è: il dispositivo, il visto di reg. contabile, un allegato parte integrante o meno</xs:documentation>
+													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:string">
+															<xs:enumeration value="dispositivo"/>
+															<xs:enumeration value="visto_reg_contabile"/>
+															<xs:enumeration value="allegato_parte_integrante"/>
+															<xs:enumeration value="allegato_non_parte_integrante"/>
+														</xs:restriction>
+													</xs:simpleType>
+												</xs:attribute>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="ErrorMessage">
+					<xs:annotation>
+						<xs:documentation>Tag valorizzato solo se esitoRequest = KO</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:string">
+								<xs:attribute name="codice" type="xs:string" use="required">
+									<xs:annotation>
+										<xs:documentation>Coice di errore</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:choice>
+			<xs:attribute name="esitoRequest" use="required">
+				<xs:annotation>
+					<xs:documentation>Esito della richiesta, con valori OK/KO: indica se la determina/proposta è stata trovata ed è recuperabile o se si è verificato un errore. In caso di errore è istanziato il tag ErrorMessage</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="OK"/>
+						<xs:enumeration value="KO"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="FirmatarioRestrictedType">
+		<xs:sequence>
+			<xs:element name="Cognome" type="xs:string"/>
+			<xs:element name="Nome" type="xs:string"/>
+			<xs:element name="DomainUserID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>UserID di dominio</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FirmatarioType">
+		<xs:complexContent>
+			<xs:extension base="AutoreType">
+				<xs:sequence>
+					<xs:element name="Struttura" type="StrutturaType">
+						<xs:annotation>
+							<xs:documentation>Struttura dell'organigramma in servizio della quale il soggetto firma/vista</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="TsFirmaVisto" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Date e ora di firma/visto</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:simpleContent>
+								<xs:extension base="xs:dateTime">
+									<xs:attribute name="firmaDigitale" type="xs:boolean" use="required">
+										<xs:annotation>
+											<xs:documentation>Indica se si tratta di una firma digitale forte o meno</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:extension>
+							</xs:simpleContent>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="AutoreType">
+		<xs:sequence>
+			<xs:element name="Cognome" type="xs:string"/>
+			<xs:element name="Nome" type="xs:string"/>
+			<xs:element name="DomainUserID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>UserID di dominio</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="StrutturaType">
+		<xs:sequence>
+			<xs:element name="Codice" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Codice rapido che identifica la struttura nell'organigramma</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Denominazione" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Nome della struttura</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DenominazioneEstesa" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Denominazione della struttura precedeuta da quelle delle strutture di livello superiore ciscuna separata da |</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

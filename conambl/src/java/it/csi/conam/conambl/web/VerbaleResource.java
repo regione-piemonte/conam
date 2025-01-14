@@ -4,6 +4,8 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -15,15 +17,18 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FileUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.jboss.resteasy.spi.validation.ValidateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.dispatcher.VerbaleDispatcher;
@@ -31,11 +36,13 @@ import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
 import it.csi.conam.conambl.request.SalvaSoggettoRequest;
 import it.csi.conam.conambl.request.TipologiaAllegabiliRequest;
 import it.csi.conam.conambl.request.verbale.RicercaVerbaleRequest;
+import it.csi.conam.conambl.request.verbale.SalvaAllegatoVerbaleRequest;
 import it.csi.conam.conambl.request.verbale.SalvaAzioneRequest;
 import it.csi.conam.conambl.request.verbale.SalvaNotaRequest;
 import it.csi.conam.conambl.request.verbale.SalvaStatoManualeRequest;
 import it.csi.conam.conambl.request.verbale.SetRecidivoVerbaleSoggettoListRequest;
 import it.csi.conam.conambl.response.AzioneVerbaleResponse;
+import it.csi.conam.conambl.response.RicercaDocumentiStiloResponse;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.SpringSupportedResource;
 import it.csi.conam.conambl.vo.IsCreatedVO;
@@ -43,6 +50,7 @@ import it.csi.conam.conambl.vo.IstruttoreVO;
 import it.csi.conam.conambl.vo.UtenteVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.common.SelectVO;
+import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.MinVerbaleVO;
 import it.csi.conam.conambl.vo.verbale.StatoManualeVO;
@@ -51,6 +59,7 @@ import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.VerbaleSoggettoVORaggruppatoPerSoggetto;
 import it.csi.conam.conambl.vo.verbale.VerbaleVO;
 import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.ModificaAllegatoFieldVO;
 import it.csi.conam.conambl.vo.verbale.allegato.RiepilogoAllegatoVO;
 import it.csi.conam.conambl.vo.verbale.allegato.TipoAllegatoVO;
 
@@ -95,7 +104,12 @@ public class VerbaleResource extends SpringSupportedResource {
 	@Path("/ricercaSoggetto")
 	public Response ricercaSoggetto(@Valid @NotNull(message = "RESCON09") MinSoggettoVO soggetto) {
 		UserDetails utente = SecurityUtils.getUser();
-		return Response.ok(verbaleDispatcher.ricercaSoggetto(soggetto, utente)).build();
+		try {
+			return Response.ok(verbaleDispatcher.ricercaSoggetto(soggetto, utente)).build();
+		}catch(Throwable t) {
+			t.printStackTrace();
+			return null;
+		}
 	}
 
 	@POST
@@ -132,6 +146,23 @@ public class VerbaleResource extends SpringSupportedResource {
 		return Response.ok(verbaleDispatcher.getSoggettiByIdVerbale(id, utente, controlloUtente)).build();
 	}
 
+	@GET
+	@Path("/getSoggettiTrasgressoriConResiduo")
+	public Response getSoggettiTrasgressoriConResiduo(@QueryParam("idVerbale") Integer idverbale,  @QueryParam("idSoggettoPagatore") Integer idSoggettoPagatore, @QueryParam("controlloUtente") Boolean controlloUtente) {
+		UserDetails utente = SecurityUtils.getUser();
+		return Response.ok(verbaleDispatcher.getSoggettiTrasgressoriConResiduo(idverbale, idSoggettoPagatore,utente, controlloUtente)).build();
+	}
+
+
+	// issue 97 - nuova api recupero lista soggetti pagatori passando soggetto pagante, che riporti i gli importi già pagati in lista
+	@GET
+	@Path("/getSoggettiTrasgressoriConResiduoByAllegato")
+	public Response getSoggettiTrasgressoriConResiduoByAllegato(@QueryParam("idVerbale") Integer idverbale,  @QueryParam("idSoggettoPagatore") Integer idSoggettoPagatore,  @QueryParam("idAllegato") Integer idAllegato, @QueryParam("controlloUtente") Boolean controlloUtente) {
+		UserDetails utente = SecurityUtils.getUser();
+		return Response.ok(verbaleDispatcher.getSoggettiTrasgressoriConResiduo(idverbale, idSoggettoPagatore, idAllegato,utente, controlloUtente)).build();
+	}
+
+	
 	@GET
 	@Path("/getSoggettiByIdVerbaleConvocazione")
 	public Response getSoggettiByIdVerbaleConvocazione(@QueryParam("idVerbale") Integer id, @QueryParam("controlloUtente") Boolean controlloUtente) {
@@ -243,7 +274,18 @@ public class VerbaleResource extends SpringSupportedResource {
 	public Response salvaAllegato(MultipartFormDataInput input) {
 		UserDetails userDetails = SecurityUtils.getUser();
 		Map<String, List<InputPart>> map = input.getFormDataMap();
-		AllegatoVO allegato = verbaleDispatcher.salvaAllegato(map.get("data"), map.get("files"), userDetails);
+		AllegatoVO allegato = verbaleDispatcher.salvaAllegato(map.get("data"), map.get("files"), map, userDetails);
+		return Response.ok(allegato).build();
+	}
+	
+
+	// issue 97 - nuova api modifica field per allegato prova di pagamento
+	@POST
+	@Path("/modificaAllegatoVerbale/{idAllegato}")
+//	@Consumes("multipart/form-data")
+	public Response modificaAllegatoVerbale(@Valid @PathParam("idAllegato") @NotNull(message = "RESCON02") Long idAllegato, SalvaAllegatoVerbaleRequest request) {
+		UserDetails userDetails = SecurityUtils.getUser();
+		AllegatoVO allegato = verbaleDispatcher.modificaAllegato(idAllegato, request, userDetails);
 		return Response.ok(allegato).build();
 	}
 
@@ -441,4 +483,14 @@ public class VerbaleResource extends SpringSupportedResource {
 		List<SelectVO> ambiti = verbaleDispatcher.getAmbitiNote();
 		return Response.ok(ambiti).build();
 	}
+
+	
+	@POST
+	@Path("/downloadReport")
+	public Response downloadReport(@Valid @NotNull(message = "RESCON11") RicercaVerbaleRequest request) {
+		UserDetails userDetails = SecurityUtils.getUser();
+		DocumentoScaricatoVO report = verbaleDispatcher.downloadReport(request, userDetails);
+		return Response.ok(report).build();
+	}
+
 }

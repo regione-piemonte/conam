@@ -219,7 +219,7 @@ public class VerbalePregressiResource extends SpringSupportedResource {
 	public Response salvaAllegato(MultipartFormDataInput input) {
 		UserDetails userDetails = SecurityUtils.getUser();
 		Map<String, List<InputPart>> map = input.getFormDataMap();
-		AllegatoVO allegato = verbalePregressiDispatcher.salvaAllegato(map.get("data"), map.get("files"), userDetails);
+		AllegatoVO allegato = verbalePregressiDispatcher.salvaAllegato(map.get("data"), map.get("files"), map, userDetails);
 		return Response.ok(allegato).build();
 	}
 

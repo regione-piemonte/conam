@@ -6,6 +6,7 @@ package it.csi.conam.conambl.dispatcher.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import it.csi.conam.conambl.dispatcher.VerbaleDispatcher;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
 import it.csi.conam.conambl.request.SalvaAllegatiProtocollatiRequest;
 import it.csi.conam.conambl.request.verbale.RicercaVerbaleRequest;
+import it.csi.conam.conambl.request.verbale.SalvaAllegatoVerbaleRequest;
 import it.csi.conam.conambl.request.verbale.SalvaAzioneRequest;
 import it.csi.conam.conambl.request.verbale.SalvaStatoManualeRequest;
 import it.csi.conam.conambl.request.verbale.SetRecidivoVerbaleSoggettoRequest;
@@ -31,11 +33,13 @@ import it.csi.conam.conambl.vo.IstruttoreVO;
 import it.csi.conam.conambl.vo.UtenteVO;
 import it.csi.conam.conambl.vo.common.MessageVO;
 import it.csi.conam.conambl.vo.common.SelectVO;
+import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
 import it.csi.conam.conambl.vo.verbale.MinSoggettoVO;
 import it.csi.conam.conambl.vo.verbale.MinVerbaleVO;
 import it.csi.conam.conambl.vo.verbale.NotaVO;
 import it.csi.conam.conambl.vo.verbale.RiepilogoVerbaleVO;
 import it.csi.conam.conambl.vo.verbale.RuoloSoggettoVO;
+import it.csi.conam.conambl.vo.verbale.SoggettoPagamentoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
 import it.csi.conam.conambl.vo.verbale.StatoManualeVO;
 import it.csi.conam.conambl.vo.verbale.StatoVerbaleVO;
@@ -115,6 +119,16 @@ public class VerbaleDispatcherImpl implements VerbaleDispatcher {
 	public List<SoggettoVO> getSoggettiByIdVerbale(Integer id, UserDetails userDetails, Boolean controlloUtente) {
 		return soggettoVerbaleService.getSoggettiByIdVerbale(id, userDetails, controlloUtente);
 	}
+
+	@Override
+	public List<SoggettoPagamentoVO> getSoggettiTrasgressoriConResiduo(Integer idverbale,Integer idSoggettoPagatore, UserDetails userDetails, Boolean controlloUtente) {
+		return soggettoVerbaleService.getSoggettiTrasgressoriConResiduo(idverbale, idSoggettoPagatore, userDetails, controlloUtente, false);
+	}
+
+	@Override
+	public List<SoggettoPagamentoVO> getSoggettiTrasgressoriConResiduo(Integer idverbale,Integer idSoggettoPagatore,Integer idAllegato, UserDetails userDetails, Boolean controlloUtente) {
+		return soggettoVerbaleService.getSoggettiTrasgressoriConResiduo(idverbale, idSoggettoPagatore, idAllegato, userDetails, controlloUtente);
+	}
 	
 	@Override
 	public List<SoggettoVO> getSoggettiByIdVerbaleConvocazione(Integer id, UserDetails userDetails, Boolean controlloUtente) {
@@ -154,7 +168,7 @@ public class VerbaleDispatcherImpl implements VerbaleDispatcher {
 	
 	@Override
 	public List<MinVerbaleVO> ricercaVerbale(RicercaVerbaleRequest request, UserDetails userDetails) {
-		return ricercaVerbaleService.ricercaVerbale(request, userDetails);
+		return ricercaVerbaleService.ricercaVerbale(request, userDetails, false);
 	}
 
 	@Override
@@ -188,10 +202,15 @@ public class VerbaleDispatcherImpl implements VerbaleDispatcher {
 	}
 
 	@Override
-	public AllegatoVO salvaAllegato(List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
-		return allegatoVerbaleService.salvaAllegato(data, file, userDetails, false);
+	public AllegatoVO salvaAllegato(List<InputPart> data, List<InputPart> file, Map<String, List<InputPart>> map, UserDetails userDetails) {
+		return allegatoVerbaleService.salvaAllegato(data, file, map, userDetails, false);
 	}
 
+	@Override
+	public AllegatoVO modificaAllegato(Long idAllegato, SalvaAllegatoVerbaleRequest request, UserDetails userDetails) {
+		return allegatoVerbaleService.modificaAllegato(idAllegato, request, userDetails, false);
+	}
+	
 	@Override
 	public AllegatoVO salvaAllegatiMultipli(List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
 		return allegatoVerbaleService.salvaAllegatiMultipli(data, file, userDetails, false);
@@ -323,5 +342,10 @@ public class VerbaleDispatcherImpl implements VerbaleDispatcher {
 	@Override
 	public List<SelectVO> getAmbitiNote() {
 		return verbaleService.getAmbitiNote();
+	}
+
+	@Override
+	public DocumentoScaricatoVO downloadReport(RicercaVerbaleRequest request, UserDetails userDetails) {
+		return ricercaVerbaleService.downloadReport(request, userDetails);
 	}
 }

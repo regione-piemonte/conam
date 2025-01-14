@@ -131,35 +131,40 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 
 	@Autowired
 	private UtilsCnmCProprietaService utilsCnmCProprietaService;
-	
+		
 	@Override
 	public List<IstruttoreVO> getIstruttoreByVerbale(Integer idVerbale, UserDetails userDetails) {
-		CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(idVerbale);
-		List<CnmRVerbaleIllecito> rel = cnmRVerbaleIllecitoRepository.findByCnmTVerbale(cnmTVerbale);
-		if (rel.isEmpty())
-			throw new SecurityException("errore non è possibile trovarsi in questa situazione");
-
-		CnmDEnte cnmDEnte = rel.get(0).getCnmDLettera().getCnmDComma().getCnmDArticolo().getCnmREnteNorma().getCnmDEnte();
-		if (cnmDEnte == null)
-			throw new SecurityException("ente non trovato");
-
-		Long idEnte = cnmDEnte.getIdEnte();
-		List<IstruttoreVO> istruttoreList = new ArrayList<>();
-		if (!SecurityUtils.isEnteNormaValido(idEnte))
-			throw new SecurityException("Ente non abilitato");
-
-		List<CnmRUserEnte> cnmRUserEnteList = cnmRUserEnteRepository.findByCnmDEnteAndTipoUtilizzoAndFineValidita(cnmDEnte, Constants.ID_UTILIZZO_ENTE_LEGGE);
-		if (cnmRUserEnteList == null || cnmRUserEnteList.isEmpty())
-			throw new SecurityException(" nessun utente con ente leggi corrispondenti");
-		for (CnmRUserEnte cnmRUserEnte : cnmRUserEnteList) {
-			CnmTUser cnmTUser = cnmRUserEnte.getCnmTUser();
-			boolean userValid = cnmTUser.getFineValidita() == null || cnmTUser.getFineValidita().after(new Date());	// 20211126_LC Jira 176 esclude utenti non validi
-			if (cnmTUser.getCnmDRuolo().getIdRuolo() == Long.parseLong(Constants.RUOLO_UTENTE_ISTRUTTORE) && userValid) {
-				istruttoreList.add(istruttoreEntityMapper.mapEntityToVO(cnmTUser));
+		if(idVerbale == null || idVerbale == 0) {
+			List<CnmTUser> cnmTUsers = cnmTUserRepository.findIstruttoriByFineValidita();
+			return istruttoreEntityMapper.mapListEntityToListVO(cnmTUsers);
+		}else {
+			CnmTVerbale cnmTVerbale = utilsVerbale.validateAndGetCnmTVerbale(idVerbale);
+			List<CnmRVerbaleIllecito> rel = cnmRVerbaleIllecitoRepository.findByCnmTVerbale(cnmTVerbale);
+			if (rel.isEmpty())
+				throw new SecurityException("errore non è possibile trovarsi in questa situazione");
+	
+			CnmDEnte cnmDEnte = rel.get(0).getCnmDLettera().getCnmDComma().getCnmDArticolo().getCnmREnteNorma().getCnmDEnte();
+			if (cnmDEnte == null)
+				throw new SecurityException("ente non trovato");
+	
+			Long idEnte = cnmDEnte.getIdEnte();
+			List<IstruttoreVO> istruttoreList = new ArrayList<>();
+			if (!SecurityUtils.isEnteNormaValido(idEnte))
+				throw new SecurityException("Ente non abilitato");
+	
+			List<CnmRUserEnte> cnmRUserEnteList = cnmRUserEnteRepository.findByCnmDEnteAndTipoUtilizzoAndFineValidita(cnmDEnte, Constants.ID_UTILIZZO_ENTE_LEGGE);
+			if (cnmRUserEnteList == null || cnmRUserEnteList.isEmpty())
+				throw new SecurityException(" nessun utente con ente leggi corrispondenti");
+			for (CnmRUserEnte cnmRUserEnte : cnmRUserEnteList) {
+				CnmTUser cnmTUser = cnmRUserEnte.getCnmTUser();
+				boolean userValid = cnmTUser.getFineValidita() == null || cnmTUser.getFineValidita().after(new Date());	// 20211126_LC Jira 176 esclude utenti non validi
+				if (cnmTUser.getCnmDRuolo().getIdRuolo() == Long.parseLong(Constants.RUOLO_UTENTE_ISTRUTTORE) && userValid) {
+					istruttoreList.add(istruttoreEntityMapper.mapEntityToVO(cnmTUser));
+				}
 			}
+	
+			return istruttoreList;
 		}
-
-		return istruttoreList;
 	}
 
 	@Override
@@ -252,7 +257,7 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 				else {
 					boolean soggettiSenzaCF = false;
 					for(SoggettoVO soggetto : soggetti) {
-						if(soggetto.getPersonaFisica() && (soggetto.getCodiceFiscale()==null || soggetto.getCodiceFiscale().length()==0)) {
+						if(soggetto.getPersonaFisica() != null && soggetto.getPersonaFisica() && (soggetto.getCodiceFiscale()==null || soggetto.getCodiceFiscale().length()==0)) {
 							soggettiSenzaCF = true;
 							break;
 						}
@@ -496,13 +501,14 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 				if (idStato == null) {
 					idStato = RegoleAllegatiCambiamentoStato.statoAvanzabile(Constants.STATO_VERBALE_ACQUISITO, idAllegatoList, RegoleAllegatiCambiamentoStato.STATO_VERBALE_ACQUISITO);
 				}
-				if(idStatoVerbale == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO && idStato!= null) {
+				if(idStato!= null) {
+				//if(idStatoVerbale == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO && idStato!= null) {
 					// controllo se ci sono pagamenti totali per il verbale
 					BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
 					if(importoPagato == null) {
 						importoPagato = new BigDecimal(0);
 					}
-					if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) == 0) {
+					if(importoPagato.compareTo(new BigDecimal(0))> 0 && importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) == 0) {
 						idStato = Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO;
 					}else {
 						idStato = Constants.STATO_VERBALE_ACQUISITO;
@@ -530,7 +536,7 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 					if(importoPagato == null) {
 						importoPagato = new BigDecimal(0);
 					}
-					if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) != 0) {
+					if(importoPagato.compareTo(new BigDecimal(0))> 0 && importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) != 0) {
 						idStato = null;
 					}
 				}
@@ -583,6 +589,9 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 
 		switch (tipo) {
 		case RICEVUTA_PAGAMENTO_VERBALE:
+			isAllegatiEnable = isAggiugiAllegatoRiconciliazioneVerbale(cnmTVerbale, userDetails, tipologiaAllegabili);
+			break;
+		case PROVA_PAGAMENTO_VERBALE:
 			isAllegatiEnable = isAggiugiAllegatoRiconciliazioneVerbale(cnmTVerbale, userDetails, tipologiaAllegabili);
 			break;
 		case VERBALE_AUDIZIONE:
@@ -683,10 +692,13 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 	}
 
 	private Boolean isAggiungiConvocazioneAudizione(CnmTVerbale cnmTVerbale) {
+
 		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findByCnmTVerbale(cnmTVerbale);
 		if (cnmRVerbaleSoggettoList.isEmpty())
 			return false;
 
+		/* RIMOSSO per OBI37 creazione di più lettere di convocazione audizione per un soggetto/verbale.
+		 
 		for (CnmRVerbaleSoggetto vs : cnmRVerbaleSoggettoList) {
 			List<CnmRAllegatoVerbSog> allegato = cnmRAllegatoVerbSogRepository.findByCnmRVerbaleSoggetto(vs);
 			if (allegato == null || allegato.isEmpty())
@@ -700,6 +712,10 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 				return true;
 		}
 		return false;
+		
+		*/
+		
+		return true;
 	}
 
 	private Boolean isAggiugiAllegatoRiconciliazioneVerbale(CnmTVerbale cnmTVerbale, UserDetails userDetails, List<TipoAllegatoVO> tipologiaAllegabili) {

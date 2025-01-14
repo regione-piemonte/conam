@@ -4,23 +4,27 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.ordinanza;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
+
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
 
 import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.notifica.NotificaService;
@@ -215,8 +219,10 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 	public Integer salvaOrdinanza(List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
 		Long idUser = userDetails.getIdUser();
 		SalvaOrdinanzaRequest request = commonAllegatoService.getRequest(data, file, SalvaOrdinanzaRequest.class);
-		byte[] byteFile = request.getFile();
+		byte[] byteFile = getFileByteDecoded(request.getFile());
+		
 		String fileName = request.getFilename();
+
 		Long idTipoAllegato = request.getIdTipoAllegato();
 		List<AllegatoFieldVO> configAllegato = request.getAllegatoField();
 		MinOrdinanzaVO ordinanza = request.getOrdinanza();
@@ -355,7 +361,8 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 			0,
 			null,
 			null,
-			null
+			null,
+			null, null, null, null
 		);
 
 		// salvo relazione allegato ordinanza
@@ -414,6 +421,18 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		return cnmTOrdinanza.getIdOrdinanza();
 	}
 
+
+	private byte[] getFileByteDecoded(byte[] file) {
+		if(file != null) {
+			try {
+	            // Per i file provenienti da Stilo decodifico il byte array
+	            return Base64.getDecoder().decode(file);            
+	            // Se la decodifica ha successo, il dato è codificato in Base64
+	        } catch (IllegalArgumentException e) {
+	        }
+		}
+		return file;
+	}
 
 	@Override
 	public DatiSentenzaResponse getDatiSentenzaByIdOrdinanzaVerbaleSoggetto(Integer idOrdinanzaVerbaleSoggetto) {
@@ -479,7 +498,7 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 	public Integer salvaOrdinanzaAnnullamento(List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
 		Long idUser = userDetails.getIdUser();
 		SalvaOrdinanzaAnnullamentoRequest request = commonAllegatoService.getRequest(data, file, SalvaOrdinanzaAnnullamentoRequest.class);
-		byte[] byteFile = request.getFile();
+		byte[] byteFile = getFileByteDecoded(request.getFile());
 		String fileName = request.getFilename();
 		Long idTipoAllegato = request.getIdTipoAllegato();
 		List<AllegatoFieldVO> configAllegato = request.getAllegatoField();
@@ -576,7 +595,7 @@ public class OrdinanzaServiceImpl implements OrdinanzaService {
 		
 		// salva allegato ordinanzaAnnullamento
 		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.DA_PROTOCOLLARE_IN_ISTANTE_SUCCESSIVO,
-				null, null, false, true, null, null, 0, null, null, null);
+				null, null, false, true, null, null, 0, null, null, null, null, null, null, null);
 
 		
 		

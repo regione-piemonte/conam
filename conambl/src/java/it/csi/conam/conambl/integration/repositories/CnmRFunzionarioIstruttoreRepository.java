@@ -18,4 +18,6 @@ public interface CnmRFunzionarioIstruttoreRepository extends CrudRepository<CnmR
 	CnmRFunzionarioIstruttore findByCnmTVerbaleAndDataAssegnazione(CnmTVerbale cnmTVerbale);
 
 	CnmRFunzionarioIstruttore findByCnmTUserAndCnmTVerbale(CnmTUser cnmTUserIstruttore, CnmTVerbale cnmTVerbale);
+	
+	CnmRFunzionarioIstruttore findByIdFunzionarioIstruttore(Integer id);
 }

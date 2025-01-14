@@ -20,10 +20,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
-//import java.security.SecureRandom;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-//import java.util.Random;
+import java.util.Random;
 
 /**
  * Classe che si occupa di cercare l'utente il cui CF viene restituito da Iride Carica inoltre i ruoli dell'utente
@@ -48,7 +48,7 @@ public class UserDetailsService implements ShibbolethDetailService {
 	private EnteEntityMapper enteDEntityMapper;
 
 	//	Issue 3 - Sonarqube
-	// private Random random = SecureRandom.getInstanceStrong();
+	private Random random = SecureRandom.getInstanceStrong();
 	public UserDetailsService() throws NoSuchAlgorithmException {
 	}
 

@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -341,6 +342,14 @@ public class VerbaleEntityMapperImpl implements VerbaleEntityMapper {
 				);
 					
 			}
+			// OB31
+			if (dati.getComuneEnteAccertatore() !=null)
+				parametri.setComuneEnteAccertatore(dati.getComuneEnteAccertatore());
+			
+			// OB32
+			if (dati.getAssegnatario() !=null)
+				parametri.setAssegnatario(dati.getAssegnatario());
+			
 			if (dati.getStato() != null && !dati.getStato().isEmpty()) {
 				List<Long> idS = new ArrayList<Long>();
 				for (StatoVerbaleVO s : dati.getStato())
@@ -358,6 +367,28 @@ public class VerbaleEntityMapperImpl implements VerbaleEntityMapper {
 			
 			// 20211125_LC Jira 184 - ricerca per ambito
 			if (dati.getAmbito() != null && dati.getAmbito().getId() != null) parametri.setAmbito(cnmDAmbitoRepository.findOne(dati.getAmbito().getId().intValue()));
+			
+			
+			if(dati.getAnnoAccertamento()!=null) {
+				parametri.setAnnoAccertamento(dati.getAnnoAccertamento());
+			}
+			
+			if (dati.getDataAccertamentoDa() != null) {
+				parametri.setDataAccertamentoDa(utilsDate.asDate(dati.getDataAccertamentoDa()));
+			} 
+			
+			if (dati.getDataAccertamentoA() != null) {
+				parametri.setDataAccertamentoA(utilsDate.asDate(dati.getDataAccertamentoA()));
+			} 
+			
+			if (dati.getDataProcessoVerbaleDa() != null) {
+				parametri.setDataProcessoVerbaleDa(utilsDate.asDate(dati.getDataProcessoVerbaleDa()));
+			} 
+			
+			if (dati.getDataProcessoVerbaleA() != null) {
+				parametri.setDataProcessoVerbaleA(utilsDate.asDate(dati.getDataProcessoVerbaleA()));
+			} 		
+					
 			
 		}
 		return parametri;

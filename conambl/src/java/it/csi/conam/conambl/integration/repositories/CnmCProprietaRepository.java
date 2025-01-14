@@ -9,4 +9,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface CnmCProprietaRepository  extends CrudRepository<CnmCProprieta, Long> {
 
+    CnmCProprieta findByNome(String nome);
+
 }

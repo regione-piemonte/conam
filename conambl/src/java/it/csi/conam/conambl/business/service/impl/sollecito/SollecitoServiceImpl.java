@@ -4,6 +4,24 @@
  ******************************************************************************/
 package it.csi.conam.conambl.business.service.impl.sollecito;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.csi.conam.conambl.business.facade.StadocServiceFacade;
+import it.csi.conam.conambl.business.service.common.CommonAllegatoService;
 import it.csi.conam.conambl.business.service.common.CommonSoggettoService;
 import it.csi.conam.conambl.business.service.notifica.NotificaService;
 import it.csi.conam.conambl.business.service.ordinanza.StatoPagamentoOrdinanzaService;
@@ -11,30 +29,52 @@ import it.csi.conam.conambl.business.service.pianorateizzazione.UtilsPianoRateiz
 import it.csi.conam.conambl.business.service.sollecito.SollecitoService;
 import it.csi.conam.conambl.business.service.sollecito.UtilsSollecitoService;
 import it.csi.conam.conambl.business.service.util.UtilsDate;
+import it.csi.conam.conambl.business.service.util.UtilsDoqui;
 import it.csi.conam.conambl.common.Constants;
-import it.csi.conam.conambl.integration.entity.*;
+import it.csi.conam.conambl.common.TipoAllegato;
+import it.csi.conam.conambl.common.TipoProtocolloAllegato;
+import it.csi.conam.conambl.integration.entity.CnmDStatoSollecito;
+import it.csi.conam.conambl.integration.entity.CnmDTipoSollecito;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoSollecito;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoSollecitoPK;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbale;
+import it.csi.conam.conambl.integration.entity.CnmRAllegatoVerbalePK;
+import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
+import it.csi.conam.conambl.integration.entity.CnmRSoggRata;
+import it.csi.conam.conambl.integration.entity.CnmRSollecitoSoggRata;
+import it.csi.conam.conambl.integration.entity.CnmRSollecitoSoggRataPK;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
+import it.csi.conam.conambl.integration.entity.CnmTPianoRate;
+import it.csi.conam.conambl.integration.entity.CnmTRata;
+import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTSollecito;
+import it.csi.conam.conambl.integration.entity.CnmTUser;
+import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.mapper.entity.ROrdinanzaVerbSogEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.SollecitoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.entity.StatoSollecitoEntityMapper;
-import it.csi.conam.conambl.integration.repositories.*;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoOrdVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDStatoSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmDTipoSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRAllegatoSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmROrdinanzaVerbSogRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRSoggRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmRSollecitoSoggRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTRataRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSoggettoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTSollecitoRepository;
+import it.csi.conam.conambl.integration.repositories.CnmTUserRepository;
+import it.csi.conam.conambl.request.ordinanza.SalvaAllegatoSollecitoRequest;
+import it.csi.conam.conambl.request.verbale.SalvaAllegatoVerbaleRequest;
 import it.csi.conam.conambl.response.ImportoResponse;
 import it.csi.conam.conambl.response.RiconciliaSollecitoResponse;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.vo.notifica.NotificaVO;
 import it.csi.conam.conambl.vo.sollecito.SollecitoVO;
 import it.csi.conam.conambl.vo.verbale.SoggettoVO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoVO;
 
 /**
  * @author riccardo.bova
@@ -84,6 +124,17 @@ public class SollecitoServiceImpl implements SollecitoService {
 	private CnmTRataRepository cnmTRataRepository;
 	@Autowired
 	private CnmRSollecitoSoggRataRepository cnmRSollecitoSoggRataRepository;
+	@Autowired
+	private CommonAllegatoService commonAllegatoService;
+	
+	@Autowired
+	private UtilsDoqui utilsDoqui;
+	
+	@Autowired
+	private CnmDTipoAllegatoRepository cnmDTipoAllegatoRepository;
+	
+	@Autowired
+	private CnmRAllegatoSollecitoRepository  cnmRAllegatoSollecitoRepository;
 	
 	
 	@Override
@@ -192,7 +243,109 @@ public class SollecitoServiceImpl implements SollecitoService {
 
 	@Override
 	@Transactional
-	public RiconciliaSollecitoResponse riconcilaSollecito(SollecitoVO sollecito, UserDetails userDetails) {
+	public RiconciliaSollecitoResponse riconciliaSollecito (List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
+		
+		SalvaAllegatoSollecitoRequest request = commonAllegatoService.getRequest(data, file, SalvaAllegatoSollecitoRequest.class);
+				
+		SollecitoVO sollecito = request.getSollecitoVO();
+		
+		if (sollecito == null)
+			throw new IllegalArgumentException("sollecito non valorizzata");
+		if (sollecito.getIdSollecito() == null)
+			throw new IllegalArgumentException("id sollecito non valorizzato");
+
+		CnmTSollecito cnmTSollecito = cnmTSollecitoRepository.findOne(request.getSollecitoVO().getIdSollecito());
+		if (cnmTSollecito == null)
+			throw new SecurityException("cnmTSollecito non trovata");
+
+		CnmTUser cnmTUser = cnmTUserRepository.findOne(userDetails.getIdUser());
+		Timestamp now = utilsDate.asTimeStamp(LocalDateTime.now());
+
+		cnmTSollecito.setImportoPagato(sollecito.getImportoPagato().setScale(2, RoundingMode.HALF_UP));
+		cnmTSollecito.setCnmDStatoSollecito(cnmDStatoSollecitoRepository.findOne(Constants.ID_STATO_SOLLECITO_PAGATO_OFFLINE));
+		cnmTSollecito.setDataPagamento(utilsDate.asDate(sollecito.getDataPagamento()));
+		cnmTSollecito.setCnmTUser1(cnmTUser);
+		cnmTSollecito.setDataOraUpdate(now);
+		cnmTSollecito.setPagatore(sollecito.getPagatore());
+		cnmTSollecito.setNote(sollecito.getNote());
+		cnmTSollecito.setReversaleDOrdine(sollecito.getReversaledOrdine());
+
+		cnmTSollecito = cnmTSollecitoRepository.save(cnmTSollecito);
+
+		sollecito.setStatoSollecito(statoSollecitoEntityMapper.mapEntityToVO(cnmTSollecito.getCnmDStatoSollecito()));
+		sollecito.setIsRiconciliaEnable(Boolean.FALSE);
+
+		// aggiorno stato ordinanza verbale soggetto
+		CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog = cnmTSollecito.getCnmROrdinanzaVerbSog();
+		cnmROrdinanzaVerbSog.setCnmTUser2(cnmTUser);
+		cnmROrdinanzaVerbSog.setDataOraUpdate(utilsDate.asTimeStamp(LocalDateTime.now()));
+		cnmROrdinanzaVerbSog.setCnmDStatoOrdVerbSog(cnmDStatoOrdVerbSogRepository.findOne(Constants.ID_STATO_ORDINANZA_VERB_SOGG_PAGATO_OFFLINE));
+		cnmROrdinanzaVerbSog = cnmROrdinanzaVerbSogRepository.save(cnmROrdinanzaVerbSog);
+		
+		statoPagamentoOrdinanzaService.verificaTerminePagamentoSollecito(
+			cnmROrdinanzaVerbSog,
+			cnmTUser,
+			cnmTSollecito
+		);
+		
+		
+		RiconciliaSollecitoResponse riconciliaSollecitoResponse = new RiconciliaSollecitoResponse();
+		riconciliaSollecitoResponse.setSollecito(sollecito);
+		
+		
+		SoggettoVO soggettoVOToSet =
+			rOrdinanzaVerbSogEntityMapper.mapEntityToVO(
+				cnmROrdinanzaVerbSog
+			);
+		
+		// 20201217_LC - JIRA 118
+		CnmTVerbale cnmTVerbale = cnmROrdinanzaVerbSog.getCnmRVerbaleSoggetto().getCnmTVerbale();
+		CnmTSoggetto cnmTSoggetto = cnmTSoggettoRepository.findOne(soggettoVOToSet.getId());	
+		if(cnmTVerbale.getCnmDStatoPregresso() != null && cnmTVerbale.getCnmDStatoPregresso().getIdStatoPregresso() != 1) {
+			soggettoVOToSet = commonSoggettoService.attachResidenzaPregressi(
+				soggettoVOToSet,
+				cnmTSoggetto,
+				cnmTVerbale.getIdVerbale()
+			);
+		}	
+		
+		riconciliaSollecitoResponse.setSoggetto(soggettoVOToSet);
+		
+		
+		byte[] byteFile = request.getFile();
+		String fileName = request.getFilename();
+		Long idTipoAllegato = request.getIdTipoAllegato() != null ? request.getIdTipoAllegato() : new Long(TipoAllegato.PROVA_PAGAMENTO_SOLLECITO_ORDINANZA.getId());
+		
+		List<AllegatoFieldVO> configAllegato = request.getAllegatoField();
+	
+		
+		//TODO qui cosa mettiamo?
+		boolean protocollazioneUscita = Constants.ALLEGATI_REGISTRAZIONE_IN_USCITA.contains(idTipoAllegato);
+
+		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, fileName, idTipoAllegato, configAllegato, cnmTUser, TipoProtocolloAllegato.PROTOCOLLARE,
+				utilsDoqui.createOrGetfolder(cnmTSollecito), utilsDoqui.createIdEntitaFruitore(cnmTSollecito, cnmDTipoAllegatoRepository.findOne(idTipoAllegato)), false, protocollazioneUscita,
+				utilsDoqui.getSoggettoActa(cnmTSollecito), utilsDoqui.getRootActa(cnmTSollecito), 0, 0, StadocServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, null,
+				null, null, null, null);
+
+		
+		CnmRAllegatoSollecito  cnmRAllegatoSollecito = new CnmRAllegatoSollecito();
+		
+		CnmRAllegatoSollecitoPK cnmRAllegatoSollecitoPK = new CnmRAllegatoSollecitoPK();
+		cnmRAllegatoSollecitoPK.setIdAllegato(cnmTAllegato.getIdAllegato());
+		cnmRAllegatoSollecitoPK.setIdSollecito(cnmTSollecito.getIdSollecito());
+		cnmRAllegatoSollecito.setCnmTUser(cnmTUser);
+		cnmRAllegatoSollecito.setDataOraInsert(utilsDate.asTimeStamp(LocalDateTime.now()));
+		cnmRAllegatoSollecito.setId(cnmRAllegatoSollecitoPK);
+		cnmRAllegatoSollecitoRepository.save(cnmRAllegatoSollecito);
+
+		return riconciliaSollecitoResponse;
+
+	}
+	
+	
+	
+	
+	public RiconciliaSollecitoResponse riconciliaSollecito(SollecitoVO sollecito, UserDetails userDetails) {
 		if (sollecito == null)
 			throw new IllegalArgumentException("sollecito non valorizzata");
 		if (sollecito.getIdSollecito() == null)
@@ -255,6 +408,13 @@ public class SollecitoServiceImpl implements SollecitoService {
 		return riconciliaSollecitoResponse;
 
 	}
+	
+	
+	
+	
+	
+	
+	
 
 	@Override
 	public ImportoResponse getImportiSollecitoByCnmROrdinanzaVerbSog(CnmROrdinanzaVerbSog cnmROrdinanzaVerbSog) {
@@ -419,6 +579,7 @@ public class SollecitoServiceImpl implements SollecitoService {
 		return sollecitoVOList;
 	}
 
+	//E14 aggiunta 20240722 Genco Pasqualini
 	
 	
 }

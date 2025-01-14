@@ -19,7 +19,7 @@ public class AmbitoEntityMapperImpl implements AmbitoEntityMapper {
 		AmbitoVO ambito = new AmbitoVO();
 		ambito.setDenominazione(dto.getDescAmbito());
 		ambito.setId(dto.getIdAmbito().longValue());
-		ambito.setAcronimo(dto.getAcronimo());
+		ambito.setAcronimo(dto.getAcronimo()+ " - "+dto.getDescAmbito());
 		return ambito;
 	}
 

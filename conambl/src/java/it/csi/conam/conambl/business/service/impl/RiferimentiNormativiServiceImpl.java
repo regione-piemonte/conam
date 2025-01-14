@@ -97,7 +97,7 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 			}
 		}
 
-		return ambitoVOList;
+		return getAmbitiSortedList(ambitoVOList);
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 			for (CnmREnteNorma cnmREnteNorma : cnmREnteNormaList)
 				normaVOList.add(normaEntityMapper.mapEntityToVO(cnmREnteNorma.getCnmDNorma()));
 
-		return normaVOList;
+		return getNormaVOSortedList(normaVOList);
 	}
 
 	@Override
@@ -192,7 +192,7 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 			articoloList = cnmDArticoloRepository.findByCnmREnteNormaAndNotEliminato(cnmREnteNorma);
 		}
 
-		return articoloEntityMapper.mapListEntityToListVO(articoloList);
+		return getArticoloVOSortedList(articoloEntityMapper.mapListEntityToListVO(articoloList));
 	}
 
 	@Override
@@ -223,7 +223,7 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 			else
 				commaList = cnmDCommaRepository.findByCnmDArticoloAndNotEliminato(cnmDArticolo);
 		}
-		return commaEntityMapper.mapListEntityToListVO(commaList);
+		return getCommaVOSortedList(commaEntityMapper.mapListEntityToListVO(commaList));
 	}
 
 	@Override
@@ -254,7 +254,7 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 				letteraList = cnmDLetteraRepository.findByCnmDCommaAndNotEliminato(cnmDComma);
 		}
 		
-		return letteraEntityMapper.mapListEntityToListVO(letteraList);
+		return getLetteraVOSortedList(letteraEntityMapper.mapListEntityToListVO(letteraList));
 	}
 
 	@Override
@@ -320,4 +320,96 @@ public class RiferimentiNormativiServiceImpl implements RiferimentiNormativiServ
 		return output;
 
 	}
+	
+	public static List<AmbitoVO> getAmbitiSortedList(List<AmbitoVO> listaAmbiti) {
+        // Creare una nuova lista per contenere gli elementi ordinati
+        List<AmbitoVO> listaOrdinata = new ArrayList<>(listaAmbiti);
+
+        // Utilizzare un Comparator per ordinare la nuova lista in base all'acronimo crescente
+        Comparator<AmbitoVO> comparator = new Comparator<AmbitoVO>() {
+            @Override
+            public int compare(AmbitoVO o1, AmbitoVO o2) {
+                return o1.getAcronimo().compareTo(o2.getAcronimo());
+            }
+        };
+
+        Collections.sort(listaOrdinata, comparator);
+
+        // Ritorna la lista ordinata
+        return listaOrdinata;
+    }
+	
+	public static List<NormaVO> getNormaVOSortedList(List<NormaVO> listaNormaVO) {
+        // Creare una nuova lista per contenere gli elementi ordinati
+        List<NormaVO> listaOrdinata = new ArrayList<>(listaNormaVO);
+
+        // Utilizzare un Comparator per ordinare la nuova lista in base all'acronimo crescente
+        Comparator<NormaVO> comparator = new Comparator<NormaVO>() {
+            @Override
+            public int compare(NormaVO o1, NormaVO o2) {
+                return o1.getDenominazione().compareTo(o2.getDenominazione());
+            }
+        };
+
+        Collections.sort(listaOrdinata, comparator);
+
+        // Ritorna la lista ordinata
+        return listaOrdinata;
+    }
+	
+	public static List<ArticoloVO> getArticoloVOSortedList(List<ArticoloVO> listaArticoloVO) {
+        // Creare una nuova lista per contenere gli elementi ordinati
+        List<ArticoloVO> listaOrdinata = new ArrayList<>(listaArticoloVO);
+
+        // Utilizzare un Comparator per ordinare la nuova lista in base all'acronimo crescente
+        Comparator<ArticoloVO> comparator = new Comparator<ArticoloVO>() {
+            @Override
+            public int compare(ArticoloVO o1, ArticoloVO o2) {
+                return o1.getDenominazione().compareTo(o2.getDenominazione());
+            }
+        };
+
+        Collections.sort(listaOrdinata, comparator);
+
+        // Ritorna la lista ordinata
+        return listaOrdinata;
+    }
+	
+	public static List<CommaVO> getCommaVOSortedList(List<CommaVO> listaCommaVO) {
+        // Creare una nuova lista per contenere gli elementi ordinati
+        List<CommaVO> listaOrdinata = new ArrayList<>(listaCommaVO);
+
+        // Utilizzare un Comparator per ordinare la nuova lista in base all'acronimo crescente
+        Comparator<CommaVO> comparator = new Comparator<CommaVO>() {
+            @Override
+            public int compare(CommaVO o1, CommaVO o2) {
+                return o1.getDenominazione().compareTo(o2.getDenominazione());
+            }
+        };
+
+        Collections.sort(listaOrdinata, comparator);
+
+        // Ritorna la lista ordinata
+        return listaOrdinata;
+    }
+	
+	public static List<LetteraVO> getLetteraVOSortedList(List<LetteraVO> listaLetteraVO) {
+        // Creare una nuova lista per contenere gli elementi ordinati
+        List<LetteraVO> listaOrdinata = new ArrayList<>(listaLetteraVO);
+
+        // Utilizzare un Comparator per ordinare la nuova lista in base all'acronimo crescente
+        Comparator<LetteraVO> comparator = new Comparator<LetteraVO>() {
+            @Override
+            public int compare(LetteraVO o1, LetteraVO o2) {
+                return o1.getDenominazione().compareTo(o2.getDenominazione());
+            }
+        };
+
+        Collections.sort(listaOrdinata, comparator);
+
+        // Ritorna la lista ordinata
+        return listaOrdinata;
+    }
+	
+	
 }

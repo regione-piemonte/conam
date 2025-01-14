@@ -4,22 +4,36 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web;
 
-import it.csi.conam.conambl.business.service.util.UtilsDoqui;
-import it.csi.conam.conambl.dispatcher.AllegatoDispatcher;
-import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
-import it.csi.conam.conambl.util.SpringSupportedResource;
-import it.csi.conam.conambl.vo.common.SelectVO;
-import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
-import it.csi.conam.conambl.vo.verbale.allegato.ConfigAllegatoVO;
-import org.jboss.resteasy.spi.validation.ValidateRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
+
+import org.jboss.resteasy.spi.validation.ValidateRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import it.csi.conam.conambl.business.service.util.UtilsDoqui;
+import it.csi.conam.conambl.dispatcher.AllegatoDispatcher;
+import it.csi.conam.conambl.response.RicercaDocumentiStiloResponse;
+import it.csi.conam.conambl.response.RicercaProtocolloSuActaResponse;
+import it.csi.conam.conambl.util.SpringSupportedResource;
+import it.csi.conam.conambl.vo.CampiRicercaFormVO;
+import it.csi.conam.conambl.vo.common.SelectVO;
+import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.AllegatoFieldVO;
+import it.csi.conam.conambl.vo.verbale.allegato.ConfigAllegatoVO;
+import it.csi.conam.conambl.vo.verbale.allegato.DettaglioAllegatoFieldVO;
+import it.csi.conam.conambl.vo.verbale.allegato.ModificaAllegatoFieldVO;
 
 /**
  * @author riccardo.bova
@@ -160,6 +174,31 @@ public class AllegatoResource extends SpringSupportedResource {
 		//return Response.ok().entity(docList).build();
 	}	
 	
+	//E19_2022 - OBI45
+	@POST
+	@Path("/ricercaDocumentoSuStilo")
+	public Response ricercaDocumentoSuStilo(@RequestBody CampiRicercaFormVO input,
+			@QueryParam("pageRequest") Integer pageRequest, @QueryParam("maxLineRequest") Integer maxLineRequest) {
+		RicercaDocumentiStiloResponse response = allegatoDispatcher.ricercaDocumentiSuStilo(input, pageRequest, maxLineRequest);
+		return Response.ok(response).build();
+	}
+	
+
+	@GET
+	@Path("/getRicercaFieldsByIdRicerca")
+	public Response getRicercaFields(@Valid @QueryParam("idRicerca") Long idRicerca) {
+		List<ConfigAllegatoVO> config = allegatoDispatcher.getConfigAllegatiRicerca(idRicerca);
+		return Response.ok(config).build();
+	}
+	
+	
+	// issue 97 - nuova api recupero field per allegato prova di pagamento	
+	@GET
+	@Path("/getFieldsByIdAllegato")
+	public Response getFieldsByIdAllegato(@Valid @QueryParam("idAllegato") Long idAllegato) {
+		DettaglioAllegatoFieldVO dettaglioAllegatoFieldVO = allegatoDispatcher.getDettaglioFieldsByIdAllegato(idAllegato);	
+		return Response.ok(dettaglioAllegatoFieldVO).build();
+	}
 	
 	
 }

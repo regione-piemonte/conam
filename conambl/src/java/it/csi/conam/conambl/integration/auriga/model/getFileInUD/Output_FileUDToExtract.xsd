@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- edited with XMLSpy v2006 sp2 U (http://www.altova.com) by Andrea Campello (Engineering) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="Output_FileUDToExtract">
+		<xs:annotation>
+			<xs:documentation>ROOT element dello schema. Contiene  l'output specifico del Web Service di estrazione file di un'unità documentaria</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="NomeFile">
+					<xs:annotation>
+						<xs:documentation>Nome del file estratto</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="NroVersione">
+					<xs:annotation>
+						<xs:documentation>Nro di versione del documento che il file estratto rappresenta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="NroUltimaVersione">
+					<xs:annotation>
+						<xs:documentation>Nro dell'ultima versione del documento cui è relativo il file estratto</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="NroAllegato" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>E' il n.ro di allegato cui è relativo il file (se relativo ad allegato)</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:positiveInteger">
+							<xs:minInclusive value="1"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="TipoDocAllegato" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Tipo dell'allegato cui è relativo il file (descrizione e codice)</xs:documentation>
+					</xs:annotation>
+					<xs:complexType mixed="true">
+						<xs:attribute name="CodiceIdentificativo" type="xs:string" use="required"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="DesAllegato" type="xs:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Descrizione/oggetto dell'allegato cui è relativo il file</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

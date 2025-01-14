@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2018 rel. 2 sp1 (http://www.altova.com) by Valentina Martinucci (Engineering) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="RequestGetDetermina">
+		<xs:annotation>
+			<xs:documentation>Root element della request di GetDetermina</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="IDDetermina">
+					<xs:annotation>
+						<xs:documentation>Estremi identificativi della determina o proposta di determina</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="TipoNumerazione" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>Sigla di registrazione:</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="Anno" type="xs:gYear">
+								<xs:annotation>
+									<xs:documentation>Anno di numerazione del tipo indicato</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="Numero">
+								<xs:annotation>
+									<xs:documentation>N.ro di proposta o definitivo della determina, a seconda di quanto indicato in TipoNumerazione</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:positiveInteger">
+										<xs:totalDigits value="7"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="SceltaFileRichiesti">
+					<xs:annotation>
+						<xs:documentation>Indicazione di quali documenti della determina recuperare</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="DispositivoAtto" type="xs:boolean" default="false"/>
+							<xs:element name="VistoRegolaritaContabile" type="xs:boolean" default="false"/>
+							<xs:element name="AllegatiParteIntegranteSeparati" type="xs:boolean" default="false">
+								<xs:annotation>
+									<xs:documentation>Allegati parte integrante non uniti al dispositivo</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="AllegatiNonParteIntegrante" type="xs:boolean" default="false">
+								<xs:annotation>
+									<xs:documentation>Allegati non parte integrante</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

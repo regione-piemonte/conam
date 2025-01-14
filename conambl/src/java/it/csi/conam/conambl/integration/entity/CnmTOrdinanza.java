@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -82,7 +83,7 @@ public class CnmTOrdinanza implements Serializable {
 	private List<CnmRAllegatoOrdinanza> cnmRAllegatoOrdinanzas;
 
 	// bi-directional many-to-one association to CnmROrdinanzaVerbSog
-	@OneToMany(mappedBy = "cnmTOrdinanza")
+	@OneToMany(mappedBy = "cnmTOrdinanza", fetch = FetchType.EAGER)
 	private List<CnmROrdinanzaVerbSog> cnmROrdinanzaVerbSogs;
 
 	// bi-directional many-to-one association to CnmSStatoOrdinanza

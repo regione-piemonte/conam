@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Paolo Piedeplaumbo
@@ -106,8 +107,8 @@ public class VerbalePregressiDispatcherImpl implements VerbalePregressiDispatche
 	}
 
 	@Override
-	public AllegatoVO salvaAllegato(List<InputPart> data, List<InputPart> file, UserDetails userDetails) {
-		return allegatoVerbaleService.salvaAllegato(data, file, userDetails, true);
+	public AllegatoVO salvaAllegato(List<InputPart> data, List<InputPart> file, Map<String, List<InputPart>> map, UserDetails userDetails) {
+		return allegatoVerbaleService.salvaAllegato(data, file, map, userDetails, true);
 	}
 
 	@Override

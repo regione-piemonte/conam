@@ -63,6 +63,9 @@ public class RequestAggiungiAllegato implements java.io.Serializable {
 	private java.lang.String dataTopica;
 	private java.util.Date dataCronica;
 
+	private java.lang.String oggetto;
+	private java.lang.String origine;
+
 	public RequestAggiungiAllegato() {
 	}
 
@@ -553,9 +556,25 @@ public class RequestAggiungiAllegato implements java.io.Serializable {
 		this.dataTopica = dataTopica;
 	}
 	
-	
-	
-	
+	public java.lang.String getOggetto() {
+		return oggetto;
+	}
+
+	public void setOggetto(java.lang.String oggetto) {
+		this.oggetto = oggetto;
+	}
+
+	public java.lang.String getOrigine() {
+		return origine;
+	}
+
+	public void setOrigine(java.lang.String origine) {
+		this.origine = origine;
+	}
+
+
+
+
 	private java.lang.Object __equalsCalc = null;
 
 	public synchronized boolean equals(java.lang.Object obj) {

@@ -4,6 +4,25 @@
  ******************************************************************************/
 package it.csi.conam.conambl.web;
 
+import java.util.Base64;
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.spi.validation.ValidateRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import it.csi.conam.conambl.common.ErrorCode;
+import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.common.security.SecurityUtils;
 import it.csi.conam.conambl.dispatcher.SollecitoPregressiDispatcher;
 import it.csi.conam.conambl.request.riscossione.SalvaSollecitoPregressiRequest;
@@ -11,18 +30,11 @@ import it.csi.conam.conambl.response.DocumentResponse;
 import it.csi.conam.conambl.response.SalvaSollecitoPregressiResponse;
 import it.csi.conam.conambl.security.UserDetails;
 import it.csi.conam.conambl.util.SpringSupportedResource;
+import it.csi.conam.conambl.vo.ExceptionVO;
 import it.csi.conam.conambl.vo.IsCreatedVO;
 import it.csi.conam.conambl.vo.sollecito.SollecitoVO;
 import it.csi.conam.conambl.vo.sollecito.StatoSollecitoVO;
 import it.csi.conam.conambl.vo.verbale.DocumentoScaricatoVO;
-import org.jboss.resteasy.spi.validation.ValidateRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.Base64;
-import java.util.List;
 
 @Path("sollecitoPregressi")
 @Consumes({ MediaType.APPLICATION_JSON })
@@ -95,14 +107,25 @@ public class SollecitoPregressiResource extends SpringSupportedResource {
 	// 20201109_LC verificare se tutte le seguenti servono ancora in gestione pregresso
 	
 	
-	
-
-
+	//REQ68
 	@POST
 	@Path("/inviaRichiestaBollettiniSollecito/{idSollecito}")
 	public Response inviaRichiestaBollettiniOrdinanza(@PathParam("idSollecito") Integer idSollecito) {
-		sollecitoPregressiDispatcher.inviaRichiestaBollettiniByIdSollecito(idSollecito);
-		return Response.ok().build();
+
+		try {
+			sollecitoPregressiDispatcher.inviaRichiestaBollettiniByIdSollecito(idSollecito);
+
+		} catch(BusinessException e) {
+			ExceptionVO exception = new ExceptionVO(
+					ErrorCode.BOLLETTINI_ERRORE_GENERAZIONE,
+					e.getCodice(),
+					"danger"
+			);
+            
+			return Response.ok().entity(exception).build();
+        }      
+	       
+        return Response.ok().build();
 	}
 
 	@DELETE

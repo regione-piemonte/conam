@@ -47,6 +47,7 @@ import it.csi.conam.conambl.integration.entity.CnmROrdinanzaVerbSog;
 import it.csi.conam.conambl.integration.entity.CnmRUserEnte;
 import it.csi.conam.conambl.integration.entity.CnmRVerbaleIllecito;
 import it.csi.conam.conambl.integration.entity.CnmRVerbaleSoggetto;
+import it.csi.conam.conambl.integration.entity.CnmTAllegato;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
 import it.csi.conam.conambl.integration.entity.CnmCProprieta.PropKey;
@@ -395,6 +396,26 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() == Constants.STATO_VERBALE_ARCHIVIATO_PER_MANCANZA_CF_SOGGETTO) {
 			idStati = new ArrayList<>();
 		}
+		
+		
+		// OB41	
+		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findVerbaleSoggettoByIdVerbale(cnmTVerbale.getIdVerbale());
+		
+		// [Importo residuo totale] = (sommatoria di tutti gli importi in misura ridotta presenti su ogni soggetto) - tutti i pagamenti effettuati
+		BigDecimal importoTotale = new BigDecimal(0);				
+		for(CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmRVerbaleSoggettoList) {
+			importoTotale = importoTotale.add(cnmRVerbaleSoggetto.getImportoMisuraRidotta());
+		}
+		
+		BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
+		if(importoPagato == null) {
+			importoPagato = new BigDecimal(0);
+		}
+		
+		if(importoPagato.compareTo(importoTotale)<0) {
+			idStati.add(Constants.STATO_VERBALE_CONCILIATO);
+		}
+			
 		return idStati;
 
 	}
@@ -504,7 +525,10 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		} else {
 			if (cnmTVerbale.getNumeroProtocollo() == null) {
 				logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "7.1");
-				List<CnmRAllegatoVerbale> cnmRAllegatoVerbaleList = cnmRAllegatoVerbaleRepository.findByCnmTVerbale(cnmTVerbale);
+//				List<CnmRAllegatoVerbale> cnmRAllegatoVerbaleList = cnmRAllegatoVerbaleRepository.findByCnmTVerbale(cnmTVerbale);
+				// E18 - per escludere i doc non protocollati
+				List<CnmRAllegatoVerbale> cnmRAllegatoVerbaleList = cnmRAllegatoVerbaleRepository.findByCnmTVerbaleAndCnmTAllegatoNumeroProtocolloIsNotNull(cnmTVerbale);
+				
 				logger.debug("salvo lo stato con id "+idStato+" per il verbale "+idVerbale + "7.2");
 				if (!cnmRAllegatoVerbaleList.isEmpty()) {
 					try {
@@ -521,10 +545,10 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 							throw new SecurityException("Messaggio non trovato");
 						}
 					}catch (Throwable t) {
-						if(t instanceof SecurityException) {
+						if(t instanceof SecurityException ) {
 							responseMsg = new MessageVO(t.getMessage(), "danger");
-						}else if(t instanceof RemoteWebServiceException) {
-							CnmDMessaggio cnmDMessaggio = cnmDMessaggioRepository.findByCodMessaggio(((RemoteWebServiceException)t).getCodice());
+						}else if(t instanceof RemoteWebServiceException || t instanceof BusinessException) {
+							CnmDMessaggio cnmDMessaggio = cnmDMessaggioRepository.findByCodMessaggio(((BusinessException)t).getCodice());
 							if(cnmDMessaggio!=null) {
 
 //								throw new BusinessException(((RemoteWebServiceException)t).getCodice());
@@ -536,7 +560,7 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 							responseMsg = new MessageVO("Attenzione! Il servizio di protocollazione non e' al momento disponibile.", "danger");
 						}
 
-//						return responseMsg;
+						return responseMsg;
 					}
 				}
 			}

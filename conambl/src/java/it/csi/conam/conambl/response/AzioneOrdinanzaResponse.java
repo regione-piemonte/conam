@@ -20,6 +20,17 @@ public class AzioneOrdinanzaResponse extends ParentVO {
 	private Boolean downloadBollettiniEnable;
 	private Boolean aggiungiNotificaEnable;
 	private Boolean visualizzaNotificaEnable;
+	private Boolean protocollaLetteraSenzaBollettini;
+	private Boolean scaricaLetteraEnable;
+	private Boolean soloLettera;
+
+	public Boolean getSoloLettera() {
+		return soloLettera;
+	}
+
+	public void setSoloLettera(Boolean soloLettera) {
+		this.soloLettera = soloLettera;
+	}
 
 	public Boolean getAggiungiAllegatoEnable() {
 		return aggiungiAllegatoEnable;
@@ -67,6 +78,22 @@ public class AzioneOrdinanzaResponse extends ParentVO {
 
 	public void setVisualizzaNotificaEnable(Boolean visualizzaNotificaEnable) {
 		this.visualizzaNotificaEnable = visualizzaNotificaEnable;
+	}
+
+	public Boolean getProtocollaLetteraSenzaBollettini() {
+		return protocollaLetteraSenzaBollettini;
+	}
+
+	public void setProtocollaLetteraSenzaBollettini(Boolean protocollaLetteraSenzaBollettini) {
+		this.protocollaLetteraSenzaBollettini = protocollaLetteraSenzaBollettini;
+	}
+
+	public Boolean getScaricaLetteraEnable() {
+		return scaricaLetteraEnable;
+	}
+
+	public void setScaricaLetteraEnable(Boolean scaricaLetteraEnable) {
+		this.scaricaLetteraEnable = scaricaLetteraEnable;
 	}
 
 }

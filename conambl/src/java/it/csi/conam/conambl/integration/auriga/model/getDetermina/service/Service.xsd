@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.2.7-b13  svn-revision#12912. --><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://updunitadoc.webservices.repository2.auriga.eng.it">
+
+<xs:element name="service" nillable="true">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="codApplicazione" type="xs:string"></xs:element>
+<xs:element name="istanzaApplicazione" type="xs:string"></xs:element>
+<xs:element name="userName" type="xs:string"></xs:element>
+<xs:element name="password" type="xs:string"></xs:element>
+<xs:element name="xml" type="xs:string"></xs:element>
+<xs:element name="hash" type="xs:string"></xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+
+<xs:element name="serviceRequest">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="codApplicazione" type="xs:string"></xs:element>
+<xs:element name="istanzaApplicazione" type="xs:string"></xs:element>
+<xs:element name="userName" type="xs:string"></xs:element>
+<xs:element name="password" type="xs:string"></xs:element>
+<xs:element name="xml" type="xs:string"></xs:element>
+<xs:element name="hash" type="xs:string"></xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+
+<xs:element name="serviceResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="serviceReturn" type="xs:string"></xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:schema>

@@ -48,7 +48,7 @@ public class NotaEntityMapperImpl implements NotaEntityMapper {
 		if(vo.getIdNota()!=null) {
 			dto.setIdNota(vo.getIdNota());
 		}
-		dto.setOggetto(vo.getOggetto());
+		dto.setOggetto(vo.getOggetto()==null?"":vo.getOggetto());
 		dto.setDesc(vo.getDescrizione());
 		dto.setDate(utilsDate.asTimeStamp(vo.getData()));
 		dto.setCnmDAmbitoNote(cnmDAmbitoNoteRepository.findOne(vo.getAmbito().getId()));

@@ -39,6 +39,7 @@ import it.csi.conam.conambl.common.TipoProtocolloAllegato;
 import it.csi.conam.conambl.common.exception.BollettinoException;
 import it.csi.conam.conambl.common.exception.BusinessException;
 import it.csi.conam.conambl.integration.entity.CnmCParametro;
+import it.csi.conam.conambl.integration.entity.CnmCProprieta;
 import it.csi.conam.conambl.integration.entity.CnmDStatoAllegato;
 import it.csi.conam.conambl.integration.entity.CnmDStatoSollecito;
 import it.csi.conam.conambl.integration.entity.CnmRAllegatoPianoRate;
@@ -53,9 +54,15 @@ import it.csi.conam.conambl.integration.entity.CnmTSoggetto;
 import it.csi.conam.conambl.integration.entity.CnmTSollecito;
 import it.csi.conam.conambl.integration.entity.CnmTUser;
 import it.csi.conam.conambl.integration.entity.CnmTVerbale;
+
+import it.csi.conam.conambl.integration.epay.rest.mapper.RestModelMapper;
+import it.csi.conam.conambl.integration.epay.rest.model.DebtPositionData;
+import it.csi.conam.conambl.integration.epay.rest.model.DebtPositionReference;
+import it.csi.conam.conambl.integration.epay.rest.util.RestUtils;
 import it.csi.conam.conambl.integration.mapper.entity.SoggettoEntityMapper;
 import it.csi.conam.conambl.integration.mapper.ws.epay.EPayWsInputMapper;
 import it.csi.conam.conambl.integration.repositories.CnmCParametroRepository;
+import it.csi.conam.conambl.integration.repositories.CnmCProprietaRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoAllegatoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDStatoSollecitoRepository;
 import it.csi.conam.conambl.integration.repositories.CnmDTipoAllegatoRepository;
@@ -132,9 +139,16 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 	private CommonSoggettoService commonSoggettoService;
 	@Autowired
 	private CnmDStatoAllegatoRepository cnmDStatoAllegatoRepository;
-
+	@Autowired
+	private CnmCProprietaRepository cnmCProprietaRepository;
 	@Autowired
 	private CnmTAllegatoRepository cnmTAllegatoRepository;
+	@Autowired
+	private RestUtils restUtils;
+	@Autowired
+	private RestModelMapper restModelMapper;
+
+
 	
 	private static final Logger logger = Logger.getLogger(AllegatoSollecitoServiceImpl.class);
 
@@ -307,7 +321,7 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 		}
 		
 		CnmTAllegato cnmTAllegato = commonAllegatoService.salvaAllegato(file, nomeFile, tipoAllegato.getId(), null, cnmTUser, tipoProtocolloAllegato, folder, idEntitaFruitore, isMaster,
-				isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList);
+				isProtocollazioneInUscita, soggettoActa, rootActa, 0, 0, tipoActa, cnmTSoggettoList, null, null, null, null);
 		
 		if (tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO.getId() || 
 				tipoAllegato.getId() == TipoAllegato.BOLLETTINI_ORDINANZA_SOLLECITO_RATE.getId()) {
@@ -369,11 +383,58 @@ public class AllegatoSollecitoServiceImpl implements AllegatoSollecitoService {
 		cnmTSollecito.setCodPosizioneDebitoria(commonBollettiniService.generaCodicePosizioneDebitoria(StringUtils.defaultString(codiceFiscale, piva), BigDecimal.ONE, Constants.CODICE_SOLLECITO));
 		cnmTSollecito.setCodMessaggioEpay(commonBollettiniService.generaCodiceMessaggioEpay(idSollecito, Constants.CODICE_SOLLECITO));
 
-		cnmTSollecito = cnmTSollecitoRepository.save(cnmTSollecito);
+		if (cnmTSollecito.getDataScadenzaRata() != null){
+			boolean isSOAP = cnmCParametroRepository.findByIdParametro(Long.parseLong(Constants.TIPO_COMUNICAZIONE_SOAP)).getValoreBoolean();
+			if(isSOAP) {
+				cnmTSollecito = cnmTSollecitoRepository.save(cnmTSollecito);
+				ePayServiceFacade.inserisciListaDiCarico(ePayWsInputMapper.mapRataSollecitoToWsMapper(cnmTSollecito));
+			}
+			else {
+				//REQ68 chiamata REST
+				CnmCProprieta uri = cnmCProprietaRepository.findOne(Constants.EPAY_REST_ENDPOINT); 
+				CnmCProprieta usr = cnmCProprietaRepository.findOne(Constants.EPAY_REST_USER); 
+				CnmCProprieta pass = cnmCProprietaRepository.findOne(Constants.EPAY_REST_PASS);
+				
+				CnmCParametro organization = cnmCParametroRepository.findByIdParametro(Constants.ORGANIZATION);
+				CnmCParametro paymentType = cnmCParametroRepository.findByIdParametro(Constants.PAYMENT_TYPE);
+				
 
-		if (cnmTSollecito.getDataScadenzaRata() != null)
-			ePayServiceFacade.inserisciListaDiCarico(ePayWsInputMapper.mapRataSollecitoToWsMapper(cnmTSollecito));
+				String uriSb = restUtils.generateUrl(uri.getValore(), organization.getValoreString(), paymentType.getValoreString());
 
+				DebtPositionData dpd = restModelMapper.mapRataSollecitoToDebtPositionData(cnmTSollecito);
+				DebtPositionReference debtPositionReference =  restUtils.callCreateDebtPosition(uriSb, dpd, usr.getValore(), pass.getValore());
+
+				
+				if(debtPositionReference.getCodiceEsito().equalsIgnoreCase("000")) {
+					logger.info("Aggiornamento codIuv, codAvviso e codEsitoListaCarico per sollecito " + cnmTSollecito.getIdSollecito());
+					cnmTSollecito.setCodIuv(debtPositionReference.getIuv());
+					logger.info("Esito inserimento lista di carico request - COD IUV restituito da Epay: " + debtPositionReference.getIuv());
+					cnmTSollecito.setCodEsitoListaCarico(debtPositionReference.getCodiceEsito());
+					logger.info("Esito inserimento lista di carico request - codiceEsito restituito da Epay: " + debtPositionReference.getCodiceEsito());
+					cnmTSollecito.setCodAvviso(debtPositionReference.getCodiceAvviso());
+					logger.info("Esito inserimento lista di carico request - codiceAvviso restituito da Epay: " + debtPositionReference.getCodiceAvviso());
+					
+					creaBollettiniByCnmTSollecito(cnmTSollecito);
+				}
+				else {
+					logAndThrowException(uriSb, cnmTSollecito, debtPositionReference);
+				}
+				
+				cnmTSollecito = cnmTSollecitoRepository.save(cnmTSollecito);
+			}
+		}
+
+	}
+
+	// REQ68
+	private void logAndThrowException(String url, CnmTSollecito cnmTSollecito, DebtPositionReference debtPositionReference) throws BusinessException {
+	    logger.error("Chiamata REST url:" + url 
+	    		+ " - DebtPositionData id: " 
+	    		+ debtPositionReference.getIdentificativoPagamento() 
+	    		+ " errore:" + debtPositionReference.getCodiceEsito() + " - " + debtPositionReference.getDescrizioneEsito()
+		);
+	    cnmTSollecito.setCodEsitoListaCarico(debtPositionReference.getCodiceEsito());
+	    throw new BusinessException(debtPositionReference.getDescrizioneEsito());
 	}
 
 	@Override

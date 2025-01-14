@@ -17,14 +17,29 @@ import java.util.List;
 public interface MinVerbaleEntityMapper {
 
 	default List<MinVerbaleVO> mapListEntityToListVO(List<CnmTVerbale> tl, Long idUser) {
-		if (null == tl)
-			return null;
-		List<MinVerbaleVO> v = new ArrayList<>();
-		for (CnmTVerbale t : tl) {
-			v.add(mapEntityToVO(t, idUser));
-		}
-		return v;
+	    if (null == tl)
+	        return null;
+	    List<MinVerbaleVO> v = new ArrayList<>();
+	    for (CnmTVerbale t : tl) {
+	        v.add(mapEntityToVO(t, idUser));
+	    }
+	    return v;
 	}
 
+
 	MinVerbaleVO mapEntityToVO(CnmTVerbale dto, Long idUser);
+
+	default List<MinVerbaleVO> mapListEntityToListVOAndDoc(List<CnmTVerbale> tl, Long idUser) {
+	    if (null == tl)
+	        return null;
+	    List<MinVerbaleVO> v = new ArrayList<>();
+	    for (CnmTVerbale t : tl) {
+	        v.add(mapEntityToVOAndDoc(t, idUser));
+	    }
+	    return v;
+	}
+
+
+	MinVerbaleVO mapEntityToVOAndDoc(CnmTVerbale dto, Long idUser);
+	
 }

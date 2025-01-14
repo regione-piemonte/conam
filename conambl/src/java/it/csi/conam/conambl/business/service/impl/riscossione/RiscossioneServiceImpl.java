@@ -57,7 +57,7 @@ public class RiscossioneServiceImpl implements RiscossioneService {
 	private static int DIM_COGNOME = 21;
 	private static int DIM_LOCALITA_FRAZIONARIA = 21;
 	private static int DIM_DENO_SOCIETA = 21;
-	private static int DIM_TITOLO = 21;
+	private static int DIM_TITOLO = 50;
 
 	@Autowired
 	private SoggettoVerbaleService soggettoVerbaleService;
@@ -348,7 +348,7 @@ public class RiscossioneServiceImpl implements RiscossioneService {
 						cnmTRecordN3.setCap(c.getCap());
 					}
 
-					if (soggVO.getNazioneNascitaEstera() && c.getNazioneNascita() != null) {
+					if (soggVO.getNazioneNascitaEstera() != null && soggVO.getNazioneNascitaEstera() && c.getNazioneNascita() != null) {
 						CnmDNazione cmDNazione = cmDNazioneRepository.findByDenomNazione(c.getNazioneNascita().getDenominazione());
 						cnmTRecordN3.setCodBelfioreNascita(cmDNazione != null ? cmDNazione.getCodBelfioreNazione() : "");
 					} else if (c.getComuneNascita() != null) {

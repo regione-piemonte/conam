@@ -10,4 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CnmDEnteRepository extends CrudRepository<CnmDEnte, Long> {
+
+	CnmDEnte findByIdEnte(Long id);
+
 }

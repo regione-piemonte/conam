@@ -133,7 +133,9 @@ public class SoggettoPregressiEntityMapperImpl implements SoggettoPregressiEntit
 	public SoggettoPregressiVO createSoggettoPregressiVO(SoggettoVO soggettoVO, CnmTSoggetto dto) {
 
 		if(dto == null) {
-			if(soggettoVO.getIdStas() != null) {
+			if(soggettoVO.getId() != null) {
+				dto = cnmTSoggettoRepository.findOne(soggettoVO.getId());
+			}else if(soggettoVO.getIdStas() != null) {
 				dto = cnmTSoggettoRepository.findByIdStas(soggettoVO.getIdStas());
 			}else if(soggettoVO.getCodiceFiscale() != null) {
 				dto = cnmTSoggettoRepository.findByCodiceFiscale(soggettoVO.getCodiceFiscale());				

@@ -49,7 +49,8 @@ public abstract class Constants {
 
 	// STATO VERBALE
 	public static final long STATO_VERBALE_INCOMPLETO = 1;
-	
+	// Ob41
+	public static final long STATO_VERBALE_CONCILIATO = 3;	
 	public static final long STATO_VERBALE_IN_ACQUISIZIONE = 12;
 	public static final long STATO_VERBALE_IN_ACQUISIZIONE_CON_PAGAMENTO = 13;
 	public static final long STATO_VERBALE_IN_ACQUISIZIONE_CON_SCRITTI_DIFENSIVI = 14;
@@ -91,6 +92,8 @@ public abstract class Constants {
 	public static final long ID_FIELD_DATA_SENTENZA = 13;
 	public static final long ID_FIELD_DATA_PAGAMENTO_RICEVUTA_ORDINANZA = 16;
 	public static final long ID_FIELD_IMPORTO_PAGATO_RICEVUTA_ORDINANZA = 17;
+	public static final long ID_FIELD_DATA_PAGAMENTO_PROVA_ORDINANZA = 52;
+	public static final long ID_FIELD_IMPORTO_PAGATO_PROVA_ORDINANZA = 55;
 	public static final long ID_FIELD_CONTO_CORRENTE_VERSAMENTO = 18;
 
 	public static final long ID_FIELD_IMPORTO_SANZIONE_SENTENZA = 14;
@@ -100,6 +103,9 @@ public abstract class Constants {
 	public static final long ID_FIELD_IMPORTO_PAGATO = 8;
 	public static final long ID_FIELD_CONTO_CORRENTE_PAGAMENTO = 9;
 	public static final long ID_FIELD_SOGGETTO_PAGAMENTO = 21;
+	public static final long ID_FIELD_SOGGETTI_PAGAMENTO = 20;
+	public static final long ID_FIELD_OGGETTO = 22;
+	public static final long ID_FIELD_ORIGINE = 23;
 
 	// DIMENSIONE ALLEGATI (10 mb)
 	public static final int ALLEGATO_MAX_SIZE = 10240000;
@@ -137,6 +143,10 @@ public abstract class Constants {
 	public static final long ID_DIREZIONE = 23L;
 	public static final long ID_SETTORE = 24L;
 	public static final long ID_DIRIGENTE_SETTORE= 25L;
+	// E2_2023-B35
+	public static final long ID_TESTO_LIBERO_2_ARCHIVIAZIONE= 40L;
+	public static final long ID_OGGETTO_LETTERA_ARCHIVIAZIONE= 41L;
+	
 	public static final long ID_SEDE_ENTE= 26L;
 	public static final long ID_OGGETTO_PRECOMIPLATO= 27L;
 	public static final long ID_ORGANO_ACCERTATORE= 28L;
@@ -160,6 +170,12 @@ public abstract class Constants {
 	public static final long ID_OGGETTO_PAGAMENTO_ORDINANZA = 14L;
 	public static final long ID_OGGETTO_PAGAMENTO_SOLLECITO_RATE = 37L;
 	
+	//E9 REQ5NF ID_TIPO_OGGETTO_PAGAMENTO_ORDINANZA indica se mostrare Oggetto pagamento ordinanza o Oggetto pagamento ordinanza variabile
+	public static final long ID_TIPO_OGGETTO_PAGAMENTO_ORDINANZA = 46L;
+	public static final long ID_OGGETTO_PAGAMENTO_ORDINANZA_VARIABILE = 47L;
+	public static final String TIPO_OGGETTO_PAGAMENTO_ORDINANZA_VARIABILE= "Oggetto pagamento ordinanza variabile";
+	public static final String TIPO_OGGETTO_PAGAMENTO_ORDINANZA_FISSO= "Oggetto pagamento ordinanza fisso";
+	
 	
 
 	public static final List<Long> PARAMETRI_BOLLETTINI = Arrays.asList(ID_NUMERO_CONTO_POSTALE, //
@@ -167,6 +183,8 @@ public abstract class Constants {
 			ID_OGGETTO_PAGAMENTO_SOLLECITO, //
 			ID_OGGETTO_PAGAMENTO_SOLLECITO_RATE, //
 			ID_OGGETTO_PAGAMENTO_ORDINANZA, //
+			ID_OGGETTO_PAGAMENTO_ORDINANZA_VARIABILE , //
+			ID_TIPO_OGGETTO_PAGAMENTO_ORDINANZA, //
 			ID_CODICE_FISCALE_ENTE_CREDITORE, //
 			ID_ENTE_CREDITORE, //
 			ID_CBILL, //
@@ -211,11 +229,26 @@ public abstract class Constants {
 	public static final String ID_DATAMATRIX = "1";
 	public static final String VALORE_FINALE_DATAMATRIX = "A";
 
-	// EPAY
+	public static final String CFSYSTEM = "SYSTEM";
+
+	// EPAY REQ68
 	public static final String CFEPAY = "EPAY";
+	public static final String TIPO_COMUNICAZIONE_SOAP = "42"; //REQ68 a questa costante sarà associato un valore true/false a seconda che la comunicazione sia SOAP o REST
+	
+	// REQ68 - Rest Client Parameters
+	public static final long EPAY_REST_ENDPOINT = 36L;
+	public static final long EPAY_REST_USER = 37L;
+	public static final long EPAY_REST_PASS = 38L;
+	
+	public static final long ORGANIZATION = 4L;
+	public static final long PAYMENT_TYPE = 8L;
+	
 	
 	// ACARIS
 	public static final String ACARIS_CODICE_EXC_E167 = "SER-E167";
+	//E14 per evitare che venga messa la partola chiave
+	public static final String PROVA_DEL_PAGAMENTO_OGGETTO = "Prova del pagamento";
+	
 	
 
 	// ALLEGATI CREA ORDINANZA
@@ -432,7 +465,6 @@ public abstract class Constants {
 	
 	public static final List<Long> LISTA_STATI_MANUALI_NON_DI_COMPETENZA = Arrays.asList(ID_STATO_MANUALE_DEFAULT,ID_STATO_MANUALE_NON_DI_COMPETENZA);
 	public static final List<Long> LISTA_STATI_MANUALI_DEVOLUTI_PER_COMPETENZA = Arrays.asList(ID_STATO_MANUALE_DEVOLUTO_PER_COMPETENZA);
-	
-	
+
 	
 }

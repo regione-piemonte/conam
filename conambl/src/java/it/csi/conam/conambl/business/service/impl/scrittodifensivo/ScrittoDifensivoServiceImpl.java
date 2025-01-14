@@ -271,7 +271,7 @@ public class ScrittoDifensivoServiceImpl implements ScrittoDifensivoService {
 				String rootActa = null;	// utilsDoqui.getRootActaScrittoDifensivo(cnmTScrittoDifensivo);		// è il folder parent del folde rin cui vanno messi gli scritti difensivi			
 		
 				cnmTAllegato = commonAllegatoService.salvaAllegato(byteFile, nomeFile, idTipoAllegato, null, cnmTUser, TipoProtocolloAllegato.PROTOCOLLARE,
-						folder, idEntitaFruitore, false, false, soggettoActa, rootActa, 0, 0, DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, null); 
+						folder, idEntitaFruitore, false, false, soggettoActa, rootActa, 0, 0, DoquiServiceFacade.TIPOLOGIA_DOC_ACTA_DOC_INGRESSO_SENZA_ALLEGATI, null, null, null, null, null); 
 
 				CnmTDocumento documentoFromAllegato = cnmTDocumentoRepository.findOne(Integer.parseInt(cnmTAllegato.getIdActa()));
 				if (documentoFromAllegato == null)

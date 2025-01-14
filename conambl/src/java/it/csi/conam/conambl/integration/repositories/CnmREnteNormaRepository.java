@@ -74,4 +74,7 @@ public interface CnmREnteNormaRepository extends JpaRepository<CnmREnteNorma, In
 			+ "where u.cnmDEnte=?1 and n.cnmDAmbito=?2 "//
 			+ "and (u.eliminato is null or u.eliminato=false)")
 	List<CnmREnteNorma> findByCnmDEnteAndCnmDAmbitoAndNotEliminato(CnmDEnte cnmDEnte, CnmDAmbito cnmDAmbito);
+
+	// E1_2022 - OB32
+	List<CnmREnteNorma> findByCnmDEnte(CnmDEnte cnmDEnte);
 }

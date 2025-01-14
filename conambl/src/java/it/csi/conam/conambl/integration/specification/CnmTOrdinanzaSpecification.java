@@ -50,7 +50,6 @@ public class CnmTOrdinanzaSpecification {
 				if (!(tipoRicerca != null && tipoRicerca.equals("RICERCA_ORDINANZA")))
 					predicates.add(builder.notEqual(cnmDTipoOrdinanzaJoin.get("idTipoOrdinanza"), 1));
 
-
 				if (trasgressore != null && !trasgressore.isEmpty()) {
 					Subquery<CnmROrdinanzaVerbSog> subqueryROrdinanzaVerbaleSoggetto = query.subquery(CnmROrdinanzaVerbSog.class);
 					Root<CnmROrdinanzaVerbSog> rootsubqueryROrdinanzaVerbaleSoggetto = subqueryROrdinanzaVerbaleSoggetto.from(CnmROrdinanzaVerbSog.class);
@@ -58,7 +57,7 @@ public class CnmTOrdinanzaSpecification {
 					subqueryROrdinanzaVerbaleSoggetto.select(rootsubqueryROrdinanzaVerbaleSoggetto.get("cnmTOrdinanza")).where(predicate).distinct(true);
 					predicates.add(root.in(subqueryROrdinanzaVerbaleSoggetto));
 				}
-
+				
 				if (obbligatoInSolido != null && !obbligatoInSolido.isEmpty()) {
 					Subquery<CnmROrdinanzaVerbSog> subqueryROrdinanzaVerbaleSoggetto = query.subquery(CnmROrdinanzaVerbSog.class);
 					Root<CnmROrdinanzaVerbSog> rootsubqueryROrdinanzaVerbaleSoggetto = subqueryROrdinanzaVerbaleSoggetto.from(CnmROrdinanzaVerbSog.class);

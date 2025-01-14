@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="WSGetDeterminaService" targetNamespace="http://getdetermina.webservices.repository2.auriga.eng.it" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:tns="http://getdetermina.webservices.repository2.auriga.eng.it" xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata">
+  <types>
+    <xsd:schema>
+<xsd:import namespace="http://getdetermina.webservices.repository2.auriga.eng.it" schemaLocation="http://coll-stilo.wsbe.regione.piemonte.it:80/stilobusiness/soap/WSGetDetermina?xsd=1"/>
+</xsd:schema>
+  </types>
+  <message name="serviceOperation">
+    <part name="service" element="tns:service">
+    </part>
+  </message>
+  <message name="serviceOperationResponse">
+    <part name="serviceResponse" element="tns:serviceResponse">
+    </part>
+  </message>
+  <portType name="WSIGetDetermina">
+    <operation name="serviceOperation">
+      <input message="tns:serviceOperation" wsam:Action="http://getdetermina.webservices.repository2.auriga.eng.it/WSIGetDetermina/serviceOperationRequest">
+    </input>
+      <output message="tns:serviceOperationResponse" wsam:Action="http://getdetermina.webservices.repository2.auriga.eng.it/WSIGetDetermina/serviceOperationResponse">
+    </output>
+    </operation>
+  </portType>
+  <binding name="WSGetDeterminaPortBinding" type="tns:WSIGetDetermina">
+    <wsp:PolicyReference URI="#WSGetDeterminaPortBinding_MTOM_Policy"/>
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="serviceOperation">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="WSGetDeterminaService">
+    <port name="WSGetDeterminaPort" binding="tns:WSGetDeterminaPortBinding">
+      <soap:address location="http://tst-api-piemonte.ecosis.csi.it/documentale/stilo-determine-rp-03-test/v1"/>
+    </port>
+  </service>
+    <wsp:Policy wsu:Id="WSGetDeterminaPortBinding_MTOM_Policy">
+<ns1:OptimizedMimeSerialization wsp:Optional="true" xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"/>
+</wsp:Policy>
+</definitions>
