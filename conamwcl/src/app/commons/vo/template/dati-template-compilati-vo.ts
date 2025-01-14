@@ -27,11 +27,12 @@ export class DatiTemplateCompilatiVO {
   public dichiara: string;
 
   //epc
-  
+
   public indirizzoOrganoAccertatoreRiga1: string;
   public indirizzoOrganoAccertatoreRiga2: string;
   public indirizzoOrganoAccertatoreRiga3: string;
   public testoLibero: string;
+  public testoLibero2?: string;
   //  public datiLetteraAnnullamento: {
 
   public infoOrganoAccertatore?: string;
@@ -52,9 +53,19 @@ export class DatiTemplateCompilatiVO {
   public sedeEnteRiga3?: string;
   public sedeEnteRiga4?: string;
   public sedeEnteRiga5?: string;
+  public areaTestoLibero?: string;
   // Rif: ordinanza ingiunzione testi liberi  
+
   public intestazioneConoscenza?: string;
   public email?: string;
   public emailOrgano?: string;
-   
+
+  public destinatariSoggetti?: {
+    soggRiga1: string,
+    soggRiga2: string,
+    soggRiga3: string,
+    soggRiga4: string
+  }[];
+  public destinatariAggiuntivi?: string = '';
+
 }

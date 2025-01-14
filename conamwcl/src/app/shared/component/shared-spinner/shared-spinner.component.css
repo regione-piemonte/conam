@@ -7,7 +7,7 @@
     animation:spin 2s linear infinite;
     z-index:1001;
     }
-    
+
     #loader:before {
     content:"";
     position:absolute;
@@ -21,7 +21,7 @@
     -webkit-animation:spin 3s linear infinite;
     animation:spin 3s linear infinite
     }
-    
+
     #loader:after {
     content:"";
     position:absolute;
@@ -35,8 +35,21 @@
     -webkit-animation:spin 1.5s linear infinite;
     animation:spin 1.5s linear infinite
     }
-    
-    
+
+    .absolute-spinner{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 99999;
+        margin-bottom: 0;
+    }
+
     @-webkit-keyframes spin {
     0% {
      -webkit-transform:rotate(0deg);
@@ -61,7 +74,7 @@
      transform:rotate(360deg)
     }
     }
-    
+
 
     .loaderIE9{
     background-image: url('/assets/loaderIE9.gif');
@@ -70,5 +83,4 @@
     display: block;
     margin:0 auto;
     }
-    
-    
+

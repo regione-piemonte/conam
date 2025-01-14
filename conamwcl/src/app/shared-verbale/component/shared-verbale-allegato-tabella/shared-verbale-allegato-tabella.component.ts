@@ -16,13 +16,16 @@ import { saveAs } from "file-saver";
 import { AllegatoSharedService } from "../../../shared/service/allegato-shared.service";
 import { SharedDialogComponent } from "../../../shared/component/shared-dialog/shared-dialog.component";
 import { UtilSubscribersService } from "../../../core/services/util-subscribers-service";
+import { Routing } from "../../../commons/routing";
+import { Route, Router } from "@angular/router";
 
 @Component({
   selector: "shared-verbale-allegato-tabella",
   templateUrl: "./shared-verbale-allegato-tabella.component.html",
 })
 export class SharedVerbaleAllegatoTabellaComponent
-  implements OnInit, OnDestroy, OnChanges {
+  implements OnInit, OnDestroy, OnChanges
+{
   @ViewChild(SharedDialogComponent) sharedDialogs: SharedDialogComponent;
 
   @Input()
@@ -43,6 +46,9 @@ export class SharedVerbaleAllegatoTabellaComponent
   @Output()
   onLoaded: EventEmitter<boolean> = new EventEmitter<boolean>();
 
+  @Output()
+  goToDatiProvaPagamento: EventEmitter<boolean> = new EventEmitter<boolean>();
+
   public buttonAnnullaTexts: string;
   public buttonConfirmTexts: string;
   public subLinks: Array<any>;
@@ -58,7 +64,8 @@ export class SharedVerbaleAllegatoTabellaComponent
   constructor(
     private logger: LoggerService,
     private allegatoSharedService: AllegatoSharedService,
-    private utilSubscribersService: UtilSubscribersService
+    private utilSubscribersService: UtilSubscribersService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -70,7 +77,8 @@ export class SharedVerbaleAllegatoTabellaComponent
   initModel() {
     this.dataDocumentiVerbale = this.riepilogoAllegato.verbale;
     this.dataDocumentiIstruttoria = this.riepilogoAllegato.istruttoria;
-    this.dataDocumentiFaseGiurisdizionale = this.riepilogoAllegato.giurisdizionale;
+    this.dataDocumentiFaseGiurisdizionale =
+      this.riepilogoAllegato.giurisdizionale;
     this.dataDocumentiRateizzazione = this.riepilogoAllegato.rateizzazione;
     this.mostraTabellaVerbaleAudizione = this.verbaleAudizione;
   }
@@ -148,6 +156,10 @@ export class SharedVerbaleAllegatoTabellaComponent
 
   emitEliminazione(el: AllegatoVO) {
     this.onDelete.emit(el);
+  }
+  onInfo(el: any | Array<any>) {
+    console.log(this.riepilogoAllegato.verbale, el);
+    this.goToDatiProvaPagamento.emit(el);
   }
 
   ngOnChanges(): void {

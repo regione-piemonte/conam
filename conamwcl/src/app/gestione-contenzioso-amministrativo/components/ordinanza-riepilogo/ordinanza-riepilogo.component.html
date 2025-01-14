@@ -11,10 +11,14 @@
                 <div class="form-group row">
                     <div id="scrollTop"></div>
                     <shared-ordinanza-riepilogo [showAnnullamentoParts]="showAnnullamentoParts" [idVerbale]="idVerbale" [idOrdinanza]="idOrdinanza" [isFirstDownloadBollettini]="isFirstDownloadBollettini"></shared-ordinanza-riepilogo>
-                    <div *ngIf="azione?.downloadBollettiniEnable && loadedAction" class="alert alert-warning col-xs-12 col-sm-12 col-md-12 col-lg-12" role="alert">
+                    <div *ngIf="azione?.downloadBollettiniEnable && loadedAction && !azione?.letteraDaCompilareEnable && !azione?.soloLettera" class="alert alert-warning col-xs-12 col-sm-12 col-md-12 col-lg-12" role="alert">
                             <strong>Attenzione!</strong> La richiesta di creazione bollettini è stata inviata alla piattaforma dei pagamenti online PiemontePAY.
-                             Per poter generare il PDF dei bollettini, cliccare sul pulsante "Scarica Bollettini".
+                             Per poter scaricare il PDF dei bollettini, cliccare sul pulsante "Scarica Bollettini".
                     </div>
+                    <div *ngIf="azione?.downloadBollettiniEnable && loadedAction && !azione?.letteraDaCompilareEnable && azione?.soloLettera" class="alert alert-warning col-xs-12 col-sm-12 col-md-12 col-lg-12" role="alert">
+                        <strong>Attenzione!</strong>
+                         Per poter scaricare il PDF dei bollettini, cliccare sul pulsante "Scarica Bollettini".
+                </div>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
                         <button type="button" *ngIf="azione?.letteraDaCompilareEnable && loaded"
                             class="btn-conam button-blue" (click)="completaLetteraOrdinanza()">
@@ -26,6 +30,11 @@
                             (click)="inviaRichiestaBollettini()">
                             <i class="glyphicon glyphicon-send btn-glyphicon img-circle text-green-conam"></i>
                             Invia Richiesta Bollettini</button>
+                        <button type="button" class="btn-conam button-green" 
+                            *ngIf="azione?.protocollaLetteraSenzaBollettini && loadedAction"
+                            (click)="protocollaLetteraSenzaBollettini()">
+                            <i class="glyphicon glyphicon-send btn-glyphicon img-circle text-green-conam"></i>
+                            Protocolla solo Lettera</button>
 
                         <button type="button" class="btn-conam button-grey"
                             *ngIf="azione?.downloadBollettiniEnable && loadedAction" (click)="dowloadBollettini()">
@@ -33,7 +42,7 @@
                             Scarica Bollettini</button>
 
                         <button type="button" class="btn-conam button-grey"
-                            *ngIf="!azione?.letteraDaCompilareEnable && loadedAction" (click)="dowloadLettera()">
+                            *ngIf="azione?.scaricaLetteraEnable && loadedAction" (click)="dowloadLettera()">
                             <i class="glyphicon glyphicon-print btn-glyphicon img-circle text-grey-conam"></i>
                             Scarica Lettera</button>
                         <!--azione.aggiungiNotifica-->
@@ -45,7 +54,7 @@
                             *ngIf="azione?.visualizzaNotificaEnable && loadedAction" (click)="goToVisualizzaNotifica()">
                             <i class="glyphicon glyphicon-share-alt btn-glyphicon img-circle text-blue-conam"></i>
                             Visualizza Notifica</button>
-                            <button type="button" class="btn-conam  button-blue"
+                        <button type="button" class="btn-conam  button-blue"
                             *ngIf="showAnnullamentoParts" (click)="goToInserisciAnnullamento()">
                             <i class="glyphicon glyphicon-share-alt btn-glyphicon img-circle text-blue-conam"></i>
                            Inserisci annullamento</button>

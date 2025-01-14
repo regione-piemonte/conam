@@ -6,6 +6,7 @@ export class RicercaVerbaleRequest{
     public datiVerbale: DatiVerbaleRequest;
     public soggettoVerbale: Array<SoggettoVerbaleRequest>;
     public statoManualeDiCompetenza : boolean;
+    public columnList?: any[]
     
     constructor(){
         this.datiVerbale=new DatiVerbaleRequest();

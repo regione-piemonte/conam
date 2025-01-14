@@ -45,18 +45,19 @@
         (change)="mostraMetadati()"
         required
       >
-        <option *ngFor="let tipoAll of tipoAllegatoModel" [ngValue]="tipoAll">
+        <option *ngFor="let tipoAll of tipoAllegatoModel" [ngValue]="tipoAll" >
           {{ tipoAll.denominazione }}
         </option>
       </select>
     </div>
     <div
       *ngIf="!senzaAllegatiForce && !senzaAllegati"
-      class="col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center"
+      class="col-xs-12 col-sm-12 col-md-6 col-lg-6 text-left"
       style="padding-top: 30px"
     >
       <button
         type="button"
+        *ngIf="!stiloResearch"
         class="btn-conam button-red"
         [disabled]="isDisabledCaricaAllegato()"
         (click)="upload.actions.addFile()"
@@ -71,10 +72,46 @@
         ></i>
         Carica Allegato
       </button>
+
+      <button
+      type="button"
+      *ngIf="isContAmmInsCreaOrd"
+      class="btn-conam button-yellow"
+      [disabled]="isDisabledCaricaAllegato()"
+      (click)="ricercaStilo()"
+    >
+      <i
+        class="
+        glyphicon glyphicon-paperclip
+            btn-glyphicon
+            img-circle
+            text-yellow-conam
+        "
+      ></i>
+     Ricerca Documento su STILO
+    </button>
+    
+    
+      <button
+      type="button"
+      *ngIf="resetRicercaStilo"
+      class="btn-conam button-light-blue"
+      [disabled]="isDisabledCaricaAllegato()"
+      (click)="resetRicerca()"
+    >
+      <i
+        class="
+        glyphicon glyphicon-arrow-left btn-glyphicon img-circle text-light-blue-conam
+        "
+      ></i>
+     Reset ricerca
+    </button>
+
+
     </div>
     <div
       *ngIf="!senzaAllegatiForce && !senzaAllegati && !isCreaOrdinanza"
-      class="col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center"
+      class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right"
       style="padding-top: 30px"
     >
       <button
@@ -93,6 +130,7 @@
         ></i>
         Conferma Allegato
       </button>
+
     </div>
     <input
       *ngIf="!senzaAllegati"
@@ -102,6 +140,12 @@
       (change)="upload.actions.onFilesAdded()"
     />
   </div>
+
+
+  <!-----------RICERCA STILO---------------->
+
+<ricerca-stilo *ngIf="stiloResearch" [idStiloResearch]="idStiloResearch" (onNewFile)="stiloFileSelected($event)"></ricerca-stilo>
+  <!----------------------------------------->
   <div
     class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-left"
     style="padding-bottom: 30px"
@@ -122,6 +166,9 @@
     <strong>Attenzione!</strong> {{ allowedFilesTypeMessage }}.
   </div>
 
+
+
+
   <!--Metadati degli allegati-->
   <div *ngIf="loadedConfig">
     <div
@@ -133,10 +180,10 @@
       class="col-xs-12 col-sm-12 col-md-10 col-lg-10"
       style="padding-bottom: 30px"
     >
-      <strong
+      <!-- <strong
         >Importo da pagare residuo:
         {{ riepilogoVerbale.verbale.importoResiduo | currency: "EUR":"symbol" }}
-      </strong>
+      </strong> -->
     </div>
     <ng-container *ngFor="let cc of configAllegatoSelezionato; let j = index">
       <div
@@ -184,7 +231,7 @@
                   [disabled]="disableAll"
                   (keydown)="isKeyPressed($event.keyCode, r.fieldType, r.label)"
                   decimalPlaces="r.fieldType.id"
-               
+
                 />
                 <!--
                                 [pattern]="dynamicForm.getPattern(r.fieldType)"
@@ -201,10 +248,10 @@
               </div>
             </ng-container>
             <!--div *ngIf="r.connectorType==1 &&
-                                typeAction.isDate(r.fieldType) && 
-                                metadata.form.controls[dynamicForm.camelize(r.nomeCampo)] && 
+                                typeAction.isDate(r.fieldType) &&
+                                metadata.form.controls[dynamicForm.camelize(r.nomeCampo)] &&
                                 metadata.form.controls[dynamicForm.camelize(r.nomeCampo)].invalid &&
-                                (metadata.form.controls[dynamicForm.camelize(r.nomeCampo)].dirty || 
+                                (metadata.form.controls[dynamicForm.camelize(r.nomeCampo)].dirty ||
                                     metadata.form.controls[dynamicForm.camelize(r.nomeCampo)].touched)"
                     class="alert alert-danger">
                     <div *ngIf="metadata.form.controls[dynamicForm.camelize(r.nomeCampo)].errors.required">
@@ -242,7 +289,45 @@
       </div>
     </ng-container>
   </div>
-  <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8 text-right">
+
+  <div class="col-xs-12 col-sm-12 col-md-10 text-right">
+    <button #buttonClick *ngIf="tipoAllegatoSelezionato && (tipoAllegatoSelezionato.id===7 || tipoAllegatoSelezionato.id===43)" type="button" class="btn-conam button-green"
+ (click)="getListaTrasgressori()"
+ [disabled]="disableAll || !metadatiAllegato.form.valid ||!isComboLoaded()"
+        >
+        <i class="glyphicon glyphicon-pencil btn-glyphicon img-circle text-green-conam"></i>
+        Conferma Soggetto Pagante</button>
+        <button type="button" class="btn-conam button-blue" (click)="backSoggettoPagamento()" *ngIf="datiProvaPagamento && datiProvaPagamento.edit ?  !allReadonly : disableAll ">
+          <i class="glyphicon glyphicon-arrow-left btn-glyphicon img-circle text-blue-conam"></i>
+          Indietro</button>
+</div>
+
+
+<!----DOCUMENTO NON PROTOCOLLATO----->
+<documento-non-prot
+  *ngIf=" tipoAllegatoSelezionato && tipoAllegatoSelezionato.id === 41"
+  [isConfermaMetadatiDisabled]="isBtnConfermaMetadatiDisabled"
+  [isDisableAll]="disableAll"
+  (masterAttachments)="salvaAllegatiAlMaster($event)"
+></documento-non-prot>
+
+
+
+  <!-----lista trasgressori-->
+<div class="row" *ngIf="tipoAllegatoSelezionato && (tipoAllegatoSelezionato.id===7 || tipoAllegatoSelezionato.id=== 43 )">
+
+  <div class="col-xs-12 text-center mb-1 mt-1" *ngIf="isListaTrasgressoriLoading">Caricamento...</div>
+  <lista-trasgressori (getListaTrasgressori)="checkPagamentoParziale($event)"  *ngIf="!isListaTrasgressoriLoading && showTable && listaTrasgressori && listaTrasgressori.length>0" [listaTrasgressori]="listaTrasgressori" [isEditProvaDelPagamento]="(datiProvaPagamento && datiProvaPagamento.edit)? datiProvaPagamento.edit : false "[disableFields]="disableFieldTrasgressori"></lista-trasgressori>
+
+  <div class="col-xs-12 col-sm-12 col-md-10 text-right m-3" *ngIf="showTable && listaTrasgressori && listaTrasgressori.length === 0">
+    <!-- Nessun soggetto trasgressore presenta un importo residuo maggiore di zero -->
+        </div>
+  </div>
+  <div class="col-xs-12 col-sm-12 col-md-10 text-right">
+
+
+
+
     <button
       type="button"
       class="btn-conam button-green"
@@ -250,14 +335,15 @@
       [disabled]="
         !metadatiAllegato.form.valid || disableAll || !isComboLoaded()
       "
-      *ngIf="loadedConfig && !senzaAllegati"
+      *ngIf="loadedConfig && !senzaAllegati && tipoAllegatoSelezionato && (tipoAllegatoSelezionato.id!=43)"
     >
       <i
         class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"
       ></i>
-      Conferma Dati
+      Conferma Dati 
     </button>
 
+    <!-----Gestione specifica del conferma dati per i casi tipo allegato 7 e 43-->
     <button
       type="button"
       class="btn-conam button-green"
@@ -265,17 +351,55 @@
       [disabled]="
         !metadatiAllegato.form.valid || disableAll || !isComboLoaded()
       "
-      *ngIf="loadedConfig && senzaAllegati"
+      *ngIf="loadedConfig && senzaAllegati && tipoAllegatoSelezionato && (tipoAllegatoSelezionato.id!=7)"
     >
       <i
         class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"
       ></i>
       Conferma Dati
     </button>
+
+<!------Ricevuta pagamento verbale 7-->
+    <button
+    type="button"
+    class="btn-conam button-green"
+    (click)="confermaMetadatiSenzaAllegati()"
+    [disabled]="
+    !listaTrasgressoriPayload || listaTrasgressoriPayload.length === 0 || listaTrasgressori.length === 0
+    "
+    *ngIf="loadedConfig && senzaAllegati && tipoAllegatoSelezionato && (tipoAllegatoSelezionato.id===7 || tipoAllegatoSelezionato.id=== 43) && showTable && listaTrasgressori && listaTrasgressori.length != 0"
+  >
+    <i
+      class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"
+    ></i>
+    Conferma Dati 
+  </button>
+
+
+
+  <!------Prova del pagamento del verbale  id 43-->
+  <button
+  type="button"
+  class="btn-conam button-green"
+  (click)="onConfermaMetadatiClick43()"
+  [disabled]="
+  !listaTrasgressoriPayload || listaTrasgressoriPayload.length === 0 || confermaMetadatiClick || listaTrasgressori.length === 0 ||
+ (datiProvaPagamento && datiProvaPagamento.edit && allReadonly)
+  "
+  *ngIf="loadedConfig && !senzaAllegati  && tipoAllegatoSelezionato && tipoAllegatoSelezionato.id===43 && showTable  && listaTrasgressori && listaTrasgressori.length != 0"
+>
+  <i
+    class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"
+  ></i>
+  Conferma Dati
+</button>
+
   </div>
   <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4"></div>
 </form>
 <!--FINE METADATI-->
+
+
 
 <form *ngIf="allegatoM" #metadatiAllegato="ngForm">
   <div

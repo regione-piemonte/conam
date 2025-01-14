@@ -99,6 +99,12 @@ export class SharedOrdinanzaService implements OnDestroy {
         );
     }
 
+    //usato per protocollare la lettera senza bollettini, poiche vengono usati i vecchi già generato
+    protocollaLetteraSenzaBollettini(idOrdinanza: number): any {
+        var url: string = this.config.getBEServer() + '/restfacade/ordinanza/protocollaLetteraSenzaBollettini/' + idOrdinanza;
+        return this.http.post(url, {});
+    }
+
     downloadLettera(idOrdinanza: number): Observable<Blob> {
         var url: string = this.config.getBEServer() + '/restfacade/ordinanza/downloadLettera';
         let params: HttpParams = new HttpParams().set('idOrdinanza', idOrdinanza.toString());
@@ -167,7 +173,11 @@ export class SharedOrdinanzaService implements OnDestroy {
                 return undefined;
             return null === v ? undefined : v;
         }));
-        form.append("files", null)
+        if(input.file){
+            form.append("files", input.file);
+         }else{
+           form.append("files", null);
+         }
         return this.http.post<AllegatoVO>(url, form);
     }
 

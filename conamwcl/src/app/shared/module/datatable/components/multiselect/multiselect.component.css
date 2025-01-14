@@ -1,0 +1,46 @@
+@import '/src/app/input.scss';
+
+.drop-toggle{
+    background-color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    cursor: hand;
+    border: 1px solid #ccc;
+    min-width: 35em !important;
+    text-align: left;
+    white-space: normal;
+}
+.drop-toggle i{
+    float:right;
+}
+.drop-show {
+    padding: 4px;
+    min-width: 35em !important;
+    background-color: #FFF;
+    border: 1px solid #BABABA;
+    position: absolute;
+    z-index: 100;
+    -webkit-box-shadow: 0 6px 10px rgba(0,0,0,.15);
+    -moz-box-shadow: 0 6px 10px rgba(0,0,0,.15);
+    box-shadow: 0 6px 10px rgba(0,0,0,.15);
+    margin-left: 1px;
+}
+.drop-show label{
+    display:block;
+    width: 19em !important;
+    font-size:15px;
+    cursor: pointer;
+}
+.drop-show label input{
+    vertical-align: middle !important;
+  position: relative !important;
+  bottom: .08em !important;
+  display: inline-block !important;
+}
+
+.drop-show label span{
+    display:inline-block !important;
+    margin-right: -20px !important
+}

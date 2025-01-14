@@ -6,27 +6,35 @@ import { LoggerService } from "../../../core/services/logger/logger.service";
 import {
   EnteVO,  StatoVerbaleVO,
   AmbitoVO,  NormaVO,
-  SelectVO,} from "../../../commons/vo/select-vo";
+  SelectVO,
+  IstruttoreVO,  ComuneVO } from "../../../commons/vo/select-vo";
+
 import { UserService } from "../../../core/services/user.service";
 import { RifNormativiService } from "../../../verbale/services/rif-normativi.service";
 import { SoggettoVerbaleRequest } from "../../../commons/request/verbale/soggetto-verbale-request";
 import { RicercaVerbaleRequest } from "../../../commons/request/verbale/ricerca-verbale-request";
 import { SharedVerbaleService } from "../../service/shared-verbale.service";
 import { Constants } from "../../../commons/class/constants";
+import { CalendarUtils } from "../../../fase-giurisdizionale/module/calendar/component/commons/calendar-utils";
+declare var $: any;
+import { LuoghiService } from "../../../core/services/luoghi.service";
 
 @Component({
   selector: "shared-verbale-ricerca",
   templateUrl: "./shared-verbale-ricerca.component.html",
   styleUrls: ["./shared-verbale-ricerca.component.scss"],
 })
+
 export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
   public subscribers: any = {};
 
   // tab 1
   public entiLegge: Array<EnteVO> = new Array<EnteVO>();
+  public entiAccertatori: Array<EnteVO> = new Array<EnteVO>();
   public tabVerbale: boolean = false;
   public loadedStatoVerbale: boolean;
   public loadedEnte: boolean;
+  public loadedEnteAccertatore: boolean;
   public loadedAmbito: boolean;
   public loadedNorma: boolean;
   public statoVerbaleModel: Array<StatoVerbaleVO> = new Array<StatoVerbaleVO>();
@@ -48,6 +56,13 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
 
   // ricerca
   public ricercaVerbale: RicercaVerbaleRequest;
+//loadedistruttore: boolean= false;
+public loadedistruttore: boolean= true;
+//funzionarioIstrModel= new Array<IstruttoreVO>();
+public funzionarioIstrModel: IstruttoreVO[];
+
+  public comuneEnteAccertatoreModel: Array<ComuneVO>;
+  public loadedComuneEnteAccertatore: boolean = true;
 
   @Output() onSearch = new EventEmitter<RicercaVerbaleRequest>();
   @Input() request: RicercaVerbaleRequest;
@@ -58,6 +73,8 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
     private logger: LoggerService,
     private rifNormativiService: RifNormativiService,
     private userService: UserService,
+
+    private luoghiService: LuoghiService,
   ) {}
 
   ngOnInit(): void {
@@ -70,10 +87,14 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
       if (data != null) {
         this.entiLegge = data.entiLegge;
         this.loadedEnte = true;
+        this.entiAccertatori = data.entiAccertatore;
+        this.loadedEnteAccertatore = true;
       }
     });
     this.setRequest();
     this.statoVerbale(this.config.tipoRicerca);
+    this.loadIstruttoreByVerbale()
+    this.comuniEnteValidInDate();
   }
 
   tabActions: any = {
@@ -83,7 +104,18 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
         this.ricercaVerbale.datiVerbale.ente = null;
         this.ricercaVerbale.datiVerbale.numeroVerbale = null;
         this.ricercaVerbale.datiVerbale.numeroProtocollo = null;
-        this.ricercaVerbale.datiVerbale.ambito = null;
+        this.ricercaVerbale.datiVerbale.annoAccertamento = null;
+
+        this.ricercaVerbale.datiVerbale.enteAccertatore = null;
+        this.ricercaVerbale.datiVerbale.comuneEnteAccertatore = null;
+        this.ricercaVerbale.datiVerbale.assegnatario = null;
+
+        this.ricercaVerbale.datiVerbale.dataProcessoVerbaleDa = null;
+        this.ricercaVerbale.datiVerbale.dataProcessoVerbaleA = null;
+        this.ricercaVerbale.datiVerbale.dataAccertamentoDa =null;
+          this.ricercaVerbale.datiVerbale.dataAccertamentoA =null;
+       //   this.ricercaVerbale.datiVerbale.assegnatario =null;
+          this.ricercaVerbale.datiVerbale.ambito = null;
         this.statoSelected = null;
         this.ricercaVerbale.datiVerbale.norma = null;
       }
@@ -142,6 +174,20 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
     },
   };
 
+  comuniEnteValidInDate() {
+    this.subscribers.comuniEnteValidInDate = this.luoghiService
+      .getcomuniEnteValidInDate()
+      .subscribe(
+        (data) => {
+          this.comuneEnteAccertatoreModel = data;
+        },
+        (err) => { this.logger.error("Errore nel recupero dei comuni Ente");  }
+      );
+  }
+
+  byId(o1: SelectVO, o2: SelectVO) {
+    return o1 && o2 ? o1.id === o2.id : o1 === o2;
+  }
   ricercaFascicolo() {
     this.ricercaVerbale.soggettoVerbale = new Array<SoggettoVerbaleRequest>();
     if (this.tabTrasgressore) {
@@ -225,7 +271,9 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
     this.ricercaVerbale.datiVerbale.norma = null;
     this.loadAmbitiByIdEnte();
   }
-
+  changeEnteAccertatore(){
+    const uno=1;
+  }
   changeAmbito() {
     this.ricercaVerbale.datiVerbale.norma = null;
     this.loadNormeByIdAmbitoAndIdEnte();
@@ -261,6 +309,7 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
   }
 
   isDisable(field: string, type: string) {
+
     if (type == "T") {
       let condFisica: Boolean =
         !this.tabTrasgressore || !this.isTrasgressorePersonaFisica;
@@ -270,11 +319,23 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
           !this.isEmpty(this.soggettoVerbaleTrasgressore.cognome) ||
           !this.isEmpty(this.soggettoVerbaleTrasgressore.nome)
         );
-      if (field == "CG" || field == "NM")
+      if (field == 'CG')
+      {
+
         return (
           condFisica ||
           !this.isEmpty(this.soggettoVerbaleTrasgressore.codiceFiscale)
-        );
+
+        );}
+        if (field == 'NM')
+      {
+
+        return (
+          condFisica ||
+          !this.isEmpty(this.soggettoVerbaleTrasgressore.codiceFiscale)
+          //|| !this.isEmpty(this.soggettoVerbaleTrasgressore.cognome)
+        );}
+
       let condGiuridica: Boolean =
         !this.tabTrasgressore || !this.isTrasgressorePersonaGiuridica;
       if (field == "DN")
@@ -309,11 +370,20 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
           !this.isEmpty(this.soggettoVerbaleObbligato.cognome) ||
           !this.isEmpty(this.soggettoVerbaleObbligato.nome)
         );
-      if (field == "CG" || field == "NM")
+      if (field == "CG" )
+
         return (
           condFisica ||
           !this.isEmpty(this.soggettoVerbaleObbligato.codiceFiscale)
         );
+        if (field == 'NM')
+        {
+
+          return (
+            condFisica ||
+            !this.isEmpty(this.soggettoVerbaleObbligato.codiceFiscale)
+            //|| !this.isEmpty(this.soggettoVerbaleObbligato.cognome)
+          );}
       let condGiuridica: Boolean =
         !this.tabObbligatoInSolido || !this.isObbligatoInSolidoPersonaGiuridica;
       if (field == "DN")
@@ -342,16 +412,53 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
   }
 
   isEmpty(str) {    return !str || 0 === str.length;  }
+loadIstruttoreByVerbale() {
+  this.subscribers.istruttoreByIdRegione = this.sharedVerbaleService
+    .getIstruttoreByIdVerbale()
+    .subscribe(
+      (data) => {
+        this.funzionarioIstrModel = data;
+        if (this.ricercaVerbale.datiVerbale && this.ricercaVerbale.datiVerbale.assegnatario){
+          const matchingFunz = this.funzionarioIstrModel.find(funz => funz.denominazione === this.ricercaVerbale.datiVerbale.assegnatario.denominazione);
+          this.ricercaVerbale.datiVerbale.assegnatario = matchingFunz;
+        }
+      },
+      (err) => { this.logger.error("Errore nel recupero dei funzionari istruttori"); }
+    );
+}
 
   setRequest() {
     if (this.request == null) this.pulisciFiltri();
     else {
       this.ricercaVerbale = this.request;
+
+      /*
       if (this.ricercaVerbale.datiVerbale.ente != null) {
         this.loadAmbitiByIdEnte();
         this.loadNormeByIdAmbitoAndIdEnte();
         this.tabVerbale = true;
+      }*/
+
+      if(
+        (this.ricercaVerbale.datiVerbale.numeroProtocollo && this.ricercaVerbale.datiVerbale.numeroProtocollo != null) ||
+        (this.ricercaVerbale.datiVerbale.numeroVerbale && this.ricercaVerbale.datiVerbale.numeroVerbale != null) ||
+        (this.ricercaVerbale.datiVerbale.annoAccertamento && this.ricercaVerbale.datiVerbale.annoAccertamento > 0) ||
+        (this.ricercaVerbale.datiVerbale.ente && this.ricercaVerbale.datiVerbale.ente != null) ||
+        (this.ricercaVerbale.datiVerbale.enteAccertatore && this.ricercaVerbale.datiVerbale.enteAccertatore != null) ||
+        (this.ricercaVerbale.datiVerbale.comuneEnteAccertatore && this.ricercaVerbale.datiVerbale.comuneEnteAccertatore != null) ||
+        (this.ricercaVerbale.datiVerbale.assegnatario && this.ricercaVerbale.datiVerbale.assegnatario != null) ||
+        (this.ricercaVerbale.datiVerbale.dataAccertamentoDa && this.ricercaVerbale.datiVerbale.dataAccertamentoDa != null) ||
+        (this.ricercaVerbale.datiVerbale.dataAccertamentoA && this.ricercaVerbale.datiVerbale.dataAccertamentoA != null) ||
+        (this.ricercaVerbale.datiVerbale.dataProcessoVerbaleDa && this.ricercaVerbale.datiVerbale.dataProcessoVerbaleDa != null) ||
+        (this.ricercaVerbale.datiVerbale.dataProcessoVerbaleA && this.ricercaVerbale.datiVerbale.dataProcessoVerbaleA != null)
+      ){
+        this.tabVerbale = true;
+        if (this.ricercaVerbale.datiVerbale.ente != null) {
+          this.loadAmbitiByIdEnte();
+          this.loadNormeByIdAmbitoAndIdEnte();
+        }
       }
+
       this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
       this.soggettoVerbaleTrasgressore.tipoSoggetto = "T";
       this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
@@ -381,7 +488,89 @@ export class SharedVerbaleRicercaComponent implements OnInit, OnDestroy {
       }
     }
   }
-
+  manageDatePicker(event: any, i: number) {
+    if ($("#datetimepicker1").length > 0) {
+      $("#datetimepicker1").datetimepicker({
+        format: "DD/MM/YYYY",
+        maxDate: new Date().setDate(new Date().getDate() + 1),
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        widgetPositioning: {
+          horizontal: "right",
+          vertical: "top",
+        },
+      });
+    }
+    if ($("#datetimepicker2").length > 0) {
+      $("#datetimepicker2").datetimepicker({
+        format: "DD/MM/YYYY",
+        maxDate: new Date().setDate(new Date().getDate() + 1),
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        widgetPositioning: {
+          horizontal: "right",
+          vertical: "top",
+        },
+      });
+    }
+    if ($("#datetimepicker3").length > 0) {
+      $("#datetimepicker3").datetimepicker({
+        format: "DD/MM/YYYY",
+        maxDate: new Date().setDate(new Date().getDate() + 1),
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        widgetPositioning: {
+          horizontal: "right",
+          vertical: "top",
+        },
+      });
+    }
+    if ($("#datetimepicker4").length > 0) {
+      $("#datetimepicker4").datetimepicker({
+        format: "DD/MM/YYYY",
+        maxDate: new Date().setDate(new Date().getDate() + 1),
+        disabledDates: [new Date().setDate(new Date().getDate() + 1)],
+        widgetPositioning: {
+          horizontal: "right",
+          vertical: "top",
+        },
+      });
+    }
+    if (event != null) {
+      switch (i) {
+        case 1: {
+          this.ricercaVerbale.datiVerbale.dataAccertamentoDa = event.srcElement.value;
+          this.ricercaVerbale.datiVerbale.dataAccertamentoA = event.srcElement.value;
+          break;
+        }
+        case 2: {
+          this.ricercaVerbale.datiVerbale.dataAccertamentoA = event.srcElement.value;
+          let flag: boolean = CalendarUtils.before(
+            this.ricercaVerbale.datiVerbale.dataAccertamentoDa,
+            this.ricercaVerbale.datiVerbale.dataAccertamentoA
+          );
+          if (!flag) {
+            this.ricercaVerbale.datiVerbale.dataAccertamentoDa = event.srcElement.value;
+          }
+          break;
+        }
+        case 3: {
+          this.ricercaVerbale.datiVerbale.dataProcessoVerbaleDa = event.srcElement.value;
+          this.ricercaVerbale.datiVerbale.dataProcessoVerbaleA = event.srcElement.value;
+          break;
+        }
+        case 4: {
+          this.ricercaVerbale.datiVerbale.dataProcessoVerbaleA = event.srcElement.value;
+          let flag: boolean = CalendarUtils.before(
+            this.ricercaVerbale.datiVerbale.dataProcessoVerbaleDa,
+            this.ricercaVerbale.datiVerbale.dataProcessoVerbaleA
+          );
+          if (!flag) {
+            this.ricercaVerbale.datiVerbale.dataProcessoVerbaleDa = event.srcElement.value;
+          }
+          break;
+        }
+      }
+    }
+  }
+  interceptor(event: Event) {    event.preventDefault();  }
   compareFn(c1: SelectVO, c2: SelectVO): boolean {    return c1 && c2 ? c1.id === c2.id : c1 === c2;  }
 
   ngOnDestroy(): void {    this.logger.destroy(SharedVerbaleRicercaComponent.name);  }

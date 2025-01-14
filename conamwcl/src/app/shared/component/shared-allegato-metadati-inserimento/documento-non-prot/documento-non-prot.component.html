@@ -1,0 +1,125 @@
+<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-left mb-8"
+  style="display:flex;flex-direction: row;justify-content: center;">
+  <div class="col-xs-9 text-left">
+    <h4 class=" col-xs-12 col-sm-12 col-md-12 col-lg-12 mr-2 mt-4 border-title text-left">
+      <strong>Aggiungi allegati</strong>
+    </h4>
+
+    <form [formGroup]="tableForm" (ngSubmit)="onSubmit()">
+      <table
+        class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12 allineamento-top"
+        style="border-spacing: 5px;    border-collapse: separate;"
+      >
+        <tr></tr>
+        <tbody>
+          <ng-container formArrayName="docAttachments">
+            <ng-container
+              *ngFor="
+                let row of docAttachments.controls;
+                let i = index
+              "
+            >
+              <tr [formGroupName]="i" style="border-left:none !important">
+
+                <td style="vertical-align: bottom;">
+                  <div class="col-md-12">
+                    <label for="oggetto">Oggetto</label>
+                    <input
+                      type="textarea"
+                      class="form-control"
+                      id="oggetto"
+                      *ngIf=" !(attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file)"
+                    required
+                      formControlName="oggetto"
+                      [attr.disabled]="isConfermaMetadatiDisabled && isDisableAll ? '' : null"
+                      />
+                    <span *ngIf="attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file"> {{ attachmentsRequest[i].oggetto}}</span>
+
+                  </div>
+                </td>
+                <td style="vertical-align: bottom;">
+                  <div class="col-md-12">
+                    <label for="origine">Origine</label>
+                    <select class="form-control" required     formControlName="origine"
+                      [attr.disabled]="isConfermaMetadatiDisabled && isDisableAll ? '' : null"
+                    *ngIf=" !(attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file)"
+                    >
+                      <option *ngFor="let o of origin" [ngValue]="o.id">{{o.denominazione}}</option>
+                    </select>
+                    <span *ngIf="attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file"> {{ getDenominazioneById(attachmentsRequest[i].origine)}}</span>
+
+                  </div>
+                </td>
+                <td style="vertical-align: bottom;">
+                  <div class="col-md-12">
+                    <button
+                    type="button"
+                    *ngIf=" !(attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file)"
+                    class="btn-conam button-red mt-3"
+                    (click)="upload.actions.addFile(i)"
+                    [disabled]="!tableForm.valid || (isConfermaMetadatiDisabled && isDisableAll)"
+                  >
+                    <i
+                      class="glyphicon glyphicon-paperclip btn-glyphicon img-circle text-red-conam"
+                    ></i>
+                    Carica Allegato
+                  </button>
+                  <label *ngIf="attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file">Nome file</label>
+                  <span *ngIf="attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file"> {{ attachmentsRequest[i].filename}}</span>
+
+                  <input
+
+                  type="file"
+                  #file
+                  style="display: none"
+                  (change)="upload.actions.onFilesAdded(i)"
+                />
+                  </div>
+                </td>
+                <td
+                  [ngStyle]="{'vertical-align': (attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file) ? 'middle' : 'bottom'}"
+                >
+                  <div class="col-12 ">
+                    <button type="button" class="btn-icon-conam  button-garnet" style="vertical-align: middle;"
+                    (click)="removeAttachment(i)"
+                    [disabled]="(isConfermaMetadatiDisabled && isDisableAll)"
+                    *ngIf="(attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file)"
+                  >
+                  <!--[disabled]="attachmentsRequest.length === 1  || (isConfermaMetadatiDisabled && isDisableAll)"-->
+                    <i
+                        class="glyphicon glyphicon-remove btn-glyphicon img-circle text-danger-icon-conam"></i>
+                </button>
+                    <button
+                      type="button"
+                      class="btn-conam button-green"
+                      (click)="addRow()"
+                      *ngIf="(docAttachments && docAttachments.length>=1 && (i===(docAttachments.length)-1))"
+                      [disabled]=" !(attachmentsRequest && attachmentsRequest[i] && attachmentsRequest[i].file)  || (isConfermaMetadatiDisabled && isDisableAll)"
+                    >
+                      <i
+                        class="glyphicon glyphicon-plus  btn-glyphicon img-circle text-green-conam"
+                      ></i>
+
+                    </button>
+
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </ng-container>
+          <tr *ngIf="sizeAlert">
+            <div *ngIf="sizeAlert" class="alert alert-danger" role="alert">
+              <strong>Attenzione!</strong> L'allegato supera le dimensioni massime
+              consentite.
+            </div>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+</div>
+<shared-alert
+  [message]="messageTop"
+  [type]="typeMessageTop"
+  *ngIf="showMessageTop"
+></shared-alert>

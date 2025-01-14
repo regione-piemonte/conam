@@ -13,13 +13,13 @@
                         <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop">
                         </shared-alert>
                         <div class="form-group row">
-                           
+
                             <shared-verbale-dettaglio-soggetti  *ngIf="!showAnnullamentoParts" [config]="config" [idVerbale]="idVerbale"
                                 (selected)="addToArraySoggettiSelezionati($event)">
                             </shared-verbale-dettaglio-soggetti>
-                            <shared-ordinanza-dettaglio-soggetti  *ngIf="showAnnullamentoParts" 
-                            [idOrdinanza]="idOrdinanza" 
-                            [idVerbale]="idVerbale"  
+                            <shared-ordinanza-dettaglio-soggetti  *ngIf="showAnnullamentoParts"
+                            [idOrdinanza]="idOrdinanza"
+                            [idVerbale]="idVerbale"
                             [config]="configSoggettiOrdinanza"
                             (selected)="addToArraySoggettiSelezionatiAnnullamento($event)"
                             >
@@ -118,18 +118,30 @@
                     </div>
 <!-- QUI VANNO INSERITI I NUOVI CAMPI -->
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="isTipoAllegatoIngiunzione()">
-                        <div class="form-group col-xs-12 col-sm-12  col-md-6 col-lg-6">
-                            <label for="dataScadenza" class="control-label">Data Scadenza Rata Ordinanza</label>
+
+                        <div class="form-group col-xs-12 col-sm-12  col-md-3 col-lg-3">
+                            <label for="checkboxDataScadenza" class="control-label">Data Scadenza su bollettino</label>
+                            <div class="input-group checkbox" style="margin:0; padding-left: 22px;">
+                                <input type="checkbox" name="checkboxDataScadenza" [(ngModel)]="checkboxDataScadenzaSuBollettino"
+                                (change)="controllaValiditaDataScadenza()"/>
+                            </div>
+                        </div>
+                        <!--<div class="form-group col-xs-12 col-sm-12  col-md-6 col-lg-6">-->
+                        <div class="form-group col-xs-12 col-sm-12  col-md-3 col-lg-3">
+                            <label for="dataScadenza" class="control-label">Data Scadenza Ordinanza</label>
                             <div class='input-group date' id='datepicker3'>
                                 <input type='text' id="dataDeterminazione" [(ngModel)]="ordinanza.dataScadenza"
                                     name="dataScadenza" #datePicker3="ngModel" (blur)="manageDatePicker($event, 3)"
-                                    class="form-control date-picker" />
+                                    class="form-control date-picker"
+                                    [disabled]="!checkboxDataScadenzaSuBollettino"
+                                    required
+                                />
                                 <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </span>
                             </div>
                         </div>
-                   
+
                         <div class="form-group col-xs-12 col-sm-12  col-md-6 col-lg-6">
                             <label for="dataFineValidita" class="control-label">Data fine validità pagamento</label>
                             <div class='input-group date' id='datepicker4'>
@@ -155,11 +167,11 @@
                         </div>
 
                         <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6" *ngIf="isTipoAllegatoIngiunzione()">
-                            <label class="control-label">Numero Accertamento</label> 
+                            <label class="control-label">Numero Accertamento</label>
                             <input type="text" id="numeroAccertamento" class="form-control" name="numeroAccertamento" [(ngModel)]="ordinanza.numeroAccertamento"
                                 step="1" [max]="100"  #numeroAccertamento="ngModel"
                                  required>
-                            <div *ngIf="numeroAccertamento.invalid && (numeroAccertamento.dirty || numeroAccertamento.touched)" class="alert alert-danger">                                
+                            <div *ngIf="numeroAccertamento.invalid && (numeroAccertamento.dirty || numeroAccertamento.touched)" class="alert alert-danger">
                                 <div *ngIf="!numeroAccertamento.errors.pattern ">
                                     Campo obbligatorio
                                 </div>
@@ -167,11 +179,11 @@
                         </div>
 
                         <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6" *ngIf="isTipoAllegatoIngiunzione()">
-                            <label class="control-label">Anno Accertamento</label> 
+                            <label class="control-label">Anno Accertamento</label>
                             <input type="number" id="annoAccertamento" class="form-control" name="annoAccertamento" [(ngModel)]="ordinanza.annoAccertamento"
                                 step="1" [max]="1000000" (keydown)="isKeyPressed($event.keyCode, 'Anno accertamento' )" #annoAccertamento="ngModel"
                                 pattern="^[0-9]{0,4}$" required>
-                            <div *ngIf="annoAccertamento.invalid && (annoAccertamento.dirty || annoAccertamento.touched)" class="alert alert-danger">                                
+                            <div *ngIf="annoAccertamento.invalid && (annoAccertamento.dirty || annoAccertamento.touched)" class="alert alert-danger">
                                 <div *ngIf="annoAccertamento.errors.pattern ">
                                     Anno accertamento non valido
                                 </div>
@@ -180,11 +192,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>                  
+                    </div>
                 </div>
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">                            
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <shared-inserimento-notifica [idOrdinanza]="ordinanza.idOrdinanza" [tipoAllegato]="isTipoAllegatoIngiunzione()" [causaleModel]="causaleModel" (save)="save($event)" (importNotificaInserito)="importNotificaInseritoHandler($event)">
-                        </shared-inserimento-notifica>                            
+                        </shared-inserimento-notifica>
                 </div>
 
                 <div class="panel-body panel-body-background">

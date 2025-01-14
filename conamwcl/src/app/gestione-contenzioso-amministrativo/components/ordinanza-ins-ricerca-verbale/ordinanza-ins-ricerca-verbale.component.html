@@ -22,7 +22,7 @@
                                 <h4 class="border-title"><strong>Esito della ricerca</strong></h4>
                             </div>
 
-                            <datatable [data]="verbali" [config]="config" *ngIf="showTable" (dettaglio)="onDettaglio($event)">
+                            <datatable [data]="verbali" [showMultiselect]="true"  [config]="config" *ngIf="showTable" (dettaglio)="onDettaglio($event)" [showDownloadReport]="'Esporta dati'" (onDownloadList)="downloadList($event)">
                             </datatable>
 
                             <div id="scrollBottom" *ngIf="showTable"></div>

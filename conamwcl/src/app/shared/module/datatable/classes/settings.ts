@@ -32,6 +32,12 @@ export interface Column extends Configurable {
    * handle the cellTemplate for the relative column`.
    */
   cellTemplate?: TemplateRef<any>;
+
+   /**
+   * handle the property to show the column`.
+   */
+   checked?:boolean;
+  
 }
 
 /**

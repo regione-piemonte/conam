@@ -16,7 +16,7 @@ import { Template06ConvocazioneAudizioneComponent } from "./components/template-
 import { Template09LetteraAccompagnamentoAnnullamentoComponent } from "./components/template-09-lettera-accompagnamento-annullamento/template-09-lettera-accompagnamento-annullamento.component";
 import { Template10LetteraAccompagnamentoArchiviazioneComponent } from "./components/template-10-lettera-accompagnamento-archiviazione/template-10-lettera-accompagnamento-archiviazione.component";
 import { Template11SollecitoPagamentoRateComponent } from "./components/template-11-lettera-sollecito-pagamento-rate/template-11-lettera-sollecito-pagamento-rate.component";
-
+import { Newline2Pipe } from "./pipes/newline2.pipe";
 
 @NgModule({
     imports: [
@@ -49,7 +49,8 @@ import { Template11SollecitoPagamentoRateComponent } from "./components/template
         Template04RateizzazioneComponent,
         Template05SollecitoPagamentoComponent,
         Template06ConvocazioneAudizioneComponent,
-        Template11SollecitoPagamentoRateComponent
+        Template11SollecitoPagamentoRateComponent,
+        Newline2Pipe
     ],
     providers: [TemplateService]
 })

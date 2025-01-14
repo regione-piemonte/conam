@@ -8,11 +8,15 @@ import { DatatableDirective } from './directives/datatable.directive';
 import { ArraySortPipe } from './pipes/pipe.sort';
 import { UtilsService } from './services/utilities';
 import { DatatableService } from './services/datatable-service';
+import { MultiselectComponent } from './components/multiselect/multiselect.component';
+import { NewlinePipe } from './pipes/newline.pipe';
+import { ToolongPipe } from './pipes/toolong.pipe';
+import { AtobPipe } from './pipes/atob.pipe';
 
 /**
- * Modulo per datatable custom. 
+ * Modulo per datatable custom.
  * Importare con nell' array di imports di angular usando DataTableModule.forRoot()
- * ### Example 
+ * ### Example
  * ```javascript
  * imports: [BrowserModule, FormsModule, DataTableModule.forRoot()],
  * ```
@@ -21,7 +25,7 @@ import { DatatableService } from './services/datatable-service';
  * <datatable [data]="model" [config]="dtConfig"></datatable>
  * ```
  * dove "model" sarà l'array di oggetti da visualizzare in tabella
- * e dtConfig dovrà essere un oggetto di tipo `Config` che 
+ * e dtConfig dovrà essere un oggetto di tipo `Config` che
  * indicherà le varie proprietà da visualizzare nelle colonne in tabella
  * e se questa utilizzerà la paginazione, il sort, ecc. ecc.
  * Indicativamente, aggiungere nella *.component.ts
@@ -42,13 +46,17 @@ import { DatatableService } from './services/datatable-service';
   declarations: [
     DataTableComponent,
     DatatableDirective,
-    ArraySortPipe
+    ArraySortPipe,
+    MultiselectComponent,
+    NewlinePipe,
+    ToolongPipe,
+    AtobPipe
   ],
   imports: [BrowserModule, FormsModule],
   exports: [DataTableComponent],
   providers: [UtilsService],
 })
-export class DataTableModule { 
+export class DataTableModule {
   static forRoot(): ModuleWithProviders {
     return {
       ngModule : DataTableModule,

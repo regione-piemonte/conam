@@ -5,7 +5,8 @@
     <div class="principal-div col-xs-12 col-sm-12 col-md-10 col-lg-10" *ngIf="loaded" style="padding-top: 30px">
         <div class="panel-primary-conam panel-conam">
             <div class="panel-heading-conam">
-                <strong>Creazione Ricevuta di Pagamento Ordinanza</strong>
+                <strong *ngIf="idTipo==22">Creazione Ricevuta di Pagamento Ordinanza</strong>
+                <strong *ngIf="idTipo==46">Creazione Prova di Pagamento Ordinanza</strong>
             </div>
             <shared-alert [message]="messageTop" [type]="typeMessageTop" *ngIf="showMessageTop"></shared-alert>
             <form #creaDisposizioneForm="ngForm">

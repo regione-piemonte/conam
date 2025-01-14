@@ -7,18 +7,46 @@
       </div>
       <label class="col-lg-3 col-md-3 col-sm-4 col-xs-4">Elementi</label>
     </div-->
+<div
+  class="pull-left col-lg-4 col-md-4 col-sm-4 col-xs-12 padding"
+  *ngIf="showMultiselect"
+>
+<!----component richiesto per mostrare dinamicamente un set di colonne
+si abilita con showMultiSelect-->
+  <multiselect
+    [list]="config.columns"
+    (shareCheckedList)="shareCheckedList($event)"
+    (shareIndividualCheckedList)="shareIndividualCheckedList($event)"
+  ></multiselect>
+</div>
 
 <!--ricerca disabilitato di default; non serve in grmed-->
-<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 pull-right" *ngIf="config.filter?.enable">
-  <label for="{{'searchText_' + id}}" class="col-lg-3 col-md-3 col-sm-4 col-xs-4">Ricerca: </label>
-  <input id="{{'searchText_' + id}}" name="searchText" [(ngModel)]="searchText" class="col-lg-5 col-md-5 col-sm-4 col-xs-4"
-    style="margin-right: 4px" (keyup.enter)="filter()">
+<div
+  class="col-lg-4 col-md-4 col-sm-12 col-xs-12 pull-right"
+  *ngIf="config.filter?.enable"
+>
+  <label
+    for="{{ 'searchText_' + id }}"
+    class="col-lg-3 col-md-3 col-sm-4 col-xs-4"
+    >Ricerca:
+  </label>
+  <input
+    id="{{ 'searchText_' + id }}"
+    name="searchText"
+    [(ngModel)]="searchText"
+    class="col-lg-5 col-md-5 col-sm-4 col-xs-4"
+    style="margin-right: 4px"
+    (keyup.enter)="filter()"
+  />
   <button class="col-lg-3 col-md-3 col-sm-3 col-xs-3" (click)="filter()">
     <i class="glyphicon glyphicon-search"></i>
   </button>
 </div>
-<nav class="col-lg-12 col-md-12 col-sm-12 col-xs-12" *ngIf="pagination.isNeeded()">
-
+<ng-container *ngIf="controlNotEmptyChecked">
+<nav
+  class="col-lg-12 col-md-12 col-sm-12 col-xs-12"
+  *ngIf="pagination.isNeeded()"
+>
   <div class="elem-1 text-left col-lg-4 col-md-4 col-sm-4 col-xs-12 padding">
     <!--<button *ngIf="config.selection?.enable && config.buttonSelection?.enable" type="button" class="btn btn-default button-blue margin-top"
       [disabled]="!selection.hasSelected()" (click)="selection.dettaglio()">
@@ -26,123 +54,292 @@
   </div>
 
   <div class="elem-2 col-lg-4 col-md-4 col-sm-4 col-xs-12 text-center padding">
-    <a [attr.href]="null" aria-label="Previous" (click)="pagination.first()" *ngIf="pagination.allowPrevious()" class="clickable text-color">
+    <a
+      [attr.href]="null"
+      aria-label="Previous"
+      (click)="pagination.first()"
+      *ngIf="pagination.allowPrevious()"
+      class="clickable text-color"
+    >
       <span aria-hidden="true">&#8810;</span>
     </a>
-    <a [attr.href]="null" aria-label="Previous" (click)="pagination.previous()" *ngIf="pagination.allowPrevious()" class="clickable text-color">
+    <a
+      [attr.href]="null"
+      aria-label="Previous"
+      (click)="pagination.previous()"
+      *ngIf="pagination.allowPrevious()"
+      class="clickable text-color"
+    >
       <span aria-hidden="true">&#8249;</span>
     </a>
-    <button *ngFor="let p of pagination.getPages()" [ngClass]="{'clickable':true, 'active': pagination.page === p}" class="btn-paginazione"
-      (click)="pagination.change(p)">{{p}}</button>
-    <a [attr.href]="null" aria-label="Next" (click)="pagination.next()" *ngIf="pagination.allowNext()" class="clickable text-color">
+    <button
+      *ngFor="let p of pagination.getPages()"
+      [ngClass]="{ clickable: true, active: pagination.page === p }"
+      class="btn-paginazione"
+      (click)="pagination.change(p)"
+    >
+      {{ p }}
+    </button>
+    <a
+      [attr.href]="null"
+      aria-label="Next"
+      (click)="pagination.next()"
+      *ngIf="pagination.allowNext()"
+      class="clickable text-color"
+    >
       <span aria-hidden="true">&#8250;</span>
     </a>
-    <a [attr.href]="null" aria-label="Last" (click)="pagination.last()" *ngIf="pagination.allowNext()" class="clickable text-color">
+    <a
+      [attr.href]="null"
+      aria-label="Last"
+      (click)="pagination.last()"
+      *ngIf="pagination.allowNext()"
+      class="clickable text-color"
+    >
       <span aria-hidden="true">&#8811;</span>
     </a>
   </div>
 
   <div class="elem-3 pull-right col-lg-4 col-md-4 col-sm-4 col-xs-12 padding">
     <!--<div class="datatables_info" id="example_info" role="status" aria-live="polite">Visualizza da {{1+pagination.startIndex}} a {{1+pagination.endIndex}} di {{pagination.getSourceLength()}} record</div>-->
-    <select [(ngModel)]="pagination.perPage" (change)="pagination.perPageChanged()" class="select">
-      <option *ngFor="let p of pagination.perPages" [value]="p">{{p}}</option>
-    </select> risultati di
-    <strong>{{pagination.getSourceLength()}}</strong>
+    <select
+      [(ngModel)]="pagination.perPage"
+      (change)="pagination.perPageChanged()"
+      class="select"
+    >
+      <option *ngFor="let p of pagination.perPages" [value]="p">{{ p }}</option>
+    </select>
+    risultati di
+    <strong>{{ pagination.getSourceLength() }}</strong>
   </div>
 </nav>
+</ng-container>
+<div class="table-container">
+  <table class="responsive" id="loaded" *ngIf="controlNotEmptyChecked">
+    <thead>
+      <tr>
+        <th *ngIf="config.selection?.enable">
+          <!--span *ngIf="hasSelection && !!selectionType">
+                <input type="checkbox" name="table-select-all" (click)="checkAll()">
+            </span-->
+        </th>
+        <ng-container *ngFor="let c of config.columns; let i = index">
 
-<table class="responsive" id="loaded">
-  <thead>
-    <tr>
-      <th *ngIf="config.selection?.enable">
-        <!--span *ngIf="hasSelection && !!selectionType">
-              <input type="checkbox" name="table-select-all" (click)="checkAll()">
-          </span-->
-      </th>
-      <th *ngFor="let c of config.columns; let i = index" scope="col">
-        <i *ngIf="config.sort?.enable" appDatatable [col]="c.columnName" [order]="c.order" (sort)="sortChanged($event)"></i>
-        {{c.displayName}}
-      </th>
-      <th *ngIf="config.delete?.enable"></th>
-      <th *ngIf="config.info?.enable"></th>
-      <th *ngIf="config.edit?.enable"></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngIf="pagination.loading;else rowData">
-      <td class="text-center" [attr.colspan]="config.columns.length + (config.selection?.enable?1:0) + (config.delete?.enable?1:0) + (config.edit?.enable?1:0)">Caricamento...</td>
-    </tr>
-    <tr class="no-data" *ngIf="pagination.hasNoElements()">
-      <td class="text-center" [attr.colspan]="config.columns.length + (config.selection?.enable?1:0) + (config.delete?.enable?1:0) + (config.edit?.enable?1:0)">Nessun
-        dato trovato</td>
-    </tr>
-    <ng-template #rowData>
-      <ng-container *ngFor="let el of data | sort:order.columnName:order.order; let j = index; trackBy: trackByFn">
-        <tr *ngIf="pagination.isNeeded() && pagination.showIndex(j) || !pagination.isNeeded()" [ngClass]="{'selected': selection.isSelected(el)}">
-          <td *ngIf="config.selection?.enable && !config.selection.selectionType">
-            <label class="customradio" *ngIf="isSelectable(el)">
-              <input type="radio" name="table-{{id}}-radio" (change)="selection.onSelection(el)" [checked]="selection.isSelected(el)">
-              <span class="checkmark"></span>
-            </label>
-          </td>
-          <td *ngIf="config.selection?.enable && !!config.selection.selectionType">
-            <input type="checkbox" name="table-{{id}}-checkbox" (change)="selection.onSelection(el)" [checked]="selection.isSelected(el)"
-              *ngIf="isSelectable(el)">
-          </td>
-          <td *ngFor="let c of config.columns" [attr.id]="c.columnName + '_' + id + '_' + j" [attr.data-label]="c.displayName">
-            <div class="{{c.class}}" [attr.data-text]="byString(el,c.columnName)" *ngIf="!(c.link?.enable); else printUrl">
-              <div *ngIf="byString(el,c.columnName) !== true && byString(el,c.columnName) !== false; else printCheckbox">
-                {{byString(el,c.columnName)}}
-              </div>
-              <ng-template #printCheckbox>
-                <input type="checkbox" [checked]="byString(el,c.columnName)" disabled>
-              </ng-template>
-            </div>
-            <ng-template #printUrl>
-              <a *ngIf="byString(el,c.columnName)[c.link.url || 'safeUrl'] != null; else downloadFile" [download]="byString(el,c.columnName)[c.link.fileName || 'nomeFile']"
-                [href]="byString(el,c.columnName)[c.link.url || 'safeUrl']">{{byString(el,c.columnName)[c.link.fileName
-                || 'nomeFile']}}</a>
-            </ng-template>
-            <ng-template #downloadFile>
-              <button class="button-text" (click)="goDownload(el)">{{byString(el,c.columnName)[c.link.fileName || 'nomeFile']}}
+        <!---se il component per mostrare dinamicamente il set di colonne è attivo
+        e la proprietà della colonna checked è true la colonna viene mostrata-->
+        <!---di default se showMultiselect è false le colonne vengono mostrate tutte -->
+          <th
+            *ngIf="
+              (showMultiselect && c.checked) || (!showMultiselect && !c.checked)
+            "
+            scope="col"
+          >
+            <i
+              *ngIf="config.sort?.enable"
+              appDatatable
+              [col]="c.columnName"
+              [order]="c.order"
+              (sort)="sortChanged($event)"
+            ></i>
+            {{ c.displayName }}
+          </th>
+        </ng-container>
+        <th *ngIf="config.delete?.enable"></th>
+        <th *ngIf="config.info?.enable"></th>
+        <th *ngIf="config.edit?.enable"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf="pagination.loading; else rowData">
+        <td
+          class="text-center"
+          [attr.colspan]="
+            config.columns.length +
+            (config.selection?.enable ? 1 : 0) +
+            (config.delete?.enable ? 1 : 0) +
+            (config.edit?.enable ? 1 : 0)
+          "
+        >
+          Caricamento...
+        </td>
+      </tr>
+      <tr class="no-data" *ngIf="pagination.hasNoElements()">
+        <td
+          class="text-center"
+          [attr.colspan]="
+            config.columns.length +
+            (config.selection?.enable ? 1 : 0) +
+            (config.delete?.enable ? 1 : 0) +
+            (config.edit?.enable ? 1 : 0)
+          "
+        >
+          Nessun dato trovato
+        </td>
+      </tr>
+      <ng-template #rowData>
+        <ng-container
+          *ngFor="
+            let el of data | sort : order.columnName : order.order;
+            let j = index;
+            trackBy: trackByFn
+          "
+        >
+          <tr
+            *ngIf="
+              (pagination.isNeeded() && pagination.showIndex(j)) ||
+              !pagination.isNeeded()
+            "
+            [ngClass]="{ selected: selection.isSelected(el) }"
+          >
+            <td
+              *ngIf="config.selection?.enable && !config.selection.selectionType"
+            >
+              <label class="customradio" *ngIf="isSelectable(el)">
+                <input
+                  type="radio"
+                  name="table-{{ id }}-radio"
+                  (change)="selection.onSelection(el)"
+                  [checked]="selection.isSelected(el)"
+                />
+                <span class="checkmark"></span>
+              </label>
+            </td>
+            <td
+              *ngIf="config.selection?.enable && !!config.selection.selectionType"
+            >
+              <input
+                type="checkbox"
+                name="table-{{ id }}-checkbox"
+                (change)="selection.onSelection(el)"
+                [checked]="selection.isSelected(el)"
+                *ngIf="isSelectable(el)"
+              />
+            </td>
+            <ng-container *ngFor="let c of config.columns">
+              <td
+                *ngIf="
+                  (showMultiselect && c.checked) ||
+                  (!showMultiselect && !c.checked)
+                "
+                [attr.id]="c.columnName + '_' + id + '_' + j"
+                [attr.data-label]="c.displayName"
+              >
+                <div
+                  class="{{ c.class }}"
+                  [attr.data-text]="byString(el, c.columnName)"
+                  *ngIf="!c.link?.enable; else printUrl"
+                >
+                  <div class="col-data-value"
+                    *ngIf="
+                      byString(el, c.columnName) !== true &&
+                        byString(el, c.columnName) !== false;
+                      else printCheckbox
+                    "
+                  >
+                    <!-- {{ byString(el, c.columnName) }} -->
+
+                    <!--pipe new line e toolong-->
+                    <ng-container *ngIf="containsNewlineOrTooLong(byString(el,c.columnName),200)">
+                      <span *ngIf="tooLong(byString(el,c.columnName),200)" [innerHTML]="byString(el,c.columnName) | toolong:50 | atob"></span>
+                      <span *ngIf="!tooLong(byString(el,c.columnName),200)" [innerHTML]="byString(el,c.columnName)| newline"></span>
+                    </ng-container>
+                    <ng-container *ngIf="!containsNewlineOrTooLong(byString(el,c.columnName),200)">
+                      {{byString(el,c.columnName)}}
+                    </ng-container>
+
+                  </div>
+                  <ng-template #printCheckbox>
+                    <input
+                      type="checkbox"
+                      [checked]="byString(el, c.columnName)"
+                      disabled
+                    />
+                  </ng-template>
+                </div>
+
+                <ng-template #printUrl>
+                  <a
+                    *ngIf="
+                      byString(el, c.columnName)[c.link.url || 'safeUrl'] != null;
+                      else downloadFile
+                    "
+                    [download]="
+                      byString(el, c.columnName)[c.link.fileName || 'nomeFile']
+                    "
+                    [href]="byString(el, c.columnName)[c.link.url || 'safeUrl']"
+                    >{{
+                      byString(el, c.columnName)[c.link.fileName || "nomeFile"]
+                    }}</a
+                  >
+                </ng-template>
+                <ng-template #downloadFile>
+                  <button class="button-text" (click)="goDownload(el)">
+                    {{
+                      byString(el, c.columnName)[c.link.fileName || "nomeFile"]
+                    }}
+                  </button>
+                </ng-template>
+
+                <!-----Handle the TemplateRef Cell in a column -->
+                <ng-container
+                  *ngIf="c?.cellTemplate"
+                  [ngTemplateOutlet]="c?.cellTemplate"
+                  [ngTemplateOutletContext]="{
+                    el: el
+                  }"
+                ></ng-container>
+              </td>
+            </ng-container>
+            <td *ngIf="config.delete?.enable">
+              <button
+                class="btn btn-danger btn-xs"
+                type="button"
+                data-title="Delete"
+                data-toggle="modal"
+                data-target="#delete"
+                (click)="delete(el)"
+                *ngIf="isDeletable(el)"
+              >
+                <span class="glyphicon glyphicon-trash"></span>
               </button>
-            </ng-template>
-
-
-  <!-----Handle the TemplateRef Cell in a column -->
-              <ng-container *ngIf="c?.cellTemplate"
-            
-              [ngTemplateOutlet]='c?.cellTemplate'
-              [ngTemplateOutletContext]='{
-            el: el
-          }'
-        ></ng-container>
-           
-          </td>
-          <td *ngIf="config.delete?.enable">
-            <button class="btn btn-danger btn-xs" type="button" data-title="Delete" data-toggle="modal" data-target="#delete" (click)="delete(el)"
-              *ngIf="isDeletable(el)">
-              <span class="glyphicon glyphicon-trash"></span>
-            </button>
-          </td>
-          <td *ngIf="config.info?.enable">
-            <button class="btn btn-primary btn-xs" type="button" data-title="Info" data-toggle="modal" data-target="#info" (click)="mostraMotivazione(el)"
-              *ngIf="hasInfo(el)">
-              <span class="glyphicon glyphicon-info-sign"></span>
-            </button>
-          </td>
-          <td *ngIf="config.edit?.enable">
-            <button class="btn btn-info btn-xs" type="button" data-title="Edit" data-toggle="modal" data-target="#edit" (click)="edit(el)"
-              *ngIf="isEditable(el)">
-              <span class="glyphicon glyphicon-edit"></span>
-            </button>
-          </td>
-          
-        </tr>
-      </ng-container>
-    </ng-template>
-  </tbody>
-</table>
+            </td>
+            <td *ngIf="config.info?.enable">
+              <button
+                class="btn btn-primary btn-xs"
+                type="button"
+                data-title="Info"
+                data-toggle="modal"
+                data-target="#info"
+                (click)="mostraMotivazione(el)"
+                *ngIf="hasInfo(el) && (el.showEdit === undefined || el.showEdit)"
+              >
+                <span *ngIf="el.showEdit === undefined" class="glyphicon glyphicon-info-sign"></span>
+                <span *ngIf="el.showEdit" class="glyphicon glyphicon-search"></span>
+              </button>
+            </td>
+            <td *ngIf="config.edit?.enable">
+              <button
+                class="btn btn-info btn-xs"
+                type="button"
+                data-title="Edit"
+                data-toggle="modal"
+                data-target="#edit"
+                (click)="edit(el)"
+                *ngIf="isEditable(el)"
+              >
+                <span class="glyphicon glyphicon-edit"></span>
+              </button>
+            </td>
+          </tr>
+        </ng-container>
+      </ng-template>
+    </tbody>
+  </table>
+<div>
+<!----nel caso in cui vengano mostrate le colonne dinamiche, ma nessuna colonna selezionata-->
+<div *ngIf="!controlNotEmptyChecked" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 empty-checked">
+  <label>Nessun valore selezionato</label>
+</div>
 
 <nav class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
   <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding elem-3"></div>
@@ -164,10 +361,33 @@
     </a>-->
   </div>
   <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding text-right">
-    <button *ngIf="config.selection?.enable && config.buttonSelection?.enable" type="button" class="btn-conam button-yellow margin-top5"
-      [disabled]="!(selection.hasSelected() && showDetail())" (click)="selection.dettaglio()">
-      <i class="glyphicon glyphicon-file btn-glyphicon img-circle text-yellow-conam"></i>
-      {{config.buttonSelection.label}}</button>
+      <button
+    *ngIf="showDownloadReport != '' "
+    type="button"
+    class="btn-conam button-yellow margin-top5"
+
+    (click)="onDowloadList($event)"
+  >
+    <i
+      class="glyphicon glyphicon-file btn-glyphicon img-circle text-yellow-conam"
+    ></i>
+    {{ showDownloadReport}}
+  </button>
+
+  <button
+      *ngIf="config.selection?.enable && config.buttonSelection?.enable"
+      type="button"
+      class="btn-conam button-yellow margin-top5"
+      [disabled]="!(selection.hasSelected() && showDetail())"
+      (click)="selection.dettaglio()"
+    >
+      <i
+        class="glyphicon glyphicon-file btn-glyphicon img-circle text-yellow-conam"
+      ></i>
+      {{ config.buttonSelection.label }}
+    </button>
+
+
   </div>
   <!--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding elem-3">
     <select [(ngModel)]="pagination.perPage" (change)="pagination.perPageChanged()" class="select">

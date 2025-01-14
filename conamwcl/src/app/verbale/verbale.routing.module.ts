@@ -8,6 +8,7 @@ import { VerbaleRicercaComponent } from "./components/verbale-ricerca/verbale-ri
 import { VerbaleEliminazioneComponent } from "./components/verbale-eliminazione/verbale-eliminazione.component";
 import { VerbaleRicercaScrittiDifensiviComponent } from "./components/verbale-ricerca-scritti-difensivi/verbale-ricerca-scritti-difensivi.component";
 import { VerbaleScrittoDifensivoComponent } from "./components/verbale-scritto-difensivo/verbale-scritto-difensivo.component";
+import { DettaglioProvaPagamentoComponent } from "../shared-verbale/component/dettaglio-prova-pagamento/dettaglio-prova-pagamento.component";
 
 
 const routes: Routes = [
@@ -22,7 +23,10 @@ const routes: Routes = [
         { path: 'eliminazione', component: VerbaleEliminazioneComponent, data: { breadcrumb: "Eliminazione"} },
         { path: 'scritto-difensivo/:id', component: VerbaleScrittoDifensivoComponent, data: { breadcrumb: "scritto-difensivo"} },
         { path: 'inserimento-scritti-difensivi', component: VerbaleScrittoDifensivoComponent, data: { breadcrumb: "inserimento-scritti-difensivi"} },
-        { path: 'ricerca-scritti-difensivi', component: VerbaleRicercaScrittiDifensiviComponent, data: { breadcrumb: "ricerca-scritti-difensivi"} },]
+        { path: 'ricerca-scritti-difensivi', component: VerbaleRicercaScrittiDifensiviComponent, data: { breadcrumb: "ricerca-scritti-difensivi"} },
+        { path: 'dettaglio-prova-pagamento/:id', component: DettaglioProvaPagamentoComponent, data: { breadcrumb: "dettaglio-prova-pagamento"} },
+    
+    ]
     }]
 
 @NgModule({

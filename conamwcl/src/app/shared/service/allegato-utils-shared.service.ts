@@ -1,14 +1,19 @@
-import { Injectable, OnDestroy } from "@angular/core";
+import { ElementRef, Injectable, OnDestroy } from "@angular/core";
 import { LoggerService } from "../../core/services/logger/logger.service";
+import { Config } from "protractor";
+import { AllegatoMultipleFields } from "../../commons/request/salva-allegato-request";
+import { FileUploader, FileItem } from "ng2-file-upload";
+import { timer } from "rxjs/observable/timer";
+declare var $: any;
 
 @Injectable()
 export class AllegatoUtilsSharedService implements OnDestroy {
-
+    allowedFilesType = ["pdf", "tiff", "jpg", "jpeg", "p7m"];
     constructor(
         private logger: LoggerService) {
         this.logger.createService(AllegatoUtilsSharedService.name);
     }
-
+    public subscribers: any = {};
     b64toBlob(b64Data: string, contentType: string) {
         let sliceSize = 512;
 
@@ -32,6 +37,8 @@ export class AllegatoUtilsSharedService implements OnDestroy {
         return blob;
     }
 
+
+  
     ngOnDestroy(): void {
         this.logger.destroyService(AllegatoUtilsSharedService.name);
     }

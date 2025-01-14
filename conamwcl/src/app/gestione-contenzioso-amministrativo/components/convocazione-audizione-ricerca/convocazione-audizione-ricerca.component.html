@@ -29,8 +29,8 @@
                                 </h4>
                             </div>
 
-                            <datatable [data]="verbali" [config]="config" *ngIf="showTable"
-                                (dettaglio)="onDettaglio($event)">
+                            <datatable [showMultiselect]="true" [data]="verbali" [config]="config" *ngIf="showTable"
+                                (dettaglio)="onDettaglio($event)" [showDownloadReport]="'Esporta dati'" (onDownloadList)="downloadList($event)">
                             </datatable>
 
                             <div id="scrollBottom" *ngIf="showTable"></div>

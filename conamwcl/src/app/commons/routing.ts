@@ -13,6 +13,8 @@ export class Routing {
     public static VERBALE_RICERCA_SCRITTI_DIFENSIVI: string = "verbale/ricerca-scritti-difensivi";
     public static VERBALE_INSERIMENTO_SCRITTI_DIFENSIVI: string = "verbale/inserimento-scritti-difensivi";
     public static VERBALE_SCRITTO_DIFENSIVO: string = "verbale/scritto-difensivo/"; //+id
+    public static DETTAGLIO_PROVA_PAGAMENTO: string = "verbale/dettaglio-prova-pagamento/"; //+id
+
     //SOGGETTO
     public static SOGGETTO_RIEPILOGO: string = "soggetto/riepilogo/"; //+id
     //PRONTUARIO
@@ -33,6 +35,7 @@ export class Routing {
     public static PREGRESSO_RIEPILOGO_SOLLECITI: string = "pregresso/riepilogo-solleciti/"; //+id
     public static PREGRESSO_RIEPILOGO_DISPOSIZIONI: string = "pregresso/riepilogo-disposizioni/"; //+id
     public static PREGRESSO_RIEPILOGO_RICEVUTE: string = "pregresso/riepilogo-ricevute/"; //+id
+    public static PREGRESSO_DETTAGLIO_PROVA_PAGAMENTO: string = "pregresso/dettaglio-prova-pagamento/"; //+id
 
 
     //GESTIONE CONTENZIOSO AMMINISTRATIVO
@@ -47,8 +50,8 @@ export class Routing {
 
     public static GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_RICERCA: string = "gest-cont-amministrativo/emissione-verbale-audizione-ricerca";
     public static GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_RIEPILOGO: string = "gest-cont-amministrativo/emissione-verbale-audizione-riepilogo/";
-    public static GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_CREA: string = "gest-cont-amministrativo/emissione-verbale-audizione-crea/"; 
-    public static GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_ALLEGA: string = "gest-cont-amministrativo/emissione-verbale-audizione-allega/"; 
+    public static GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_CREA: string = "gest-cont-amministrativo/emissione-verbale-audizione-crea/";
+    public static GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_ALLEGA: string = "gest-cont-amministrativo/emissione-verbale-audizione-allega/";
     public static GESTIONE_CONT_AMMI_VERBALE_AUDIZIONE_TEMPLATE_LETTERA: string = "gest-cont-amministrativo/emissione-verbale-audizione-template-lettera/"; //+id
 
     public static GESTIONE_CONT_AMMI_CONVOCAZIONE_AUDIZIONE_RICERCA: string = "gest-cont-amministrativo/convocazione-audizione-ricerca";
@@ -62,11 +65,11 @@ export class Routing {
     public static GESTIONE_CONT_AMMI_INSERIMENTO_CONTRODEDUZIONI_ALLEGATO: string = "gest-cont-amministrativo/controdeduzioni-verbale-allegato/";
     public static GESTIONE_CONT_AMMI_INSERIMENTO_RECIDIVITA_RICERCA: string = "gest-cont-amministrativo/recidivita-ricerca";
     public static GESTIONE_CONT_AMMI_INSERIMENTO_RECIDIVITA_DETTAGLIO: string = "gest-cont-amministrativo/recidivita-dettaglio/";//+id
-    
+
     //FASE GIURISDIZIONALE
     public static FASE_GIURISDIZIONALE_INSERIMENTO_COMPARSA_RICERCA: string = "fase-giurisdizionale/comparsa-verbale-ricerca";
     public static FASE_GIURISDIZIONALE_INSERIMENTO_COMPARSA_RIEPILOGO: string = "fase-giurisdizionale/comparsa-verbale-riepilogo/";
-    public static GESTIONE_CONT_AMMI_INSERIMENTO_COMPARSA_ALLEGATO: string = "fase-giurisdizionale/comparsa-verbale-allegato/";        
+    public static GESTIONE_CONT_AMMI_INSERIMENTO_COMPARSA_ALLEGATO: string = "fase-giurisdizionale/comparsa-verbale-allegato/";
     public static FASE_GIURISDIZIONALE_CANCELLERIA_RICERCA_ORDINANZA: string = "fase-giurisdizionale/cancelleria-ricerca-ordinanza";
     public static FASE_GIURISDIZIONALE_CANCELLERIA_DETTAGLIO_ORDINANZA: string = "fase-giurisdizionale/cancelleria-dettaglio-ordinanza/";
     public static FASE_GIURISDIZIONALE_CANCELLERIA_ALLEGATO_ORDINANZA: string = "fase-giurisdizionale/cancelleria-allegato-ordinanza/";
@@ -85,7 +88,7 @@ export class Routing {
     public static RISCOSSIONE_SOLLECITO_RICERCA: string = "riscossione/sollecito-pagamento-ricerca";
     public static RISCOSSIONE_SOLLECITO_DETTAGLIO: string = "riscossione/sollecito-pagamento-dettaglio";
     public static RISCOSSIONE_SOLLECITO_RICERCA_RATE: string = "riscossione/sollecito-pagamento-rate-ricerca";
-    public static RISCOSSIONE_SOLLECITO_DETTAGLIO_RATE: string = "riscossione/sollecito-pagamento-rate-dettaglio";    
+    public static RISCOSSIONE_SOLLECITO_DETTAGLIO_RATE: string = "riscossione/sollecito-pagamento-rate-dettaglio";
     public static RISCOSSIONE_SOLLECITO_TEMPLATE: string = "riscossione/sollecito-pagamento-template/"; //+id
     public static RISCOSSIONE_SOLLECITO_RATE_TEMPLATE: string = "riscossione/sollecito-pagamento-rate-template/"; //+id
     public static RISCOSSIONE_SOLLECITO_INS_NOTIFICA: string = "riscossione/sollecito-pagamento-ins-notifica/"; //+id
@@ -108,6 +111,7 @@ export class Routing {
     public static PAGAMENTI_RICONCILIA_VERBALE_RICERCA: string = "pagamenti/riconcilia-verbale-ricerca";
     public static PAGAMENTI_RICONCILIA_VERBALE_RIEPILOGO: string = "pagamenti/riconcilia-verbale-riepilogo/"; //+id
     public static PAGAMENTI_RICONCILIA_VERBALE_ALLEGATO_PAGAMENTO: string = "pagamenti/riconcilia-verbale-allegato/"; //+id
+    public static PAGAMENTI_RICONCILIA_DETTAGLIO_PROVA_PAGAMENTO: string = "pagamenti/dettaglio-prova-pagamento/"; //+id
 
     //RICONCILIA ORDINANZA
     public static PAGAMENTI_RICONCILIA_ORDINANZA_RICERCA: string = "pagamenti/riconcilia-ordinanza-ricerca";

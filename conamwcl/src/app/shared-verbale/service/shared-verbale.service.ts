@@ -6,6 +6,7 @@ import { MinVerbaleVO } from "../../commons/vo/verbale/min-verbale-vo";
 import { RicercaVerbaleRequest } from "../../commons/request/verbale/ricerca-verbale-request";
 import { Observable } from "rxjs";
 import {
+  IstruttoreVO,
   RuoloVO,
   SelectVO,
   StatoVerbaleVO,
@@ -37,22 +38,38 @@ export class SharedVerbaleService {
     this.logger.createService(SharedVerbaleService.name);
   }
 
-    salvaSoggetto(soggetto: SoggettoVO, idVerbale: number): Observable<SoggettoVO> {
-        var url: string = this.config.getBEServer() + '/restfacade/verbale/salvaSoggetto';
-        let body = { "idVerbale": idVerbale, "soggetto": soggetto };
-        return this.http.post<SoggettoVO>(url, body);
-    }
-    
-	ruoliSoggetto(): Observable<Array<RuoloVO>> {
-	    var url: string = this.config.getBEServer() + '/restfacade/verbale/ruoliSoggetto';
-	    return this.http.get<Array<RuoloVO>>(url);
-	}
+  salvaSoggetto(
+    soggetto: SoggettoVO,
+    idVerbale: number
+  ): Observable<SoggettoVO> {
+    var url: string =
+      this.config.getBEServer() + "/restfacade/verbale/salvaSoggetto";
+    let body = { idVerbale: idVerbale, soggetto: soggetto };
+    return this.http.post<SoggettoVO>(url, body);
+  }
+
+  ruoliSoggetto(): Observable<Array<RuoloVO>> {
+    var url: string =
+      this.config.getBEServer() + "/restfacade/verbale/ruoliSoggetto";
+    return this.http.get<Array<RuoloVO>>(url);
+  }
   ricercaVerbale(
     ricercaVerbaleRequest: RicercaVerbaleRequest
   ): Observable<Array<MinVerbaleVO>> {
     var url: string =
       this.config.getBEServer() + "/restfacade/verbale/ricercaVerbale";
     return this.http.post<Array<MinVerbaleVO>>(url, ricercaVerbaleRequest);
+  }
+
+  getIstruttoreByIdVerbale(
+    idVerbale?: number
+  ): Observable<Array<IstruttoreVO>> {
+    var url: string =
+      this.config.getBEServer() + "/restfacade/verbale/getIstruttoreByVerbale";
+    // let params = new HttpParams().set('idVerbale', idVerbale.toString()?idVerbale.toString() : null );
+    //  let params = new HttpParams().set('idVerbale', idVerbale.toString()?idVerbale.toString() : null );
+
+    return this.http.get<Array<IstruttoreVO>>(url);
   }
 
   getStatiRicercaVerbale(): Observable<Array<StatoVerbaleVO>> {
@@ -151,17 +168,32 @@ export class SharedVerbaleService {
   salvaAllegatoVerbale(
     input: SalvaAllegatoVerbaleRequest
   ): Observable<AllegatoVO> {
+    //console.log(input)
     var url: string =
       this.config.getBEServer() + "/restfacade/verbale/salvaAllegatoVerbale";
     let form = new FormData();
     form.append(
       "data",
       JSON.stringify(input, (k, v) => {
+        //console.log(k,v)
+
         if (v instanceof File) return undefined;
+
         return null === v ? undefined : v;
       })
     );
     form.append("files", input.file);
+    if (input.allegati && input.allegati != null) {
+      input.allegati.forEach((allegato, index) => {
+        form.append(
+          `allegati[${index}].file`,
+          allegato.file,
+          allegato.filename
+        );
+      
+      });
+    }
+
     return this.http.post<AllegatoVO>(url, form);
   }
 
@@ -226,11 +258,25 @@ export class SharedVerbaleService {
     form.append(
       "data",
       JSON.stringify(input, (k, v) => {
+        //console.log(k,v)
+
         if (v instanceof File) return undefined;
+
         return null === v ? undefined : v;
       })
     );
-    form.append("files", null);
+    form.append("files", input.file);
+    if (input.allegati && input.allegati != null) {
+      input.allegati.forEach((allegato, index) => {
+        form.append(
+          `allegati[${index}].file`,
+          allegato.file,
+          allegato.filename
+        );
+      
+      });
+    }
+
     return this.http.post<AllegatoVO>(url, form);
   }
 
@@ -326,7 +372,7 @@ export class SharedVerbaleService {
     };
     var url: string = this.config.getBEServer() + "/restfacade/verbale/nota";
     let params = new HttpParams().set("idNota", request.nota.idNota.toString());
-    return this.http.put<any>(url,request, {params: params});
+    return this.http.put<any>(url, request, { params: params });
   }
 
   deleteNote(nota: NotaVO, idVerbale: number): Observable<any> {
@@ -345,7 +391,44 @@ export class SharedVerbaleService {
     return this.http.get<Array<SelectVO>>(url);
   }
   ricercaSoggettoPerPIva(minSoggetto: MinSoggettoVO) {
-	    var url: string = this.config.getBEServer() + '/restfacade/verbale/ricercaSoggettoPerPIva';
-	    return this.http.post<SoggettoVO>(url, minSoggetto);
-	}
+    var url: string =
+      this.config.getBEServer() + "/restfacade/verbale/ricercaSoggettoPerPIva";
+    return this.http.post<SoggettoVO>(url, minSoggetto);
+  }
+
+  dowloadReport(request: RicercaVerbaleRequest, itemsColumns: any[]) {
+    let input: RicercaVerbaleRequest = request;
+    input.columnList = itemsColumns;
+    //console.log(input)
+    var url: string =
+      this.config.getBEServer() + "/restfacade/verbale/downloadReport";
+
+    return this.http.post<any>(url, input);
+  }
+
+  saveData(response: any) {
+    let type = response.nomeFile.slice(response.nomeFile.lastIndexOf(".") + 1);
+
+    const blob = this.dataURItoBlob(response.file, type);
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = response.nomeFile;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+
+  dataURItoBlob(dataURI, type) {
+    const byteString = window.atob(dataURI);
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+
+    const int8Array = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < byteString.length; i++) {
+      int8Array[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([int8Array], { type: `application/${{ type }}` });
+    return blob;
+  }
 }

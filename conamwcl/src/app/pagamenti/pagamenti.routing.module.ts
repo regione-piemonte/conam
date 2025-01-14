@@ -22,6 +22,7 @@ import { PagamentiRiconciliaSollecitoRateRicercaComponent } from "./components/p
 import { PagamentiRiconciliaSollecitoRateDettaglioComponent } from "./components/pagamenti-riconcilia-sollecito-rate-dettaglio/pagamenti-riconcilia-sollecito-rate-dettaglio.component";
 import { pagamentiRiconciliaManualePagamentoOrdinanzaComponent } from "./components/pagamenti-riconcilia-manuale-pagamento-ordinanza/pagamenti-riconcilia-manuale-pagamento-ordinanza.component";
 import { pagamentiRiconciliaManualePagamentoOrdinanzaDettaglioComponent } from "./components/pagamenti-riconcilia-manuale-pagamento-ordinanza-dettaglio/pagamenti-riconcilia-manuale-pagamento-ordinanza-dettaglio.component";
+import { DettaglioProvaPagamentoComponent } from "../shared-verbale/component/dettaglio-prova-pagamento/dettaglio-prova-pagamento.component";
 
 const routes: Routes = [
     {
@@ -53,7 +54,9 @@ const routes: Routes = [
             { path: 'riconcilia-sollecito-rate-ricerca', component: PagamentiRiconciliaSollecitoRateRicercaComponent },
             { path: 'riconcilia-sollecito-rate-dettaglio', component: PagamentiRiconciliaSollecitoRateDettaglioComponent },
             { path: 'pagamenti-riconcilia-manuale-pagamento-ordinanza', component: pagamentiRiconciliaManualePagamentoOrdinanzaComponent },
-            { path: 'pagamenti-riconcilia-manuale-pagamento-ordinanza-dettaglio/:id', component: pagamentiRiconciliaManualePagamentoOrdinanzaDettaglioComponent }
+            { path: 'pagamenti-riconcilia-manuale-pagamento-ordinanza-dettaglio/:id', component: pagamentiRiconciliaManualePagamentoOrdinanzaDettaglioComponent },
+            { path: 'dettaglio-prova-pagamento/:id', component: DettaglioProvaPagamentoComponent, data: { breadcrumb: "dettaglio-prova-pagamento"} },
+
 
         ]
     }]

@@ -220,7 +220,7 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6" *ngIf="soggetto.ruolo.id != 2">
                                     <label for="importomisuraRidotta" class="control-label">Importo in misura ridotta</label>
                                     <input type="number" id="importomisuraRidotta"  class="form-control" [(ngModel)]="importo"
                                             name="importomisuraRidotta" required >

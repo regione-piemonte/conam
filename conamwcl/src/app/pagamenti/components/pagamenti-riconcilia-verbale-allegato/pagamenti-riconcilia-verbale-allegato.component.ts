@@ -90,11 +90,11 @@ export class PagamentiRiconciliaVerbaleAllegatoComponent
       .subscribe(
         (data) => {
           let azione: string = "";
-          if (nuovoAllegato.allegatoField[3].booleanValue == "true") {
+       /*   if (nuovoAllegato.allegatoField[3].booleanValue == "true") {
             azione = "parziale";
-          } else {
+          } else {*/
             azione = "allegato";
-          }
+         // }
           this.router.navigate([
             Routing.PAGAMENTI_RICONCILIA_VERBALE_RIEPILOGO + this.idVerbale,
             { action: azione },

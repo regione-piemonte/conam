@@ -14,7 +14,7 @@ import { PregressoPianiRiepilogoComponent } from "./components/pregresso-piani-r
 import { PregressoSollecitiRiepilogoComponent } from "./components/pregresso-solleciti-riepilogo/pregresso-solleciti-riepilogo.component";
 import { PregressoDisposizioniRiepilogoComponent } from "./components/pregresso-disposizioni-riepilogo/pregresso-disposizioni-riepilogo.component";
 import { PregressoRicevuteRiepilogoComponent } from "./components/pregresso-ricevute-riepilogo/pregresso-ricevute-riepilogo.component";
-
+import { DettaglioProvaPagamentoComponent } from "../shared-verbale/component/dettaglio-prova-pagamento/dettaglio-prova-pagamento.component";
 
 const routes: Routes = [
     { path: 'pregresso', children:[
@@ -34,6 +34,7 @@ const routes: Routes = [
         { path: 'inserimento', component: PregressoInserimentoComponent, data: { breadcrumb: "Inerimento Pregresso"} },
         { path: 'inserimento-manuale', component: PregressoInserimentoManualeComponent, data: { breadcrumb: "Inerimento Pregresso"} },
         { path: 'inserimento-acta', component: PregressoInserimentoActaComponent, data: { breadcrumb: "Inerimento Pregresso"} },
+        { path: 'dettaglio-prova-pagamento/:id', component: DettaglioProvaPagamentoComponent, data: { breadcrumb: "dettaglio-prova-pagamento"} },
        ]
     }]
 

@@ -1,4 +1,4 @@
-import { SelectVO, StatoOrdinanzaVO, TipoOrdinanzaVO } from "../../../commons/vo/select-vo";
+import { ComuneVO, SelectVO, StatoOrdinanzaVO, TipoOrdinanzaVO } from "../../../commons/vo/select-vo";
 
 export class OrdinanzaVO {
 
@@ -25,5 +25,7 @@ export class OrdinanzaVO {
     public numVerbale?: any;
     public numeroAccertamento: number;
     public annoAccertamento: number;
-
+    public trasgressori: string;
+    public obbligati: string;
+    public comuneEnteAccertatore?: ComuneVO;
 }

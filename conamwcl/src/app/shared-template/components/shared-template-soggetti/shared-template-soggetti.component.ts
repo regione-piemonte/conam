@@ -11,6 +11,7 @@ export class SharedTemplateSoggettiComponent implements OnInit, OnDestroy {
 
     @Input()
     listaSoggetti: Array<SoggettoVO>;
+    @Input() hideListaSoggetti?: boolean;
     //Variabili template
     public signor: string;
 

@@ -1,0 +1,67 @@
+<div class="container-fluid">
+  <div class="principal-div col-xs-12 col-sm-12 col-md-0 col-lg-1"></div>
+  <div id="scrollTop"></div>
+  <!-- <shared-spinner *ngIf="!(loaded && loadedConfig)"></shared-spinner>
+     -->
+
+  <div
+    class="principal-div col-xs-12 col-sm-12 col-md-12 col-lg-10"
+    style="padding-top: 30px"
+  >
+    <div class="panel-conam panel-primary-conam">
+      <div class="panel-heading-conam">
+        <strong>Dettaglio Prova del pagamento del verbale</strong>
+      </div>
+      <div class="panel-body panel-body-background">
+        <shared-spinner *ngIf="showSpinner" [absolute]="true"></shared-spinner>
+        <div class="form-group row">
+          <shared-alert
+            [message]="messageTop"
+            [type]="typeMessageTop"
+            *ngIf="showMessageTop && !alertBottom"
+          ></shared-alert>
+          <div
+            *ngIf="loaded"
+            class="col-xs-12 col-sm-12 col-md-12 col-lg-12"
+            style="overflow-x: scroll"
+          >
+            <datatable [data]="dataDocumentiVerbale" [config]="configVerb">
+            </datatable>
+          </div>
+        </div>
+        <!--<shared-spinner *ngIf="showSpinner"></shared-spinner>-->
+        <shared-allegato-metadati-inserimento
+        *ngIf="loadedCategoriaAllegato && inputSharedAllegatoMetadatiInserimentoReady"
+        [tipoAll]="defaultValueTipoAllegato"
+        [tipoAllegatoInput]="tipoAllegatoModel"
+        [riepilogoVerbale]="riepilogoVerbale"
+        [senzaAllegatiForce]="true"
+        [datiProvaPagamento]="fieldValues"
+        [soggettiSelect]="listaSoggetti"
+            (onNewFile)="salvaAllegato($event)"
+            (showSpinner)="handleShowSpinner($event)">
+        </shared-allegato-metadati-inserimento>
+
+        <div *ngIf="loadedCategoriaAllegato" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
+        <button type="button" class="btn-conam button-blue" (click)="back()">
+            <i class="glyphicon glyphicon-arrow-left btn-glyphicon img-circle text-blue-conam"></i>
+            Indietro</button>
+        <button type="button" class="btn-conam button-green" (click)="save()" [disabled]="!requestValid">
+            <i class="glyphicon glyphicon-floppy-saved btn-glyphicon img-circle text-blue-conam"></i>
+            Salva</button>
+    </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="principal-div col-xs-12 col-sm-12 col-md-0 col-lg-1">
+
+  </div>
+</div>
+<shared-dialog
+  [titolo]="'Attenzione'"
+  [subMessages]="subMessagess"
+  [id]="'myModalDelete'"
+  [buttonConfirmText]="buttonConfirmTexts"
+  [buttonAnnullaText]="buttonAnnullaTexts"
+></shared-dialog>

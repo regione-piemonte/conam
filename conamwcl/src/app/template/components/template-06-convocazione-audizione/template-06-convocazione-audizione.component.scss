@@ -1,3 +1,15 @@
 .datepicker-size{
     width: 20%;
 }
+
+.input-soggetti-container,
+.textarea-soggetti-container {
+    clear: both;
+    float: right;
+ }
+ .right-aligned-input,
+ .right-aligned-textarea {
+    margin-left: auto;
+    width: 300px;
+    text-align: right;
+ }

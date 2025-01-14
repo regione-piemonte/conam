@@ -1,5 +1,6 @@
 import { StatoSollecitoVO } from "../select-vo";
 import { SoggettoVO } from "../verbale/soggetto-vo";
+import { SalvaAllegatoRequest } from "../../request/salva-allegato-request";
 
 export class SollecitoVO {
     public idSollecito: number;
@@ -24,8 +25,19 @@ export class SollecitoVO {
     public isCreatoDalloUserCorrente: boolean;
 
     public soggetto: SoggettoVO;
-    
+
+    public reversaledOrdine?: string;
+    public pagatore?: string;
+    public note?: string;
+    public salvaAllegatoRequest?: SalvaAllegatoRequest;
+
     constructor() {
 		if (!this.statoSollecito) this.statoSollecito = new StatoSollecitoVO();
     }
+}
+
+export class SollecitoRequestVO {
+  sollecitoVO: SollecitoVO;
+  file?: File;
+filename?: string;
 }

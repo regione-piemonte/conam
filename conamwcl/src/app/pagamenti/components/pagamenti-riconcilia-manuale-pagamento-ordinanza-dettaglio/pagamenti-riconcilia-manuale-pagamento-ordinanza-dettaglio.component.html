@@ -136,7 +136,64 @@
                     </div>
                   </div>
                 </div>
-                <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6" style="padding-top: 25px;">
+
+                <!------->
+                <!--reversaledOrdine -->
+                <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <label for="reversaledOrdine" class="control-label"
+                      >Reversale d'Ordine
+                    </label>
+                    <input
+                      type="text"
+                      id="reversaledOrdine"
+                      class="form-control"
+                      name="reversaledOrdine"
+                      [(ngModel)]="acconto.reversaledOrdine"
+               
+                      #reversaledOrdine="ngModel"
+                    />
+                  </div>
+                </div>
+
+                <!--pagatore -->
+                <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <label for="pagatore" class="control-label"
+                      >Pagatore
+                    </label>
+                    <input
+                      type="text"
+                      id="pagatore"
+                      class="form-control"
+                      name="pagatore"
+                      [(ngModel)]="acconto.pagatore"
+                   
+                      #pagatore="ngModel"
+                    />
+                  </div>
+                </div>
+                <!--Note -->
+                <div class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <label for="note" class="control-label">Note </label>
+                    <input
+                      type="text"
+                      id="note"
+                      class="form-control"
+                      name="note"
+                      [(ngModel)]="acconto.note"
+                    
+                      #note="ngModel"
+                    />
+                  </div>
+                </div>
+
+                <!------->
+                <div
+                  class="form-group col-xs-12 col-sm-12 col-md-6 col-lg-6"
+                  style="padding-top: 25px"
+                >
                   <shared-allegato (onNewFile)="salvaAllegato($event)">
                   </shared-allegato>
                 </div>

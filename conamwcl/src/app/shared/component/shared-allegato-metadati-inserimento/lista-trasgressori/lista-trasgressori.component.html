@@ -1,0 +1,52 @@
+
+<div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+  <shared-spinner *ngIf="!loaded"></shared-spinner>
+  <div id="scrollBottom" *ngIf="showTable">
+    <datatable
+      [data]="listaTrasgressori"
+      [config]="configTragressori"
+  [defaultFirstElSelected]="true"
+      [defaultDataSelected]="provaDelPagamentoDetails ? selectedItems : null"
+      (selected)="onSelected($event)"
+      *ngIf="showTable"
+    >
+    </datatable>
+    <div *ngIf="listaTrasgressori.length === 0">
+Nessun trasgressore trovato
+    </div>
+  </div>
+
+
+
+
+
+</div>
+<ng-template #formTemplate let-el="el">
+  <input
+    type="number"
+    id="importoPagato"
+    class="form-control"
+    name="importoPagato"
+    [(ngModel)]="el.importoPagato"
+ [disabled]="checkBoolean(el)"
+    (input)="sendTheNewValue(el)"
+    decimalPlaces
+    [min]="0"
+    required
+  />
+</ng-template>
+<ng-template #checkedTemplate let-el="el">
+  <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 checkbox">
+    <label class="radio-label"
+      ><input
+        type="checkbox"
+        name="pagamentoParziale"
+        id="pagamentoParziale"
+        class="checkbox-input"
+        [disabled]="checkBoolean(el)"
+        (input)="sendTheNewValue(el)"
+        [(ngModel)]="el.pagamentoParziale"
+      />
+    </label>
+  </div>
+</ng-template>

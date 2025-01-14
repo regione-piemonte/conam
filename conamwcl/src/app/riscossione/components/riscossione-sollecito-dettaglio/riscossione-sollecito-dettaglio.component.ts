@@ -25,7 +25,8 @@ declare var $: any;
   templateUrl: "./riscossione-sollecito-dettaglio.component.html",
 })
 export class RiscossioneSollecitoDettaglioComponent
-  implements OnInit, OnDestroy {
+  implements OnInit, OnDestroy
+{
   @ViewChild(SharedDialogComponent) sharedDialog: SharedDialogComponent;
   @ViewChild(SharedOrdinanzaDettaglio)
   sharedOrdinanzaDettaglio: SharedOrdinanzaDettaglio;
@@ -83,17 +84,22 @@ export class RiscossioneSollecitoDettaglioComponent
     this.soggettoSollecito = [];
     this.soggettoSollecito[0] = this.riscossioneService.soggettoSollecito;
 
-
-    this.templateService.getMessage('PROTLET01').subscribe(data => {    this.message= data.message    }
-      , err => {        this.logger.error("Errore nel recupero del messaggio");    });
-
+    this.templateService.getMessage("PROTLET01").subscribe(
+      (data) => {
+        this.message = data.message;
+      },
+      (err) => {
+        this.logger.error("Errore nel recupero del messaggio");
+      }
+    );
 
     //this.riscossioneService.soggettoSollecito = null;
     if (!this.soggettoSollecito[0]) {
       this.router.navigateByUrl(Routing.RISCOSSIONE_SOLLECITO_RICERCA);
     } else {
       this.idOrdinanzaVerbaleSoggetto = [];
-      this.idOrdinanzaVerbaleSoggetto[0] = this.soggettoSollecito[0].idSoggettoOrdinanza;
+      this.idOrdinanzaVerbaleSoggetto[0] =
+        this.soggettoSollecito[0].idSoggettoOrdinanza;
 
       this.loadSollecitiEsistenti();
 
@@ -102,11 +108,16 @@ export class RiscossioneSollecitoDettaglioComponent
       this.sollecito = new SollecitoVO();
       this.sollecito.idSoggettoOrdinanza = this.idOrdinanzaVerbaleSoggetto[0];
     }
-    this.riscossioneService.getMessaggioManualeByidOrdinanzaVerbaleSoggetto(this.idOrdinanzaVerbaleSoggetto[0]).subscribe(data => {
-      if(data){        this.manageMessageTop(data.message, data.type)      }
-    });
+    this.riscossioneService
+      .getMessaggioManualeByidOrdinanzaVerbaleSoggetto(
+        this.idOrdinanzaVerbaleSoggetto[0]
+      )
+      .subscribe((data) => {
+        if (data) {
+          this.manageMessageTop(data.message, data.type);
+        }
+      });
   }
-
 
   loadSollecitiEsistenti() {
     this.loaded = false;
@@ -119,20 +130,18 @@ export class RiscossioneSollecitoDettaglioComponent
           if (this.listaSolleciti != null && this.listaSolleciti.length > 0) {
             let currencyPipe = new CurrencyPipe("it-IT");
             for (let i = 0; i < this.listaSolleciti.length; i++) {
-              this.listaSolleciti[
-                i
-              ].importoSollecitatoString = currencyPipe.transform(
-                this.listaSolleciti[i].importoSollecitato,
-                "EUR",
-                "symbol"
-              );
-              this.listaSolleciti[
-                i
-              ].maggiorazioneString = currencyPipe.transform(
-                this.listaSolleciti[i].maggiorazione,
-                "EUR",
-                "symbol"
-              );
+              this.listaSolleciti[i].importoSollecitatoString =
+                currencyPipe.transform(
+                  this.listaSolleciti[i].importoSollecitato,
+                  "EUR",
+                  "symbol"
+                );
+              this.listaSolleciti[i].maggiorazioneString =
+                currencyPipe.transform(
+                  this.listaSolleciti[i].maggiorazione,
+                  "EUR",
+                  "symbol"
+                );
             }
           }
 
@@ -140,7 +149,9 @@ export class RiscossioneSollecitoDettaglioComponent
           this.loaded = true;
         },
         (err) => {
-          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
+          if (err instanceof ExceptionVO) {
+            this.manageMessageTop(err.message, err.type);
+          }
           this.logger.error("Errore durante il caricamento dei solleciti");
           this.loaded = true;
         }
@@ -169,7 +180,9 @@ export class RiscossioneSollecitoDettaglioComponent
           );
         },
         (err) => {
-          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
+          if (err instanceof ExceptionVO) {
+            this.manageMessageTop(err.message, err.type);
+          }
           this.logger.error("Errore durante il caricamento dei solleciti");
           this.loaded = true;
         }
@@ -188,13 +201,15 @@ export class RiscossioneSollecitoDettaglioComponent
     let seconds: number = 10;
     this.intervalTop = window.setInterval(() => {
       seconds -= 1;
-      if (seconds === 0) {        this.resetMessageTop();      }
+      if (seconds === 0) {
+        this.resetMessageTop();
+      }
     }, 2000);
   }
 
   richiediEliminazioneSollecito() {
     this.buttonAnnullaText = "Annulla";
-      //mostro un messaggio
+    //mostro un messaggio
     this.sharedDialog.open();
     //premo "Conferma"
     this.subscribers.save = this.sharedDialog.salvaAction.subscribe(
@@ -202,21 +217,29 @@ export class RiscossioneSollecitoDettaglioComponent
         this.eliminaSollecito(this.sollecito);
         this.sollecito = new SollecitoVO();
       },
-      (err) => {        this.logger.error(err);      }
+      (err) => {
+        this.logger.error(err);
+      }
     );
     //"Annulla"
     this.subscribers.close = this.sharedDialog.closeAction.subscribe(
-      (data) => {        this.subMessages = new Array<string>();      },
-      (err) => {        this.logger.error(err);      }
+      (data) => {
+        this.subMessages = new Array<string>();
+      },
+      (err) => {
+        this.logger.error(err);
+      }
     );
   }
 
   creaSollecito() {
     this.loaded = false;
     //JIRA - Gestione Notifica
-    let salvaSollecitoRequest: SalvaSollecitoRequest = new SalvaSollecitoRequest();
+    let salvaSollecitoRequest: SalvaSollecitoRequest =
+      new SalvaSollecitoRequest();
     salvaSollecitoRequest.sollecito = this.sollecito;
-    salvaSollecitoRequest.notifica = this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject();
+    salvaSollecitoRequest.notifica =
+      this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject();
     //this.subscribers.salvataggio = this.riscossioneService.salvaSollecito(this.sollecito).subscribe(data => {
     this.subscribers.salvataggio = this.riscossioneService
       .salvaSollecito(salvaSollecitoRequest)
@@ -227,7 +250,9 @@ export class RiscossioneSollecitoDettaglioComponent
           );
         },
         (err) => {
-          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
+          if (err instanceof ExceptionVO) {
+            this.manageMessageTop(err.message, err.type);
+          }
           this.logger.error("Errore durante il salvataggio del sollecito");
           this.loaded = true;
         }
@@ -239,7 +264,9 @@ export class RiscossioneSollecitoDettaglioComponent
 
     this.subMessages.push("Si intende eliminare il sollecito selezionato?");
     this.subMessages.push("Data Creazione: " + this.sollecito.dataScadenza);
-    this.subMessages.push(      "Importo da sollecitare: " + this.sollecito.importoSollecitato    );
+    this.subMessages.push(
+      "Importo da sollecitare: " + this.sollecito.importoSollecitato
+    );
   }
 
   modificaVediSollecito(el: SollecitoVO) {
@@ -252,9 +279,10 @@ export class RiscossioneSollecitoDettaglioComponent
     }
     this.isModifica = true;
     this.isNuovo = false;
-    if(this.sharedRiscossioneSollecitoDettaglioComponent){      this.sharedRiscossioneSollecitoDettaglioComponent.aggiornaNotifica();    }
+    if (this.sharedRiscossioneSollecitoDettaglioComponent) {
+      this.sharedRiscossioneSollecitoDettaglioComponent.aggiornaNotifica();
+    }
   }
-
 
   eliminaSollecito(el: SollecitoVO) {
     this.generaMessaggio();
@@ -268,7 +296,9 @@ export class RiscossioneSollecitoDettaglioComponent
           this.loaded = true;
         },
         (err) => {
-          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);          }
+          if (err instanceof ExceptionVO) {
+            this.manageMessageTop(err.message, err.type);
+          }
           this.logger.error("Errore durante l'eliminazione del sollecito");
           this.loaded = true;
         }
@@ -290,54 +320,66 @@ export class RiscossioneSollecitoDettaglioComponent
       this.sharedRiscossioneSollecitoDettaglioComponent != undefined
     ) {
       if (
-        this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject() !=          null ||
-        this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject() !=          undefined
+        this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject() !=
+          null ||
+        this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject() !=
+          undefined
       ) {
         if (
-          this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject().importoSpeseNotifica == undefined ||
-          this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject().importoSpeseNotifica == null
+          this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject()
+            .importoSpeseNotifica == undefined ||
+          this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject()
+            .importoSpeseNotifica == null
         ) {
           checkNotifica = true;
         } else {
           checkNotifica = isNaN(
             Number(
-              this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject().importoSpeseNotifica
+              this.sharedRiscossioneSollecitoDettaglioComponent.getNotificaObject()
+                .importoSpeseNotifica
             )
           );
         }
       }
     }
-    if (checkNotifica) {return true;}
+    if (checkNotifica) {
+      return true;
+    }
     return !this.sollecito.importoSollecitato;
   }
 
   setConfig() {
-    this.configSoggetti = this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggetti(
-      false,
-      null,
-      0,
-      null,
-      null,
-      (el: any) => true
-    );
+    this.configSoggetti =
+      this.sharedOrdinanzaConfigService.getConfigOrdinanzaSoggetti(
+        false,
+        null,
+        0,
+        null,
+        null,
+        (el: any) => true
+      );
     this.configSolleciti = {
       selection: {
         enable: true,
-        isSelectable: (el: SollecitoVO) => {          console.log('prova',el);          return el.isCreatoDalloUserCorrente;        },
+        isSelectable: (el: SollecitoVO) => {
+          console.log("prova", el);
+          return el.isCreatoDalloUserCorrente;
+        },
       },
       columns: [
-        {          columnName: "numeroProtocollo",          displayName: "Numero Protocollo",
-        },
-        {          columnName: "dataScadenza",          displayName: "Data Scadenza",
+        { columnName: "numeroProtocollo", displayName: "Numero Protocollo" },
+        { columnName: "dataScadenza", displayName: "Data Scadenza" },
+        {
+          columnName: "importoSollecitatoString",
+          displayName: "Importo da sollecitare",
         },
         {
-          columnName: "importoSollecitatoString",          displayName: "Importo da sollecitare",
+          columnName: "maggiorazioneString",
+          displayName: "Maggiorazione",
         },
         {
-          columnName: "maggiorazioneString",          displayName: "Maggiorazione",
-        },
-        {
-          columnName: "statoSollecito.denominazione",          displayName: "Stato",
+          columnName: "statoSollecito.denominazione",
+          displayName: "Stato",
         },
       ],
     };
@@ -368,7 +410,8 @@ export class RiscossioneSollecitoDettaglioComponent
           this.loadedAction = true;
         },
         (err) => {
-          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);
+          if (err instanceof ExceptionVO) {
+            this.manageMessageTop(err.message, err.type);
           }
           this.loadedAction = true;
           this.logger.error("Errore durante il download del PDF");
@@ -381,10 +424,12 @@ export class RiscossioneSollecitoDettaglioComponent
     this.subscribers.inviaRichiestaBollettini = this.riscossioneService
       .inviaRichiestaBollettiniSollecito(this.sollecito.idSollecito)
       .subscribe(
-        (data) => {          this.loadSollecitiEsistentiCopiaPerRichiestaBollettini();
+        (data) => {
+          this.loadSollecitiEsistentiCopiaPerRichiestaBollettini();
         },
         (err) => {
-          if (err instanceof ExceptionVO) {            this.manageMessageTop(err.message, err.type);
+          if (err instanceof ExceptionVO) {
+            this.manageMessageTop(err.message, err.type);
           }
           this.loaded = true;
           this.logger.error("Errore durante il download del PDF");
@@ -392,7 +437,9 @@ export class RiscossioneSollecitoDettaglioComponent
       );
   }
   goToCreaNotifica() {
-    this.router.navigateByUrl(      Routing.RISCOSSIONE_SOLLECITO_INS_NOTIFICA + this.sollecito.idSollecito    );
+    this.router.navigateByUrl(
+      Routing.RISCOSSIONE_SOLLECITO_INS_NOTIFICA + this.sollecito.idSollecito
+    );
   }
 
   downloadLettera() {
@@ -418,9 +465,10 @@ export class RiscossioneSollecitoDettaglioComponent
   }
 
   goToVisualizzaNotifica() {
-    this.router.navigateByUrl(      Routing.RISCOSSIONE_SOLLECITO_VIEW_NOTIFICA + this.sollecito.idSollecito    );
+    this.router.navigateByUrl(
+      Routing.RISCOSSIONE_SOLLECITO_VIEW_NOTIFICA + this.sollecito.idSollecito
+    );
   }
-
 
   ngOnDestroy(): void {
     this.logger.destroy(RiscossioneSollecitoDettaglioComponent.name);
@@ -431,7 +479,10 @@ export class RiscossioneSollecitoDettaglioComponent
     else {
       let azione1: string = el.ruolo;
       let azione2: string = el.noteSoggetto;
-      this.router.navigate([        Routing.SOGGETTO_RIEPILOGO + el.idSoggetto,        { ruolo: azione1, nota: azione2 },      ]);
+      this.router.navigate([
+        Routing.SOGGETTO_RIEPILOGO + el.idSoggetto,
+        { ruolo: azione1, nota: azione2 },
+      ]);
     }
   }
 }

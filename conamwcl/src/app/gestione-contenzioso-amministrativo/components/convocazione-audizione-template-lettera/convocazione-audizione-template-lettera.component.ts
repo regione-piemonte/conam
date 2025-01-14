@@ -218,7 +218,9 @@ export class ConvocazioneAudizioneTemplateLetteraGestContAmministrativoComponent
 
   checkDatiTemplate(dati: DatiTemplateCompilatiVO): boolean {
     let flag: boolean = true;
+    let fieldsToIgnore = ['destinatariAggiuntivi'];
     for (let field in dati) {
+      if (fieldsToIgnore.includes(field)) continue;
       if (!dati[field]) flag = false;
     }
     return flag;

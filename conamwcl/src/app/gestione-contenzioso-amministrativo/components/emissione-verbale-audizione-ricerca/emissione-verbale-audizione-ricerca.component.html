@@ -29,7 +29,7 @@
                                 </h4>
                             </div>
 
-                            <datatable [data]="verbali" [config]="config" *ngIf="showTable"
+                            <datatable [data]="verbali" [config]="config" [showMultiselect]="true" *ngIf="showTable"
                                 (dettaglio)="onDettaglio($event)">
                             </datatable>
 

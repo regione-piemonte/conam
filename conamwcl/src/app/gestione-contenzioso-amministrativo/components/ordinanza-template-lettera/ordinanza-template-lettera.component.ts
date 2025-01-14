@@ -77,7 +77,7 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
       OrdinanzaTemplateLetteraGestContAmministrativoComponent.name
     );
     this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
-  
+
       this.idOrdinanza = +params["id"];
       let request: DatiTemplateRequest = new DatiTemplateRequest();
       if(params.azione === 'annullamento'){
@@ -89,12 +89,12 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
         this.itsLetteraArchiviazione = true
       }
       else{
-        request.codiceTemplate = Constants.TEMPLATE_LETTERA_ACCOMPAGNAMENTO;  
+        request.codiceTemplate = Constants.TEMPLATE_LETTERA_ACCOMPAGNAMENTO;
         this.itsLetteraAnnullamento = false
       }
-      
+
       request.idOrdinanza = this.idOrdinanza;
-     
+
       this.subscribers.getTemplate = this.templateService
         .getDatiTemplate(request)
         .subscribe(
@@ -157,7 +157,7 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
       this.template.setStampa(false);
       this.scrollEnable = true;
     }
- 
+
   }
 
   public isStampa: boolean = false;
@@ -170,15 +170,15 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
     this.isStampa = true;
 
     let fieldsNotRequired:string[]=[];
-    
+
     if(this.itsLetteraAnnullamento){
       this.templateAnnullamento.setStampa(true);
-      this.templateAnnullamento.setDatiCompilati(this.datiTemplateModelStampa); 
+      this.templateAnnullamento.setDatiCompilati(this.datiTemplateModelStampa);
        tmp = this.templateAnnullamento.getDatiCompilati()
     }
     else if (this.itsLetteraArchiviazione && !this.itsLetteraAnnullamento){
       this.templateArchiviazione.setStampa(true);
-      this.templateArchiviazione.setDatiCompilati(this.datiTemplateModelStampa); 
+      this.templateArchiviazione.setDatiCompilati(this.datiTemplateModelStampa);
        tmp = this.templateArchiviazione.getDatiCompilati()
     }
     else{
@@ -187,7 +187,7 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
       this.template.setDatiCompilati(this.datiTemplateModelStampa);
       tmp = this.template.getDatiCompilati()
     }
-    
+
     this.resetMessageTop();
     if (this.checkDatiTemplate(tmp,fieldsNotRequired)) {
       //this.loaded = false;
@@ -201,7 +201,7 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
       }
       else{
         request.codiceTemplate = Constants.TEMPLATE_LETTERA_ACCOMPAGNAMENTO;
-      }     
+      }
       request.idOrdinanza = this.idOrdinanza;
       request.datiTemplateCompilatiVO = tmp;
       let isCreatedVO: IsCreatedVO = new IsCreatedVO();
@@ -284,7 +284,9 @@ export class OrdinanzaTemplateLetteraGestContAmministrativoComponent
 
   checkDatiTemplate(dati: DatiTemplateCompilatiVO,fieldsNotRequired:string[]=[]): boolean {
     let flag: boolean = true;
+    let fieldsToIgnore = ['destinatariAggiuntivi','destinatariSoggetti'];
     for (let field in dati) {
+      if (fieldsToIgnore.includes(field)) continue;
       if (!fieldsNotRequired.includes(field) && !dati[field]) flag = false;
     }
     return flag;

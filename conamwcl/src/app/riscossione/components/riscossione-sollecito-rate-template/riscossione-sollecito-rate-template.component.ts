@@ -193,7 +193,9 @@ export class RiscossioneSollecitoRateTemplateComponent
 
   checkDatiTemplate(dati: DatiTemplateCompilatiVO): boolean {
     let flag: boolean = true;
+    let fieldsToIgnore = ['destinatariAggiuntivi','destinatariSoggetti'];
     for (let field in dati) {
+      if (fieldsToIgnore.includes(field)) continue;
       if (!dati[field]) flag = false;
     }
     return flag;

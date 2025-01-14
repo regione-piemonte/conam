@@ -8,6 +8,7 @@ import {
   ViewChild,
   Output,
   EventEmitter,
+  AfterViewInit,
 } from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import {
@@ -20,7 +21,10 @@ import { ConfigAllegatoVO } from "../../../commons/vo/verbale/config-allegato-vo
 import { AllegatoFieldVO } from "../../../commons/vo/verbale/allegato-field-vo";
 import { AllegatoSharedService } from "../../../shared/service/allegato-shared.service";
 import { Config } from "../../../shared/module/datatable/classes/config";
-import { SalvaAllegatoRequest } from "../../../commons/request/salva-allegato-request";
+import {
+  AllegatiSecondariRequest,
+  SalvaAllegatoRequest,
+} from "../../../commons/request/salva-allegato-request";
 import { NumberUtilsSharedService } from "../../service/number-utils-shared.service";
 import { FileUploader, FileItem } from "ng2-file-upload";
 import { SalvaAllegatoMultipleRequest } from "../../../commons/request/salva-allegato-multiple-request";
@@ -30,6 +34,16 @@ import { SharedDialogComponent } from "../shared-dialog/shared-dialog.component"
 import { UtilSubscribersService } from "../../../core/services/util-subscribers-service";
 import { SharedAlertComponent } from "../shared-alert/shared-alert.component";
 import { RiepilogoVerbaleVO } from "../../../commons/vo/verbale/riepilogo-verbale-vo";
+import { SoggettoModule } from "../../../soggetto/soggetto.module";
+import { SoggettoPagamentoVO } from "../../../commons/vo/verbale/soggetto-pagamento-vo";
+import { Subscription } from "rxjs";
+import { ActivatedRoute, Router } from "@angular/router";
+import { Routing } from "../../../commons/routing";
+import { NgForm } from "@angular/forms";
+import { TemplateService } from "../../../template/services/template.service";
+import { startWith } from "rxjs/operators";
+import { DatiProvaPagamentoVO } from "../../../commons/vo/verbale/dettaglio-prova-pagamento";
+import { E } from "@angular/core/src/render3";
 
 declare var $: any;
 const URL = "https://evening-anchorage-3159.herokuapp.com/api/";
@@ -52,9 +66,21 @@ interface Upload {
   styleUrls: ["./shared-allegato-metadati-inserimento.component.scss"],
 })
 export class SharedAllegatoMetadatiInserimentoComponent
-  implements OnInit, OnDestroy, OnChanges
+  implements OnInit, OnDestroy, OnChanges, AfterViewInit
 {
   @ViewChild(SharedDialogComponent) sharedDialog: SharedDialogComponent;
+  @ViewChild("metadatiAllegato") metadatiAllegatoForm: NgForm | undefined;
+
+  /////gestione dettaglio prova del pagamento (edit==== true)
+  @Input() tipoAll?: TipoAllegatoVO;
+  @Input() datiProvaPagamento?: DatiProvaPagamentoVO;
+  @ViewChild("buttonClick") buttonClick: ElementRef;
+  doOnce: boolean = false;
+  fromBack: boolean = false;
+  //only if stato.id === 3 // conciliato
+  allReadonly: boolean = false;
+  @Input() soggettiSelect?: SelectVO[]; //passed select list as SelectVO from the parent component
+  ///////
 
   @Input()
   tipoAllegatoInput: Array<TipoAllegatoVO>;
@@ -86,8 +112,10 @@ export class SharedAllegatoMetadatiInserimentoComponent
   onChangeCategoriaDocumento = new EventEmitter<any>();
   @Input()
   riepilogoVerbale: RiepilogoVerbaleVO;
-  public subscribers: any = {};
 
+  listaTrasgressori: SoggettoPagamentoVO[];
+  public subscribers: any = {};
+  subscriptionLista: Subscription;
   public mapConfigAllegati: Map<number, Array<Array<ConfigAllegatoVO>>>;
 
   public loadedConfig: boolean;
@@ -118,15 +146,36 @@ export class SharedAllegatoMetadatiInserimentoComponent
   allowedFilesType = ["pdf", "tiff", "jpg", "jpeg", "p7m"];
   allowedFilesTypeMessage: string;
   public idVerbale: number;
+  listaTrasgressoriPayload: SoggettoPagamentoVO[];
+  showTable: boolean;
+  disableFieldTrasgressori: boolean = false;
+  ///Research on Stilo
+  stiloResearch: boolean = false;
+  idStiloResearch: any;
+  isContAmmInsCreaOrd: boolean = false;
+  resetRicercaStilo: boolean = false;
+  confermaMetadatiClick: boolean = false;
+  isListaTrasgressoriLoading: boolean = false;
+  @Output()
+  showSpinner = new EventEmitter<boolean>(true);
   constructor(
     private logger: LoggerService,
+    private route: ActivatedRoute,
     private allegatoSharedService: AllegatoSharedService,
     private numberUtilsSharedService: NumberUtilsSharedService,
-    private utilSubscribersService: UtilSubscribersService
+    private utilSubscribersService: UtilSubscribersService,
+    private router: Router,
+    private templateService: TemplateService
   ) {}
 
   ngOnInit(): void {
     this.logger.init(SharedAllegatoMetadatiInserimentoComponent.name);
+
+    console.log('tipoAll',this.tipoAll);
+    console.log('tipoAllegatoInput',this.tipoAllegatoInput);
+    console.log('riepilogoVerbale',this.riepilogoVerbale);
+    console.log('datiProvaPagamento',this.datiProvaPagamento);
+    console.log('soggettiSelect',this.soggettiSelect);
 
     //gestisce abilitazione/disabilitazione da parte di chi usa il componente
     if (this.enableMetadati == null) this.enableMetadati = true;
@@ -138,12 +187,116 @@ export class SharedAllegatoMetadatiInserimentoComponent
       this.mapConfigAllegati = new Map();
     }
 
+
     this.initModel();
+    this.chkContAmmInsCreaOrd();
   }
 
   ngOnChanges() {
     this.logger.change(SharedAllegatoMetadatiInserimentoComponent.name);
     this.initModel();
+    console.log('ngOnChanges');
+    //prova del pagamento detail
+
+    if (this.datiProvaPagamento && this.datiProvaPagamento.edit) {
+      setTimeout(()=>{
+        this.provaDelPagamentoDetail();
+      },0);
+
+    }
+    if (
+      this.datiProvaPagamento &&
+      this.datiProvaPagamento.edit &&
+      this.riepilogoVerbale.verbale.stato.id === 3
+    ) {
+      //if stato === conciliato
+      // everything is readonly
+
+      this.allReadonly = true;
+      this.disableFieldTrasgressori=true;
+    }
+  }
+
+  provaDelPagamentoDetail() {
+    console.log('provaDelPagamentoDetail');
+    //if this.isEdit
+    this.doOnce = true;
+    console.log('this.metadatiAllegatoForm',this.metadatiAllegatoForm);
+    console.log('this.tipoAll',this.tipoAll);
+    if (this.metadatiAllegatoForm != undefined && this.tipoAll) {
+      this.metadatiAllegatoForm.form
+        .get("categoriaDocumento")
+        .setValue(this.tipoAll);
+      this.mostraMetadati();
+
+      //make everything readonly
+      if (this.loadedConfig) {
+        this.disableSelectCategoria = true;
+        // this.setValueProvaDelPagamento();
+      }
+    }
+  }
+
+  setValueProvaDelPagamento() {
+    console.log('setValueProvaDelPagamento');
+    // debugger
+    if (
+      this.datiProvaPagamento &&
+      this.datiProvaPagamento.edit &&
+      this.doOnce
+    ) {
+      this.tmpModel.forEach((el) => {
+        let elValue = this.datiProvaPagamento.allegatoFields.find(
+          (elValue) => elValue.idField === el.idField
+        );
+        if (elValue) {
+          el.value = elValue.genericValue;
+
+          if (elValue.idField === 27) {
+            el.value = elValue.numberValue;
+
+            if (this.comboModel) {
+              let comboModelEl = this.soggettiSelect.find(
+                (el) => el.id === elValue.numberValue
+              );
+
+              // this.metadatiAllegatoForm.form.controls['Soggetto Pagante'].setValue(comboModelEl)
+
+              console.log(
+                this.metadatiAllegatoForm.form.get("Soggetto Pagante"),
+                comboModelEl
+              );
+              this.metadatiAllegatoForm.form
+                .get("Soggetto Pagante")
+                .setValue(comboModelEl);
+
+              //      }
+              //      });
+            }
+          }
+        }
+      });
+      setTimeout(() => {
+        if (this.buttonClick) {
+          this.buttonClick.nativeElement.click();
+        }
+      }, 0);
+    }
+  }
+
+  ngAfterViewInit() {}
+
+  chkContAmmInsCreaOrd(): void {
+    const currentUrl = this.router.url;
+    if (
+      currentUrl.includes(
+        Routing.GESTIONE_CONT_AMMI_INS_ORDINANZA_CREA_ORDINANZA
+      )
+    ) {
+      this.isContAmmInsCreaOrd = true;
+    } else {
+      this.isContAmmInsCreaOrd = false;
+    }
   }
 
   callConfig() {
@@ -163,6 +316,9 @@ export class SharedAllegatoMetadatiInserimentoComponent
       .subscribe(
         (data) => {
           //
+          if(this.datiProvaPagamento && this.datiProvaPagamento.edit){
+            this.mostraMetadati();
+          }
         },
         (err) => {
           this.logger.error("Errore nel recupero dei config degli allegati");
@@ -179,6 +335,9 @@ export class SharedAllegatoMetadatiInserimentoComponent
     this.tipoAllegatoModel = this.tipoAllegatoInput;
     this.senzaAllegati = this.allegati;
     this.nuovoAllegatoMultiple = new SalvaAllegatoMultipleRequest();
+    //
+    this.configAllegatoSelezionato = null;
+    this.nomeAllegatoTmp = null;
   }
 
   changeCat() {
@@ -191,13 +350,24 @@ export class SharedAllegatoMetadatiInserimentoComponent
       current: this.current,
     });
   }
+
   mostraMetadati() {
     this.loadedConfig = false;
     this.validMetadata = false;
     this.disableAll = false;
+    this.showTable = false;
     this.initModel();
     let $idTipo: number = this.tipoAllegatoSelezionato.id;
     this.emitCat();
+
+    ///reset Stilo Research
+    this.resetRicercaStilo = false;
+    this.stiloResearch = false;
+    this.idStiloResearch = null;
+    //
+    //reset listaTrasgressori
+    this.listaTrasgressoriPayload = null;
+    //
 
     if ($idTipo == 7 || $idTipo == 22) {
       this.senzaAllegati = true;
@@ -209,7 +379,8 @@ export class SharedAllegatoMetadatiInserimentoComponent
       $idTipo != 10 &&
       this.mapConfigAllegati.has($idTipo) &&
       !($idTipo == 14 && this.pregresso) &&
-      !($idTipo == 22 && this.pregresso)
+      !($idTipo == 22 && this.pregresso) &&
+      !($idTipo == 46 && this.pregresso)
     ) {
       // tipo 14 disposizioni del giudice sul pregresso non mostrano metadati
       // tipo 22 ricevute pagamento ordinanza sul pregresso non mostrano metadati
@@ -246,7 +417,7 @@ export class SharedAllegatoMetadatiInserimentoComponent
                     );
                   }
                 );
-            } else if (el.fieldType.id == 7){
+            } else if (el.fieldType.id == 7) {
               this.subscribers.getSelect = this.allegatoSharedService
                 .getDecodificaSelectSoggettiAllegato(
                   this.riepilogoVerbale.verbale.id
@@ -265,7 +436,7 @@ export class SharedAllegatoMetadatiInserimentoComponent
                     );
                   }
                 );
-            }else {
+            } else {
               this.subscribers.getSelect = this.allegatoSharedService
                 .getDecodificaSelectSoggettiAllegatoCompleto(
                   this.riepilogoVerbale.verbale.id
@@ -277,6 +448,11 @@ export class SharedAllegatoMetadatiInserimentoComponent
                     this.logger.info(
                       "Caricata lista per il campo numero " + el.idModel
                     );
+                    //if prova del pagamento detail edit flow
+                    // set all the form values
+                    setTimeout(() => {
+                      this.setValueProvaDelPagamento();
+                    }, 0);
                   },
                   (err) => {
                     this.logger.error(
@@ -288,8 +464,10 @@ export class SharedAllegatoMetadatiInserimentoComponent
           }
         });
       });
-
       this.loadedConfig = true;
+      if(this.datiProvaPagamento && this.datiProvaPagamento.edit && this.loadedConfig){
+        this.disableSelectCategoria = true;
+      }
     }
     this._onValid();
   }
@@ -302,81 +480,148 @@ export class SharedAllegatoMetadatiInserimentoComponent
       idTipo: $idTipo,
       metaDataModel: this.nuovoAllegato.allegatoField,
     };
+
     this.onValid.emit(onValidObj);
   }
 
   confermaMetadati() {
     //bisogna mappare tmpModel in metaDataModel
+
     this.mapMetadati();
     //disabilito tutti i campi
     this.disableAll = true;
     //copio i metadati
+
+    let allegatiAppoggio: Array<AllegatiSecondariRequest> = [];
+    if (this.nuovoAllegato.allegati && this.nuovoAllegato.allegati.length > 0) {
+      allegatiAppoggio = [...this.nuovoAllegato.allegati];
+    }
     this.nuovoAllegato = new SalvaAllegatoRequest();
     this.nuovoAllegato.allegatoField = this.metaDataModel;
-    this.validMetadata = true;
+    if (
+      this.tipoAllegatoSelezionato.id != 43 &&
+      this.tipoAllegatoSelezionato.id != 7
+    ) {
+      this.validMetadata = true;
+    }
+
+    //Gestione Prova di pagamento ID 43
+    if (
+      this.tipoAllegatoSelezionato.id === 43 &&
+      this.listaTrasgressoriPayload &&
+      this.listaTrasgressoriPayload.length > 0
+    ) {
+      this.disableFieldTrasgressori = true;
+      this.nuovoAllegato.soggettiPagamentoVO = new Array<SoggettoPagamentoVO>();
+      this.listaTrasgressoriPayload.forEach((el, index) => {
+        this.nuovoAllegato.soggettiPagamentoVO.push(
+          JSON.parse(JSON.stringify(el))
+        );
+        delete this.nuovoAllegato.soggettiPagamentoVO[index]["_cognomeNome"];
+
+        this.checkPagamento();
+
+        if (this.validMetadata) {
+          this.confermaMetadatiClick = true;
+        }
+
+        if (this.senzaAllegatiForce || this.senzaAllegati) {
+          this.onNewFile.emit(this.nuovoAllegato);
+        }
+      });
+      // this.nuovoAllegato.soggettiPagamentoVO = this.listaTrasgressoriPayload
+    }
+
+    this.nuovoAllegato.allegati = allegatiAppoggio;
+    //
+
     this._onValid();
   }
+  onConfermaMetadatiClick43(): void {
+    //  this.confermaMetadatiClick = true;
+    this.confermaMetadati();
+  }
+
   checkPagamento() {
-   	var residuo = this.tmpModel[0].value.denominazione;
-  	
-  	console.log(residuo);
-  	console.log(residuo.substring(residuo.indexOf('Imp residuo ')+12,residuo.length));
-  	residuo = residuo.substring(residuo.indexOf('Imp residuo ')+12,residuo.length);
-  	
-  	if (residuo == "0.00") {
-      this.manageMessageTop(
-        "Attenzione! Il soggetto ha gia' pagato l'intero importo",
-        "DANGER",
-        false
-      );
-    } else{
-	  	const differenza =
-	      residuo - this.tmpModel[2].value;
-	      
-	    //const differenza =
-	      //this.riepilogoVerbale.verbale.importoResiduo - this.tmpModel[2].value;
-	    const isParziale =
-	      this.tmpModel[4].value == null ||
-	      this.tmpModel[4].value == "" ||
-	      this.tmpModel[4].value == "false"
-	        ? false
-	        : true;
-	    if (differenza < 0) {
-	      this.manageMessageTop(
-	        "Attenzione! Non inserire un importo superiore al residuo da pagare ("+residuo+")",
-	        "DANGER",
-	        false
-	      );
-	    } else if (differenza > 0 && !isParziale) {
-	      this.manageMessageTop(
-	        "Attenzione! Non è stato selezionato pagamento parziale, non inserire un importo inferiore al totale ("+residuo+")",
-	        "DANGER",
-	        false
-	      );
-	    } else if (differenza === 0 && isParziale) {
-	      this.manageMessageTop(
-	        'Attenzione, è stato selezionato "pagamento parziale" inserire un importo inferiore al totale ('+residuo+')',
-	        "DANGER",
-	        false
-	      );
-	    } else {
-	      this.confermaPagamento(isParziale);
-	    }
+    ///nuove implementazione
+    let check = true;
+
+
+    this.listaTrasgressoriPayload.forEach((el) => {
+      if (
+        el.pagamentoParziale &&
+        el.importoPagato &&
+        el.importoPagato >= el.importoResiduoVerbale
+      ) {
+        if (
+          this.soggettiSelect &&
+          this.soggettiSelect.length > 0 &&
+          this.datiProvaPagamento &&
+          this.datiProvaPagamento.edit
+        ) {
+          console.log("this.soggettiSelect", this.soggettiSelect);
+          this.validMetadata = true;
+        } else {
+          //gestione errore
+          this.manageMessageTop(
+            "Attenzione! Non inserire un importo superiore al residuo da pagare per il soggetto " +
+              el.codiceFiscale +
+              " ",
+            "DANGER",
+            false
+          );
+          //issue 90-91
+          this.validMetadata = false;
+          this.disableFieldTrasgressori = false;
+          return (check = false);
+        }
+      } else if (el.pagamentoParziale && !el.importoPagato) {
+        this.manageMessageTop(
+          "Attenzione, è stato selezionato pagamento parziale inserire un importo inferiore al totale per il soggetto " +
+            el.codiceFiscale +
+            " ",
+          "DANGER",
+          false
+        );
+        this.validMetadata = false;
+        this.disableFieldTrasgressori = false;
+        return (check = false);
+      } else if (
+        !el.pagamentoParziale &&
+        el.importoPagato != el.importoResiduoVerbale
+      ) {
+        if (this.datiProvaPagamento && this.datiProvaPagamento.edit) {
+          return (check = true);
+        }
+        //gestione errore
+        this.manageMessageTop(
+          "Attenzione! Non è stato selezionato pagamento parziale, non inserire un importo inferiore al totale per il soggetto " +
+            el.codiceFiscale +
+            "",
+          "DANGER",
+          false
+        );
+        this.validMetadata = false;
+        this.disableFieldTrasgressori = false;
+        return (check = false);
+      }
+    });
+    if (check) {
+      this.validMetadata = true;
     }
+    if (check && this.senzaAllegati) {
+      this.confermaPagamento(false);
+      this.validMetadata = true;
+    }
+
+    ////
   }
   confermaPagamento(isParziale: boolean) {
-    if (isParziale)
-      this.generaMessaggio(
-        "Si sta inserendo un pagamento parziale per il fascicolo con Numero Verbale " +
-          this.riepilogoVerbale.verbale.numero +
-          ". Il fascicolo potrà procedere con l'iter sanzionatorio. Per procedere con il salvataggio selezionare il tasto Conferma. Annulla per tornare indietro."
-      );
-    else
-      this.generaMessaggio(
-        "Si sta inserendo un pagamento completo per il fascicolo con Numero Verbale " +
-          this.riepilogoVerbale.verbale.numero +
-          ". Si ricorda che il fascicolo in stato CONCILIATO non potrà procedere con l'iter sanzionatorio. Per procedere con il salvataggio selezionare il tasto Conferma. Annulla per tornare indietro."
-      );
+    this.generaMessaggio(
+      "Si sta inserendo un pagamento per il fascicolo con Numero Verbale " +
+        this.riepilogoVerbale.verbale.numero +
+        ". Si ricorda che il fascicolo in stato CONCILIATO non potrà procedere con l'iter sanzionatorio. Per procedere con il salvataggio selezionare il tasto Conferma. Annulla per tornare indietro."
+    );
 
     this.buttonAnnullaText = "Indietro";
     this.buttonConfirmText = "Conferma";
@@ -418,9 +663,33 @@ export class SharedAllegatoMetadatiInserimentoComponent
     //copio i metadati
     this.nuovoAllegato = new SalvaAllegatoRequest();
     this.nuovoAllegato.allegatoField = this.metaDataModel;
-    this.validMetadata = true;
+    if (
+      this.tipoAllegatoSelezionato.id === 7 ||
+      this.tipoAllegatoSelezionato.id === 43
+    ) {
+      this.disableFieldTrasgressori = true;
+      this.nuovoAllegato.soggettiPagamentoVO = new Array<SoggettoPagamentoVO>();
+      this.listaTrasgressoriPayload.forEach((el, index) => {
+        this.nuovoAllegato.soggettiPagamentoVO.push(
+          JSON.parse(JSON.stringify(el))
+        );
+        delete this.nuovoAllegato.soggettiPagamentoVO[index]["_cognomeNome"];
+      });
+      // this.nuovoAllegato.soggettiPagamentoVO = this.listaTrasgressoriPayload
+    } else {
+      this.validMetadata = true;
+    }
+
     this._onValid();
     this.onNewFile.emit(this.nuovoAllegato);
+  }
+
+  get isBtnConfermaMetadatiDisabled(): boolean {
+    return this.metadatiAllegatoForm
+      ? !this.metadatiAllegatoForm.valid ||
+          this.disableAll ||
+          !this.isComboLoaded()
+      : true;
   }
 
   mapMetadati() {
@@ -556,15 +825,37 @@ export class SharedAllegatoMetadatiInserimentoComponent
   };
 
   isConfermaDisabled() {
-    return this.nomeAllegatoTmp == null;
+    //return this.nomeAllegatoTmp == null ;
+
+    let disabled = false;
+    if (this.nomeAllegatoTmp == null) {
+      disabled = true;
+    } else if (
+      this.nomeAllegatoTmp != null &&
+      (this.configAllegatoSelezionato === undefined ||
+        this.configAllegatoSelezionato === null)
+    ) {
+      disabled = false;
+    } else if (this.nomeAllegatoTmp != null && !this.disableAll) {
+      disabled = true;
+    }
+
+    return disabled;
+    //(this.nomeAllegatoTmp == null) || (this.nomeAllegatoTmp != null && !this.disableAll)
   }
 
   conferma() {
     if (this.flagAllegatoMaster || this.allegatiMultipli) {
       this.onNewFile.emit(this.nuovoAllegatoMultiple);
     } else {
+      //console.log('shared-allegato-metadati-inserimento this.nuovoAllegato = ',this.nuovoAllegato);
       this.onNewFile.emit(this.nuovoAllegato);
     }
+  }
+
+  salvaAllegatiAlMaster(allegati: AllegatiSecondariRequest[]) {
+    //console.log('salvaAllegatiAlMaster>>',allegati);
+    this.nuovoAllegato.allegati = allegati;
   }
 
   confermaAllegato(files: FileItem[]) {
@@ -739,7 +1030,8 @@ export class SharedAllegatoMetadatiInserimentoComponent
   isDisabledCaricaAllegato(): boolean {
     return (
       !this.tipoAllegatoSelezionato ||
-      (this.loadedConfig && !this.validMetadata)
+      (this.loadedConfig && !this.validMetadata) ||
+      (this.tipoAllegatoSelezionato.id === 43 && !this.confermaMetadatiClick)
     );
   }
 
@@ -770,7 +1062,10 @@ export class SharedAllegatoMetadatiInserimentoComponent
       if (t.id === Constants.FT_ELENCO) {
         return t ? t.id === Constants.FT_ELENCO : false;
       } else {
-        return t ? (t.id === Constants.FT_ELENCO_SOGG || t.id ===  Constants.FT_ELENCO_SOGG_COMPL) : false;
+        return t
+          ? t.id === Constants.FT_ELENCO_SOGG ||
+              t.id === Constants.FT_ELENCO_SOGG_COMPL
+          : false;
       }
     },
     isDate: (t: SelectVO): boolean => {
@@ -874,9 +1169,166 @@ export class SharedAllegatoMetadatiInserimentoComponent
     return res;
   }
 
+  getListaTrasgressori() {
+    this.confermaMetadati();
+
+    ////
+
+    let idAllegato = null;
+    if (this.datiProvaPagamento && this.datiProvaPagamento.edit) {
+      this.doOnce = false;
+      this.route.queryParams.subscribe((params) => {
+        idAllegato = params.idAllegato;
+      });
+    }
+    ////
+    let checkTrasgressoreError = false;
+    let id;
+    if (this.tipoAllegatoSelezionato.id === 7) {
+      id = this.nuovoAllegato.allegatoField.find(
+        (el) => el.idField === 21
+      ).numberValue;
+    } else if (this.tipoAllegatoSelezionato.id === 43) {
+      id = this.nuovoAllegato.allegatoField.find(
+        (el) => el.idField === 27
+      ).numberValue;
+    }
+    //   //issue 79
+
+    if (this.comboModel && this.comboModel.length > 0) {
+      this.comboModel.forEach((i) => {
+        //check if the array position is undefined
+        if (i && i.length > 0) {
+          //distiction between "trasgressore" and "obbligato in solido"
+          let el = i.find((el) => el.id === id);
+
+          if (el.denominazione.includes("TRASGRESSORE")) {
+            checkTrasgressoreError = true;
+          }
+        }
+      });
+    }
+    /////
+    this.isListaTrasgressoriLoading = true;
+    this.allegatoSharedService
+      .getListaTrasgressori(
+        this.riepilogoVerbale.verbale.id,
+        id,
+        false,
+        idAllegato
+      )
+      .subscribe((data) => {
+        this.listaTrasgressori = data;
+        let error;
+        if (this.datiProvaPagamento && this.datiProvaPagamento.edit) {
+          //if edit mode
+          //the value must be editable
+        } else {
+          if (this.listaTrasgressori.length === 0 && checkTrasgressoreError) {
+            //error n1
+
+            this.templateService.getMessage("SOGTRNORES").subscribe(
+              (msg) => {
+                error = msg.message;
+                this.manageMessageTop(error, "DANGER", false);
+              },
+              (err) => {
+                this.logger.error("Errore nel recupero del messaggio");
+              }
+            );
+          } else if (
+            this.listaTrasgressori.length === 0 &&
+            !checkTrasgressoreError
+          ) {
+            //error n2
+            this.templateService.getMessage("SOGNORES").subscribe(
+              (msg) => {
+                error = msg.message;
+
+                this.manageMessageTop(error, "DANGER", false);
+              },
+              (err) => {
+                this.logger.error("Errore nel recupero del messaggio");
+              }
+            );
+          }
+        }
+
+        this.disableAll = true;
+        this.showTable = true;
+        if(this.datiProvaPagamento && this.datiProvaPagamento.edit && this.allReadonly){
+          this.disableFieldTrasgressori = true;
+        }else{
+          this.disableFieldTrasgressori = false;
+        }
+
+
+
+        this.isListaTrasgressoriLoading = false;
+        // console.log(this.loadedConfig, !this.senzaAllegati, this.showTable, this.listaTrasgressori)
+
+        this.showSpinner.emit(false);
+      });
+  }
+
+  checkPagamentoParziale($event) {
+    this.listaTrasgressoriPayload = $event;
+    //console.log('var',this.listaTrasgressoriPayload)
+  }
+  ricercaStilo(id?: any) {
+    //INPUT
+    this.nomeAllegatoTmp = null;
+    this.stiloResearch = true;
+    this.idStiloResearch = 2;
+    this.resetRicercaStilo = true;
+  }
+
+  resetRicerca(id?: any) {
+    //INPUT
+    this.stiloResearch = false;
+    this.idStiloResearch = null;
+    this.resetRicercaStilo = false;
+    this.nomeAllegatoTmp = null;
+  }
+  /* checkObject(arr: SoggettoPagamentoVO[]){
+    arr.map((element)=>  delete element['_cognomeNome'])
+  }*/
+  backSoggettoPagamento() {
+    this.disableAll = false;
+
+    if (this.showTable && !this.datiProvaPagamento) {
+      this.showTable = false;
+    } else if (this.datiProvaPagamento && this.datiProvaPagamento.edit) {
+      this.showTable = true;
+      // this.disableFieldTrasgressori=true;
+      //this.fromBack= true;
+
+      //reset for this flow
+      this.listaTrasgressoriPayload = null;
+    }
+    // this.metaDataModel = []
+    this.confermaMetadatiClick = false;
+  }
+
+  stiloFileSelected(event) {
+    //OUTPUT
+    console.log(event);
+    this.stiloResearch = false;
+    this.nuovoAllegato = event;
+    this.nuovoAllegato.idTipoAllegato = this.tipoAllegatoSelezionato.id;
+    this.nomeAllegatoTmp =
+      typeof this.nuovoAllegato.filename === "string"
+        ? this.nuovoAllegato.filename
+        : this.nuovoAllegato.filename;
+
+    if (this.isCreaOrdinanza) {
+      this.onNewFile.emit(this.nuovoAllegato);
+    }
+  }
   ngAfterViewChecked() {
     let i: number;
     for (i = 0; i < this.tmpModel.length; i++) this.manageDatePicker(i);
+    //console.log(i)
   }
 
   ngOnDestroy(): void {

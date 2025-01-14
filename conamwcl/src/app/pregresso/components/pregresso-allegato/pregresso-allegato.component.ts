@@ -38,6 +38,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
   public subscribers: any = {};
 
   public tipoAllegatoModel: Array<TipoAllegatoVO>;
+  public tipoAllegatoModelNonProt: Array<TipoAllegatoVO>;
   public allegatoModel: RiepilogoAllegatoVO = new RiepilogoAllegatoVO();
 
   public typeMessageTop: string;
@@ -59,7 +60,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
   public configVerb: Config;
   public configRateizzazione: Config;
   public configGiurisd: Config;
-
+  public showEdit: boolean = true
 
   constructor(
     private router: Router,
@@ -105,7 +106,13 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
           "numDeterminazione"
         );
       }
+      this.subscribers.riepilogo = this.sharedVerbaleService
+      .riepilogoVerbale(this.idVerbale)
+      .subscribe((data) => {
+       // this.showEdit = data.verbale.stato.id!=3; //conciliato=3
 
+      }
+    )
       this.subscribers.statoVerbale = this.pregressoVerbaleService
         .getAzioniVerbale(this.idVerbale)
         .subscribe((data) => {
@@ -115,7 +122,7 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
 
           // set  config
           this.configVerb = this.configSharedService.getConfigDocumentiVerbale(
-            this.eliminaAllegatoFlag
+            this.eliminaAllegatoFlag,  (el: any) => true
           );
           this.configIstr = this.configSharedService.configDocumentiIstruttoria;
           this.configGiurisd = this.configSharedService.configDocumentiGiurisdizionale;
@@ -130,8 +137,11 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
         .subscribe(
           (data) => {
             this.allegatoModel = data;
+            this.showEdit =true; //conciliato=3
             this.allegatoModel.verbale.forEach((all) => {
+
               all.theUrl = new MyUrl(all.nome, null);
+              all.showEdit = this.showEdit && (all.tipo.id==43);
             });
             this.allegatoModel.istruttoria.forEach((all) => {
               all.theUrl = new MyUrl(all.nome, null);
@@ -150,9 +160,25 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
         );
 
       this.loadTipoAllegato();
+      this.loadTipoAllegatoNonProt();
     });
   }
-
+  goToDatiProvaPagamento(el){
+    console.log(el);
+    const currentUrl = this.router.url;
+    if (currentUrl.includes('pregresso/')) {
+      this.router.navigate([Routing.PREGRESSO_DETTAGLIO_PROVA_PAGAMENTO + this.idVerbale], {
+        queryParams: {idAllegato : el.id}
+      });
+    } else if (currentUrl.includes('verbale/')) {
+      this.router.navigate([Routing.DETTAGLIO_PROVA_PAGAMENTO + this.idVerbale], {
+        queryParams: {idAllegato : el.id}
+      });
+    }
+    /*this.router.navigate(['/route-to'], {
+        someData: { name: 'Some name', description: 'Some description' },
+    });*/
+  }
   timerShowMessageTop() {
     this.showMessageTop = true;
     let seconds: number = 20 ;
@@ -168,7 +194,31 @@ export class PregressoAllegatoComponent implements OnInit, OnDestroy {
     this.messageTop = message;
     this.timerShowMessageTop();
   }
-
+  //tipologie di allegato allegabili
+  loadTipoAllegatoNonProt() {
+    this.loadedCategoriaAllegato = false;
+    let request = new TipologiaAllegabiliRequest();
+    request.id = this.idVerbale;
+    request.tipoDocumento = 'DOCNOPROT';
+    console.log('request getTipologiaAllegatiAllegabiliVerbale', request);
+    this.subscribers.tipoAllegato = this.pregressoVerbaleService
+      .getTipologiaAllegatiAllegabiliVerbale(request)
+      .subscribe(
+        (data) => {
+          this.tipoAllegatoModelNonProt = data.sort((a, b) => a.id - b.id);
+          this.loadedCategoriaAllegato = true;
+          // set rif x  ricerca documento protocollato
+          this.fascicoloService.tipoAllegatoModel = this.tipoAllegatoModelNonProt;
+        },
+        (err) => {
+          if (err instanceof ExceptionVO) {
+            this.manageMessage(err.type, err.message);
+          }
+          this.logger.info("Errore nel recupero dei tipi di allegato");
+          this.loadedCategoriaAllegato = true;
+        }
+      );
+  }
 
   //tipologie di allegato allegabili
   loadTipoAllegato() {

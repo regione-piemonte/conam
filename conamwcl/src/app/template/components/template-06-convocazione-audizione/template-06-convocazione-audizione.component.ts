@@ -10,7 +10,6 @@ import { DatiTemplateVO } from "../../../commons/vo/template/dati-template-vo";
 import { NgForm } from "@angular/forms";
 import { SharedTemplateIntestazioneComponent } from "../../../shared-template/components/shared-template-intestazione/shared-template-intestazione.component";
 import { SoggettoVO } from "../../../commons/vo/verbale/soggetto-vo";
-
 declare var $: any;
 
 @Component({
@@ -37,6 +36,9 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
   public isStampa: boolean;
   @Input()  data: DatiTemplateVO;
 
+  //public destinatariSoggetti: { soggRiga1: string, soggRiga2: string, soggRiga3: string, soggRiga4: string }[] = [];
+  //public destinatariAggiuntivi: string = '';
+
   denominazioneList: Array<String> = new Array<String>();
   @Output()  formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
   formIntestazioneValid: boolean;
@@ -46,7 +48,7 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private logger: LoggerService,
+    private logger: LoggerService
   ) {}
 
   ngOnInit(): void {
@@ -75,6 +77,50 @@ export class Template06ConvocazioneAudizioneComponent implements OnInit {
     this.datiCompilati.sedeEnteRiga4 =  this.infoEnteArray[3] ? this.infoEnteArray[3] : ' '
     this.datiCompilati.sedeEnteRiga5 =  this.infoEnteArray[4] ? this.infoEnteArray[4] : ' '
     this.data.mailSettoreTributi = null;
+
+    this.datiCompilati.destinatariAggiuntivi = "";
+    this.datiCompilati.destinatariSoggetti = [];
+
+    this.popolaDestinatariSoggetti(this.data)
+  }
+
+  popolaDestinatariSoggetti(data: DatiTemplateVO) {
+    if (data!=null && data.listaSoggetti!=null){
+
+      let propDenominazione: string = "";
+      let propIndirizzo: string = "";
+      let propCapCittaProvincia: string = "";
+      let propTestoLibero: string = "";
+      for (let sogg of data.listaSoggetti) {
+        if (sogg){
+          if (sogg.personaFisica){
+            propDenominazione = sogg.nome + " " + sogg.cognome;
+          }else{
+            propDenominazione = sogg.ragioneSociale;
+          }
+          if (sogg.indirizzoResidenza != null){
+            propIndirizzo = sogg.indirizzoResidenza;
+            if (sogg.civicoResidenza!=null){
+              propIndirizzo += ", n° " + sogg.civicoResidenza;
+            }
+          }
+          if(sogg.comuneResidenza !=null && sogg.provinciaResidenza !=null){
+            propCapCittaProvincia = sogg.cap + " " + sogg.comuneResidenza.denominazione + " (" + sogg.provinciaResidenza.sigla + ")";
+          }
+          //this.destinatariSoggetti.push({
+          this.datiCompilati.destinatariSoggetti.push({
+            soggRiga1: propDenominazione,
+            soggRiga2: propIndirizzo,
+            soggRiga3: propCapCittaProvincia,
+            soggRiga4: propTestoLibero
+          });
+          propDenominazione = "";
+          propIndirizzo = "";
+          propCapCittaProvincia = "";
+          propTestoLibero = "";
+        }
+      }
+    }
   }
 
   setAnteprima(flag: boolean) {

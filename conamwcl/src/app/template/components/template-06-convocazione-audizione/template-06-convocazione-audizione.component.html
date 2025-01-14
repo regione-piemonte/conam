@@ -3,10 +3,41 @@
         (formValid)="setFormIntestazioneValid($event)">
     </shared-template-intestazione>
     <form #formTemplate="ngForm">
-        <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
-            <shared-template-soggetti [listaSoggetti]="data.listaSoggetti"
+        <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right" *ngIf="data!=null && data.listaSoggetti!=null">
+            <shared-template-soggetti [listaSoggetti]="data.listaSoggetti" [hideListaSoggetti]="true"
                 *ngIf="data!=null && data.listaSoggetti!=null">
             </shared-template-soggetti>
+
+            <ng-container *ngIf="!isAnteprima && !isStampa">
+                <div class="input-soggetti-container padding-top-15" *ngFor="let sogg of datiCompilati.destinatariSoggetti;let i = index">
+                    <input required type="text" [(ngModel)]="sogg.soggRiga1" [name]="'soggRiga1' + i"  class="form-control right-aligned-input" placeholder="denominazione">
+                    <input required type="text" [(ngModel)]="sogg.soggRiga2" [name]="'soggRiga2' + i"  class="form-control right-aligned-input" placeholder="indirizzo">
+                    <input required type="text" [(ngModel)]="sogg.soggRiga3" [name]="'soggRiga3' + i"  class="form-control right-aligned-input" placeholder="cap città provincia">
+                    <input type="text" [(ngModel)]="sogg.soggRiga4" [name]="'soggRiga4' + i"  class="form-control right-aligned-input" placeholder="testo libero">
+                </div>
+                <div class="textarea-soggetti-container padding-top-15">
+                    <textarea rows="4" [(ngModel)]="datiCompilati.destinatariAggiuntivi" [name]="'destinatariAggiuntivi'" class="form-control right-aligned-textarea" placeholder="Altri destinatari"></textarea>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="isAnteprima || isStampa">
+                <div class="input-soggetti-container padding-top-15" *ngFor="let sogg of datiCompilati.destinatariSoggetti;let i = index">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        {{sogg.soggRiga1}}
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        {{sogg.soggRiga2}}
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        {{sogg.soggRiga3}}
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        {{sogg.soggRiga4}}
+                    </div>
+                </div>
+                <div class="textarea-soggetti-container padding-top-15" *ngIf="datiCompilati.destinatariAggiuntivi!=null">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" [innerHTML]="datiCompilati.destinatariAggiuntivi | newline2"></div>
+                </div>
+            </ng-container>
         </div>
 
         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -70,8 +101,8 @@
 
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top:3%">
                 <div class="form-inline">
-                    Si rammenta che l’<b>assenza all’audizione</b>, le <b>affermazioni</b> eventualmente solo <b>confermative</b> di 
-                    quanto già indicato negli scritti difensivi, saranno considerate ai fini della valutazione delle 
+                    Si rammenta che l’<b>assenza all’audizione</b>, le <b>affermazioni</b> eventualmente solo <b>confermative</b> di
+                    quanto già indicato negli scritti difensivi, saranno considerate ai fini della valutazione delle
                     <b>responsabilità</b> rispetto all’illecito contestato.
                 </div>
             </div>

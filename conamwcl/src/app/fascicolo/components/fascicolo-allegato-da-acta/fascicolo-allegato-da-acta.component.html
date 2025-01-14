@@ -73,7 +73,9 @@
                                     [riepilogoVerbale]="riepilogoVerbale"
                                     [tipoAllegatoInput]="tipoAllegatoModel"  
                                     (onChangeCategoriaDocumento)="onChangeCategoriaDocumento($event)"
-                                    (onValid)="onValidAllegatoMetadati($event)">
+                                    (onValid)="onValidAllegatoMetadati($event)"
+                                    (onNewFile)="onValidAllegatoMetadati($event)"
+                                    >
                                     </shared-allegato-metadati-inserimento>
                                     <pregresso-ordinanza-ins-crea-ordinanza *ngIf="showCompMeta==11 || showCompMeta==12 " 
                                     [idTipoAllegatoSelezionato]="showCompMeta" 
@@ -101,8 +103,9 @@
 
                                     </pregresso-disposizione-giudice-ins>
 
-                                    <pregresso-ricevuta-pagamento-ordinanza-ins *ngIf="showCompMeta==22" 
+                                    <pregresso-ricevuta-pagamento-ordinanza-ins *ngIf="showCompMeta==22 || showCompMeta==46" 
                                     [idOrdinanza]="idOrdinanza" 
+                                    [idTipo]="showCompMeta"
                                     [tipoAllegatoInput]="tipoAllegatoModel"
                                     [numDeterminazione]="numDeterminazione"
                                     (onChangeData)="onChangeData($event)">
@@ -132,7 +135,7 @@
                             <button type="button" class="btn-conam button-blue" (click)="back()">
                                 <i class="glyphicon glyphicon-arrow-left btn-glyphicon img-circle text-blue-conam"></i>
                                 Indietro</button>
-                            <button type="button" class="btn-conam button-green" (click)="save()" [disabled]="saveDisabled">
+                            <button type="button" class="btn-conam button-green" (click)="save()" [disabled]="checkDisabled()">
                                 <i class="glyphicon glyphicon-floppy-saved btn-glyphicon img-circle text-blue-conam"></i>
                                 Salva</button>
                         </div>

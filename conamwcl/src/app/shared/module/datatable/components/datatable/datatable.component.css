@@ -1,3 +1,8 @@
+.table-container{
+  width: 100%;
+  overflow: auto;
+}
+
 table {
   border-collapse: collapse;
   background-color:#f9f9f9;
@@ -152,8 +157,18 @@ a:hover {
   padding-bottom: 3px;
 }
 
-.button-text { 
-  background:none; 
-  border:none; 
-  color: #337ab7; 
+.button-text {
+  background:none;
+  border:none;
+  color: #337ab7;
+}
+.empty-checked{
+    padding: .625em;
+    text-align: center;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+.empty-checked label{
+  font-weight: normal;
+  margin-bottom: 0;
 }

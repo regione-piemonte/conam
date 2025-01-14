@@ -19,6 +19,8 @@ export class SharedSpinnerComponent implements OnInit {
 
     ie9: Boolean = false;
 
+    @Input() absolute: boolean = false;
+
     constructor(private logger: LoggerService) {
         this.size = 150;
         this.left = "auto";

@@ -18,6 +18,8 @@ import { NotesListComponent } from './component/shared-verbale-riepilogo/notes/n
 //import { VerbaleSoggettoRicercaFisicaComponent } from "./component/shared-verbale-riepilogo/verbale-soggetto-ricerca-fisica/verbale-soggetto-ricerca-fisica.component";
 //import { VerbaleSoggettoRicercaGiuridicaComponent } from "./component/shared-verbale-riepilogo/verbale-soggetto-ricerca-giuridica/verbale-soggetto-ricerca-giuridica.component";
 import { SharedCommonsModule } from '../shared-commons/shared-commons.module';
+import { ListaTrasgressoriComponent } from '../shared/component/shared-allegato-metadati-inserimento/lista-trasgressori/lista-trasgressori.component';
+import { DettaglioProvaPagamentoComponent } from './component/dettaglio-prova-pagamento/dettaglio-prova-pagamento.component';
 @NgModule({
     imports: [CommonModule, RouterModule, FormsModule, SharedModule, SharedCommonsModule],
     exports: [
@@ -30,6 +32,8 @@ import { SharedCommonsModule } from '../shared-commons/shared-commons.module';
         SharedVerbaleScrittoDifensivoSoggettoComponent,
         NoteDetailComponent,
         NotesListComponent,
+        DettaglioProvaPagamentoComponent
+
     ],
     declarations: [
         SharedVerbaleRicercaComponent,
@@ -40,10 +44,12 @@ import { SharedCommonsModule } from '../shared-commons/shared-commons.module';
         SharedVerbaleAllegatoTabellaComponent,
         SharedVerbaleScrittoDifensivoDatiVerbaleComponent,
         SharedVerbaleScrittoDifensivoSoggettoComponent,
+       
 //        VerbaleSoggettoRicercaGiuridicaComponent,
 //        VerbaleSoggettoRicercaFisicaComponent,
         NoteDetailComponent,
         NotesListComponent,
+        DettaglioProvaPagamentoComponent
     ],
     providers: [SharedVerbaleService, SharedVerbaleConfigService],
 })

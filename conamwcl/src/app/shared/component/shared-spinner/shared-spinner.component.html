@@ -1,4 +1,4 @@
-<div class="container-fluid  height-75 table">
+<div class="container-fluid  height-75 table" [ngClass]="{'absolute-spinner': absolute}">
     <div class="row vcenter">
         <div *ngIf="!ie9" id="loader" [style.width.px]="size" [style.height.px]="size" [style.margin-left]="left"
             [style.margin-right]="right"></div>

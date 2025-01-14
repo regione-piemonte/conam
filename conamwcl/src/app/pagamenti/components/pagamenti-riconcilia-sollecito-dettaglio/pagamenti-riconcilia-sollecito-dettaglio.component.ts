@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from "@angular/core";
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from "@angular/core";
 import { LoggerService } from "../../../core/services/logger/logger.service";
 import { Router } from "@angular/router";
 import { Routing } from "../../../commons/routing";
@@ -6,13 +6,14 @@ import { TableSoggettiOrdinanza } from "../../../commons/table/table-soggetti-or
 import { Config } from "../../../shared/module/datatable/classes/config";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { SharedOrdinanzaDettaglio } from "../../../shared-ordinanza/component/shared-ordinanza-dettaglio/shared-ordinanza-dettaglio.component";
-import { SollecitoVO } from "../../../commons/vo/riscossione/sollecito-vo";
+import {  SollecitoRequestVO, SollecitoVO } from "../../../commons/vo/riscossione/sollecito-vo";
 import { RiscossioneSollecitoDettaglioComponent } from "../../../riscossione/components/riscossione-sollecito-dettaglio/riscossione-sollecito-dettaglio.component";
 import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { PagamentiUtilService } from "../../services/pagamenti-util.serivice";
 import { SharedRiscossioneService } from "../../../shared-riscossione/services/shared-riscossione.service";
 import { PagamentiService } from "../../services/pagamenti.service";
 import { NumberUtilsSharedService } from "../../../shared/service/number-utils-shared.service";
+import { SalvaAllegatoRequest } from "../../../commons/request/salva-allegato-request";
 
 declare var $: any;
 
@@ -44,6 +45,12 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
 
   public isRiconcilia: boolean = false;
 
+
+  public nuovoAllegato: SalvaAllegatoRequest;
+  public uploader: ElementRef;
+  public senzaAllegati: boolean = true;
+
+
   //Messaggio top
   private intervalTop: number = 0;
   public typeMessageTop: string;
@@ -64,6 +71,7 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
     this.logger.init(RiscossioneSollecitoDettaglioComponent.name);
     this.loaded = false;
     this.soggettoSollecito = [];
+    
     this.soggettoSollecito[0] = this.pagamentiUtilService.soggettoSollecito;
     if (!this.soggettoSollecito[0]) {
       this.router.navigateByUrl(Routing.PAGAMENTI_RICONCILIA_SOLLECITO_RICERCA);
@@ -130,8 +138,14 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
 
   confermaRiconciliazione() {
     this.loaded = false;
+    let body = new SollecitoRequestVO();
+body.sollecitoVO= this.sollecito;
+    if (this.nuovoAllegato){
+      body.file = this.nuovoAllegato.file;
+      body.filename = this.nuovoAllegato.filename;
+    }
     this.subscribers.riconcilia = this.pagamentiService
-      .riconciliaSollecito(this.sollecito)
+      .riconciliaSollecito(body)
       .subscribe(
         (data) => {
           this.soggettoSollecito[0] = TableSoggettiOrdinanza.map(data.soggetto);
@@ -210,7 +224,16 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
       ],
     };
   }
+  addFile() {
+    this.logger.info("=> Add file");
+    this.uploader.nativeElement.click();
+    this.senzaAllegati = false;
+  }
 
+  salvaAllegato(nuovoAllegato: SalvaAllegatoRequest){
+    console.log(nuovoAllegato);
+    this.nuovoAllegato = nuovoAllegato;
+  }
   scrollTopEnable: boolean;
   manageDatePicker(event: any, i: number) {
     var str: string = "#datetimepicker" + i.toString();
@@ -230,6 +253,7 @@ export class PagamentiRiconciliaSollecitoDettaglioComponent
   ngOnDestroy(): void {
     this.logger.destroy(PagamentiRiconciliaSollecitoDettaglioComponent.name);
   }
+
 
   onInfo(el: any | Array<any>) {
     if (el instanceof Array)

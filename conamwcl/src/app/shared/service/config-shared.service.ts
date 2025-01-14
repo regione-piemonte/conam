@@ -23,29 +23,80 @@ export class ConfigSharedService implements OnDestroy {
     },
     columns: [
       {
-        columnName: "numero",
-        displayName: "Numero Verbale",
-      },
-      {
-        columnName: "dataOraAccertamento",
-        displayName: "Data e ora di accertamento",
-      },
-      {
         columnName: "numeroProtocollo",
         displayName: "Numero protocollo",
+        checked: true,
+      },
+      {
+        columnName: "numero",
+        displayName: "Numero Verbale",
+        checked: true,
+      },
+      {
+        columnName: "annoAccertamento",
+        displayName: "Anno accertamento",
+        checked: false,
+      },
+      {
+        columnName: "enteRiferimentiNormativi",
+        displayName: "Ente - riferimenti normativi",
+        checked: false,
+      },
+      {
+        columnName: "ambiti",
+        displayName: "Ambito",
+        checked: true,
+      },
+      {
+        columnName: "leggeViolata",
+        displayName: "Legge violata",
+        checked: false,
       },
       {
         columnName: "enteAccertatore.denominazione",
         displayName: "Ente accertatore",
+        checked: true,
+      },
+      {
+        columnName: "comuneEnteAccertatore",
+        displayName: "Comune ente accertatore",
       },
       {
         columnName: "stato.denominazione",
         displayName: "Stato del fascicolo",
+        checked: true,
+      },
+      {
+        columnName: "assegnatario.denominazione",
+        displayName: "Funzionario istruttore assegnatario",
+        checked: false,
+      },
+      {
+        columnName: "dataOraAccertamento",
+        displayName: "Data accertamento",
+        checked: false,
+      },
+      {
+        columnName: "dataProcesso",
+        displayName: "Data processo verbale",
+        checked: false,
       },
 
-      {
+      /* {
         columnName: "user",
         displayName: "Utente creatore",
+        checked: false
+      },*/
+
+      {
+        columnName: "trasgressori",
+        displayName: "Soggetto trasgressore",
+        checked: false,
+      },
+      {
+        columnName: "obbligati",
+        displayName: "Soggetto obbligato in solido",
+        checked: false,
       },
     ],
   };
@@ -89,6 +140,14 @@ export class ConfigSharedService implements OnDestroy {
         columnName: "dataOrdinanza",
         displayName: "Data e ora caricamento",
       },
+      {
+        columnName: "trasgressori",
+        displayName: "Soggetto trasgressore",
+      },
+      {
+        columnName: "obbligati",
+        displayName: "Soggetto obbligato in solido",
+      },
     ],
   };
   public configRicercaScrittoDifensivo: Config = {
@@ -129,8 +188,16 @@ export class ConfigSharedService implements OnDestroy {
     ],
   };
 
-  getConfigDocumentiVerbale(flag: boolean): Config {
+  getConfigDocumentiVerbale(
+    flag: boolean,
+    hasInfo?: (el: any) => boolean
+  ): Config {
+    //console.log("gere");
     this.configDocumentiVerbale.delete.enable = flag;
+    //task_97
+    this.configDocumentiVerbale.info.hasInfo = hasInfo;
+
+    console.log(this.configDocumentiVerbale.info.hasInfo);
     return this.configDocumentiVerbale;
   }
 
@@ -146,6 +213,12 @@ export class ConfigSharedService implements OnDestroy {
     },
     delete: {
       enable: false,
+    },
+    info: {
+      enable: true,
+      hasInfo: (el: any) => {
+        return true;
+      },
     },
     columns: [
       {
@@ -579,18 +652,18 @@ export class ConfigSharedService implements OnDestroy {
       enable: false,
     },
     info: {
-        enable: true,
-        hasInfo: (el: any) => {
-            return true;
-        }
-    },  
+      enable: true,
+      hasInfo: (el: any) => {
+        return true;
+      },
+    },
     delete: {
       enable: true,
     },
     buttonSelection: {
-        label: "Dettaglio",
-        enable: true,
-      },
+      label: "Dettaglio",
+      enable: true,
+    },
     columns: [
       {
         columnName: "ambito.denominazione",

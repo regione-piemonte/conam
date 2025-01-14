@@ -31,6 +31,8 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
     public statiOrdinanzaModel: Array<StatoOrdinanzaVO>;
     public loadedStatiOrdinanza: boolean;
 
+    public max: boolean = false;
+
     constructor(
         private configSharedService: ConfigSharedService,
         private router: Router,
@@ -66,14 +68,34 @@ export class FaseGiurisdizionaleCancelleriaRicercaOrdinanzaComponent implements 
         this.loaded = false;
         ricercaOrdinanzaRequest.ordinanzaProtocollata = true;
         this.sharedOrdinanzaService.ricercaOrdinanza(ricercaOrdinanzaRequest).subscribe(
+            /*
             data => {
-                this.resetMessageTop2();
+
                 if (data != null)
                     this.ordinanze = data;
                 this.showTable = true;
                 this.loaded = true;
                 this.scrollEnable = true;
-            }, err => {
+            },*/
+            (data) => {
+                this.resetMessageTop2();
+                this.max = data.length === 1 ? data[0].superatoIlMassimo : false;
+
+                if (this.max) {
+
+                  this.manageMessageTop2(
+                    "Il sistema può mostrare solo 100 risultati per volta. Ridurre l'intervallo di ricerca",
+                    "WARNING"
+                  );
+                  this.ordinanze = [];
+                  this.loaded = true;
+                } else if (data) {
+
+                  this.ordinanze = data;
+                  this.showTable = this.loaded = this.scrollEnable = true;
+                }
+            },
+            err => {
                 if (err instanceof ExceptionVO) {
                     this.loaded = true;
                     this.manageMessage(err);

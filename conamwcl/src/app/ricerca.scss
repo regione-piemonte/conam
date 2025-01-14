@@ -3,7 +3,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   .title {
     font-size: 54px;
     font-weight: 300;
@@ -12,28 +12,28 @@
   .title small {
     font-size: 16px;
   }
-  
+
   .link {
     display: block;
     color: rgba(0, 0, 0, 0.54);
     margin-top: 54px;
   }
-  
+
   .checkbox-input {
     display: none;
   }
-  
+
   .checkbox-label, .checkbox-text, .checkbox-text--description {
     -webkit-transition: all 0.4s ease;
     transition: all 0.4s ease;
   }
-  
+
   .checkbox-label {
     display: inline-block;
     vertical-align: top;
     position: relative;
     width: 100%;
-    height: 650px;
+    height: 750px;
     padding: 30px 10px;
     cursor: pointer;
     font-size: 14px;
@@ -62,7 +62,7 @@
     -webkit-transition: all 0.4s ease;
     transition: all 0.4s ease;
   }
-  
+
   .checkbox-text--title {
     font-weight: 900;
     text-align: center;
@@ -73,7 +73,7 @@
     border-top: 1px solid #cccccc;
     text-align: center;
     font-weight: 900;
-    
+
   }
   .checkbox-text--description .un {
     display: inline-block;
@@ -81,7 +81,7 @@
    .disattiva-click{
     pointer-events: none;
    }
-  
+
   .checkbox-input:checked + .checkbox-label {
     border-color: #2196F3;
     box-shadow: inset 0 -12px 0 0 #2196F3;
@@ -101,7 +101,7 @@
   .checkbox-input:checked + .checkbox-label .checkbox-text--description .un {
     display: none;
   }
-  
+
   @media screen and (min-width: 540px) {
     .checkbox-label {
       width: 450px;

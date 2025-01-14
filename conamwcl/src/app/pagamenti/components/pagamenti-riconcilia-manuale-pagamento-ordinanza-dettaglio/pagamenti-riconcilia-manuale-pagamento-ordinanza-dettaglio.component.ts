@@ -144,7 +144,7 @@ export class pagamentiRiconciliaManualePagamentoOrdinanzaDettaglioComponent
         this.acconto = new AccontoVO();
         this.manageMessage({
           type: TypeAlert.SUCCESS,
-          message: "Acconto salveto con successo",
+          message: "Acconto salvato con successo",
         });
       },
       (err) => {

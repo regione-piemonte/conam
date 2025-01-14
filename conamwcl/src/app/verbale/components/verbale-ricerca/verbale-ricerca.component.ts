@@ -64,6 +64,15 @@ export class VerbaleRicercaComponent implements OnInit, OnDestroy {
     );
   }
 
+downloadList(list:any){
+  this.loaded=false
+  this.sharedVerbaleService.dowloadReport(this.request, list)
+  .subscribe((response) => {
+    this.sharedVerbaleService.saveData(response);
+    this.loaded = true;
+  });
+
+}
   onDettaglio(el: any | Array<any>) {
     this.verbaleSel = el;
     if (el instanceof Array){

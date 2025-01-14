@@ -307,9 +307,11 @@ export class SharedCommonsSoggettoRicercaFisicaComponent
   }
 
   emitRicerca() {
+    console.log ("emit", this.soggetto);   
+    console.log ("emit2", this.soggetto);
+    this.ricerca.emit(this.soggetto);
     this.cittadinanzaEstera(true);
     this.cittadinanzaEstera(false);
-    this.ricerca.emit(this.soggetto);
   }
 
   emitPulisci() {

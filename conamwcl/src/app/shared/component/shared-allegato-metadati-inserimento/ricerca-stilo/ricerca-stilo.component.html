@@ -1,0 +1,178 @@
+<div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+  <h4 class="border-title">
+    <strong>Recupera documento da Stilo</strong>
+  </h4>
+</div>
+<form *ngIf="!allegatoM" #metadatiAllegato="ngForm">
+  <div *ngIf="loadedConfig">
+    <ng-container *ngFor="let cc of configAllegatoSelezionato; let j = index">
+      <div
+        class="col-xs-12 col-sm-12 col-mFaggiungid-12 col-lg-12 allineamento-top"
+      >
+        <!-- <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2"></div> -->
+        <ng-container *ngFor="let r of cc; let i = index">
+          <div class="form-group col-md-6">
+            <label for="{{ r.label }}" [ngClass]="{ 'control-label': true }">{{
+              r.label
+            }}</label>
+            <ng-container *ngIf="!typeAction.isCombo(r.fieldType)">
+              <div
+                [ngClass]="{
+                  'input-group':
+                    typeAction.isDate(r.fieldType) ||
+                    typeAction.isDataOra(r.fieldType),
+                  date:
+                    typeAction.isDate(r.fieldType) ||
+                    typeAction.isDataOra(r.fieldType)
+                }"
+                id="datetimepicker_{{ current }}_{{ r.idModel }}"
+              >
+                {{ r.nomeCampo }}
+                <input
+                  [(ngModel)]="tmpModel[r.idModel].value"
+                  type="{{ typeAction.getInputType(r.fieldType) }}"
+                  name="{{ r.label }}"
+                  id="{{ r.label }}"
+                  [ngClass]="{
+                    'form-control': !typeAction.isCheckbox(r.fieldType),
+                    'date-picker':
+                      typeAction.isDate(r.fieldType) ||
+                      typeAction.isDataOra(r.fieldType)
+                  }"
+                  [maxlength]="r.maxLength"
+                  min="1"
+                  step="r.scale"
+                  [required]="r.required"
+                  (change)="check(r.idModel, r.fieldType)"
+                  (blur)="onBlur($event, r.idModel, r.fieldType)"
+                  [disabled]="disableAll"
+                  (keydown)="isKeyPressed($event.keyCode, r.fieldType, r.label)"
+                  decimalPlaces="r.fieldType.id"
+                />
+                <!--
+                              [pattern]="dynamicForm.getPattern(r.fieldType)"
+                          -->
+                <span
+                  *ngIf="
+                    typeAction.isDate(r.fieldType) ||
+                    typeAction.isDataOra(r.fieldType)
+                  "
+                  class="input-group-addon"
+                >
+                  <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="typeAction.isCombo(r.fieldType)">
+              <shared-spinner-form
+                [diameter]="30"
+                *ngIf="!comboLoaded[r.idModel]"
+              ></shared-spinner-form>
+              <ng-container *ngIf="comboLoaded[r.idModel]">
+                <select
+                  class="form-control"
+                  name="{{ r.label }}"
+                  [(ngModel)]="tmpModel[r.idModel].value"
+                  [required]="r.required"
+                  [compareWith]="byId"
+                  [disabled]="disableAll"
+                >
+                  <option
+                    *ngFor="let elem of comboModel[r.idModel]"
+                    [ngValue]="elem"
+                  >
+                    {{ elem.denominazione }}
+                  </option>
+                </select>
+              </ng-container>
+            </ng-container>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
+      <!-- <button
+      type="button"
+      class="btn-conam button-green"
+      (click)="confermaMetadati()"
+      [disabled]="
+        !metadatiAllegato.form.valid || disableAll || !isComboLoaded()
+      "
+      *ngIf="loadedConfig && !senzaAllegati"
+    >
+      <i
+        class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"
+      ></i>
+      Conferma Dati
+    </button> -->
+      <button
+        type="submit"
+        class="btn-conam button-yellow"
+        (click)="confermaMetadati()"
+        [disabled]="
+          !metadatiAllegato.form.valid || disableAll || !isComboLoaded()
+        "
+        *ngIf="loadedConfig"
+      >
+        <i
+          class="glyphicon glyphicon-search btn-glyphicon img-circle text-yellow-conam"
+        ></i>
+        Ricerca Documento
+      </button>
+    </div>
+  </div>
+</form>
+
+<!-------------------------TABLE-->
+<div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+  <shared-spinner *ngIf="!loaded"></shared-spinner>
+  <div id="scrollBottom" *ngIf="showTable">
+    <datatable
+      [data]="searchedFiles"
+      [config]="configStiloFiles"
+      (selected)="onSelected($event)"
+      *ngIf="showTable"
+    (download)="getAllegato($event)">
+    </datatable>
+    <!-- div *ngIf="searchedFiles && searchedFiles.length === 0">Nessun file trovato</div-->
+  </div>
+</div>
+
+<shared-dialog
+  *ngIf="allegatoM"
+  [titolo]="'Attenzione'"
+  [subMessages]="subMessages"
+  [testo]="messageDialog"
+  [buttonConfirmText]="buttonConfirmText"
+  [buttonAnnullaText]="buttonAnnullaText"
+></shared-dialog>
+<shared-dialog
+  [titolo]="'Attenzione'"
+  [subMessages]="subMessages"
+  [testo]="messageDialog"
+  [buttonConfirmText]="buttonConfirmText"
+  [buttonAnnullaText]="buttonAnnullaText"
+></shared-dialog>
+<shared-alert
+  [message]="messageTop"
+  [type]="typeMessageTop"
+  *ngIf="showMessageTop"
+></shared-alert>
+<!------------------->
+<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-right">
+  <button type="button" (click)="onSave()" [disabled]="documentSelected === null" class="btn-conam button-green">
+    <i
+      class="glyphicon glyphicon-ok btn-glyphicon img-circle text-green-conam"
+    ></i>
+    Salva
+  </button>
+  <button type="button" (click)="onReset()" class="btn-conam button-light-blue">
+    <i
+      class="glyphicon glyphicon-arrow-left btn-glyphicon img-circle text-light-blue-conam"
+    ></i>
+    Annulla
+  </button>
+</div>
+<!------->

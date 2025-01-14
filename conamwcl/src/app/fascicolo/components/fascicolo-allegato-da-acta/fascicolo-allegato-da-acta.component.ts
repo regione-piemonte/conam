@@ -48,6 +48,7 @@ import { TableSoggettiVerbale } from "../../../commons/table/table-soggetti-verb
 import { SalvaConvocazioneAudizioneRequest } from "../../../commons/request/pregresso/salva-convocazione-audizione-request";
 import { SalvaVerbaleAudizioneRequest } from "../../../commons/request/pregresso/salva-verbale-audizione-request";
 import { RiepilogoVerbaleVO } from "../../../commons/vo/verbale/riepilogo-verbale-vo";
+import { SoggettoPagamentoVO } from "../../../commons/vo/verbale/soggetto-pagamento-vo";
 
 type saveRequestFascicoloAllegatoDaActaComponent =
   | SalvaAllegatoProtocollatoOrdinanzaSoggettoRequest
@@ -67,6 +68,7 @@ const idAllegatiSuper: number[] = [
   20, //Sollecito id 20
   14, //Disposizione del giudice id 14
   22, //Ricevuta-pagamento-ordinanza id 22
+  46, //Ricevuta-pagamento-ordinanza id 46
   19, //Lettera accompagnatoria ordinanza 19
   7, //Ricevuta Pagamento 7
 ];
@@ -126,8 +128,11 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   dataRicercaProtocolloSelected: DocumentoProtocollatoVO;
   numberDocument: NumberDocument;
   numberDocumentSuper: NumberDocument;
-  validsAllegatoMetadata: any[] = [];
+  validsAllegatoMetadata: any;
+  allegatoTrasgressoriRequest: any;
+  idSelect: number;
   saveDisabled: boolean = true;
+  soggettiPagamentoVO: SoggettoPagamentoVO[];
   incompleted: boolean = false;
   typeSaveRequestCategory: number = -1;
 
@@ -263,6 +268,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   }
 
   loadRiepilogo() {
+    this.loaded = false;
     this.subscribers.riepilogo = this.sharedVerbaleService
       .riepilogoVerbale(this.idVerbale)
       .subscribe((data) => {
@@ -271,6 +277,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
             this.incompleted = true;
           }
           this.riepilogoVerbale = data;
+          this.loaded = true;
         }
       });
   }
@@ -413,8 +420,9 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       );
   }
 
-  pageChange(page:number){
-    let ricercaProtocolloRequest:RicercaProtocolloRequest = new RicercaProtocolloRequest();
+  pageChange(page: number) {
+    let ricercaProtocolloRequest: RicercaProtocolloRequest =
+      new RicercaProtocolloRequest();
     ricercaProtocolloRequest.pageRequest = page;
     ricercaProtocolloRequest.numeroProtocollo = this.searchFormRicercaProtocol;
     this.ricercaProtocollo(ricercaProtocolloRequest);
@@ -446,17 +454,19 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
           data.documentoProtocollatoVOList = [];
         }
 
-        const numpages:number = Math.ceil(+data.totalLineResp/+data.maxLineReq);
+        const numpages: number = Math.ceil(
+          +data.totalLineResp / +data.maxLineReq
+        );
         this.fascicoloService.dataRicercaProtocolloNumPages = numpages;
         this.numPages = numpages;
         this.currentPage = +data.pageResp;
-        this.numResults  = +data.totalLineResp;
+        this.numResults = +data.totalLineResp;
 
         if (data.messaggio) {
           this.mess = data.messaggio;
-          if(!this.dataRicercaProtocolloSelected){
+          if (!this.dataRicercaProtocolloSelected) {
             this.manageMessage(data.messaggio);
-          }else{
+          } else {
             this.manageMessageBottom();
           }
         } else {
@@ -486,7 +496,11 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   }
 
   onValidAllegatoMetadati(event: any) {
+    console.log('fascicolo', event, this.isPregresso);
+    
+
     if (
+      this.validsAllegatoMetadata &&
       this.validsAllegatoMetadata.find(
         (item: any) => item.current === event.current
       )
@@ -494,9 +508,14 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       this.validsAllegatoMetadata = this.validsAllegatoMetadata.map((item) => {
         return item.current === event.current ? event : item;
       });
-    } else {
+    } else if (this.validsAllegatoMetadata) {
       this.validsAllegatoMetadata.push(event);
     }
+    /* else if( this.isPregresso && this.idSelect===7){
+     
+      this.allegatoTrasgressoriRequest = event
+      this.soggettiPagamentoVO= this.allegatoTrasgressoriRequest.soggettiPagamentoVO
+    }*/
     this._checkSave();
   }
 
@@ -510,9 +529,13 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   }
 
   onChangeCategoriaDocumento(event: any) {
-  	this.showCompMeta = -1;
+    console.log(event);
+    this.showCompMeta = -1;
     let $idTipo: number = event.tipoAllegatoSelezionato.id;
-
+if(this.validsAllegatoMetadata && this.validsAllegatoMetadata[1]){
+  this.validsAllegatoMetadata= []
+}
+    this.idSelect = $idTipo;
     if (this.isPregresso && idAllegatiSuper.indexOf($idTipo) > -1) {
       this._allegatiSuperInit(event);
     } else {
@@ -552,10 +575,16 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       this._checkSave();
     } else if ($idTipo == 22) {
       // ricevuta-pagamento-ordinanza
-      this.typeSaveRequestCategory = 5;
+      this.typeSaveRequestCategory = 4;
       this.showCompMeta = 22;
       this.compMetaDataDisabled = true;
-      this._checkSave();
+      this._checkSave();}
+      else if ($idTipo == 46) {
+        // ricevuta-pagamento-ordinanza
+        this.typeSaveRequestCategory = 4;
+        this.showCompMeta = 46;
+        this.compMetaDataDisabled = true;
+        this._checkSave();
     } else if ($idTipo == 27) {
       // convocazione audizione
       this.typeSaveRequestCategory = 6;
@@ -624,8 +653,28 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   }
 
   _checkSave() {
+    console.log(this.validsAllegatoMetadata);
+    if (this.validsAllegatoMetadata === undefined) {
+      this.validsAllegatoMetadata = [];
+    }
+    //ISSUE 90-91 Check the validity of listaTragressori 
     if (
+      this.validsAllegatoMetadata && !this.validsAllegatoMetadata[0].validMetadata){
+        
+        this.saveDisabled = true;
+      }
+    if (
+      this.validsAllegatoMetadata &&
+      this.validsAllegatoMetadata[0].validMetadata &&
+      this.validsAllegatoMetadata[1] &&
+      this.validsAllegatoMetadata[1].soggettiPagamentoVO.length > 0
+    ) {
+      this.saveDisabled = false;
+      this.soggettiPagamentoVO =
+        this.validsAllegatoMetadata[1].soggettiPagamentoVO;
+    } else if (
       !this.modeSuper &&
+      this.validsAllegatoMetadata &&
       (this.validsAllegatoMetadata.length !== this.numberDocument.value ||
         this.validsAllegatoMetadata.find((item: any) => item.valid === false))
     ) {
@@ -643,17 +692,21 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     // this.fascicoloService.categoriesNotDuplicated;
     let categories: Array<number> = [];
     let allowed: boolean = true;
-    this.validsAllegatoMetadata.forEach((value, index) => {
-      if (
-        this.fascicoloService.categoriesDuplicated.indexOf(value.idTipo) === -1
-      ) {
-        if (categories.indexOf(value.idTipo) > -1) {
-          allowed = false;
-        } else {
-          categories.push(value.idTipo);
+    console.log(this.validsAllegatoMetadata);
+    if (this.validsAllegatoMetadata) {
+      this.validsAllegatoMetadata.forEach((value, index) => {
+        if (
+          this.fascicoloService.categoriesDuplicated.indexOf(value.idTipo) ===
+          -1
+        ) {
+          if (categories.indexOf(value.idTipo) > -1) {
+            allowed = false;
+          } else {
+            categories.push(value.idTipo);
+          }
         }
-      }
-    });
+      });
+    }
     return allowed;
   }
 
@@ -702,6 +755,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     if (
       this.isPregresso &&
       this.modeSuper &&
+      this.validsAllegatoMetadata &&
       this.validsAllegatoMetadata[this.currentSuper].idTipo == 7
     ) {
       return true;
@@ -777,6 +831,7 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
           this.validsAllegatoMetadata[this.currentSuper].idTipo;
         request.allegatoField =
           this.validsAllegatoMetadata[this.currentSuper].metaDataModel;
+        request.soggettiPagamentoVO = this.soggettiPagamentoVO;
         this._saveRequestAsis(typeSaveRequest, request);
         return;
       } else if (typeSaveRequest === 2) {
@@ -809,26 +864,31 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
       }
 
       saveRequest.allegati = [];
-      this.validsAllegatoMetadata.forEach((value, index) => {
-        let allegato: SalvaAllegatoProtocollatoVerbaleRequestAllegato = {
-          idTipoAllegato: <number>value.idTipo,
-        };
-        if (value.metaDataModel) {
-          allegato.allegatoField = value.metaDataModel;
-        }
-        if (
-          this.compMetaData &&
-          this.compMetaData.metaDataModel &&
-          this.typeSaveRequestCategory == 4
-        ) {
-          allegato.allegatoField = this.compMetaData.metaDataModel;
-        }
-        if (!this.modeSuper) {
-          saveRequest.allegati[value.current] = allegato;
-        } else if (this.currentSuper == value.current) {
-          saveRequest.allegati[0] = allegato;
-        }
-      });
+      if (this.validsAllegatoMetadata) {
+        this.validsAllegatoMetadata.forEach((value, index) => {
+          let allegato: SalvaAllegatoProtocollatoVerbaleRequestAllegato = {
+            idTipoAllegato: <number>value.idTipo,
+          };
+          if (value.metaDataModel) {
+            allegato.allegatoField = value.metaDataModel;
+          }
+          if (
+            this.compMetaData &&
+            this.compMetaData.metaDataModel &&
+            this.typeSaveRequestCategory == 4
+          ) {
+            allegato.allegatoField = this.compMetaData.metaDataModel;
+          }
+          if (!this.modeSuper) {
+            saveRequest.allegati[value.current] = allegato;
+          } else if (this.currentSuper == value.current) {
+            saveRequest.allegati[0] = allegato;
+          }
+          if (this.soggettiPagamentoVO && this.soggettiPagamentoVO.length > 0) {
+            saveRequest.soggettiPagamentoVO = this.soggettiPagamentoVO;
+          }
+        });
+      }
 
       saveRequest.documentoProtocollato = documentoProtocollato;
 
@@ -1504,7 +1564,37 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
   goToVerbaleSoggetto() {
     this.router.navigateByUrl(Routing.VERBALE_SOGGETTO + this.idVerbale);
   }
+  salvaAllegatoTrasgressori(nuovoAllegato: SalvaAllegatoVerbaleRequest) {
+    nuovoAllegato.idVerbale = this.idVerbale;
+    //mando il file al Back End
+    this.loaded = false;
+    this.subscribers.salvaAllegato = this.sharedVerbaleService
+      .creaAllegatoVerbale(nuovoAllegato)
+      .subscribe(
+        (data) => {
+          let azione: string = "";
+          /*   if (nuovoAllegato.allegatoField[3].booleanValue == "true") {
+            azione = "parziale";
+          } else {*/
+          azione = "allegato";
+          // }
+          /*  this.router.navigate([
+            Routing.PAGAMENTI_RICONCILIA_VERBALE_RIEPILOGO + this.idVerbale,
+            { action: azione },
+          ]);*/
+          this.router.navigateByUrl(Routing.VERBALE_RIEPILOGO + this.idVerbale);
 
+          this.loaded = true;
+        },
+        (err) => {
+          if (err) {
+            this.manageMessage(err);
+          }
+          this.logger.error("Errore nel salvataggio dell'allegato");
+          this.loaded = true;
+        }
+      );
+  }
   byId(o1: SelectVO, o2: SelectVO) {
     return o1 && o2 ? o1.id === o2.id : o1 === o2;
   }
@@ -1513,6 +1603,36 @@ export class FascicoloAllegatoDaActaComponent implements OnInit, OnDestroy {
     this.logger.destroy(FascicoloAllegatoDaActaComponent.name);
   }
 
+  checkDisabled(): boolean {
+   console.log('check', this.validsAllegatoMetadata, this.saveDisabled )
+   
+
+   if (!this.saveDisabled) {
+   
+      if (
+        (this.idSelect === 7 || this.idSelect === 43 ) &&
+        this.validsAllegatoMetadata &&
+        !this.validsAllegatoMetadata[1]
+      ) {
+        this.saveDisabled= true
+        return true;
+      } else if (
+        (this.idSelect === 7 || this.idSelect === 43 ) &&
+        this.validsAllegatoMetadata &&
+        this.validsAllegatoMetadata[1] &&
+        this.validsAllegatoMetadata[1].soggettiPagamentoVO > 0
+      ) {
+        this.saveDisabled= false
+        return false;
+      }
+      this.saveDisabled= false
+      return false;
+    } else {
+      this.saveDisabled= true
+      return true;
+    }
+ //   return true
+  }
   back(): void {
     if (this.incompleted) {
       this.router.navigateByUrl(this.fascicoloService.backPage);

@@ -4,19 +4,19 @@ export class SelectVO {
 
     public id: number;
     public denominazione: string;
-   
+
 }
 
 export class modalitaCaricamentoVO extends SelectVO { }
 export class EnteVO extends SelectVO { }
 export class RegioneVO extends SelectVO { }
-export class ProvinciaVO extends SelectVO { 
+export class ProvinciaVO extends SelectVO {
     public sigla: string;
 }
 export class ComuneVO extends SelectVO { }
 export class NazioneVO extends SelectVO { }
 
-export class StatoVerbaleVO extends SelectVO { 
+export class StatoVerbaleVO extends SelectVO {
     public confirmMessage: MessageVO;
     public warningMessage: MessageVO;
 }
@@ -49,7 +49,7 @@ export class AmbitoVO extends SelectVO {
 }
 
 export class NormaVO extends SelectVO {
-    public dataInizioValidita: string; 
+    public dataInizioValidita: string;
     public dataFineValidita: string;
 }
 

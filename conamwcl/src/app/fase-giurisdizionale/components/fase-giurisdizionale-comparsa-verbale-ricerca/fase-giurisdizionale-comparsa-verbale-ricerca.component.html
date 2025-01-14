@@ -17,7 +17,7 @@
                                     <strong>Ricerca per:</strong>
                                 </h4>
                             </div>
-                            <shared-verbale-ricerca [config]="configVerbaleRicerca"
+                            <shared-verbale-ricerca   [config]="configVerbaleRicerca"
                                 (onSearch)="ricercaFascicolo($event)" [request]="request"></shared-verbale-ricerca>
                         </div>
 
@@ -29,8 +29,8 @@
                                 </h4>
                             </div>
 
-                            <datatable [data]="verbali" [config]="config" *ngIf="showTable"
-                                (dettaglio)="onDettaglio($event)">
+                            <datatable [data]="verbali" [showMultiselect]="true" [config]="config" *ngIf="showTable"
+                                (dettaglio)="onDettaglio($event)" [showDownloadReport]="'Esporta dati'" (onDownloadList)="downloadList($event)">
                             </datatable>
 
                             <div id="scrollBottom" *ngIf="showTable"></div>

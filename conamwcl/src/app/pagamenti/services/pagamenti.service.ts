@@ -11,7 +11,7 @@ import { StatoPianoVO } from "../../commons/vo/select-vo";
 import { PianoRateizzazioneVO } from "../../commons/vo/piano-rateizzazione/piano-rateizzazione-vo";
 import { AllegatoUtilsSharedService } from "../../shared/service/allegato-utils-shared.service";
 import { RataVO } from "../../commons/vo/piano-rateizzazione/rata-vo";
-import { SollecitoVO } from "../../commons/vo/riscossione/sollecito-vo";
+import { SollecitoRequestVO, SollecitoVO } from "../../commons/vo/riscossione/sollecito-vo";
 import { RiconciliaSollecitoResponse } from "../../commons/response/pagamenti/riconcilia-sollecito-response";
 
 
@@ -95,9 +95,19 @@ export class PagamentiService {
         return this.http.post<RataVO>(url, rata);
     }
 
-    riconciliaSollecito(sollecito: SollecitoVO): Observable<RiconciliaSollecitoResponse> {
+    riconciliaSollecito(body: SollecitoRequestVO): Observable<RiconciliaSollecitoResponse> {
         var url: string = this.config.getBEServer() + '/restfacade/sollecito/riconciliaSollecito';
-        return this.http.post<RiconciliaSollecitoResponse>(url, sollecito);
+       //let body = { sollecito: sollecito}
+        let form = new FormData();
+        form.append("data", JSON.stringify(body, (k, v) => {
+            if (v instanceof File)
+                return undefined;
+            return null === v ? undefined : v;
+        }));
+        if(body.file){
+            form.append("files", body.file)
+            }
+        return this.http.post<RiconciliaSollecitoResponse>(url, form);
     }
     getMessaggioManualeByidOrdinanzaVerbaleSoggetto(idOrdinanzaVerbaleSoggetto: number): Observable<any>{
         var url: string = this.config.getBEServer() + '/restfacade/verbale/getMessaggioManualeByIdOrdinanzaVerbaleSoggetto';

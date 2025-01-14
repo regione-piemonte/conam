@@ -39,10 +39,11 @@
                           [(ngModel)]="nota.ambito"
                           name="ambito"
                           [compareWith]="byId"
-                          required
+                         required
                           #ambito="ngModel"
+                  
                         >
-                          <option *ngFor="let el of ambitoList" [ngValue]="el">
+                          <option *ngFor="let el of ambitoList" [ngValue]="el" >
                             {{ el.denominazione }}
                           </option>
                         </select>
@@ -70,7 +71,7 @@
                           name="oggetto"
                           #oggetto="ngModel"
                           [(ngModel)]="nota.oggetto"
-                          required
+                     
                           maxlength="50"
                         />
                         <div
@@ -118,7 +119,7 @@
                       </div>
                       <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <label for="descrizione" class="control-label"
-                          >Descrizione</label
+                          >Testo nota</label
                         >
                         <input
                           #descrizione

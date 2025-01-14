@@ -61,6 +61,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
   public configIstr: Config;
   public configRateizzazione: Config;
 
+  public showEdit: boolean= true
 
   constructor(
     private logger: LoggerService,
@@ -92,8 +93,11 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
           this.buttonModificaFlag = data.modificaVerbaleEnable;
           this.eliminaAllegatoFlag = data.eliminaAllegatoEnable;
           // set config
+          //console.log('here');
+          //console.log('here - data',data);
           this.configVerb = this.configSharedService.getConfigDocumentiVerbale(
-            this.eliminaAllegatoFlag
+            //this.eliminaAllegatoFlag,
+            this.eliminaAllegatoFlag, (el: any) => true
           );
           this.configIstr = this.configSharedService.configDocumentiIstruttoria;
           this.configGiurisd = this.configSharedService.configDocumentiGiurisdizionale;
@@ -101,11 +105,14 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
           this.loadedConfig = true;
         });
 
+      /* spostato dentro recupero dati verbale
       // allegati x tabella
       this.subscribers.allegati = this.verbaleService
         .getAllegatiByIdVerbale(this.idVerbale)
         .subscribe(
           (data) => {
+            console.log('verbale-allegato data', data);
+            console.log('this.riepilogoVerbale',this.riepilogoVerbale);
             this.allegatoModel = data;
             this.allegatoModel.istruttoria.forEach((all) => {
               all.theUrl = new MyUrl(all.nome, null);
@@ -126,9 +133,40 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
           }
         );
       this.loadTipoAllegato();
+      */
       // recupero riepilogo verbale
       this.subscribers.riepilogo = this.sharedVerbaleService.riepilogoVerbale(this.idVerbale).subscribe(data => {
         this.riepilogoVerbale = data;
+     //     this.showEdit = data.verbale.stato.id!=3; //conciliato=3
+          // allegati x tabella
+          this.subscribers.allegati = this.verbaleService
+            .getAllegatiByIdVerbale(this.idVerbale)
+            .subscribe(
+              (data) => {
+                console.log('verbale-allegato data', data);
+                //console.log('this.riepilogoVerbale',this.riepilogoVerbale);
+                this.allegatoModel = data;
+                this.allegatoModel.istruttoria.forEach((all) => {
+                  all.theUrl = new MyUrl(all.nome, null);
+                });
+                this.allegatoModel.verbale.forEach((all) => {
+                  all.theUrl = new MyUrl(all.nome, null);
+                  all.showEdit = this.showEdit && all.tipo.id==43;
+                  //quiiiii
+                });
+                this.allegatoModel.rateizzazione.forEach((all) => {
+                  all.theUrl = new MyUrl(all.nome, null);
+                });
+                this.allegatoModel.giurisdizionale.forEach((all) => {
+                  all.theUrl = new MyUrl(all.nome, null);
+                });
+                this.loaded = true;
+              },
+              (err) => {
+                this.logger.error("Errore nel recupero degli allegati");
+              }
+            );
+            this.loadTipoAllegato();
       });
     });
   }
@@ -181,7 +219,9 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
   }
 
   salvaAllegato(nuovoAllegato: SalvaAllegatoVerbaleRequest) {
+    //console.log('verbale-allegato nuovoAllegato>>>>>>>>', nuovoAllegato);
     nuovoAllegato.idVerbale = this.idVerbale;
+    //this.showEdit già valorizzato true se non conciliato
     //mando il file al Back End
     this.loaded = false;
     this.subscribers.salvaAllegato = this.sharedVerbaleService
@@ -207,6 +247,7 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
               (data) => {
                 this.allegatoModel = data;
                 this.allegatoModel.verbale.forEach((all) => {
+                  all.showEdit = this.showEdit && all.tipo.id==43;
                   all.theUrl = new MyUrl(all.nome, null);
                 });
                 this.allegatoModel.istruttoria.forEach((all) => {
@@ -387,7 +428,22 @@ export class VerbaleAllegatoComponent implements OnInit, OnDestroy {
   goToVerbaleDati() {
     this.router.navigateByUrl(Routing.VERBALE_DATI + this.idVerbale);
   }
-
+  goToDatiProvaPagamento(el){
+    console.log(el);
+    const currentUrl = this.router.url;
+    if (currentUrl.includes('pregresso/')) {
+      this.router.navigate([Routing.PREGRESSO_DETTAGLIO_PROVA_PAGAMENTO + this.idVerbale], {
+        queryParams: {idAllegato : el.id}
+      });
+    } else if (currentUrl.includes('verbale/')) {
+      this.router.navigate([Routing.DETTAGLIO_PROVA_PAGAMENTO + this.idVerbale], {
+        queryParams: {idAllegato : el.id}
+      });
+    }
+    /*this.router.navigate(['/route-to'], {
+        someData: { name: 'Some name', description: 'Some description' },
+    });*/
+  }
   ngOnDestroy(): void {
     this.logger.destroy(VerbaleAllegatoComponent.name);
   }

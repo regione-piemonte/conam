@@ -4,4 +4,5 @@ export class SalvaAllegatoVerbaleRequest extends SalvaAllegatoRequest{
 
     public idVerbale: number;
     public idVerbaleAudizione: number;
+    //public soggettiPagamentoVO?: Soggetto[]
 }

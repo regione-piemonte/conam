@@ -16,7 +16,8 @@
                             <shared-verbale-allegato-tabella *ngIf="loadedConfig" [riepilogoAllegato]="allegatoModel" [configDocumentiVerbale]="configVerb"
                                 [configDocumentiIstruttoria]="configIstr" [configDocumentiFaseGiurisdizionale]="configGiurisd" [configDocumentiRateizzazione]="configRateizzazione"
                                 (onDelete)="confermaEliminazione($event)"
-                                (onLoaded)="onLoadedAllegato($event)">
+                                (onLoaded)="onLoadedAllegato($event)"
+                                (goToDatiProvaPagamento)="goToDatiProvaPagamento($event)">
                             </shared-verbale-allegato-tabella>
                             <shared-allegato-metadati-inserimento 
                             *ngIf="loadedCategoriaAllegato && allegaDocumentoFlag" 

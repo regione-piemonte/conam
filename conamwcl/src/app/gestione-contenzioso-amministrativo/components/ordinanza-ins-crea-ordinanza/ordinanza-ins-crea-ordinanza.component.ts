@@ -25,6 +25,7 @@ import { SharedAllegatoMetadatiInserimentoComponent } from "../../../shared/comp
 import { SharedInserimentoNotificaComponent } from "../../../shared-notifica/components/shared-inserimento-notifica/shared-inserimento-notifica.component";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { Column } from "../../../shared/module/datatable/classes/settings";
+import { NgForm, Validators } from "@angular/forms";
 
 
 declare var $: any;
@@ -50,7 +51,7 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
   idVerbale: number;
   ordinanza: OrdinanzaVO;
   soggettiArray: Array<TableSoggettiVerbale>;
-  
+
 
   tipoOrdinanzaSoggettoModel: Array<StatoSoggettoOrdinanzaVO>;
   causaleModel: Array<SelectVO>;
@@ -62,9 +63,9 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
   checkboxOrdinanzaMista: boolean;
 
   isCreaOrdinanza: boolean = true;
-  itsAnnullamento: string; 
+  itsAnnullamento: string;
   showAnnullamentoParts: boolean = false;
-  idOrdinanza : number; 
+  idOrdinanza : number;
   //JIRA - Gestione Notifica
   isImportoNotificaInserito: boolean = true;
   loadedcausale: boolean = false;
@@ -75,7 +76,9 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
     if (!this.showAnnullamentoParts && el.ordinanzaCreata) return false;
     else return true;
   };
-  
+  checkboxDataScadenzaSuBollettino: boolean = false;
+  creaOrdinanza: NgForm;
+
 
   constructor(
     private logger: LoggerService,
@@ -89,16 +92,16 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
   ngOnInit(): void {
 
     this.itsAnnullamento = ''
-        this.subscribers.route = this.activatedRoute.params.subscribe((params) => {    
+        this.subscribers.route = this.activatedRoute.params.subscribe((params) => {
 
             // verifico se arrivo da inserimento ordinanza di annullamento
-            if (this.activatedRoute.snapshot.paramMap.get("azione")) {             
+            if (this.activatedRoute.snapshot.paramMap.get("azione")) {
               this.itsAnnullamento  = this.activatedRoute.snapshot.paramMap.get("azione");
               this.idOrdinanza = +this.activatedRoute.snapshot.paramMap.get('idOrdinanza');
-            } 
+            }
             if (this.itsAnnullamento === 'annullamento') {
                 this.showAnnullamentoParts =  true;
-            }          
+            }
         });
 
 
@@ -112,7 +115,7 @@ export class OrdinanzaInsCreaOrdinanzaGestContAmministrativoComponent
           Routing.GESTIONE_CONT_AMMI_INS_ORDINANZA_RICERCA_VERBALE
         );
     });
-  
+
     this.config = this.sharedVerbaleConfigService.getConfigVerbaleSoggetti(
       true,
       1,
@@ -138,7 +141,7 @@ this.config.columns.push(column)
       (el: any) => false,
       false
     );
-    
+
 
     this.ordinanza = new OrdinanzaVO();
     this.soggettiArray = new Array();
@@ -149,14 +152,14 @@ this.config.columns.push(column)
     }
 
   addToArraySoggettiSelezionati(e: Array<TableSoggettiVerbale>) {
-   
+
     this.soggettiArray = e;
   }
-  
+
   addToArraySoggettiSelezionatiAnnullamento(arr: Array<any>){
     arr.forEach(el => {
       el.idVerbaleSoggetto = el.idSoggettoVerbale;
-    });    
+    });
     this.soggettiArray = arr;
   }
 
@@ -183,7 +186,7 @@ this.config.columns.push(column)
         this.loadedCategoriaAllegato = true;
       });
     }
-   
+
   }
 
   loadStatiOrdinanzaSoggettoInCreazioneOrdinanza() {
@@ -248,6 +251,7 @@ this.config.columns.push(column)
   }
 
   addAllegato(event) {
+
     this.salvaAllegatoRequest = event;
   }
 
@@ -260,7 +264,7 @@ this.config.columns.push(column)
       : false
     : false;
   }
-  else{ 
+  else{
     return this.allegatiSubComponent
       ? this.allegatiSubComponent.getTipoAllegatoSelezionato()
         ? this.allegatiSubComponent.getTipoAllegatoSelezionato().id ==
@@ -268,7 +272,7 @@ this.config.columns.push(column)
         : false
       : false;
     }
- 
+
   }
   isTipoAllegatoOrdinanza(): boolean {
     if(this.showAnnullamentoParts) {
@@ -289,7 +293,32 @@ this.config.columns.push(column)
     }
   }
 
+  controllaValiditaDataScadenza() {
+
+    if (!this.checkboxDataScadenzaSuBollettino) {
+      this.ordinanza.dataScadenza = null;
+    }
+    /*
+    if (this.creaOrdinanza){
+      const dataDeterminazioneControl = this.creaOrdinanza.form.get('dataScadenza');
+      if (this.checkboxDataScadenzaSuBollettino) {
+        // Abilita il controllo e imposta il validator richiesto
+        dataDeterminazioneControl.enable();
+        dataDeterminazioneControl.setValidators([Validators.required]);
+      } else {
+        // Disabilita il controllo e rimuove il validator richiesto
+        dataDeterminazioneControl.setValue(null);
+        dataDeterminazioneControl.disable();
+        dataDeterminazioneControl.clearValidators();
+      }
+      // Forza il ricalcolo della validità
+      dataDeterminazioneControl.updateValueAndValidity();
+    }
+    */
+  }
+
   isAllegatoCaricato(): boolean {
+
     return (
       this.salvaAllegatoRequest != null &&
       this.salvaAllegatoRequest.idTipoAllegato != null
@@ -311,7 +340,7 @@ this.config.columns.push(column)
       return false;
 
 
-    if(!this.showAnnullamentoParts){    
+    if(!this.showAnnullamentoParts){
       if (
         this.soggettiArray.some(
           (e) => !(e.idTipoOrdinanza && e.idTipoOrdinanza.id)
@@ -323,7 +352,7 @@ this.config.columns.push(column)
         return !this.byId(e.idTipoOrdinanza, arr[i - 1].idTipoOrdinanza);
       });
     }
-    
+
   }
 
   //JIRA - Gestione Notifica
@@ -386,7 +415,7 @@ this.config.columns.push(column)
         }
       );
   }
-  
+
   salvaOrdinanzaAnnullamento() {
     this.loaded = false;
     let request: SalvaOrdinanzaRequest = new SalvaOrdinanzaRequest();
@@ -404,7 +433,7 @@ this.config.columns.push(column)
     request.file = this.salvaAllegatoRequest.file;
     request.allegatoField = this.salvaAllegatoRequest.allegatoField;
     request.ordinanza = this.ordinanza;
-    
+
     request.idOrdinanzaDaAnnullare = +this.idOrdinanza;
     request.soggetti = this.soggettiArray.map((x) => {
       let obj: SoggettoOrdinanzaRequest = new SoggettoOrdinanzaRequest();
@@ -414,7 +443,7 @@ this.config.columns.push(column)
       return obj;
     });
     request.notifica = this.insertNotifica.getNotificaObject();
-    
+
     this.subscribers.salvaOrdinanza = this.faseGiurisdizionaleOrdinanzaService
       .salvaOrdinanzaAnnullamento(request)
       .subscribe(

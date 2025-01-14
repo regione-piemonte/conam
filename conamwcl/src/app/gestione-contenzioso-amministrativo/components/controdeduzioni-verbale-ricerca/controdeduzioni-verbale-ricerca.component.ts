@@ -9,6 +9,7 @@ import { RicercaVerbaleRequest } from "../../../commons/request/verbale/ricerca-
 import { ConfigSharedService } from "../../../shared/service/config-shared.service";
 import { SharedVerbaleService } from "../../../shared-verbale/service/shared-verbale.service";
 import { SharedVerbaleRicercaComponent, ConfigVerbaleRicerca } from "../../../shared-verbale/component/shared-verbale-ricerca/shared-verbale-ricerca.component";
+import { BehaviorSubject } from "rxjs";
 
 @Component({
     selector: 'controdeduzioni-verbale-ricerca',
@@ -20,7 +21,7 @@ export class ControdeduzioniVerbaleRicercaGestContAmministrativoComponent implem
     public config: Config;
     public loaded: boolean = true;
     public verbaleSel: MinVerbaleVO;
-
+    public payloadRicerca: RicercaVerbaleRequest;
     public showTable: boolean;
 
     public configVerbaleRicerca: ConfigVerbaleRicerca = { showFieldStatoVerbale: true, tipoRicerca: 'GC' };
@@ -29,6 +30,8 @@ export class ControdeduzioniVerbaleRicercaGestContAmministrativoComponent implem
     @ViewChild(SharedVerbaleRicercaComponent)
 
     request: RicercaVerbaleRequest;
+
+    request$ = new BehaviorSubject<any>(null);
 
     constructor(
         private sharedVerbaleService: SharedVerbaleService,
@@ -46,6 +49,9 @@ export class ControdeduzioniVerbaleRicercaGestContAmministrativoComponent implem
     scrollEnable: boolean;
     ricercaFascicolo(ricercaVerbaleRequest: RicercaVerbaleRequest) {
         this.request = ricercaVerbaleRequest;
+        this.request$.next(ricercaVerbaleRequest);
+
+        this.payloadRicerca= ricercaVerbaleRequest
         this.showTable = false;
         this.loaded = false;
         this.sharedVerbaleService.ricercaVerbale(ricercaVerbaleRequest).subscribe(
@@ -65,7 +71,26 @@ export class ControdeduzioniVerbaleRicercaGestContAmministrativoComponent implem
             }
         );
     }
+    downloadList(list:any){
+        this.loaded=false
 
+        this.sharedVerbaleService.dowloadReport(this.payloadRicerca, list)
+        .subscribe(
+          (response) => {
+          this.sharedVerbaleService.saveData(response);
+          this.loaded = true;
+        },
+        (err) => {
+          if (err instanceof ExceptionVO) {
+            this.loaded = true;
+            this.manageMessage(err);
+          }
+          this.scrollEnable = true;
+          this.logger.error("Errore nel dowload report");
+        }
+        );
+
+      }
     onDettaglio(el: any | Array<any>) {
         this.verbaleSel = el;
         if (el instanceof Array){

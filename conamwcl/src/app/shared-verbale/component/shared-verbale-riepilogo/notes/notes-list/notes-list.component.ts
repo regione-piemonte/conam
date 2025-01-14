@@ -38,7 +38,6 @@ export class NotesListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log(this.noteList, this.configNote);
     this.loaded = true;
   }
 

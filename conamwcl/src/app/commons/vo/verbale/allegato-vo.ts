@@ -13,4 +13,5 @@ export class AllegatoVO{
 	public utente: string;
 	public theUrl ?: MyUrl;
 	public nomeCognomeRagioneSocialeSoggetti: string;
+	public showEdit?:boolean;
 }

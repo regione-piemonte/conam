@@ -95,7 +95,25 @@ export class OrdinanzaInsRicercaVerbaleGestContAmministrativoComponent
       Routing.GESTIONE_CONT_AMMI_INS_ORDINANZA_RIEPILOGO_VERBALE + el.id
     );
   }
-
+  downloadList(list:any){
+    this.loaded=false
+    this.verbaleService.dowloadReport(this.request, list)
+    .subscribe(
+      (response) => {
+      this.verbaleService.saveData(response);
+      this.loaded = true;
+    },
+    (err) => {
+      if (err instanceof ExceptionVO) {
+        this.loaded = true;
+        this.manageMessage(err);
+      }
+      this.scrollEnable = true;
+      this.logger.error("Errore nel dowload report");
+    }
+    );
+  
+  }
   //Messaggio top
   public showMessageTop: boolean;
   public typeMessageTop: String;

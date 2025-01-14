@@ -62,13 +62,17 @@ export class NoteDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (!this.nota || this.nota === undefined) {
       this.nota = new NotaVO();
+   
     }
     if (!this.titolo) this.titolo = "titolo non definito";
     if (!this.buttonAnnullaText) this.buttonAnnullaText = "No";
     if (!this.buttonConfirmText) this.buttonConfirmText = "Si";
     this.service.ambitiList().subscribe((data) => {
+     
       this.ambitoList = data;
+     
       this.loaded = true;
+    
     });
     this.manageDatePicker(null, 1);
   }
@@ -81,6 +85,11 @@ export class NoteDetailComponent implements OnInit, OnDestroy {
     if (nota === null || !nota) {
       this.nota = new NotaVO();
       this.loaded = true;
+      //SET DEFAULT VALUE
+      if(this.nota.ambito === null ||this.nota.ambito === undefined){
+        let itemVO= this.ambitoList.find((el)=> el.id===5)
+        this.nota.ambito = itemVO
+      }
     } else {
       this.nota = nota;
       this.loaded = true;

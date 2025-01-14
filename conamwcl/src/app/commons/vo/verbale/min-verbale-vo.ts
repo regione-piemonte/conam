@@ -1,4 +1,4 @@
-import { EnteVO, StatoVerbaleVO } from "../../../commons/vo/select-vo";
+import { ComuneVO, EnteVO, StatoVerbaleVO } from "../../../commons/vo/select-vo";
 
 export class MinVerbaleVO {
 	public id: number;
@@ -9,5 +9,8 @@ export class MinVerbaleVO {
 	public user: string;
 	public dataCaricamento: string;
 	public modificabile: boolean;
-	public dataOraAccertamento: string; 
+	public dataOraAccertamento: string;
+	public trasgressori: string;
+	public obbligati: string;
+	public comuneEnteAccertatore: ComuneVO;
 }

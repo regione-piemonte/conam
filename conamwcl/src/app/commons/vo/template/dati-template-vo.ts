@@ -39,5 +39,6 @@ export class DatiTemplateVO {
     public email?: string;
     public emailOrgano?: string;
     public testoLibero?: string;
+    public testoLibero2?: string;
   
 }

@@ -413,7 +413,15 @@ export class VerbaleSoggettoComponent implements OnInit, OnDestroy {
       this.soggetto.nazioneResidenza = null;
       this.soggetto.denomComuneResidenzaEstero = null;
     }
-    this.soggetto.importoVerbale =this.importo;
+
+    if(this.soggetto.ruolo.id.toString() === "1"){
+      this.soggetto.ruolo = this.ruoloModel.find((el)=> el.id===1)
+      this.soggetto.importoVerbale =this.importo;
+    }else{
+      this.soggetto.ruolo = this.ruoloModel.find((el)=> el.id===2)
+      this.soggetto.importoVerbale = null
+      this.soggetto.importoResiduoVerbale = null
+    }
     this.subscribers.salvaSoggettoVerbale = this.verbaleService
       .salvaSoggetto(this.soggetto, this.idVerbale)
       .subscribe(

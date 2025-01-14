@@ -67,6 +67,13 @@ export class PregressoVerbaleService {
             return null === v ? undefined : v;
         }));
         form.append("files", input.file)
+        
+        if(input.allegati && input.allegati!= null){
+            input.allegati.forEach((allegato, index) => {
+              form.append(`allegati[${index}].file`, allegato.file, allegato.filename);
+
+          });
+        }
         return this.http.post<AllegatoVO>(url, form);
     }
 

@@ -180,7 +180,11 @@ export class PagamentiTemplateComponent implements OnInit, OnDestroy {
 
   checkDatiTemplate(dati: DatiTemplateCompilatiVO): boolean {
     let flag: boolean = true;
-    for (let field in dati) {      if (!dati[field]) flag = false;    }
+    let fieldsToIgnore = ['destinatariAggiuntivi','destinatariSoggetti'];
+    for (let field in dati) {
+      if (fieldsToIgnore.includes(field)) continue;
+      if (!dati[field]) flag = false;
+    }
     return flag;
   }
 

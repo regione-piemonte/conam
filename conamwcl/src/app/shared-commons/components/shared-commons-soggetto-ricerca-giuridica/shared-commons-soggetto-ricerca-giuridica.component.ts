@@ -60,7 +60,9 @@ export class SharedCommonsSoggettoRicercaGiuridicaComponent implements OnInit {
     }
 
     isDisable(field: string) {
+
         let s = this.soggetto;
+//controlled disabled
         if (this.modalita == "R") {
             if (field == "RS")
                 return !(this.isEmpty(s.codiceFiscale) && this.isEmpty(s.partitaIva));

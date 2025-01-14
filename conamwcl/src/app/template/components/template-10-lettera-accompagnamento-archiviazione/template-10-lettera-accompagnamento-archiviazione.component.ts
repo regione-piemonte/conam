@@ -50,6 +50,9 @@ export class Template10LetteraAccompagnamentoArchiviazioneComponent
     this.subscribers.form = this.formTemplate.valueChanges.subscribe((data) => {
       this.formValid.next(        this.formTemplate.valid && this.formIntestazioneValid      );
     });
+   // console.log(this.data)
+    this.datiCompilati.testoLibero2= this.data.testoLibero2
+    this.datiCompilati.oggetto= this.data.oggettoLettera
     this.infoEnteArray= this.data.sedeEnte.split(";");
     this.datiCompilati.sedeEnteRiga1 = this.infoEnteArray[0] ? this.infoEnteArray[0] : ' '
     this.datiCompilati.sedeEnteRiga2 = this.infoEnteArray[1] ? this.infoEnteArray[1] : ' '

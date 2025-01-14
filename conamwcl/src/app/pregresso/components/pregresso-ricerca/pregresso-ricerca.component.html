@@ -19,10 +19,10 @@
 
                         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="showTable">
-                                <h4 class="border-title"><strong>Esito della ricerca</strong></h4>
+                                <h4 class="border-title"><strong>Esito della ricerca </strong></h4>
                             </div>
 
-                            <datatable [data]="verbali" [config]="config" *ngIf="showTable" (dettaglio)="onDettaglio($event)">
+                            <datatable [showMultiselect]="true"  [data]="verbali" [config]="config" *ngIf="showTable" (dettaglio)="onDettaglio($event)" [showDownloadReport]="'Esporta dati'" (onDownloadList)="downloadList($event)">
                             </datatable>
 
                             <div id="scrollBottom" *ngIf="showTable"></div>

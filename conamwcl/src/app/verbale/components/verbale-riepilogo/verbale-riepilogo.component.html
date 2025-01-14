@@ -183,12 +183,12 @@
                   class="btn-conam button-blue"
                   (click)="editStatofascicolo()"
                   *ngIf="
-                    riepilogoVerbale.verbale.stato.id != 12 ||
-                    riepilogoVerbale.verbale.stato.id != 13 ||
-                    riepilogoVerbale.verbale.stato.id != 14 ||
-                    riepilogoVerbale.verbale.stato.id != 15 ||
-                    riepilogoVerbale.verbale.stato.id != 18 ||
-                    riepilogoVerbale.verbale.stato.id != 19
+                    riepilogoVerbale?.verbale.stato.id != 12 ||
+                    riepilogoVerbale?.verbale.stato.id != 13 ||
+                    riepilogoVerbale?.verbale.stato.id != 14 ||
+                    riepilogoVerbale?.verbale.stato.id != 15 ||
+                    riepilogoVerbale?.verbale.stato.id != 18 ||
+                    riepilogoVerbale?.verbale.stato.id != 19
                   "
                 >
                   <i

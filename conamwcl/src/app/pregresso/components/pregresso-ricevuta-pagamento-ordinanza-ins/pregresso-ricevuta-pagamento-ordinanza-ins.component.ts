@@ -35,6 +35,7 @@ interface Elem {
 export class PregressoRicevutaPagamentoOrdinanzaInsComponent
   implements OnInit, OnDestroy {
   @Input()  idOrdinanza: number;
+  @Input()  idTipo: number;
   @Input()  numDeterminazione: string;
   @Input()  tipoAllegatoInput: Array<TipoAllegatoVO>;
   @Input()  allegati: boolean;
@@ -301,8 +302,9 @@ export class PregressoRicevutaPagamentoOrdinanzaInsComponent
   }
   mostraMetadati() {
     // disposizioni del giudice
+    
     this.tipoAllegatoSelezionato = this.tipoAllegatoInput.find(
-      (item) => item.id == 22
+      (item) => item.id == this.idTipo
     );
     this.loadedConfig = false;
     this.validMetadata = false;

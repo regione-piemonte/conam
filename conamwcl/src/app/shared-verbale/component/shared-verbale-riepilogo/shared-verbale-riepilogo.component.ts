@@ -68,19 +68,19 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
   public buttonAnnullaText: string;
   public buttonConfirmText: string;
   public subMessages: Array<string>;
-  
-  
+
+
   //Messaggio top
   public showMessageTop: boolean;
   public typeMessageTop: String;
   public messageTop: String;
-  
+
   private intervalIdS: number = 0;
   private intervalIdW: number = 0;
-  
+
   //ruolo
   public ruoloModel = new Array<RuoloVO>();
-  
+
   //edit soggetto
   public isModificaSoggetto: boolean;
   public soggettoModifica: TableSoggettiVerbale;
@@ -98,7 +98,7 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
   private capEstero: string;
   public importo: number=0;
   public importoVerbale: number=0;
-	
+
   public loaderRegioni: boolean = false;
   public regioneModel: Array<RegioneVO> = new Array<RegioneVO>();
   public provinciaModel: Array<ProvinciaVO> = new Array<ProvinciaVO>();
@@ -107,16 +107,19 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
   public loaderComuni: boolean = true;
   public loaderNazioni: boolean;
   public nazioneResidenzaModel: Array<NazioneVO> = new Array<NazioneVO>();
-	
+
   //VALIDAZIONE
   public formGiuridicoValid: boolean;
   public formFisicoValid: boolean;
 
   //RUOLO
   public loaderRuolo: boolean;
-  
+
   @Output()
   public delete: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+ 
+  public showEdit: boolean= true
 
   constructor(
     private logger: LoggerService,
@@ -135,13 +138,15 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
     this.isModificaSoggetto = false;
     console.log(this.isModificaSoggetto);
     this.logger.init(SharedVerbaleRiepilogoComponent.name);
-    this.importo= this.riepilogoVerbale.verbale.importo;
-    this.importoVerbale= this.riepilogoVerbale.verbale.importo;
- 
-   
-      this.pulisciFiltri();
+
+    //spostati dentro load
+    //this.importo= this.riepilogoVerbale.verbale.importo;
+    //this.importoVerbale= this.riepilogoVerbale.verbale.importo;
+
+
+    this.pulisciFiltri();
     this.loadedSalvaRicerca = true;
-     
+
   }
 	loadDatiVerbale() {
 		this.subscribers.riepilogo = this.sharedVerbaleService
@@ -162,8 +167,11 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
             this.notes= data.verbale.note;
             ////
           this.riepilogoVerbale = data;
+        //  this.showEdit = data.verbale.stato.id!=3; //conciliato=3
           this.riepilogoVerbale.allegati.verbale.forEach((all) => {
             all.theUrl = new MyUrl(all.nome, null);
+            all.showEdit = this.showEdit && (all.tipo.id==43);
+            //quiiiii
           });
           this.riepilogoVerbale.allegati.istruttoria.forEach((all) => {
             all.theUrl = new MyUrl(all.nome, null);
@@ -174,6 +182,9 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
           this.riepilogoVerbale.allegati.rateizzazione.forEach((all) => {
             all.theUrl = new MyUrl(all.nome, null);
           });
+          console.log('this.riepilogoVerbale',this.riepilogoVerbale);
+          this.importo= this.riepilogoVerbale.verbale.importo;
+          this.importoVerbale= this.riepilogoVerbale.verbale.importo;
 
           this.dataRifNormativi = data.verbale.riferimentiNormativi;
 
@@ -217,9 +228,11 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
             this.eliminaAllegatoFlag = data.eliminaAllegatoEnable;
 
             //setto i config
+
             this.configVerb =
               this.configSharedService.getConfigDocumentiVerbale(
-                this.eliminaAllegatoFlag
+                //this.eliminaAllegatoFlag
+                this.eliminaAllegatoFlag,  (el: any) => true
               );
             this.configIstr =
               this.configSharedService.configDocumentiIstruttoria;
@@ -247,9 +260,9 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
       }
     );
   }
-  
+
   confermaEliminazione(el: AllegatoVO) {
- 
+
     this.logger.info("Richiesta eliminazione dell'allegato " + el.id);
     this.generaMessaggio(el);
     this.buttonAnnullaText = "Annulla";
@@ -278,12 +291,13 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
               );
               this.delete.next(true);
               this.router.navigate([
-	            Routing.PAGAMENTI_RICONCILIA_VERBALE_RIEPILOGO + this.idVerbale,
+	           // Routing.PAGAMENTI_RICONCILIA_VERBALE_RIEPILOGO + this.idVerbale,
+             Routing.VERBALE_RIEPILOGO + this.idVerbale,
 	            {  },
 	          ]);
               //this.load();
               //this.loaded = true;
-              
+
               this.isModificaSoggetto = false;
             },
             (err) => {
@@ -429,11 +443,32 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
   onLoadedAllegato(loaded: boolean) {
     this.loadedAllegato = loaded;
   }
-  
-  
-  pulisciFiltri() {	
+
+
+  goToDatiProvaPagamento(el){
+    console.log(el);
+    const currentUrl = this.router.url;
+    if (currentUrl.includes('pregresso/')) {
+      this.router.navigate([Routing.PREGRESSO_DETTAGLIO_PROVA_PAGAMENTO + this.idVerbale], {
+        queryParams: {idAllegato : el.id}
+      });
+    } else if (currentUrl.includes('verbale/')) {
+      this.router.navigate([Routing.DETTAGLIO_PROVA_PAGAMENTO + this.idVerbale], {
+        queryParams: {idAllegato : el.id}
+      });
+    }else if (currentUrl.includes('pagamenti/')) {
+      this.router.navigate([Routing.PAGAMENTI_RICONCILIA_DETTAGLIO_PROVA_PAGAMENTO + this.idVerbale], {
+        queryParams: {idAllegato : el.id}
+      });
+    }
+    /*this.router.navigate(['/route-to'], {
+        someData: { name: 'Some name', description: 'Some description' },
+    });*/
+  }
+
+  pulisciFiltri() {
     //this.importo=this.importoVerbale;
-    
+
     this.comuneEstero = false;
     this.comuneEsteroDisabled = false;
     if(!this.isModificaSoggetto){
@@ -460,13 +495,13 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
 	      if(this.soggetto.comuneNascita) {this.soggetto.comuneNascita.id = 0;}
 	 }
   }
-  
+
   manageMessage(err: ExceptionVO) {
     this.typeMessageTop = err.type;
     this.messageTop = err.message;
     this.timerShowMessageTop();
   }
-  
+
   manageMessageTop(message: string, type: string) {
     this.typeMessageTop = type;
     this.messageTop = message;
@@ -492,6 +527,7 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
   }
 
   salvaSoggetto() {
+
     this.loadedSalvaRicerca = false;
     if (this.soggetto.residenzaEstera) {
       this.soggetto.indirizzoResidenza = this.indirizzoEstero;
@@ -507,18 +543,25 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
       this.soggetto.nazioneResidenza = null;
       this.soggetto.denomComuneResidenzaEstero = null;
     }
-    this.soggetto.importoVerbale =this.importo;
+    if(this.soggetto.ruolo.id.toString() === "1"){
+      this.soggetto.ruolo = this.ruoloModel.find((el)=> el.id===1)
+      this.soggetto.importoVerbale =this.importo;
+    }else{
+      this.soggetto.ruolo = this.ruoloModel.find((el)=> el.id===2)
+      this.soggetto.importoVerbale = null
+    }
+
     this.subscribers.salvaSoggettoVerbale = this.sharedVerbaleService
       .salvaSoggetto(this.soggetto, this.idVerbale)
       .subscribe(
         (data) => {
-          if (data.comuneNascitaValido) {        
+          if (data.comuneNascitaValido) {
 	        this.dataSoggVerbale.splice(this.dataSoggVerbale.indexOf(this.soggettoModifica), 1);
           	this.dataSoggVerbale.push(TableSoggettiVerbale.map(data));
             this.pulisciFiltri();
-            
+
             this.manageMessageTop("Soggetto modificato con successo", "SUCCESS");
-            
+
             this.isModificaSoggetto = false;
             // ricarico le info del verbale per visualizzare gli importi aggiornati
             this.loadDatiVerbale();
@@ -547,10 +590,10 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
 	console.log('modifica');
 	console.log(el);
           this.modalita = "E";
-	this.soggettoModifica = el; 
+	this.soggettoModifica = el;
     this.isModificaSoggetto = true;
 	this.loadedSalvaRicerca = true;
-	
+
 	/**
 	 * soggettoService.getSoggettoById(el.id,this.idVerbale).subscribe((data) => {
      */
@@ -585,12 +628,12 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
           this.showResidenza = true;
     	//this.ricercaSoggetto(this.soggetto);
     });
-    
-	
+
+
   }
-  
+
   manageLuoghiBySoggetto() {
-  
+
       this.loadNazioni();
       this.loadRegioni();
       this.loadRuoli();
@@ -607,8 +650,8 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
       this.loadComuni(this.soggetto.provinciaResidenza.id);
     }
   }
-  
-  
+
+
   loadNazioni() {
     this.loaderNazioni = false;
     this.subscribers.nazioni = this.luoghiService.getNazioni().subscribe(
@@ -634,7 +677,7 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
       }
     );
   }
-  
+
   loadProvince(id: number) {
     this.loaderProvince = false;
     this.subscribers.provinceByRegione = this.luoghiService
@@ -665,8 +708,8 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
         }
       );
   }
-  
-  
+
+
   isDisable(field: string) {
     let s = this.soggetto;
     if (s.idStas != null) return true;
@@ -679,15 +722,15 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
     }
     return false;
   }
-  
+
   //PROVINCIA RESIDENZA
   public isDisabledComuneProvincia(type: string) {
     if (type == "P" && this.soggetto.regioneResidenza.id == null) return true;
     if (type == "C" && this.soggetto.provinciaResidenza.id == null) return true;
     return false;
   }
-  
-  
+
+
   formDisabled(form: NgForm) {
     if (this.soggetto.personaFisica)
       return !(this.formFisicoValid && form.valid);
@@ -698,5 +741,5 @@ export class SharedVerbaleRiepilogoComponent implements OnInit, OnDestroy {
     if (type == "F") this.formFisicoValid = event;
     if (type == "G") this.formGiuridicoValid = event;
   }
-  
+
 }

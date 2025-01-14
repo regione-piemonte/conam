@@ -18,6 +18,7 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
   public tabOrdinanza: boolean;
   public loadedStatoVerbale: boolean;
 
+
   public subscribers: any = {};
 
   @Input()  statiOrdinanzaModel: Array<StatoOrdinanzaVO>;
@@ -54,7 +55,17 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
   setRequest() {
     if (this.request == null) this.pulisciFiltri();
     else {
-      this.tabOrdinanza = true;
+      //this.tabOrdinanza = true;
+      if (
+        (this.request.numeroDeterminazione && this.request.numeroDeterminazione != null)
+        || (this.request.numeroVerbale && this.request.numeroVerbale != null)
+        || (this.request.statoOrdinanza && this.request.statoOrdinanza.length == 0)
+        || (this.request.dataOrdinanzaDa && this.request.dataOrdinanzaDa != null)
+        || (this.request.dataOrdinanzaA && this.request.dataOrdinanzaA != null)
+        || this.request.soggettoVerbale.length == 0
+      ){
+        this.tabOrdinanza = true;
+      }
       this.ricercaOrdinanzaModel = this.request;
       this.soggettoVerbaleTrasgressore = new SoggettoVerbaleRequest();
       this.soggettoVerbaleObbligato = new SoggettoVerbaleRequest();
@@ -184,11 +195,24 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
           !this.isEmpty(this.soggettoVerbaleTrasgressore.cognome) ||
           !this.isEmpty(this.soggettoVerbaleTrasgressore.nome)
         );
-      if (field == "CG" || field == "NM")
-        return (
-          condFisica ||
-          !this.isEmpty(this.soggettoVerbaleTrasgressore.codiceFiscale)
-        );
+        if (field == 'CG')
+        {
+
+          return (
+            condFisica ||
+            !this.isEmpty(this.soggettoVerbaleTrasgressore.codiceFiscale)
+
+          );}
+          if (field == 'NM')
+        {
+
+          return (
+            condFisica ||
+            !this.isEmpty(this.soggettoVerbaleTrasgressore.codiceFiscale)
+            //|| !this.isEmpty(this.soggettoVerbaleTrasgressore.cognome)
+          );}
+
+
       let condGiuridica: Boolean =
         !this.tabTrasgressore || !this.isTrasgressorePersonaGiuridica;
       if (field == "DN")
@@ -223,11 +247,20 @@ export class SharedOrdinanzaRicercaComponent implements OnInit, OnDestroy {
           !this.isEmpty(this.soggettoVerbaleObbligato.cognome) ||
           !this.isEmpty(this.soggettoVerbaleObbligato.nome)
         );
-      if (field == "CG" || field == "NM")
+        if (field == "CG" )
+
         return (
           condFisica ||
           !this.isEmpty(this.soggettoVerbaleObbligato.codiceFiscale)
         );
+        if (field == 'NM')
+        {
+
+          return (
+            condFisica ||
+            !this.isEmpty(this.soggettoVerbaleObbligato.codiceFiscale)
+            //|| !this.isEmpty(this.soggettoVerbaleObbligato.cognome)
+          );}
       let condGiuridica: Boolean =
         !this.tabObbligatoInSolido || !this.isObbligatoInSolidoPersonaGiuridica;
       if (field == "DN")

@@ -6,7 +6,7 @@ import { TableSoggettiOrdinanza } from "../../../commons/table/table-soggetti-or
 import { Config } from "../../../shared/module/datatable/classes/config";
 import { SharedOrdinanzaConfigService } from "../../../shared-ordinanza/service/shared-ordinanza-config.service";
 import { SharedOrdinanzaDettaglio } from "../../../shared-ordinanza/component/shared-ordinanza-dettaglio/shared-ordinanza-dettaglio.component";
-import { SollecitoVO } from "../../../commons/vo/riscossione/sollecito-vo";
+import { SollecitoRequestVO, SollecitoVO } from "../../../commons/vo/riscossione/sollecito-vo";
 import { ExceptionVO } from "../../../commons/vo/exceptionVO";
 import { PagamentiUtilService } from "../../services/pagamenti-util.serivice";
 import { SharedRiscossioneService } from "../../../shared-riscossione/services/shared-riscossione.service";
@@ -132,8 +132,12 @@ export class PagamentiRiconciliaSollecitoRateDettaglioComponent
 
   confermaRiconciliazione() {
     this.loaded = false;
+    let body = new SollecitoRequestVO();
+
+    
+    body.sollecitoVO= this.sollecito
     this.subscribers.riconcilia = this.pagamentiService
-      .riconciliaSollecito(this.sollecito)
+      .riconciliaSollecito(body)
       .subscribe(
         (data) => {
           let index = this.listaSolleciti.findIndex(

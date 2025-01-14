@@ -41,8 +41,29 @@
             [disabled]="!tabVerbale"
           />
         </div>
+
+
         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
-          <label for="ente" class="control-label">Ente – riferimenti normativi</label>
+          <label for="annoAccertamento" class="control-label"
+            >Anno accertamento</label
+          >
+          <input
+            type="number"
+            id="annoAccertamento"
+            pattern="[0-9]{4}"
+            maxlength="4"
+            class="form-control"
+            name="annoAccertamento"
+            [(ngModel)]="ricercaVerbale.datiVerbale.annoAccertamento"
+            [disabled]="!tabVerbale"
+            #annoAccertamento="ngModel"
+          />
+        </div>
+
+        <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <label for="ente" class="control-label"
+            >Ente – riferimenti normativi</label
+          >
           <shared-spinner-form
             [diameter]="30"
             *ngIf="!loadedEnte; else elseEnte"
@@ -55,7 +76,6 @@
               [(ngModel)]="ricercaVerbale.datiVerbale.ente"
               [disabled]="!tabVerbale"
               name="ente"
-              
             >
               <option *ngFor="let ent of entiLegge" [ngValue]="ent">
                 {{ ent.denominazione }}
@@ -64,7 +84,7 @@
           </ng-template>
         </div>
         <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
-          <label for="ambito" class="control-label">Acronimo ambito</label>
+          <label for="ambito" class="control-label"> Ambito</label>
           <shared-spinner-form
             [diameter]="30"
             *ngIf="!loadedAmbito; else elseAmbito"
@@ -106,7 +126,7 @@
               "
               [(ngModel)]="ricercaVerbale.datiVerbale.norma"
               name="leggeViolata"
-              
+
             >
               <option *ngFor="let norm of normaModel" [ngValue]="norm">
                 {{ norm.denominazione }}
@@ -141,6 +161,205 @@
             </select>
           </ng-template>
         </div>
+
+                <!------------>
+                <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                  <label for="enteAccertatore" class="control-label">Ente accertatore</label>
+                  <shared-spinner-form
+                    [diameter]="30"
+                    *ngIf="!loadedEnteAccertatore; else elseEnteAccertatore"
+                  ></shared-spinner-form>
+                  <ng-template #elseEnteAccertatore>
+                    <select
+                      class="form-control"
+                      id="enteAccertatore"
+                      (change)="changeEnteAccertatore()"
+                      [(ngModel)]="ricercaVerbale.datiVerbale.enteAccertatore"
+                      [disabled]="!tabVerbale"
+                      name="enteAccertatore"
+                    >
+                      <option *ngFor="let enteAccertatore of entiAccertatori" [ngValue]="enteAccertatore">
+                        {{ enteAccertatore.denominazione }}
+                      </option>
+                    </select>
+                  </ng-template>
+                </div>
+                <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                  <label for="comuneEnteAccertatore" class="control-label">Comune ente accertatore</label>
+                  <shared-spinner-form
+                    [diameter]="30"
+                    *ngIf="!loadedComuneEnteAccertatore; else elseComuneEnteAccertatore"
+                  ></shared-spinner-form>
+                  <ng-template #elseComuneEnteAccertatore>
+                    <select
+                      class="form-control"
+                      id="comuneEnteAccertatore"
+                      [(ngModel)]="ricercaVerbale.datiVerbale.comuneEnteAccertatore"
+                      [disabled]="!tabVerbale"
+                      name="comuneEnteAccertatore"
+                      [compareWith]="byId"
+                      #comuneEnteAccertatore="ngModel"
+                    >
+                      <option *ngFor="let coment of comuneEnteAccertatoreModel" [ngValue]="coment">
+                        {{ coment.denominazione }}
+                      </option>
+                    </select>
+                  </ng-template>
+                </div>
+
+        <!-----istruttore-->
+
+        <div
+        class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12"
+
+      >
+        <label for="funzionarioIstr" class="control-label"
+          >Funzionario Istruttore assegnatario</label
+        >
+        <shared-spinner-form
+          [diameter]="30"
+          *ngIf="!loadedistruttore; else elseFunzionarioIstr"
+        ></shared-spinner-form>
+        <ng-template #elseFunzionarioIstr>
+          <select
+          class="form-control"
+          id="funzionarioIstr"
+
+          [(ngModel)]="ricercaVerbale.datiVerbale.assegnatario"
+          name="funzionarioIstr"
+           [disabled]="!tabVerbale"
+          #funzionarioIstr="ngModel"
+        >
+            <option
+              *ngFor="let funz of funzionarioIstrModel"
+              [ngValue]="funz"
+            >
+              {{ funz.denominazione }}
+            </option>
+          </select>
+        </ng-template>
+      </div>
+
+        <!----- dataAccertamento ------>
+
+        <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6" style="margin-left:15px">
+          <div class="row">
+            <div
+            class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-left"
+              style="font-size: 11.5px !important; margin-left:-15px "
+            >
+              <label class="control-label"> Da Data accertamento </label>
+            </div>
+            <div
+              class="input-group date col-xs-10 col-sm-10 col-md-10 col-lg-10"
+              id="datetimepicker1"
+            >
+              <input
+                type="text"
+                id="dataAccertamentoDa"
+                [(ngModel)]="ricercaVerbale.datiVerbale.dataAccertamentoDa"
+                name="dataAccertamentoDa"
+                #datePicker1="ngModel"
+                (blur)="manageDatePicker($event, 1)"
+                class="form-control date-picker"
+                [disabled]="!tabVerbale"
+              />
+              <span class="input-group-addon" (click)="interceptor($event)">
+                <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6" style="margin-right: -15px">
+          <div class="row">
+            <div
+            class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-left"
+              style="font-size: 11.5px; margin-left: -15px"
+            >
+              <label class="control-label">A Data Accertamento</label>
+            </div>
+            <div
+              class="input-group date col-xs-10 col-sm-10 col-md-10 col-lg-10"
+              id="datetimepicker2"
+            >
+              <input
+                type="text"
+                id="dataAccertamentoA"
+                [(ngModel)]="ricercaVerbale.datiVerbale.dataAccertamentoA"
+                name="dataAccertamentoA"
+                #datePicker2="ngModel"
+                (blur)="manageDatePicker($event, 2)"
+                class="form-control date-picker"
+                [disabled]="!tabVerbale"
+              />
+              <span class="input-group-addon" (click)="interceptor($event)">
+                <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <!------------>
+         <!----- dataProcessoVerbale ------>
+
+         <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6" style="margin-left:15px">
+          <div class="row">
+            <div
+            class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-left"
+              style="font-size: 11.5px !important; margin-left:-15px "
+            >
+              <label class="control-label"> Da Data processo verbale </label>
+            </div>
+            <div
+              class="input-group date col-xs-10 col-sm-10 col-md-10 col-lg-10"
+              id="datetimepicker3"
+            >
+              <input
+                type="text"
+                id="dataProcessoVerbaleDa"
+                [(ngModel)]="ricercaVerbale.datiVerbale.dataProcessoVerbaleDa"
+                name="dataProcessoVerbaleDa"
+                #datePicker3="ngModel"
+                (blur)="manageDatePicker($event, 3)"
+                class="form-control date-picker"
+                [disabled]="!tabVerbale"
+              />
+              <span class="input-group-addon" (click)="interceptor($event)">
+                <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6" style="margin-right: -15px">
+          <div class="row">
+            <div
+              class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-left"
+              style="font-size: 11.5px; margin-left: -15px"
+            >
+              <label class="control-label">A Data processo verbale</label>
+            </div>
+            <div
+              class="input-group date col-xs-10 col-sm-10 col-md-10 col-lg-10"
+              id="datetimepicker4"
+            >
+              <input
+                type="text"
+                id="dataProcessoVerbaleA"
+                [(ngModel)]="ricercaVerbale.datiVerbale.dataProcessoVerbaleA"
+                name="dataProcessoVerbaleA"
+                #datePicker4="ngModel"
+                (blur)="manageDatePicker($event, 4)"
+                class="form-control date-picker"
+                [disabled]="!tabVerbale"
+              />
+              <span class="input-group-addon" (click)="interceptor($event)">
+                <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+
+
       </div>
     </label>
   </div>
@@ -218,8 +437,8 @@
               name="nome"
               [(ngModel)]="soggettoVerbaleTrasgressore.nome"
               [disabled]="isDisable('NM', 'T')"
-              required
             />
+            <!--required-->
           </div>
         </div>
       </div>
@@ -364,8 +583,8 @@
               name="nomeOS"
               [(ngModel)]="soggettoVerbaleObbligato.nome"
               [disabled]="isDisable('NM', 'O')"
-              required
             />
+            <!--required-->
           </div>
         </div>
       </div>

@@ -5,4 +5,7 @@ export class AzioneOrdinanzaResponse {
     public dowloadBollettiniEnable: boolean;
     public aggiungiNotificaEnable: boolean;
     public visualizzaNotificaEnable: boolean;
+    public protocollaLetteraSenzaBollettini: boolean;
+    public scaricaLetteraEnable: boolean;
+    public soloLettera:boolean;
 }
