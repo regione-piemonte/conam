@@ -168,7 +168,7 @@ public class GetDeterminaWS extends MyWebServiceGatewaySupport {
 						SaajSoapMessage sm = (SaajSoapMessage) message;
 						attachments = sm.getAttachments();
 					}
-					if (attachments.hasNext()) {
+					if (attachments != null && attachments.hasNext()) {
 						Attachment dd = attachments.next();
 						String listaDetermina = AurigaUtils.getXmlStringFromAttachment(message);
 						logger.debug("[GetDeterminaWS] xml output: " + listaDetermina);
@@ -182,7 +182,6 @@ public class GetDeterminaWS extends MyWebServiceGatewaySupport {
 								docEng.setOggetto(determina.getOggettoPubbl());
 								docEng.setData(determina.getIDProposta().getTsRegistrazione().toString());
 								try {
-									// TODO - DA CAPIRE COME RIEMPIRE
 									Attachment att = attachments.next();
 									docEng.setFile(IOUtils.toByteArray(att.getInputStream()));
 								} catch (Throwable t) {

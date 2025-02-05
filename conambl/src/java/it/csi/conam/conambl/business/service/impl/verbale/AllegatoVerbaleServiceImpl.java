@@ -428,12 +428,16 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 					importoTotale = importoTotale.add(cnmRVerbaleSoggetto.getImportoMisuraRidotta());
 				}
 				
-				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
-				if(importoPagato == null) {
-					importoPagato = new BigDecimal(0);
-				}
-				
-				if(importoPagato.compareTo(importoTotale)<0) {
+//				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
+//				if(importoPagato == null) {
+//					importoPagato = new BigDecimal(0);
+//				}
+//				
+//				if(importoPagato.compareTo(importoTotale)<0) {
+					
+				BigDecimal importoResiduo = cnmTAllegatoFieldRepository.getImportoResiduoByIdVerbale(idVerbale);
+					
+				if(importoResiduo != null && importoResiduo.compareTo(BigDecimal.valueOf(0))!=0) {
 					
 					TipoAllegatoVO ricevutaPagamentoVerbale = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId()));
 					TipoAllegatoVO provaPagamentoVerbale = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.PROVA_PAGAMENTO_VERBALE.getId()));
@@ -584,9 +588,14 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		// 20210921 PP - consente di inserire ancora una ricevuta o prova (ob41) di pagamento se l'importo pagato e' inferiore all'importo del verbale
 		try {
 			if(tipo!=null && (tipo == TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE || tipo == TipoAllegato.PROVA_PAGAMENTO_VERBALE))  {
-				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
-				if(importoPagato!=null && importoPagato.intValue()!=0) {
-					if(importoPagato.intValue()<cnmTVerbale.getImportoVerbale().intValue()) {
+//				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
+//				if(importoPagato!=null && importoPagato.intValue()!=0) {
+				
+				BigDecimal importoResiduo = cnmTAllegatoFieldRepository.getImportoResiduoByIdVerbale(idVerbale);
+					
+				if(importoResiduo != null && importoResiduo.compareTo(BigDecimal.valueOf(0))==0) {
+					
+//					if(importoPagato.intValue()<cnmTVerbale.getImportoVerbale().intValue()) {
 						TipoAllegatoVO ricevutaPagamentoVerbale = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId()));
 						TipoAllegatoVO provaPagamentoVerbale = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.PROVA_PAGAMENTO_VERBALE.getId()));
 						
@@ -599,7 +608,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 							listAllegabili.add(provaPagamentoVerbale);
 						}
 
-					}
+//					}
 				}
 			}
 		}catch(Throwable t) {}
@@ -667,7 +676,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 				listAllegabili.add(verbAccSec);
 			}
 			
-			BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
+//			BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(idVerbale);
 			TipoAllegatoVO docRicevutaAllegati = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.RICEVUTA_PAGAMENTO_VERBALE.getId()));
 			TipoAllegatoVO docProvaPagamentoAllegati = tipoAllegatoEntityMapper.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.PROVA_PAGAMENTO_VERBALE.getId()));
 			while (listAllegabili.remove(docRicevutaAllegati)) {
@@ -842,7 +851,7 @@ public class AllegatoVerbaleServiceImpl implements AllegatoVerbaleService {
 		for(String idSoggVerbale : soggList) {
 			CnmRVerbaleSoggetto cnmRVerbaleSoggetto= cnmRVerbaleSoggettoRepository.findOne(Integer.parseInt(idSoggVerbale.replaceAll("\\+", "")));
 			Double amount = Double.valueOf(pagamentoList[i].replaceAll("\\+", ""));
-			cnmRVerbaleSoggetto.setImportoPagato(cnmRVerbaleSoggetto.getImportoPagato().subtract(new BigDecimal(amount)));
+			cnmRVerbaleSoggetto.setImportoPagato(cnmRVerbaleSoggetto.getImportoPagato().subtract(BigDecimal.valueOf(amount)));
 			cnmRVerbaleSoggettoRepository.save(cnmRVerbaleSoggetto);
 			i++;
 		}

@@ -24,14 +24,28 @@ public interface CnmTAllegatoFieldRepository extends CrudRepository<CnmTAllegato
 	@Query("Select af from CnmROrdinanzaVerbSog o join o.cnmRAllegatoOrdVerbSogs rao join rao.cnmTAllegato a join a.cnmTAllegatoFields af join af.cnmCField cf where o.idOrdinanzaVerbSog = ?1 and cf.idField = 15 ")
 	List<CnmTAllegatoField> findByIdOrdinanzaVerbSog(Integer idOrdinanzaVerbSog);
 
-	@Query(value = "Select SUM(af.valore_number) from cnm_t_allegato_field af, cnm_t_allegato a, cnm_r_allegato_verbale av where "
-			+ "af.id_allegato = a.id_allegato and "
-			+ "a.id_allegato = av.id_allegato and "
-			+ "av.id_verbale = ?1 and "
-			+ "a.id_tipo_allegato = 7 and "
-			+ "af.id_field = 8 ", nativeQuery = true)
+//	@Query(value = "Select SUM(af.valore_number) from cnm_t_allegato_field af, cnm_t_allegato a, cnm_r_allegato_verbale av where "
+//			+ "af.id_allegato = a.id_allegato and "
+//			+ "a.id_allegato = av.id_allegato and "
+//			+ "av.id_verbale = ?1 and "
+//			+ "a.id_tipo_allegato = 7 and "
+//			+ "af.id_field = 8 ", nativeQuery = true)
+//	BigDecimal getImportoPagatoByIdVerbale(Integer idVerbale);
+
+	// Nuovo metodo che tiene conto degli importi pagati per ogni soggetto del verbale e non dei field
+	@Query(value = "Select SUM(crvs.importo_pagato)/ count(*)  from cnm_r_verbale_soggetto crvs, cnm_t_soggetto cts "
+			+ "where crvs.id_soggetto = cts.id_soggetto and "
+			+ "crvs.id_verbale = ?1 and "
+			+ "crvs.id_ruolo_soggetto = 1", nativeQuery = true)
 	BigDecimal getImportoPagatoByIdVerbale(Integer idVerbale);
 
+
+	// Nuovo metodo che tiene conto degli importi pagati per ogni soggetto del verbale e non dei field
+	@Query(value = "Select SUM(crvs.importo_mis_ridotta)-SUM(crvs.importo_pagato)  from cnm_r_verbale_soggetto crvs, cnm_t_soggetto cts "
+			+ "where crvs.id_soggetto = cts.id_soggetto and "
+			+ "crvs.id_verbale = ?1 and "
+			+ "crvs.id_ruolo_soggetto = 1", nativeQuery = true)
+	BigDecimal getImportoResiduoByIdVerbale(Integer idVerbale);
 	
 	/*
 	 * RICERCA RISCOSSIONE -> RISCOSSIONE COATTIVA

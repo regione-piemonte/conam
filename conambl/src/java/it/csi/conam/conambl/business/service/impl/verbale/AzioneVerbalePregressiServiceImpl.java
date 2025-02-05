@@ -372,11 +372,15 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 			}else {
 				idStati = new ArrayList<>();
 				// controllo se ci sono pagamenti totali per il verbale
-				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
-				if(importoPagato == null) {
-					importoPagato = new BigDecimal(0);
-				}
-				if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) == 0) {
+//				BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
+//				if(importoPagato == null) {
+//					importoPagato = new BigDecimal(0);
+//				}
+//				if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) == 0) {
+				
+				BigDecimal importoResiduo = cnmTAllegatoFieldRepository.getImportoResiduoByIdVerbale(cnmTVerbale.getIdVerbale());
+					
+				if(importoResiduo != null && importoResiduo.compareTo(BigDecimal.valueOf(0))==0) {
 					idStati.add(Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO);
 				}else {
 					if(conScritti)
@@ -402,19 +406,31 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 		List<CnmRVerbaleSoggetto> cnmRVerbaleSoggettoList = cnmRVerbaleSoggettoRepository.findVerbaleSoggettoByIdVerbale(cnmTVerbale.getIdVerbale());
 		
 		// [Importo residuo totale] = (sommatoria di tutti gli importi in misura ridotta presenti su ogni soggetto) - tutti i pagamenti effettuati
-		BigDecimal importoTotale = new BigDecimal(0);				
-		for(CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmRVerbaleSoggettoList) {
-			importoTotale = importoTotale.add(cnmRVerbaleSoggetto.getImportoMisuraRidotta());
-		}
+//		BigDecimal importoTotale = new BigDecimal(0);				
+//		for(CnmRVerbaleSoggetto cnmRVerbaleSoggetto : cnmRVerbaleSoggettoList) {
+//			importoTotale = importoTotale.add(cnmRVerbaleSoggetto.getImportoMisuraRidotta());
+//		}
+//		
+//		BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
+//		if(importoPagato == null) {
+//			importoPagato = new BigDecimal(0);
+//		}
 		
-		BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
-		if(importoPagato == null) {
-			importoPagato = new BigDecimal(0);
-		}
-		
-		if(importoPagato.compareTo(importoTotale)<0) {
-			idStati.add(Constants.STATO_VERBALE_CONCILIATO);
-		}
+//		if (cnmTVerbale.getCnmDStatoVerbale().getIdStatoVerbale() != Constants.STATO_VERBALE_INCOMPLETO) {
+			
+			// verifico se tutti i soggetti hanno importo residuo = 0, in questo caso sarà possibile passare il fascicolo in conciliato
+			boolean canConciliato = true;
+			for(SoggettoVO sog : soggetti) {
+				if(sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID)
+						&& sog.getImportoResiduoVerbale() > 0) {
+					canConciliato = false;
+					break;
+				}
+			}
+			if(canConciliato) {
+				idStati.add(Constants.STATO_VERBALE_CONCILIATO);
+			}
+//		}
 			
 		return idStati;
 
@@ -785,11 +801,14 @@ public class AzioneVerbalePregressiServiceImpl implements AzioneVerbalePregressi
 				// segnalazione via mail da Cacciuttolo il 07/12/2021 14:13
 				if(idStato!= null) {
 					// controllo se ci sono pagamenti totali per il verbale
-					BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
-					if(importoPagato == null) {
-						importoPagato = new BigDecimal(0);
-					}
-					if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) != 0) {
+//					BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
+//					if(importoPagato == null) {
+//						importoPagato = new BigDecimal(0);
+//					}
+//					if(importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) != 0) {
+					BigDecimal importoResiduo = cnmTAllegatoFieldRepository.getImportoResiduoByIdVerbale(cnmTVerbale.getIdVerbale());
+					
+					if(importoResiduo != null && importoResiduo.compareTo(BigDecimal.valueOf(0))!=0) {
 						idStato = null;
 					}
 				}

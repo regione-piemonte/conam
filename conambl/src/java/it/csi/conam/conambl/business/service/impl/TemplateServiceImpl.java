@@ -566,15 +566,15 @@ public class TemplateServiceImpl implements TemplateService {
 							? request.getDatiTemplateCompilatiVO().getTestoLibero2()
 							: "");
 
-			if (StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1())
-					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2())
-					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3())
-					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())) {
-				jasperParam.put("intestazioneOrganoAccertatore", "");
-			} else {
-				//jasperParam.put("intestazioneOrganoAccertatore", "e p.c.");
-				jasperParam.put("intestazioneOrganoAccertatore", "");
-			}
+//			if (StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga1())
+//					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga2())
+//					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getIndirizzoOrganoAccertatoreRiga3())
+//					&& StringUtils.isBlank(request.getDatiTemplateCompilatiVO().getTestoLibero())) {
+//				jasperParam.put("intestazioneOrganoAccertatore", "");
+//			} else {
+//				//jasperParam.put("intestazioneOrganoAccertatore", "e p.c.");
+//			}
+			jasperParam.put("intestazioneOrganoAccertatore", "");
 			// --
 
 		}

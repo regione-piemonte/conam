@@ -504,11 +504,14 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 				if(idStato!= null) {
 				//if(idStatoVerbale == Constants.STATO_VERBALE_IN_ATTESA_VERIFICA_PAGAMENTO && idStato!= null) {
 					// controllo se ci sono pagamenti totali per il verbale
-					BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
-					if(importoPagato == null) {
-						importoPagato = new BigDecimal(0);
-					}
-					if(importoPagato.compareTo(new BigDecimal(0))> 0 && importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) == 0) {
+//					BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
+//					if(importoPagato == null) {
+//						importoPagato = new BigDecimal(0);
+//					}
+//					if(importoPagato.compareTo(new BigDecimal(0))> 0 && importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) == 0) {
+					BigDecimal importoResiduo = cnmTAllegatoFieldRepository.getImportoResiduoByIdVerbale(cnmTVerbale.getIdVerbale());
+					
+					if(importoResiduo != null && importoResiduo.compareTo(BigDecimal.valueOf(0))==0) {
 						idStato = Constants.STATO_VERBALE_ACQUISITO_CON_PAGAMENTO;
 					}else {
 						idStato = Constants.STATO_VERBALE_ACQUISITO;
@@ -532,11 +535,14 @@ public class AzioneVerbaleServiceImpl implements AzioneVerbaleService {
 				// segnalazione via mail da Cacciuttolo il 07/12/2021 14:13
 				if(idStato!= null) {
 					// controllo se ci sono pagamenti totali per il verbale
-					BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
-					if(importoPagato == null) {
-						importoPagato = new BigDecimal(0);
-					}
-					if(importoPagato.compareTo(new BigDecimal(0))> 0 && importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) != 0) {
+//					BigDecimal importoPagato = cnmTAllegatoFieldRepository.getImportoPagatoByIdVerbale(cnmTVerbale.getIdVerbale());
+//					if(importoPagato == null) {
+//						importoPagato = new BigDecimal(0);
+//					}
+//					if(importoPagato.compareTo(new BigDecimal(0))> 0 && importoPagato.compareTo(cnmTVerbale.getImportoVerbale()) != 0) {
+					BigDecimal importoResiduo = cnmTAllegatoFieldRepository.getImportoResiduoByIdVerbale(cnmTVerbale.getIdVerbale());
+					
+					if(importoResiduo != null && importoResiduo.compareTo(BigDecimal.valueOf(0))!=0) {
 						idStato = null;
 					}
 				}

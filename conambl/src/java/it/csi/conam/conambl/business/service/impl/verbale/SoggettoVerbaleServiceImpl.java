@@ -388,7 +388,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(cnmDRuoloSoggetto));
 		sog.setNoteSoggetto(soggetto.getNoteSoggetto());
 		//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
-		if(sog.getRuolo()!=null && Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID)) {
+		if(sog.getRuolo()!=null && sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID)) {
 			sog.setImportoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
 			sog.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue()-cnmRVerbaleSoggetto.getImportoPagato().doubleValue());
 		}else {
@@ -675,7 +675,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 		sog.setImportoResiduoVerbale(cnmRVerbaleSoggetto.getImportoMisuraRidotta().doubleValue());
 		
 		//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
-		if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+		if(sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
 			sog.setImportoVerbale(null);
 			sog.setImportoResiduoVerbale(null);
 		}
@@ -727,7 +727,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
 			
 			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
-			if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+			if(sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
 				sog.setImportoVerbale(null);
 				sog.setImportoResiduoVerbale(null);
 			}
@@ -837,7 +837,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 						sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
 						
 						//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
-						if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+						if(sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
 							sog.setImportoVerbale(null);
 							sog.setImportoResiduoVerbale(null);
 						}
@@ -889,7 +889,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 				sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(cnmRVerbaleSoggetto.getCnmDRuoloSoggetto()));
 				
 				//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
-				if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+				if(sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
 					sog.setImportoVerbale(null);
 					sog.setImportoResiduoVerbale(null);
 				}
@@ -1018,7 +1018,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
 			
 			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
-			if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+			if(sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
 				sog.setImportoVerbale(null);
 				sog.setImportoResiduoVerbale(null);
 			}
@@ -1065,7 +1065,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
 			
 			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
-			if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+			if(sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
 				sog.setImportoVerbale(null);
 				sog.setImportoResiduoVerbale(null);
 			}
@@ -1109,7 +1109,7 @@ public class SoggettoVerbaleServiceImpl implements SoggettoVerbaleService {
 			sog.setRuolo(ruoloSoggettoEntityMapper.mapEntityToVO(c.getCnmDRuoloSoggetto()));
 			
 			//REQ_69 Pasqualini -  i due seguenti valori vanno impostati solo se soggettoVO  ha come ruolo VERBALE_SOGGETTO_RUOLO_TRASGRESSORE_ID
-			if(Long.valueOf(sog.getRuolo().getId()).equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
+			if(sog.getRuolo().getId().equals(Constants.VERBALE_SOGGETTO_RUOLO_OBBLIGATO_IN_SOLIDO_ID)) {
 				sog.setImportoVerbale(null);
 				sog.setImportoResiduoVerbale(null);
 			}

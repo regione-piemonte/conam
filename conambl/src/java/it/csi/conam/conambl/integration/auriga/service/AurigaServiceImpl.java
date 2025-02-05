@@ -177,7 +177,14 @@ public class AurigaServiceImpl implements AurigaService {
 			try {
 				InputStream initialStream = attachment.getInputStream();
 				byte[] content = new byte[initialStream.available()];
-				initialStream.read(content);
+//				initialStream.read(content);
+				int bytesRead = initialStream.read(content);
+				if (bytesRead != content.length) {
+					throw new DocumentaleException("Impossibile leggere tutti i byte dall'InputStream. Previsti: " 
+							+ content.length + ", letti: " + bytesRead);
+				}
+				
+				
 				file.setContent(content);
 			} catch (IOException e) {
 				logger.error("[getInputStream] Errore nel recupero del documento: " + e.getMessage(), e);

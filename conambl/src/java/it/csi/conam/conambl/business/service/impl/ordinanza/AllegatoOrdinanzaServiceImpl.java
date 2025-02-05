@@ -304,7 +304,7 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 			return listAllegabili;
 		}
 
-		listAllegabili.removeAll(listAllegati);
+		if(listAllegabili!=null) listAllegabili.removeAll(listAllegati);
 
 		return listAllegabili;
 	}
@@ -382,6 +382,8 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		if (tipoDocumento != null && tipoDocumento.equals(TipoAllegato.ISTANZA_RATEIZZAZIONE.getTipoDocumento())
 				&& aggiungiCategoriaEmail) {
 			// 20200729_ET aggiunto blocco per gestione tipi doc EMAIL
+			if(listAllegabili==null) listAllegabili = new ArrayList<>();
+			
 			listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(
 					cnmDTipoAllegatoRepository.findOne(TipoAllegato.EMAIL_GIURISDIZIONALE_ORD_SOGG.getId())));
 			return listAllegabili;
@@ -399,11 +401,12 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		else
 			listAllegati = getTipologiaAllegatiOrdinanzaSoggettByCnmTOrdinanzaSoggetto(cnmROrdinanzaVerbSog);
 
-		listAllegabili.removeAll(listAllegati);
+		if(listAllegabili!=null) listAllegabili.removeAll(listAllegati);
 
 		// 20200729_ET aggiunto blocco per gestione tipi doc EMAIL
 		if (tipoDocumento != null && tipoDocumento.equals(TipoAllegato.DISPOSIZIONE_DEL_GIUDICE.getTipoDocumento())
 				&& aggiungiCategoriaEmail) {
+			if(listAllegabili==null) listAllegabili = new ArrayList<>();
 			listAllegabili.add(tipoAllegatoEntityMapper.mapEntityToVO(
 					cnmDTipoAllegatoRepository.findOne(TipoAllegato.EMAIL_GIURISDIZIONALE_ORD_SOGG.getId())));
 			return listAllegabili;
@@ -414,18 +417,18 @@ public class AllegatoOrdinanzaServiceImpl implements AllegatoOrdinanzaService {
 		// verificare se non sia inutile (dovrebbe già non esser presente nella list)
 		TipoAllegatoVO ordAnnArc = tipoAllegatoEntityMapper.mapEntityToVO(
 				cnmDTipoAllegatoRepository.findOne(TipoAllegato.ORDINANZA_ANNULLAMENTO_ARCHIVIAZIONE.getId()));
-		listAllegabili.remove(ordAnnArc);
+		if(listAllegabili!=null) listAllegabili.remove(ordAnnArc);
 		TipoAllegatoVO ordAnnIng = tipoAllegatoEntityMapper.mapEntityToVO(
 				cnmDTipoAllegatoRepository.findOne(TipoAllegato.ORDINANZA_ANNULLAMENTO_INGIUNZIONE.getId()));
-		listAllegabili.remove(ordAnnIng);
+		if(listAllegabili!=null) listAllegabili.remove(ordAnnIng);
 
 		// 20210426_LC aggiunge istanza_allegato solo se istanza già presente
 		TipoAllegatoVO istanza = tipoAllegatoEntityMapper
 				.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.ISTANZA_RATEIZZAZIONE.getId()));
 		TipoAllegatoVO istanzaAllegato = tipoAllegatoEntityMapper
 				.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.ISTANZA_ALLEGATO.getId()));
-		listAllegabili.remove(istanzaAllegato);
-		if (listAllegati.contains(istanza)) {
+		if(listAllegabili!=null) listAllegabili.remove(istanzaAllegato);
+		if (listAllegabili!=null && listAllegati.contains(istanza)) {
 			listAllegabili.add(tipoAllegatoEntityMapper
 					.mapEntityToVO(cnmDTipoAllegatoRepository.findOne(TipoAllegato.ISTANZA_ALLEGATO.getId())));
 		}
