@@ -171,11 +171,11 @@ export class SharedAllegatoMetadatiInserimentoComponent
   ngOnInit(): void {
     this.logger.init(SharedAllegatoMetadatiInserimentoComponent.name);
 
-    console.log('tipoAll',this.tipoAll);
-    console.log('tipoAllegatoInput',this.tipoAllegatoInput);
-    console.log('riepilogoVerbale',this.riepilogoVerbale);
-    console.log('datiProvaPagamento',this.datiProvaPagamento);
-    console.log('soggettiSelect',this.soggettiSelect);
+    console.log("tipoAll", this.tipoAll);
+    console.log("tipoAllegatoInput", this.tipoAllegatoInput);
+    console.log("riepilogoVerbale", this.riepilogoVerbale);
+    console.log("datiProvaPagamento", this.datiProvaPagamento);
+    console.log("soggettiSelect", this.soggettiSelect);
 
     //gestisce abilitazione/disabilitazione da parte di chi usa il componente
     if (this.enableMetadati == null) this.enableMetadati = true;
@@ -187,7 +187,6 @@ export class SharedAllegatoMetadatiInserimentoComponent
       this.mapConfigAllegati = new Map();
     }
 
-
     this.initModel();
     this.chkContAmmInsCreaOrd();
   }
@@ -195,14 +194,13 @@ export class SharedAllegatoMetadatiInserimentoComponent
   ngOnChanges() {
     this.logger.change(SharedAllegatoMetadatiInserimentoComponent.name);
     this.initModel();
-    console.log('ngOnChanges');
+    console.log("ngOnChanges");
     //prova del pagamento detail
 
     if (this.datiProvaPagamento && this.datiProvaPagamento.edit) {
-      setTimeout(()=>{
+      setTimeout(() => {
         this.provaDelPagamentoDetail();
-      },0);
-
+      }, 0);
     }
     if (
       this.datiProvaPagamento &&
@@ -213,16 +211,16 @@ export class SharedAllegatoMetadatiInserimentoComponent
       // everything is readonly
 
       this.allReadonly = true;
-      this.disableFieldTrasgressori=true;
+      this.disableFieldTrasgressori = true;
     }
   }
 
   provaDelPagamentoDetail() {
-    console.log('provaDelPagamentoDetail');
+    console.log("provaDelPagamentoDetail");
     //if this.isEdit
     this.doOnce = true;
-    console.log('this.metadatiAllegatoForm',this.metadatiAllegatoForm);
-    console.log('this.tipoAll',this.tipoAll);
+    console.log("this.metadatiAllegatoForm", this.metadatiAllegatoForm);
+    console.log("this.tipoAll", this.tipoAll);
     if (this.metadatiAllegatoForm != undefined && this.tipoAll) {
       this.metadatiAllegatoForm.form
         .get("categoriaDocumento")
@@ -238,7 +236,7 @@ export class SharedAllegatoMetadatiInserimentoComponent
   }
 
   setValueProvaDelPagamento() {
-    console.log('setValueProvaDelPagamento');
+    console.log("setValueProvaDelPagamento");
     // debugger
     if (
       this.datiProvaPagamento &&
@@ -316,7 +314,7 @@ export class SharedAllegatoMetadatiInserimentoComponent
       .subscribe(
         (data) => {
           //
-          if(this.datiProvaPagamento && this.datiProvaPagamento.edit){
+          if (this.datiProvaPagamento && this.datiProvaPagamento.edit) {
             this.mostraMetadati();
           }
         },
@@ -465,7 +463,11 @@ export class SharedAllegatoMetadatiInserimentoComponent
         });
       });
       this.loadedConfig = true;
-      if(this.datiProvaPagamento && this.datiProvaPagamento.edit && this.loadedConfig){
+      if (
+        this.datiProvaPagamento &&
+        this.datiProvaPagamento.edit &&
+        this.loadedConfig
+      ) {
         this.disableSelectCategoria = true;
       }
     }
@@ -546,7 +548,6 @@ export class SharedAllegatoMetadatiInserimentoComponent
     ///nuove implementazione
     let check = true;
 
-
     this.listaTrasgressoriPayload.forEach((el) => {
       if (
         el.pagamentoParziale &&
@@ -557,10 +558,11 @@ export class SharedAllegatoMetadatiInserimentoComponent
           this.soggettiSelect &&
           this.soggettiSelect.length > 0 &&
           this.datiProvaPagamento &&
-          this.datiProvaPagamento.edit
+          this.datiProvaPagamento.edit &&
+          el.importoPagato != el.importoVerbale
         ) {
           console.log("this.soggettiSelect", this.soggettiSelect);
-          this.validMetadata = true;
+          // this.validMetadata = true;
         } else {
           //gestione errore
           this.manageMessageTop(
@@ -573,8 +575,16 @@ export class SharedAllegatoMetadatiInserimentoComponent
           //issue 90-91
           this.validMetadata = false;
           this.disableFieldTrasgressori = false;
+
           return (check = false);
         }
+      } else if (
+        this.datiProvaPagamento &&
+        this.datiProvaPagamento.edit &&
+        el.importoPagato === el.importoVerbale
+      ) {
+        //this.validMetadata = true;
+        // return (check = true);
       } else if (el.pagamentoParziale && !el.importoPagato) {
         this.manageMessageTop(
           "Attenzione, è stato selezionato pagamento parziale inserire un importo inferiore al totale per il soggetto " +
@@ -585,14 +595,12 @@ export class SharedAllegatoMetadatiInserimentoComponent
         );
         this.validMetadata = false;
         this.disableFieldTrasgressori = false;
+
         return (check = false);
       } else if (
         !el.pagamentoParziale &&
         el.importoPagato != el.importoResiduoVerbale
       ) {
-        if (this.datiProvaPagamento && this.datiProvaPagamento.edit) {
-          return (check = true);
-        }
         //gestione errore
         this.manageMessageTop(
           "Attenzione! Non è stato selezionato pagamento parziale, non inserire un importo inferiore al totale per il soggetto " +
@@ -603,6 +611,25 @@ export class SharedAllegatoMetadatiInserimentoComponent
         );
         this.validMetadata = false;
         this.disableFieldTrasgressori = false;
+
+        return (check = false);
+      } else if (
+        !el.pagamentoParziale &&
+        this.datiProvaPagamento &&
+        this.datiProvaPagamento.edit &&
+        el.importoPagato < el.importoVerbale
+      ) {
+        //gestione errore
+        this.manageMessageTop(
+          "Attenzione! Non è stato selezionato pagamento parziale, non inserire un importo inferiore al totale per il soggetto " +
+            el.codiceFiscale +
+            "",
+          "DANGER",
+          false
+        );
+        this.validMetadata = false;
+        this.disableFieldTrasgressori = false;
+
         return (check = false);
       }
     });
@@ -1256,13 +1283,15 @@ export class SharedAllegatoMetadatiInserimentoComponent
 
         this.disableAll = true;
         this.showTable = true;
-        if(this.datiProvaPagamento && this.datiProvaPagamento.edit && this.allReadonly){
+        if (
+          this.datiProvaPagamento &&
+          this.datiProvaPagamento.edit &&
+          this.allReadonly
+        ) {
           this.disableFieldTrasgressori = true;
-        }else{
+        } else {
           this.disableFieldTrasgressori = false;
         }
-
-
 
         this.isListaTrasgressoriLoading = false;
         // console.log(this.loadedConfig, !this.senzaAllegati, this.showTable, this.listaTrasgressori)
@@ -1316,10 +1345,7 @@ export class SharedAllegatoMetadatiInserimentoComponent
     this.stiloResearch = false;
     this.nuovoAllegato = event;
     this.nuovoAllegato.idTipoAllegato = this.tipoAllegatoSelezionato.id;
-    this.nomeAllegatoTmp =
-      typeof this.nuovoAllegato.filename === "string"
-        ? this.nuovoAllegato.filename
-        : this.nuovoAllegato.filename;
+    this.nomeAllegatoTmp = this.nuovoAllegato.filename;
 
     if (this.isCreaOrdinanza) {
       this.onNewFile.emit(this.nuovoAllegato);

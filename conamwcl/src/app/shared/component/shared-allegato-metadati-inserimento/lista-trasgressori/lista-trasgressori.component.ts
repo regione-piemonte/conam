@@ -143,7 +143,7 @@ export class ListaTrasgressoriComponent implements OnInit, OnDestroy {
     let i;
     let modifiedEl;
 
-    this.selectedItems.find((selectedItem, index, arr) => {
+   let element=  this.selectedItems.find((selectedItem, index, arr) => {
       if (selectedItem.id === el.id) {
         i = index;
         modifiedEl = selectedItem;
